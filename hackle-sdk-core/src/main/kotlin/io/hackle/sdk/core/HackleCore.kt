@@ -1,7 +1,6 @@
 package io.hackle.sdk.core
 
-import io.hackle.sdk.core.client.HackleClient
-import io.hackle.sdk.core.client.InternalHackleClient
+import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.decision.Bucketer
 import io.hackle.sdk.core.decision.BucketingDecider
 import io.hackle.sdk.core.event.EventProcessor
@@ -17,5 +16,5 @@ import io.hackle.sdk.core.workspace.WorkspaceFetcher
  */
 object HackleCore
 
-fun HackleCore.client(workspaceFetcher: WorkspaceFetcher, eventProcessor: EventProcessor): HackleClient =
-    InternalHackleClient(BucketingDecider(Bucketer()), workspaceFetcher, eventProcessor)
+fun HackleCore.client(workspaceFetcher: WorkspaceFetcher, eventProcessor: EventProcessor): HackleInternalClient =
+    HackleInternalClient(BucketingDecider(Bucketer()), workspaceFetcher, eventProcessor)

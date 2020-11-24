@@ -1,9 +1,10 @@
 package io.hackle.sdk.internal.client
 
-import io.hackle.sdk.common.Event
 import io.hackle.sdk.HackleClient
+import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
+import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.utils.tryClose
 
@@ -11,7 +12,7 @@ import io.hackle.sdk.core.internal.utils.tryClose
  * @author Yong
  */
 internal class HackleClientImpl(
-    private val client: io.hackle.sdk.core.client.HackleClient
+    private val client: HackleInternalClient
 ) : HackleClient {
 
     override fun variation(experimentKey: Long, user: User): Variation {

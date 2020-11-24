@@ -61,7 +61,7 @@ object HackleClients {
             httpClient = httpClient
         )
 
-        val workspaceFetcher = PollingWorkspaceFetcher(
+        val pollingWorkspaceFetcher = PollingWorkspaceFetcher(
             httpWorkspaceFetcher = httpWorkspaceFetcher,
             pollingInterval = 10.seconds,
             scheduler = Schedulers.executor(
@@ -80,7 +80,7 @@ object HackleClients {
             shutdownTimeout = 10.seconds
         )
 
-        val eventProcessor = DefaultEventProcessor(
+        val defaultEventProcessor = DefaultEventProcessor(
             queue = ArrayBlockingQueue(10000),
             eventDispatcher = eventDispatcher,
             eventDispatchSize = 500,
@@ -92,11 +92,11 @@ object HackleClients {
             shutdownTimeout = 10.seconds
         )
 
-        val coreClient = HackleCore.client(
-            workspaceFetcher = workspaceFetcher.apply { start() },
-            eventProcessor = eventProcessor.apply { start() }
+        val internalClient = HackleCore.client(
+            workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
+            eventProcessor = defaultEventProcessor.apply { start() }
         )
 
-        return HackleClientImpl(client = coreClient)
+        return HackleClientImpl(client = internalClient)
     }
 }

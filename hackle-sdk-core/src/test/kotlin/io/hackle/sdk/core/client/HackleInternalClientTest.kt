@@ -31,7 +31,7 @@ import strikt.assertions.isSameInstanceAs
  * @author Yong
  */
 @ExtendWith(MockKExtension::class)
-internal class InternalHackleClientTest {
+internal class HackleInternalClientTest {
 
     @MockK
     private lateinit var decider: Decider
@@ -43,7 +43,7 @@ internal class InternalHackleClientTest {
     private lateinit var eventProcessor: EventProcessor
 
     @InjectMockKs
-    private lateinit var sut: InternalHackleClient
+    private lateinit var sut: HackleInternalClient
 
     @Nested
     inner class Variations {
