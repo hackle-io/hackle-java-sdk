@@ -1,0 +1,45 @@
+package io.hackle.sdk.internal.client
+
+import io.hackle.sdk.common.Event
+import io.hackle.sdk.HackleClient
+import io.hackle.sdk.common.User
+import io.hackle.sdk.common.Variation
+import io.hackle.sdk.core.internal.log.Logger
+import io.hackle.sdk.core.internal.utils.tryClose
+
+/**
+ * @author Yong
+ */
+internal class HackleClientImpl(
+    private val client: io.hackle.sdk.core.client.HackleClient
+) : HackleClient {
+
+    override fun variation(experimentKey: Long, user: User): Variation {
+        return variation(experimentKey, user, Variation.CONTROL)
+    }
+
+    override fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation {
+        return runCatching { client.variation(experimentKey, user, defaultVariation) }
+            .getOrElse {
+                log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $it" }
+                defaultVariation
+            }
+    }
+
+    override fun track(eventKey: String, user: User) {
+        track(Event.of(eventKey), user)
+    }
+
+    override fun track(event: Event, user: User) {
+        runCatching { client.track(event, user) }
+            .onFailure { log.error { "Unexpected exception while tracking event[${event.key}]: $it" } }
+    }
+
+    override fun close() {
+        client.tryClose()
+    }
+
+    companion object {
+        private val log = Logger<HackleClientImpl>()
+    }
+}
