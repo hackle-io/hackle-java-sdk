@@ -19,9 +19,9 @@ import io.hackle.sdk.internal.workspace.loadVersion
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
-import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * @author Yong
@@ -81,18 +81,16 @@ object HackleClients {
         )
 
         val eventProcessor = DefaultEventProcessor(
-            queue = LinkedBlockingQueue(),
+            queue = ArrayBlockingQueue(10000),
             eventDispatcher = eventDispatcher,
             eventDispatchSize = 500,
             flushScheduler = Schedulers.executor(
                 newSingleThreadScheduledExecutor(NamedThreadFactory("Hackle-EventFlush-", true))
             ),
-            flushInterval = 30.seconds,
+            flushInterval = 10.seconds,
             consumingExecutor = Executors.newSingleThreadExecutor(NamedThreadFactory("Hackle-EventConsumer-", true)),
             shutdownTimeout = 10.seconds
         )
-
-
 
         val coreClient = HackleCore.client(
             workspaceFetcher = workspaceFetcher.apply { start() },

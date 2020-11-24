@@ -13,7 +13,7 @@ internal class Sdk(
 
 internal fun loadVersion(): String =
     runCatching {
-        val properties = Sdk::class.java.getResourceAsStream("/hackle-sdk.properties").use {
+        val properties = Sdk::class.java.getResourceAsStream("/hackle-server-sdk.properties").use {
             Properties().apply { load(it) }
         }
         properties.getProperty("sdk.version", "unknown")
