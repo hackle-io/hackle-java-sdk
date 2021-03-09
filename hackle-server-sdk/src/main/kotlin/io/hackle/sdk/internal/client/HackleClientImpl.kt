@@ -26,18 +26,18 @@ internal class HackleClientImpl(
     }
 
     override fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation {
-        return decideVariation(experimentKey, user, defaultVariation).variation
+        return variationDetail(experimentKey, user, defaultVariation).variation
     }
 
-    override fun decideVariation(experimentKey: Long, userId: String): Decision {
-        return decideVariation(experimentKey, User.of(userId), Variation.CONTROL)
+    override fun variationDetail(experimentKey: Long, userId: String): Decision {
+        return variationDetail(experimentKey, User.of(userId), Variation.CONTROL)
     }
 
-    override fun decideVariation(experimentKey: Long, user: User): Decision {
-        return decideVariation(experimentKey, user, Variation.CONTROL)
+    override fun variationDetail(experimentKey: Long, user: User): Decision {
+        return variationDetail(experimentKey, user, Variation.CONTROL)
     }
 
-    override fun decideVariation(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
+    override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
         return runCatching { client.variation(experimentKey, user, defaultVariation) }
             .getOrElse {
                 log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $it" }

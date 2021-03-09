@@ -40,17 +40,17 @@ internal class HackleClientImplTest {
             val spy = spyk(sut)
 
             val decision = mockk<Decision>()
-            every { spy.decideVariation(any(), any(), any()) } returns decision
+            every { spy.variationDetail(any(), any(), any()) } returns decision
 
             val user = User.of("test_user_id")
 
             // when
-            val actual = spy.decideVariation(320L, user)
+            val actual = spy.variationDetail(320L, user)
 
             //then
             expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                spy.decideVariation(320, user, Variation.CONTROL)
+                spy.variationDetail(320, user, Variation.CONTROL)
             }
         }
 
@@ -65,7 +65,7 @@ internal class HackleClientImplTest {
             every { client.variation(experimentKey, user, defaultVariation) } returns decision
 
             // when
-            val actual = sut.decideVariation(experimentKey, user, defaultVariation)
+            val actual = sut.variationDetail(experimentKey, user, defaultVariation)
 
             //then
             expectThat(actual) isSameInstanceAs decision
@@ -86,7 +86,7 @@ internal class HackleClientImplTest {
             val defaultVariation = Variation.I
 
             // when
-            val actual = sut.decideVariation(320L, User.of("test_user_id"), defaultVariation)
+            val actual = sut.variationDetail(320L, User.of("test_user_id"), defaultVariation)
 
             //then
             expectThat(actual) {

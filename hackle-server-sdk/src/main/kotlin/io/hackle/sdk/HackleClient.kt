@@ -65,7 +65,7 @@ interface HackleClient : AutoCloseable {
      *
      * @return a [Decision] object
      */
-    fun decideVariation(experimentKey: Long, userId: String): Decision
+    fun variationDetail(experimentKey: Long, userId: String): Decision
 
     /**
      * Decide the variation to expose to the user for experiment, and returns an object that
@@ -76,7 +76,7 @@ interface HackleClient : AutoCloseable {
      *
      * @return a [Decision] object
      */
-    fun decideVariation(experimentKey: Long, user: User): Decision
+    fun variationDetail(experimentKey: Long, user: User): Decision
 
     /**
      * Decide the variation to expose to the user for experiment, and returns an object that
@@ -88,7 +88,7 @@ interface HackleClient : AutoCloseable {
      *
      * @return a [Decision] object
      */
-    fun decideVariation(experimentKey: Long, user: User, defaultVariation: Variation): Decision
+    fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
     /**
      * Records the event that occurred by the user.
