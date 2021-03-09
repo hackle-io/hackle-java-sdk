@@ -16,7 +16,7 @@ data class Decision internal constructor(
 
         @JvmStatic
         fun of(variation: Variation, reason: DecisionReason) =
-            requireNotNull(DECISIONS[variation]?.get(reason)) { "decision[$variation, $reason]" }
+            DECISIONS[variation]?.get(reason) ?: Decision(variation, reason)
     }
 }
 
