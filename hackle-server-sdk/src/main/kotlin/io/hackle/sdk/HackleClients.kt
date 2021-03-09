@@ -6,7 +6,6 @@ import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.scheduler.Schedulers
 import io.hackle.sdk.core.internal.threads.NamedThreadFactory
 import io.hackle.sdk.core.internal.threads.PoolingExecutors
-import io.hackle.sdk.core.internal.utils.seconds
 import io.hackle.sdk.internal.client.HackleClientImpl
 import io.hackle.sdk.internal.event.DefaultEventProcessor
 import io.hackle.sdk.internal.event.EventDispatcher
@@ -45,9 +44,9 @@ object HackleClients {
         }
 
         val requestConfig = RequestConfig.custom()
-            .setConnectTimeout(5000)
-            .setConnectionRequestTimeout(10000)
-            .setSocketTimeout(10000)
+            .setConnectTimeout(5 * 1000)
+            .setConnectionRequestTimeout(10 * 1000)
+            .setSocketTimeout(10 * 1000)
             .build()
 
         val httpClient = HttpClients.custom()
@@ -63,7 +62,7 @@ object HackleClients {
 
         val pollingWorkspaceFetcher = PollingWorkspaceFetcher(
             httpWorkspaceFetcher = httpWorkspaceFetcher,
-            pollingInterval = 10.seconds,
+            pollingIntervalMillis = 10 * 1000,
             scheduler = Schedulers.executor(
                 newSingleThreadScheduledExecutor(NamedThreadFactory("Hackle-WorkspacePolling-", true))
             )
@@ -77,7 +76,7 @@ object HackleClients {
                 workQueueCapacity = 100,
                 threadFactory = NamedThreadFactory("Hackle-EventDispatcher-", true)
             ),
-            shutdownTimeout = 10.seconds
+            shutdownTimeoutMillis = 10 * 1000
         )
 
         val defaultEventProcessor = DefaultEventProcessor(
@@ -87,9 +86,9 @@ object HackleClients {
             flushScheduler = Schedulers.executor(
                 newSingleThreadScheduledExecutor(NamedThreadFactory("Hackle-EventFlush-", true))
             ),
-            flushInterval = 10.seconds,
+            flushIntervalMillis = 10 * 1000,
             consumingExecutor = Executors.newSingleThreadExecutor(NamedThreadFactory("Hackle-EventConsumer-", true)),
-            shutdownTimeout = 10.seconds
+            shutdownTimeoutMillis = 10 * 1000
         )
 
         val internalClient = HackleCore.client(
