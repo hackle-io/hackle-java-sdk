@@ -13,10 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isSameInstanceAs
-import java.time.Duration
 import java.util.concurrent.*
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import kotlin.concurrent.thread
 
 /**
  * @author Yong
@@ -41,17 +39,17 @@ internal class DefaultEventProcessorTest {
     private fun setDefaultEventProcessor(
         queue: BlockingQueue<Message>? = null,
         eventDispatchSize: Int = 10,
-        flushInterval: Duration = Duration.ofSeconds(10),
-        shutdownTimeout: Duration = Duration.ofSeconds(10)
+        flushIntervalMillis: Long = 10 * 1000,
+        shutdownTimeoutMillis: Long = 10 * 1000
     ) {
         sut = DefaultEventProcessor(
             queue ?: this.queue,
             eventDispatcher,
             eventDispatchSize,
             flushScheduler,
-            flushInterval,
+            flushIntervalMillis,
             consumingExecutor,
-            shutdownTimeout
+            shutdownTimeoutMillis
         )
     }
 
@@ -103,8 +101,7 @@ internal class DefaultEventProcessorTest {
         @Test
         fun `입력받은 주기로 flush를 실행한다`() {
             // given
-            val flushInterval = Duration.ofSeconds(10)
-            setDefaultEventProcessor(flushInterval = flushInterval)
+            setDefaultEventProcessor(flushIntervalMillis = 320)
 
             // when
             sut.start()
@@ -112,8 +109,9 @@ internal class DefaultEventProcessorTest {
             //then
             verify(exactly = 1) {
                 flushScheduler.schedulePeriodically(
-                    delay = withArg { expectThat(it) isSameInstanceAs flushInterval },
-                    period = withArg { expectThat(it) isSameInstanceAs flushInterval },
+                    delay = 320,
+                    period = 320,
+                    unit = MILLISECONDS,
                     task = any()
                 )
             }
@@ -130,7 +128,7 @@ internal class DefaultEventProcessorTest {
 
             //then
             verify(exactly = 1) {
-                flushScheduler.schedulePeriodically(any(), any(), capture(flushTask))
+                flushScheduler.schedulePeriodically(any(), any(), any(), capture(flushTask))
             }
 
             flushTask.captured()
@@ -151,7 +149,7 @@ internal class DefaultEventProcessorTest {
 
             //then
             verify(exactly = 1) { consumingExecutor.submit(any()) }
-            verify(exactly = 1) { flushScheduler.schedulePeriodically(any(), any(), any()) }
+            verify(exactly = 1) { flushScheduler.schedulePeriodically(any(), any(), any(), any()) }
         }
     }
 
@@ -177,7 +175,7 @@ internal class DefaultEventProcessorTest {
             // given
             setDefaultEventProcessor()
             val flushingJob = mockk<ScheduledJob>(relaxed = true)
-            every { flushScheduler.schedulePeriodically(any(), any(), any()) } returns flushingJob
+            every { flushScheduler.schedulePeriodically(any(), any(), any(), any()) } returns flushingJob
 
             // when
             sut.start()
@@ -205,8 +203,7 @@ internal class DefaultEventProcessorTest {
         @Test
         fun `큐에 Shutdown Message를 넣는다`() {
             // given
-            val shutdownTimeout = Duration.ofMillis(320)
-            setDefaultEventProcessor(shutdownTimeout = shutdownTimeout)
+            setDefaultEventProcessor(shutdownTimeoutMillis = 320)
 
             // when
             sut.start()
@@ -214,18 +211,14 @@ internal class DefaultEventProcessorTest {
 
             //then
             verify(exactly = 1) {
-                queue.offer(
-                    Message.Shutdown,
-                    320, MILLISECONDS
-                )
+                queue.offer(Message.Shutdown, 320, MILLISECONDS)
             }
         }
 
         @Test
         fun `큐에 Shutdown Message가 정상적으로 들어갔으면 ConsumingTask가 끝날때까지 기다린다`() {
             // given
-            val shutdownTimeout = Duration.ofMillis(42)
-            setDefaultEventProcessor(shutdownTimeout = shutdownTimeout)
+            setDefaultEventProcessor(shutdownTimeoutMillis = 42)
 
             val consumingTask = mockk<Future<*>>()
             every { consumingExecutor.submit(any()) } returns consumingTask
@@ -245,8 +238,7 @@ internal class DefaultEventProcessorTest {
         @Test
         fun `큐에 Shutdown Message가 정삭적으로 들어가지 못했으면 ConsumingTask를 기다리지 않는다`() {
             // given
-            val shutdownTimeout = Duration.ofMillis(42)
-            setDefaultEventProcessor(shutdownTimeout = shutdownTimeout)
+            setDefaultEventProcessor(shutdownTimeoutMillis = 42)
 
             val consumingTask = mockk<Future<*>>()
             every { consumingExecutor.submit(any()) } returns consumingTask

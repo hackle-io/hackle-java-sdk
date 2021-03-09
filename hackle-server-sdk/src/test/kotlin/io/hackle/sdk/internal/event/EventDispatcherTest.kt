@@ -9,7 +9,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.Duration
 import java.util.concurrent.ExecutorService
 
 /**
@@ -37,8 +36,8 @@ internal class EventDispatcherTest {
         unmockkStatic("io.hackle.sdk.internal.event.DtoKt")
     }
 
-    private fun init(eventBaseUrl: String = "localhost", shutdownTimeout: Duration = Duration.ofSeconds(10)) {
-        sut = EventDispatcher(eventBaseUrl, httpClient, dispatcherExecutor, shutdownTimeout)
+    private fun init(eventBaseUrl: String = "localhost", shutdownTimeoutMillis: Long = 10000) {
+        sut = EventDispatcher(eventBaseUrl, httpClient, dispatcherExecutor, shutdownTimeoutMillis)
     }
 
     @Test
