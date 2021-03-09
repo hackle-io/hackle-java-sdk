@@ -1,10 +1,8 @@
 package io.hackle.sdk.core.internal.scheduler
 
-import io.hackle.sdk.core.internal.utils.millis
-import java.time.Duration
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Yong
@@ -17,12 +15,12 @@ object Schedulers {
 
     private class ExecutorScheduler(private val executor: ScheduledExecutorService) : Scheduler, AutoCloseable {
 
-        override fun schedule(delay: Duration, task: () -> Unit): ScheduledJob {
-            return Job(executor.schedule(task, delay.millis, MILLISECONDS))
+        override fun schedule(delay: Long, unit: TimeUnit, task: () -> Unit): ScheduledJob {
+            return Job(executor.schedule(task, delay, unit))
         }
 
-        override fun schedulePeriodically(delay: Duration, period: Duration, task: () -> Unit): ScheduledJob {
-            return Job(executor.scheduleAtFixedRate(task, delay.millis, period.millis, MILLISECONDS))
+        override fun schedulePeriodically(delay: Long, period: Long, unit: TimeUnit, task: () -> Unit): ScheduledJob {
+            return Job(executor.scheduleAtFixedRate(task, delay, period, unit))
         }
 
         override fun close() {

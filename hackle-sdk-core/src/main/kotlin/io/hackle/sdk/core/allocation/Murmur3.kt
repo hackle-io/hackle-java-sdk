@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.decision
+package io.hackle.sdk.core.allocation
 
 /**
  * @author Yong
