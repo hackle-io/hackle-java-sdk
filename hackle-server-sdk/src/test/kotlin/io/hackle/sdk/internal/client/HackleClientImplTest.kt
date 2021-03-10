@@ -3,6 +3,8 @@ package io.hackle.sdk.internal.client
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.decision.Decision
+import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.mockk.*
@@ -37,18 +39,18 @@ internal class HackleClientImplTest {
             // given
             val spy = spyk(sut)
 
-            val variation = mockk<Variation>()
-            every { spy.variation(any(), any(), any()) } returns variation
+            val decision = mockk<Decision>()
+            every { spy.variationDetail(any(), any(), any()) } returns decision
 
             val user = User.of("test_user_id")
 
             // when
-            val actual = spy.variation(320L, user)
+            val actual = spy.variationDetail(320L, user)
 
             //then
-            expectThat(actual) isSameInstanceAs variation
+            expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                spy.variation(320, user, Variation.CONTROL)
+                spy.variationDetail(320, user, Variation.CONTROL)
             }
         }
 
@@ -58,15 +60,15 @@ internal class HackleClientImplTest {
             val experimentKey = 320L
             val user = mockk<User>()
             val defaultVariation = mockk<Variation>()
-            val returnVariation = mockk<Variation>()
+            val decision = mockk<Decision>()
 
-            every { client.variation(experimentKey, user, defaultVariation) } returns returnVariation
+            every { client.variation(experimentKey, user, defaultVariation) } returns decision
 
             // when
-            val actual = sut.variation(experimentKey, user, defaultVariation)
+            val actual = sut.variationDetail(experimentKey, user, defaultVariation)
 
             //then
-            expectThat(actual) isSameInstanceAs returnVariation
+            expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
                 client.variation(
                     experimentKey = withArg { expectThat(it) isEqualTo 320L },
@@ -81,13 +83,16 @@ internal class HackleClientImplTest {
             // given
             every { client.variation(any(), any(), any()) } throws IllegalArgumentException()
 
-            val defaultVariation = mockk<Variation>()
+            val defaultVariation = Variation.I
 
             // when
-            val actual = sut.variation(320L, User.of("test_user_id"), defaultVariation)
+            val actual = sut.variationDetail(320L, User.of("test_user_id"), defaultVariation)
 
             //then
-            expectThat(actual) isSameInstanceAs defaultVariation
+            expectThat(actual) {
+                get { reason } isEqualTo DecisionReason.EXCEPTION
+                get { variation } isSameInstanceAs defaultVariation
+            }
         }
     }
 

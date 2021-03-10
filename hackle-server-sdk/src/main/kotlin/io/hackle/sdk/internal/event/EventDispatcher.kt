@@ -2,7 +2,6 @@ package io.hackle.sdk.internal.event
 
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.log.Logger
-import io.hackle.sdk.core.internal.utils.millis
 import io.hackle.sdk.internal.http.isSuccessful
 import io.hackle.sdk.internal.http.statusCode
 import io.hackle.sdk.internal.utils.toJson
@@ -11,7 +10,6 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import java.net.URI
-import java.time.Duration
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -23,7 +21,7 @@ internal class EventDispatcher(
     eventBaseUrl: String,
     private val httpClient: CloseableHttpClient,
     private val dispatcherExecutor: ExecutorService,
-    private val shutdownTimeout: Duration
+    private val shutdownTimeoutMillis: Long
 ) : AutoCloseable {
 
     private val eventEndpoint = URI("$eventBaseUrl/api/v1/events")
@@ -44,7 +42,7 @@ internal class EventDispatcher(
         dispatcherExecutor.shutdown()
 
         try {
-            if (!dispatcherExecutor.awaitTermination(shutdownTimeout.millis, MILLISECONDS)) {
+            if (!dispatcherExecutor.awaitTermination(shutdownTimeoutMillis, MILLISECONDS)) {
                 log.warn { "Failed to dispatch previously submitted events" }
                 dispatcherExecutor.shutdownNow()
             }

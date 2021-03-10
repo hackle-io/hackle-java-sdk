@@ -5,10 +5,7 @@ import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.scheduler.ScheduledJob
 import io.hackle.sdk.core.internal.scheduler.Scheduler
-import io.hackle.sdk.core.internal.utils.format
-import io.hackle.sdk.core.internal.utils.millis
 import io.hackle.sdk.core.internal.utils.tryClose
-import java.time.Duration
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -22,9 +19,9 @@ internal class DefaultEventProcessor(
     private val eventDispatcher: EventDispatcher,
     private val eventDispatchSize: Int,
     private val flushScheduler: Scheduler,
-    private val flushInterval: Duration,
+    private val flushIntervalMillis: Long,
     private val consumingExecutor: ExecutorService,
-    private val shutdownTimeout: Duration
+    private val shutdownTimeoutMillis: Long
 ) : EventProcessor, AutoCloseable {
 
     private var flushingJob: ScheduledJob? = null
@@ -42,9 +39,9 @@ internal class DefaultEventProcessor(
         produce(Message.Flush)
     }
 
-    private fun produce(message: Message, wait: Duration? = null): Boolean {
-        return if (wait != null) {
-            queue.offer(message, wait.millis, MILLISECONDS)
+    private fun produce(message: Message, waitMillis: Long? = null): Boolean {
+        return if (waitMillis != null) {
+            queue.offer(message, waitMillis, MILLISECONDS)
         } else {
             queue.offer(message)
         }
@@ -57,10 +54,11 @@ internal class DefaultEventProcessor(
         }
 
         consumingTask = consumingExecutor.submit(Consumer())
-        flushingJob = flushScheduler.schedulePeriodically(flushInterval, flushInterval) { flush() }
+        flushingJob =
+            flushScheduler.schedulePeriodically(flushIntervalMillis, flushIntervalMillis, MILLISECONDS) { flush() }
 
         isStarted = true
-        log.info { "DefaultEventProcessor started. Flush events every ${flushInterval.format()}." }
+        log.info { "DefaultEventProcessor started. Flush events every $flushIntervalMillis ms." }
     }
 
     override fun close() {
@@ -74,8 +72,8 @@ internal class DefaultEventProcessor(
         flushScheduler.tryClose()
 
         try {
-            if (produce(Message.Shutdown, shutdownTimeout)) {
-                consumingTask?.awaitShutdown(shutdownTimeout)
+            if (produce(Message.Shutdown, shutdownTimeoutMillis)) {
+                consumingTask?.awaitShutdown(shutdownTimeoutMillis)
             } else {
                 log.error { "Failed to produce shutdown signal to consumer." }
             }
@@ -88,8 +86,8 @@ internal class DefaultEventProcessor(
         eventDispatcher.tryClose()
     }
 
-    private fun Future<*>.awaitShutdown(timeout: Duration) {
-        get(timeout.millis, MILLISECONDS)
+    private fun Future<*>.awaitShutdown(timeoutMillis: Long) {
+        get(timeoutMillis, MILLISECONDS)
     }
 
     sealed class Message {

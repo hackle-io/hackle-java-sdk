@@ -2,8 +2,11 @@ package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
-import io.hackle.sdk.core.decision.Decider
-import io.hackle.sdk.core.decision.Decision
+import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.common.decision.DecisionReason.*
+import io.hackle.sdk.core.allocation.Allocation
+import io.hackle.sdk.core.allocation.Allocation.ForcedAllocated
+import io.hackle.sdk.core.allocation.Allocator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.model.EventType
@@ -34,7 +37,7 @@ import strikt.assertions.isSameInstanceAs
 internal class HackleInternalClientTest {
 
     @MockK
-    private lateinit var decider: Decider
+    private lateinit var allocator: Allocator
 
     @MockK
     private lateinit var workspaceFetcher: WorkspaceFetcher
@@ -49,7 +52,7 @@ internal class HackleInternalClientTest {
     inner class Variations {
 
         @Test
-        fun `Workspace를 가져오지 못하면 defaultVariation을 리턴한다`() {
+        fun `Workspace를 가져오지 못하면 defaultVariation으로 결정한다`() {
             // given
             every { workspaceFetcher.fetch() } returns null
 
@@ -60,12 +63,13 @@ internal class HackleInternalClientTest {
 
             //then
             expectThat(actual) {
-                isSameInstanceAs(defaultVariation)
+                get { reason } isEqualTo DecisionReason.SDK_NOT_READY
+                get { variation } isEqualTo defaultVariation
             }
         }
 
         @Test
-        fun `experimentKey에 해당하는 experiment가 없으면 defaultVariation을 리턴한다`() {
+        fun `experimentKey에 해당하는 experiment가 없으면 defaultVariation으로 결정한다`() {
             // given
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns null
@@ -80,34 +84,38 @@ internal class HackleInternalClientTest {
 
             //then
             expectThat(actual) {
-                isSameInstanceAs(defaultVariation)
+                get { reason } isEqualTo DecisionReason.EXPERIMENT_NOT_FOUND
+                get { variation } isEqualTo defaultVariation
             }
         }
 
         @Test
-        fun `실험에 할당 되지 않으면 defaultVariation을 리턴한다`() {
+        fun `실험에 할당 되지 않으면 defaultVariation으로 결정한다`() {
             // given
+            val user = User.of("TEST_USER_ID")
             val experiment = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns experiment
             }
             every { workspaceFetcher.fetch() } returns workspace
-            every { decider.decide(experiment, any()) } returns Decision.NotAllocated
+            every { allocator.allocate(experiment, user) } returns Allocation.NotAllocated(TRAFFIC_NOT_ALLOCATED)
 
             val defaultVariation = io.hackle.sdk.common.Variation.J
 
             // when
-            val actual = sut.variation(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.variation(42, user, defaultVariation)
 
             //then
             expectThat(actual) {
-                isSameInstanceAs(defaultVariation)
+                get { reason } isEqualTo TRAFFIC_NOT_ALLOCATED
+                get { variation } isEqualTo defaultVariation
             }
         }
 
         @Test
-        fun `강제할당된 경우 강제할당된 Variaton을 리턴하고 노출이벤트는 전송하지 않는다`() {
+        fun `강제할당된 경우 강제할당된 Variaton으로 결정하고 노출이벤트는 전송하지 않는다`() {
             // given
+            val user = User.of("TEST_USER_ID")
             val experiment = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns experiment
@@ -115,44 +123,49 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             val forcedAllocatedVariation = io.hackle.sdk.common.Variation.E
-            every { decider.decide(experiment, any()) } returns Decision.ForcedAllocated(forcedAllocatedVariation.name)
+            every { allocator.allocate(experiment, user) } returns ForcedAllocated(
+                OVERRIDDEN,
+                forcedAllocatedVariation.name
+            )
 
             val defaultVariation = io.hackle.sdk.common.Variation.J
 
             // when
-            val actual = sut.variation(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.variation(42, user, defaultVariation)
 
             //then
             expectThat(actual) {
-                isSameInstanceAs(forcedAllocatedVariation)
+                get { reason } isEqualTo OVERRIDDEN
+                get { variation } isEqualTo forcedAllocatedVariation
             }
             verify { eventProcessor wasNot Called }
         }
 
         @Test
-        fun `자연할당 된 경우 노출 이벤트를 전송하고 할당된 Variation을 리턴한다`() {
+        fun `할당 된 경우 노출 이벤트를 전송하고 할당된 Variation으로 결정한다`() {
             // given
+            val user = User.of("TEST_USER_ID")
             val experiment = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns experiment
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val forcedAllocatedVariation = io.hackle.sdk.common.Variation.E
             val variation = mockk<Variation> {
-                every { key } returns forcedAllocatedVariation.name
+                every { key } returns io.hackle.sdk.common.Variation.E.name
             }
 
-            every { decider.decide(experiment, any()) } returns Decision.NaturalAllocated(variation)
+            every { allocator.allocate(experiment, user) } returns Allocation.Allocated(TRAFFIC_ALLOCATED, variation)
 
             val defaultVariation = io.hackle.sdk.common.Variation.J
 
             // when
-            val actual = sut.variation(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.variation(42, user, defaultVariation)
 
             //then
             expectThat(actual) {
-                isSameInstanceAs(forcedAllocatedVariation)
+                get { reason } isEqualTo TRAFFIC_ALLOCATED
+                get { this.variation } isEqualTo io.hackle.sdk.common.Variation.E
             }
             verify(exactly = 1) {
                 eventProcessor.process(withArg {

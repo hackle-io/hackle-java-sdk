@@ -6,7 +6,7 @@ import io.hackle.sdk.core.internal.scheduler.Scheduler
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
-import java.time.Duration
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 internal class PollingWorkspaceFetcher(
     private val httpWorkspaceFetcher: HttpWorkspaceFetcher,
-    private val pollingInterval: Duration,
+    private val pollingIntervalMillis: Long,
     private val scheduler: Scheduler
 ) : WorkspaceFetcher, AutoCloseable {
 
@@ -37,7 +37,8 @@ internal class PollingWorkspaceFetcher(
     fun start() {
         if (pollingJob == null) {
             poll()
-            pollingJob = scheduler.schedulePeriodically(pollingInterval, pollingInterval) { poll() }
+            pollingJob =
+                scheduler.schedulePeriodically(pollingIntervalMillis, pollingIntervalMillis, MILLISECONDS) { poll() }
         }
     }
 

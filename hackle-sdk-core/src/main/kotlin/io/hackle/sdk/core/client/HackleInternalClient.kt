@@ -3,8 +3,11 @@ package io.hackle.sdk.core.client
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
-import io.hackle.sdk.core.decision.Decider
-import io.hackle.sdk.core.decision.Decision
+import io.hackle.sdk.common.decision.Decision
+import io.hackle.sdk.common.decision.DecisionReason.EXPERIMENT_NOT_FOUND
+import io.hackle.sdk.common.decision.DecisionReason.SDK_NOT_READY
+import io.hackle.sdk.core.allocation.Allocation.*
+import io.hackle.sdk.core.allocation.Allocator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
@@ -15,19 +18,19 @@ import io.hackle.sdk.core.workspace.WorkspaceFetcher
  * @author Yong
  */
 class HackleInternalClient internal constructor(
-    private val decider: Decider,
+    private val allocator: Allocator,
     private val workspaceFetcher: WorkspaceFetcher,
     private val eventProcessor: EventProcessor
 ) : AutoCloseable {
 
-    fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation {
-        val workspace = workspaceFetcher.fetch() ?: return defaultVariation
-        val experiment = workspace.getExperimentOrNull(experimentKey) ?: return defaultVariation
-        return when (val decision = decider.decide(experiment, user)) {
-            Decision.NotAllocated -> defaultVariation
-            is Decision.ForcedAllocated -> Variation.from(decision.variationKey)
-            is Decision.NaturalAllocated -> Variation.from(decision.variation.key).also {
-                eventProcessor.process(UserEvent.exposure(experiment, decision.variation, user))
+    fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
+        val workspace = workspaceFetcher.fetch() ?: return Decision.of(defaultVariation, SDK_NOT_READY)
+        val experiment = workspace.getExperimentOrNull(experimentKey) ?: return Decision.of(defaultVariation, EXPERIMENT_NOT_FOUND)
+        return when (val allocation = allocator.allocate(experiment, user)) {
+            is NotAllocated -> Decision.of(defaultVariation, allocation.decisionReason)
+            is ForcedAllocated -> Decision.of(Variation.from(allocation.variationKey), allocation.decisionReason)
+            is Allocated -> Decision.of(Variation.from(allocation.variation.key), allocation.decisionReason).also {
+                eventProcessor.process(UserEvent.exposure(experiment, allocation.variation, user))
             }
         }
     }
