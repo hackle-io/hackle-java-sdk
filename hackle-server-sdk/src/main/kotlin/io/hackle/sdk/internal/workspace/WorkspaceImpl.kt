@@ -9,11 +9,16 @@ import io.hackle.sdk.core.workspace.Workspace
  */
 internal class WorkspaceImpl(
     private val experiments: Map<Long, Experiment>,
-    private val eventTypes: Map<String, EventType>
+    private val featureFlags: Map<Long, FeatureFlag>,
+    private val eventTypes: Map<String, EventType>,
 ) : Workspace {
 
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
         return eventTypes[eventTypeKey]
+    }
+
+    override fun getFeatureFlagOrNull(featureFlagKey: Long): FeatureFlag? {
+        return featureFlags[featureFlagKey]
     }
 
     override fun getExperimentOrNull(experimentKey: Long): Experiment? {
@@ -28,25 +33,56 @@ internal class WorkspaceImpl(
             val buckets: Map<Long, Bucket> =
                 dto.buckets.associate { it.id to it.toBucket() }
 
-            val running: Map<Long, Experiment> =
+            val experiment: Map<Long, Experiment> =
                 dto.experiments.asSequence()
-                    .mapNotNull { it.toExperimentOrNull(buckets.getValue(it.bucketId)) }
+                    .mapNotNull { it.toExperiment(buckets.getValue(it.bucketId)) }
                     .associateBy { it.key }
 
-            val completed: Map<Long, Experiment> =
-                dto.completedExperiments.associate { it.experimentKey to it.toExperiment() }
+            val featureFlags = dto.featureFlags.asSequence()
+                .map { it.toFeatureFlag(buckets.getValue(it.bucketId)) }
+                .associateBy { it.key }
 
             val eventTypes: Map<String, EventType.Custom> = dto.events.associate { it.key to it.toEventType() }
 
             return WorkspaceImpl(
-                experiments = running + completed,
+                experiments = experiment,
+                featureFlags = featureFlags,
                 eventTypes = eventTypes
             )
         }
 
-        private fun ExperimentDto.toExperimentOrNull(bucket: Bucket): Experiment? {
+        private fun ExperimentDto.toExperiment(bucket: Bucket): Experiment? {
+
+            val variations = variations.associate { it.id to it.toVariation() }
+            val overrides = execution.userOverrides.associate { it.userId to it.variationId }
+
             return when (execution.status) {
-                "RUNNING" -> toRunning(bucket)
+                "READY" -> Experiment.Ready(
+                    id = id,
+                    key = key,
+                    variations = variations,
+                    overrides = overrides
+                )
+                "RUNNING" -> Experiment.Running(
+                    id = id,
+                    key = key,
+                    bucket = bucket,
+                    variations = variations,
+                    overrides = overrides
+                )
+                "PAUSED" -> Experiment.Paused(
+                    id = id,
+                    key = key,
+                    variations = variations,
+                    overrides = overrides
+                )
+                "STOPPED" -> Experiment.Completed(
+                    id = id,
+                    key = key,
+                    variations = variations,
+                    overrides = overrides,
+                    winnerVariationId = requireNotNull(winnerVariationId)
+                )
                 else -> {
                     log.warn { "Unknown experiment status [$status]" }
                     null
@@ -54,22 +90,15 @@ internal class WorkspaceImpl(
             }
         }
 
-        private fun ExperimentDto.toRunning(bucket: Bucket): Experiment.Running {
-            val variations: Map<Long, Variation> = variations.associate { it.id to it.toVariation() }
-            return Experiment.Running(
+        private fun FeatureFlagDto.toFeatureFlag(bucket: Bucket): FeatureFlag {
+            val variations = variations.associate { it.id to it.toVariation() }
+            val overrides = execution.userOverrides.associate { it.userId to it.variationId }
+            return FeatureFlag(
                 id = id,
                 key = key,
                 bucket = bucket,
                 variations = variations,
-                overrides = execution.userOverrides.associate { it.userId to it.variationId }
-            )
-        }
-
-        private fun CompletedExperimentDto.toExperiment(): Experiment {
-            return Experiment.Completed(
-                id = experimentId,
-                key = experimentKey,
-                winnerVariationKey = winnerVariationKey
+                overrides = overrides
             )
         }
 

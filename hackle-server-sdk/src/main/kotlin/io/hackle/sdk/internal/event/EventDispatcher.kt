@@ -24,7 +24,7 @@ internal class EventDispatcher(
     private val shutdownTimeoutMillis: Long
 ) : AutoCloseable {
 
-    private val eventEndpoint = URI("$eventBaseUrl/api/v1/events")
+    private val eventEndpoint = URI("$eventBaseUrl/api/v2/events")
 
     fun dispatch(userEvents: List<UserEvent>) {
         val task = DispatchTask(userEvents.toPayload())

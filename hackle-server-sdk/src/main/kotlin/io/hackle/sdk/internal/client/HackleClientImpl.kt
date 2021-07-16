@@ -6,6 +6,7 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
+import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.utils.tryClose
@@ -38,10 +39,26 @@ internal class HackleClientImpl(
     }
 
     override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
-        return runCatching { client.variation(experimentKey, user, defaultVariation) }
+        return runCatching { client.experiment(experimentKey, user, defaultVariation) }
             .getOrElse {
                 log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $it" }
                 Decision.of(defaultVariation, EXCEPTION)
+            }
+    }
+
+    override fun isFeatureFlagOn(featureFlagKey: Long, userId: String): Boolean {
+        return isFeatureFlagOn(featureFlagKey, User.of(userId))
+    }
+
+    override fun isFeatureFlagOn(featureFlagKey: Long, user: User): Boolean {
+        return isFeatureFlagOnDetail(featureFlagKey, user).isOn
+    }
+
+    override fun isFeatureFlagOnDetail(featureFlagKey: Long, user: User): FeatureFlagDecision {
+        return runCatching { client.featureFlag(featureFlagKey, user) }
+            .getOrElse {
+                log.error { "Unexpected exception while deciding feature flag[$featureFlagKey]. Returning default value[false]: $it" }
+                return FeatureFlagDecision.off(EXCEPTION)
             }
     }
 

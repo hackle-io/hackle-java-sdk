@@ -9,29 +9,49 @@ sealed class Experiment {
 
     abstract val id: Long
     abstract val key: Long
+    abstract val variations: Map<Long, Variation>
+    abstract val overrides: Map<String, Long>
+
+    class Ready(
+        override val id: Long,
+        override val key: Long,
+        override val variations: Map<Long, Variation>,
+        override val overrides: Map<String, Long>,
+    ) : Experiment()
 
     class Running(
         override val id: Long,
         override val key: Long,
-        val bucket: Bucket,
-        private val variations: Map<Long, Variation>,
-        private val overrides: Map<String, Long>
-    ) : Experiment() {
+        override val variations: Map<Long, Variation>,
+        override val overrides: Map<String, Long>,
+        val bucket: Bucket
+    ) : Experiment()
 
-        fun getVariationOrNull(variationId: Long): Variation? {
-            return variations[variationId]
-        }
+    class Paused(
+        override val id: Long,
+        override val key: Long,
+        override val variations: Map<Long, Variation>,
+        override val overrides: Map<String, Long>,
+    ) : Experiment()
 
-        fun getOverriddenVariationOrNull(user: User): Variation? {
-            val overriddenVariationId = overrides[user.id] ?: return null
-            val overriddenVariation = getVariationOrNull(overriddenVariationId)
-            return requireNotNull(overriddenVariation) { "experiment[$id] variation[$overriddenVariationId]" }
-        }
-    }
 
     class Completed(
         override val id: Long,
         override val key: Long,
-        val winnerVariationKey: String
-    ) : Experiment()
+        override val variations: Map<Long, Variation>,
+        override val overrides: Map<String, Long>,
+        private val winnerVariationId: Long
+    ) : Experiment() {
+        val winnerVariation: Variation get() = variations.getValue(winnerVariationId)
+    }
+
+    fun getVariationOrNull(variationId: Long): Variation? {
+        return variations[variationId]
+    }
+
+    fun getOverriddenVariationOrNull(user: User): Variation? {
+        val overriddenVariationId = overrides[user.id] ?: return null
+        val overriddenVariation = getVariationOrNull(overriddenVariationId)
+        return requireNotNull(overriddenVariation) { "experiment[$id] variation[$overriddenVariationId]" }
+    }
 }

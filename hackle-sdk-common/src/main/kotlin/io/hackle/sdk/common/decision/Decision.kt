@@ -21,6 +21,31 @@ data class Decision internal constructor(
 }
 
 /**
+ * An object that contains the decided flag and the reason for the feature flag decision.
+ */
+data class FeatureFlagDecision internal constructor(
+    val isOn: Boolean,
+    val reason: DecisionReason
+) {
+
+    companion object {
+
+        private val ON = DecisionReason.values().associate { it to FeatureFlagDecision(true, it) }
+        private val OFF = DecisionReason.values().associate { it to FeatureFlagDecision(false, it) }
+
+        @JvmStatic
+        fun on(reason: DecisionReason): FeatureFlagDecision {
+            return ON[reason] ?: FeatureFlagDecision(true, reason)
+        }
+
+        @JvmStatic
+        fun off(reason: DecisionReason): FeatureFlagDecision {
+            return OFF[reason] ?: FeatureFlagDecision(false, reason)
+        }
+    }
+}
+
+/**
  * Describes the reason for the [Variation] decision.
  */
 enum class DecisionReason {
@@ -36,6 +61,11 @@ enum class DecisionReason {
      * Returns the default variation.
      */
     EXPERIMENT_NOT_FOUND,
+
+    /**
+     * Indicates that no feature flag was found for the feature flag key provided by the caller.
+     */
+    FEATURE_FLAG_NOT_FOUND,
 
     /**
      * Indicates that the experiment was completed.
@@ -73,4 +103,3 @@ enum class DecisionReason {
      */
     EXCEPTION,
 }
-

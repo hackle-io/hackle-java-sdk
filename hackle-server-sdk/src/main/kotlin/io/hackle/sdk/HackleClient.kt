@@ -4,6 +4,7 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
+import io.hackle.sdk.common.decision.FeatureFlagDecision
 
 /**
  * The entry point of Hackle SDKs.
@@ -89,6 +90,12 @@ interface HackleClient : AutoCloseable {
      * @return a [Decision] object
      */
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
+
+    fun isFeatureFlagOn(featureFlagKey: Long, userId: String): Boolean
+
+    fun isFeatureFlagOn(featureFlagKey: Long, user: User): Boolean
+
+    fun isFeatureFlagOnDetail(featureFlagKey: Long, user: User) : FeatureFlagDecision
 
     /**
      * Records the event that occurred by the user.
