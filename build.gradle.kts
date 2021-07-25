@@ -9,9 +9,6 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
-        maven {
-            url = uri("https://jitpack.io")
-        }
     }
 }
 
@@ -25,7 +22,6 @@ subprojects {
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
         implementation(kotlin("reflect"))
-        implementation("com.github.statsig-io:java-server-sdk:v0.3.0")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
