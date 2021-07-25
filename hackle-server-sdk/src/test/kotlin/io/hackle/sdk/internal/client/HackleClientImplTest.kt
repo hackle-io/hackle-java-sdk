@@ -62,7 +62,7 @@ internal class HackleClientImplTest {
             val defaultVariation = mockk<Variation>()
             val decision = mockk<Decision>()
 
-            every { client.variation(experimentKey, user, defaultVariation) } returns decision
+            every { client.experiment(experimentKey, user, defaultVariation) } returns decision
 
             // when
             val actual = sut.variationDetail(experimentKey, user, defaultVariation)
@@ -70,7 +70,7 @@ internal class HackleClientImplTest {
             //then
             expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                client.variation(
+                client.experiment(
                     experimentKey = withArg { expectThat(it) isEqualTo 320L },
                     user = withArg { expectThat(it) isSameInstanceAs user },
                     defaultVariation = withArg { expectThat(it) isSameInstanceAs defaultVariation }
@@ -81,7 +81,7 @@ internal class HackleClientImplTest {
         @Test
         fun `internalClient에서 예외가 발생하면 defaultVariation을 리턴한다`() {
             // given
-            every { client.variation(any(), any(), any()) } throws IllegalArgumentException()
+            every { client.experiment(any(), any(), any()) } throws IllegalArgumentException()
 
             val defaultVariation = Variation.I
 

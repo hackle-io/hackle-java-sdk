@@ -6,7 +6,6 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.FeatureFlag
 
 /**
  * @author Yong
@@ -19,9 +18,7 @@ sealed class UserEvent {
     data class Exposure internal constructor(
         override val timestamp: Long,
         override val user: User,
-        val experimentId: Long,
-        val experimentKey: Long,
-        val experimentType: String,
+        val experiment: Experiment,
         val variationId: Long?,
         val variationKey: String?,
         val decisionReason: DecisionReason,
@@ -42,22 +39,7 @@ sealed class UserEvent {
             return Exposure(
                 timestamp = generateTimestamp(),
                 user = user,
-                experimentId = experiment.id,
-                experimentKey = experiment.key,
-                experimentType = "AB_TEST",
-                variationId = evaluation.variationId,
-                variationKey = evaluation.variationKey,
-                decisionReason = evaluation.reason
-            )
-        }
-
-        internal fun exposure(featureFlag: FeatureFlag, user: User, evaluation: Evaluation): UserEvent {
-            return Exposure(
-                timestamp = generateTimestamp(),
-                user = user,
-                experimentId = featureFlag.id,
-                experimentKey = featureFlag.key,
-                experimentType = "FEATURE_FLAG",
+                experiment = experiment,
                 variationId = evaluation.variationId,
                 variationKey = evaluation.variationKey,
                 decisionReason = evaluation.reason

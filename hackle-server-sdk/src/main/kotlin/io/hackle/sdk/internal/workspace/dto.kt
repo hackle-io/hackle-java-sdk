@@ -2,7 +2,7 @@ package io.hackle.sdk.internal.workspace
 
 internal data class WorkspaceDto(
     val experiments: List<ExperimentDto>,
-    val featureFlags: List<FeatureFlagDto>,
+    val featureFlags: List<ExperimentDto>,
     val buckets: List<BucketDto>,
     val events: List<EventTypeDto>,
 )
@@ -15,14 +15,6 @@ internal data class ExperimentDto(
     val variations: List<VariationDto>,
     val execution: ExecutionDto,
     val winnerVariationId: Long?,
-)
-
-internal data class FeatureFlagDto(
-    val id: Long,
-    val key: Long,
-    val bucketId: Long,
-    val variations: List<VariationDto>,
-    val execution: ExecutionDto,
 )
 
 internal data class VariationDto(

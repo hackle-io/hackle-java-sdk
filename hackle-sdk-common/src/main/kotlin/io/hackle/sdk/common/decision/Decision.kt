@@ -63,9 +63,14 @@ enum class DecisionReason {
     EXPERIMENT_NOT_FOUND,
 
     /**
-     * Indicates that no feature flag was found for the feature flag key provided by the caller.
+     * Indicates that the experiment is in draft.
      */
-    FEATURE_FLAG_NOT_FOUND,
+    EXPERIMENT_DRAFT,
+
+    /**
+     * Indicates that the experiment was paused.
+     */
+    EXPERIMENT_PAUSED,
 
     /**
      * Indicates that the experiment was completed.

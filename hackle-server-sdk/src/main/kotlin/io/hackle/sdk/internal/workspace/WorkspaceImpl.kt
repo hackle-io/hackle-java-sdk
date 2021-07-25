@@ -2,6 +2,8 @@ package io.hackle.sdk.internal.workspace
 
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.workspace.Workspace
 
 /**
@@ -35,12 +37,13 @@ internal class WorkspaceImpl(
 
             val experiment: Map<Long, Experiment> =
                 dto.experiments.asSequence()
-                    .mapNotNull { it.toExperiment(buckets.getValue(it.bucketId)) }
+                    .mapNotNull { it.toExperiment(AB_TEST, buckets.getValue(it.bucketId)) }
                     .associateBy { it.key }
 
-            val featureFlags = dto.featureFlags.asSequence()
-                .map { it.toFeatureFlag(buckets.getValue(it.bucketId)) }
-                .associateBy { it.key }
+            val featureFlags: Map<Long, FeatureFlag> =
+                dto.featureFlags.asSequence()
+                    .mapNotNull { it.toExperiment(FEATURE_FLAG, buckets.getValue(it.bucketId)) }
+                    .associateBy { it.key }
 
             val eventTypes: Map<String, EventType.Custom> = dto.events.associate { it.key to it.toEventType() }
 
@@ -51,21 +54,23 @@ internal class WorkspaceImpl(
             )
         }
 
-        private fun ExperimentDto.toExperiment(bucket: Bucket): Experiment? {
+        private fun ExperimentDto.toExperiment(type: Experiment.Type, bucket: Bucket): Experiment? {
 
             val variations = variations.associate { it.id to it.toVariation() }
             val overrides = execution.userOverrides.associate { it.userId to it.variationId }
 
             return when (execution.status) {
-                "READY" -> Experiment.Ready(
+                "READY" -> Experiment.Draft(
                     id = id,
                     key = key,
+                    type = type,
                     variations = variations,
                     overrides = overrides
                 )
                 "RUNNING" -> Experiment.Running(
                     id = id,
                     key = key,
+                    type = type,
                     bucket = bucket,
                     variations = variations,
                     overrides = overrides
@@ -73,12 +78,14 @@ internal class WorkspaceImpl(
                 "PAUSED" -> Experiment.Paused(
                     id = id,
                     key = key,
+                    type = type,
                     variations = variations,
                     overrides = overrides
                 )
                 "STOPPED" -> Experiment.Completed(
                     id = id,
                     key = key,
+                    type = type,
                     variations = variations,
                     overrides = overrides,
                     winnerVariationId = requireNotNull(winnerVariationId)
@@ -88,18 +95,6 @@ internal class WorkspaceImpl(
                     null
                 }
             }
-        }
-
-        private fun FeatureFlagDto.toFeatureFlag(bucket: Bucket): FeatureFlag {
-            val variations = variations.associate { it.id to it.toVariation() }
-            val overrides = execution.userOverrides.associate { it.userId to it.variationId }
-            return FeatureFlag(
-                id = id,
-                key = key,
-                bucket = bucket,
-                variations = variations,
-                overrides = overrides
-            )
         }
 
         private fun VariationDto.toVariation() = Variation(

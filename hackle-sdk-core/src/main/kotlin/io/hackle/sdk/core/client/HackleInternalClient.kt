@@ -6,7 +6,6 @@ import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
-import io.hackle.sdk.core.evaluation.Evaluation.*
 import io.hackle.sdk.core.evaluation.Evaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
@@ -18,9 +17,9 @@ import io.hackle.sdk.core.workspace.WorkspaceFetcher
  * @author Yong
  */
 class HackleInternalClient internal constructor(
+    private val evaluator: Evaluator,
     private val workspaceFetcher: WorkspaceFetcher,
     private val eventProcessor: EventProcessor,
-    private val evaluator: Evaluator
 ) : AutoCloseable {
 
     fun experiment(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
@@ -32,26 +31,23 @@ class HackleInternalClient internal constructor(
         val evaluation = evaluator.evaluate(experiment, user, defaultVariation.name)
         eventProcessor.process(UserEvent.exposure(experiment, user, evaluation))
 
-        return when (evaluation) {
-            is Identified -> Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
-            is Forced -> Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
-            is Default -> Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
-            is None -> Decision.of(defaultVariation, evaluation.reason)
-        }
+        return Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
     }
 
     fun featureFlag(featureFlagKey: Long, user: User): FeatureFlagDecision {
 
         val workspace = workspaceFetcher.fetch() ?: return FeatureFlagDecision.off(SDK_NOT_READY)
         val featureFlag =
-            workspace.getFeatureFlagOrNull(featureFlagKey) ?: return FeatureFlagDecision.off(FEATURE_FLAG_NOT_FOUND)
+            workspace.getFeatureFlagOrNull(featureFlagKey) ?: return FeatureFlagDecision.off(EXPERIMENT_NOT_FOUND)
 
-        val evaluation = evaluator.evaluate(featureFlag, user)
+        val evaluation = evaluator.evaluate(featureFlag, user, Variation.CONTROL.name)
         eventProcessor.process(UserEvent.exposure(featureFlag, user, evaluation))
 
-        return when (evaluation) {
-            is Identified, is Forced -> FeatureFlagDecision.on(evaluation.reason)
-            is Default, is None -> FeatureFlagDecision.off(evaluation.reason)
+        val variation = Variation.from(evaluation.variationKey)
+        return if (variation.isControl) {
+            FeatureFlagDecision.off(evaluation.reason)
+        } else {
+            FeatureFlagDecision.on(evaluation.reason)
         }
     }
 
