@@ -24,7 +24,7 @@ sealed class UserEvent {
         val decisionReason: DecisionReason,
     ) : UserEvent()
 
-    class Track internal constructor(
+    data class Track internal constructor(
         override val timestamp: Long,
         override val user: User,
         val eventType: EventType,
