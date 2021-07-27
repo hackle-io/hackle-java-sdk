@@ -91,11 +91,11 @@ interface HackleClient : AutoCloseable {
      */
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
-    fun isFeatureFlagOn(featureFlagKey: Long, userId: String): Boolean
+    fun isFeatureOn(featureKey: Long, userId: String): Boolean
 
-    fun isFeatureFlagOn(featureFlagKey: Long, user: User): Boolean
+    fun isFeatureOn(featureKey: Long, user: User): Boolean
 
-    fun isFeatureFlagOnDetail(featureFlagKey: Long, user: User) : FeatureFlagDecision
+    fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision
 
     /**
      * Records the event that occurred by the user.

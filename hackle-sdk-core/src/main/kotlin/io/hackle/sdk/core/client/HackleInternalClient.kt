@@ -34,11 +34,11 @@ class HackleInternalClient internal constructor(
         return Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
     }
 
-    fun featureFlag(featureFlagKey: Long, user: User): FeatureFlagDecision {
+    fun featureFlag(featureKey: Long, user: User): FeatureFlagDecision {
 
         val workspace = workspaceFetcher.fetch() ?: return FeatureFlagDecision.off(SDK_NOT_READY)
         val featureFlag =
-            workspace.getFeatureFlagOrNull(featureFlagKey) ?: return FeatureFlagDecision.off(EXPERIMENT_NOT_FOUND)
+            workspace.getFeatureFlagOrNull(featureKey) ?: return FeatureFlagDecision.off(EXPERIMENT_NOT_FOUND)
 
         val evaluation = evaluator.evaluate(featureFlag, user, Variation.CONTROL.name)
         eventProcessor.process(UserEvent.exposure(featureFlag, user, evaluation))

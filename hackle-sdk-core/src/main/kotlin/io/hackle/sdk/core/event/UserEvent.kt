@@ -20,7 +20,7 @@ sealed class UserEvent {
         override val user: User,
         val experiment: Experiment,
         val variationId: Long?,
-        val variationKey: String?,
+        val variationKey: String,
         val decisionReason: DecisionReason,
     ) : UserEvent()
 

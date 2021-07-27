@@ -11,7 +11,7 @@ import io.hackle.sdk.core.workspace.Workspace
  */
 internal class WorkspaceImpl(
     private val experiments: Map<Long, Experiment>,
-    private val featureFlags: Map<Long, FeatureFlag>,
+    private val featureFlags: Map<Long, Experiment>,
     private val eventTypes: Map<String, EventType>,
 ) : Workspace {
 
@@ -19,7 +19,7 @@ internal class WorkspaceImpl(
         return eventTypes[eventTypeKey]
     }
 
-    override fun getFeatureFlagOrNull(featureFlagKey: Long): FeatureFlag? {
+    override fun getFeatureFlagOrNull(featureFlagKey: Long): Experiment? {
         return featureFlags[featureFlagKey]
     }
 
@@ -40,7 +40,7 @@ internal class WorkspaceImpl(
                     .mapNotNull { it.toExperiment(AB_TEST, buckets.getValue(it.bucketId)) }
                     .associateBy { it.key }
 
-            val featureFlags: Map<Long, FeatureFlag> =
+            val featureFlags: Map<Long, Experiment> =
                 dto.featureFlags.asSequence()
                     .mapNotNull { it.toExperiment(FEATURE_FLAG, buckets.getValue(it.bucketId)) }
                     .associateBy { it.key }

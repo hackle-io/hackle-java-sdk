@@ -46,18 +46,18 @@ internal class HackleClientImpl(
             }
     }
 
-    override fun isFeatureFlagOn(featureFlagKey: Long, userId: String): Boolean {
-        return isFeatureFlagOn(featureFlagKey, User.of(userId))
+    override fun isFeatureOn(featureKey: Long, userId: String): Boolean {
+        return isFeatureOn(featureKey, User.of(userId))
     }
 
-    override fun isFeatureFlagOn(featureFlagKey: Long, user: User): Boolean {
-        return isFeatureFlagOnDetail(featureFlagKey, user).isOn
+    override fun isFeatureOn(featureKey: Long, user: User): Boolean {
+        return featureFlagDetail(featureKey, user).isOn
     }
 
-    override fun isFeatureFlagOnDetail(featureFlagKey: Long, user: User): FeatureFlagDecision {
-        return runCatching { client.featureFlag(featureFlagKey, user) }
+    override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
+        return runCatching { client.featureFlag(featureKey, user) }
             .getOrElse {
-                log.error { "Unexpected exception while deciding feature flag[$featureFlagKey]. Returning default value[false]: $it" }
+                log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default value[false]: $it" }
                 return FeatureFlagDecision.off(EXCEPTION)
             }
     }
