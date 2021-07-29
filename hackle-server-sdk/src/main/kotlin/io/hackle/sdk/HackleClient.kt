@@ -91,10 +91,43 @@ interface HackleClient : AutoCloseable {
      */
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
+    /**
+     * Decides whether the feature is turned on to the user.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param userId     the identifier of user.
+     *
+     * @return True if the feature is on.
+     *         False if the feature is off.
+     *
+     * @since 2.0.0
+     */
     fun isFeatureOn(featureKey: Long, userId: String): Boolean
 
+    /**
+     * Decides whether the feature is turned on to the user.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param user       the user requesting the feature.
+     *
+     * @return True if the feature is on.
+     *         False if the feature is off.
+     *
+     * @since 2.0.0
+     */
     fun isFeatureOn(featureKey: Long, user: User): Boolean
 
+    /**
+     * Decides whether the feature is turned on to the user, and returns an object that
+     * describes the way the value was decided.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param user       the user requesting the feature.
+     *
+     * @return a [FeatureFlagDecision] object
+     *
+     * @since 2.0.0
+     */
     fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision
 
     /**
