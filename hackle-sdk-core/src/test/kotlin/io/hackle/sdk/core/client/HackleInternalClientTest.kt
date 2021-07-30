@@ -10,7 +10,6 @@ import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.FeatureFlag
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
 import io.mockk.Called
@@ -164,7 +163,7 @@ internal class HackleInternalClientTest {
         fun `평가 결과 이벤트를 전송한다`() {
             // given
             val user = User.of("TEST_USER_ID")
-            val featureFlag = mockk<FeatureFlag>()
+            val featureFlag = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
@@ -192,7 +191,7 @@ internal class HackleInternalClientTest {
         fun `평가 결과 Control 그룹이면 off로 결정한다`() {
             // given
             val user = User.of("TEST_USER_ID")
-            val featureFlag = mockk<FeatureFlag>()
+            val featureFlag = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
@@ -215,7 +214,7 @@ internal class HackleInternalClientTest {
         fun `평가 결과가 Control 그룹이 아니면 on으로 결정한다 `() {
             // given
             val user = User.of("TEST_USER_ID")
-            val featureFlag = mockk<FeatureFlag>()
+            val featureFlag = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }

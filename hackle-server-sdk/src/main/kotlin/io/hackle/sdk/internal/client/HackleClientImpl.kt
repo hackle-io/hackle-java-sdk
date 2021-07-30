@@ -54,6 +54,10 @@ internal class HackleClientImpl(
         return featureFlagDetail(featureKey, user).isOn
     }
 
+    override fun featureFlagDetail(featureKey: Long, userId: String): FeatureFlagDecision {
+        return featureFlagDetail(featureKey, User.of(userId))
+    }
+
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
         return runCatching { client.featureFlag(featureKey, user) }
             .getOrElse {

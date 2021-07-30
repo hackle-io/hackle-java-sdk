@@ -5,6 +5,9 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
+import io.hackle.sdk.common.decision.DecisionReason.TRAFFIC_ALLOCATED
+import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.mockk.*
@@ -16,7 +19,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isSameInstanceAs
+import strikt.assertions.isTrue
 
 /**
  * @author Yong
@@ -94,6 +99,38 @@ internal class HackleClientImplTest {
                 get { variation } isSameInstanceAs defaultVariation
             }
         }
+    }
+
+    @Nested
+    inner class FeatureFlag {
+
+        @Test
+        fun `feature flag on`() {
+            // given
+            every { client.featureFlag(42, User.of("test_id")) } returns FeatureFlagDecision.on(TRAFFIC_ALLOCATED)
+
+            // when
+            val actual = sut.isFeatureOn(42, "test_id")
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `예외가 발생하면 feature off`() {
+            // given
+            every { client.featureFlag(any(), any()) } answers { throw IllegalArgumentException("Fail") }
+
+            // when
+            val actual = sut.featureFlagDetail(42, "abc")
+
+            // then
+            expectThat(actual) {
+                get { isOn }.isFalse()
+                get { reason } isEqualTo EXCEPTION
+            }
+        }
+
     }
 
     @Nested
