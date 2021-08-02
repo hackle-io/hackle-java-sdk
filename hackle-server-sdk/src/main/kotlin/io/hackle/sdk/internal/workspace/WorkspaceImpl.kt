@@ -19,8 +19,8 @@ internal class WorkspaceImpl(
         return eventTypes[eventTypeKey]
     }
 
-    override fun getFeatureFlagOrNull(featureFlagKey: Long): Experiment? {
-        return featureFlags[featureFlagKey]
+    override fun getFeatureFlagOrNull(featureKey: Long): Experiment? {
+        return featureFlags[featureKey]
     }
 
     override fun getExperimentOrNull(experimentKey: Long): Experiment? {
