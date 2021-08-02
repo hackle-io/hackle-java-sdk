@@ -14,38 +14,38 @@ import io.hackle.sdk.common.decision.FeatureFlagDecision
 interface HackleClient : AutoCloseable {
 
     /**
-     * Determine the variation to expose to the user for experiment.
+     * Decide the variation to expose to the user for experiment.
      *
      * This method return the [Variation.CONTROL] if:
      * - The experiment key is invalid
      * - The experiment has not started yet
      * - The user is not allocated to the experiment
-     * - The determined variation has been dropped
+     * - The decided variation has been dropped
      *
      * This method does not block the calling thread.
      *
      * @param experimentKey the unique key of the experiment.
      * @param userId        the identifier of user to participate in the experiment. MUST NOT be null.
      *
-     * @return the determined variation for the user, or [Variation.CONTROL]
+     * @return the decided variation for the user, or [Variation.CONTROL]
      */
     fun variation(experimentKey: Long, userId: String): Variation
 
     /**
-     * Determine the variation to expose to the user for experiment.
+     * Decide the variation to expose to the user for experiment.
      *
      * This method does not block the calling thread.
      *
      * @param experimentKey the unique key of the experiment.
      * @param user          the user to participate in the experiment. MUST NOT be null.
      *
-     * @return the determined variation for the user, or [Variation.CONTROL]
+     * @return the decided variation for the user, or [Variation.CONTROL]
      */
     fun variation(experimentKey: Long, user: User): Variation
 
     /**
-     * Determine the variation to expose to the user for experiment.
-     * Returns the default variation if the variation cannot be determined.
+     * Decide the variation to expose to the user for experiment.
+     * Returns the default variation if the variation cannot be decided.
      *
      * This method does not block the calling thread.
      *
@@ -53,13 +53,13 @@ interface HackleClient : AutoCloseable {
      * @param user             the user to participate in the experiment. MUST NOT be null.
      * @param defaultVariation the default variation of the experiment. MUST NOT be null.
      *
-     * @return the determined variation for the user, or the default variation.
+     * @return the decided variation for the user, or the default variation.
      */
     fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation
 
     /**
-     * Determine the variation to expose to the user for experiment, and returns an object that
-     * describes the way the variation was determined.
+     * Decide the variation to expose to the user for experiment, and returns an object that
+     * describes the way the variation was decided.
      *
      * @param experimentKey the unique key of the experiment.
      * @param userId        the identifier of user to participate in the experiment. MUST NOT be null.
@@ -69,8 +69,8 @@ interface HackleClient : AutoCloseable {
     fun variationDetail(experimentKey: Long, userId: String): Decision
 
     /**
-     * Determine the variation to expose to the user for experiment, and returns an object that
-     * describes the way the variation was determined.
+     * Decide the variation to expose to the user for experiment, and returns an object that
+     * describes the way the variation was decided.
      *
      * @param experimentKey the unique key of the experiment.
      * @param user          the user to participate in the experiment. MUST NOT be null.
@@ -80,8 +80,8 @@ interface HackleClient : AutoCloseable {
     fun variationDetail(experimentKey: Long, user: User): Decision
 
     /**
-     * Determine the variation to expose to the user for experiment, and returns an object that
-     * describes the way the variation was determined.
+     * Decide the variation to expose to the user for experiment, and returns an object that
+     * describes the way the variation was decided.
      *
      * @param experimentKey    the unique key for the experiment.
      * @param user             the user to participate in the experiment. MUST NOT be null.
@@ -92,7 +92,7 @@ interface HackleClient : AutoCloseable {
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
     /**
-     * Determine whether the feature is turned on to the user.
+     * Decide whether the feature is turned on to the user.
      *
      * @param featureKey the unique key for the feature.
      * @param userId     the identifier of user.
@@ -105,7 +105,7 @@ interface HackleClient : AutoCloseable {
     fun isFeatureOn(featureKey: Long, userId: String): Boolean
 
     /**
-     * Determine whether the feature is turned on to the user.
+     * Decide whether the feature is turned on to the user.
      *
      * @param featureKey the unique key for the feature.
      * @param user       the user requesting the feature.
@@ -118,8 +118,8 @@ interface HackleClient : AutoCloseable {
     fun isFeatureOn(featureKey: Long, user: User): Boolean
 
     /**
-     * Determine whether the feature is turned on to the user, and returns an object that
-     * describes the way the value was determined.
+     * Decide whether the feature is turned on to the user, and returns an object that
+     * describes the way the value was decided.
      *
      * @param featureKey the unique key for the feature.
      * @param userId     the identifier of user.
@@ -131,8 +131,8 @@ interface HackleClient : AutoCloseable {
     fun featureFlagDetail(featureKey: Long, userId: String): FeatureFlagDecision
 
     /**
-     * Determine whether the feature is turned on to the user, and returns an object that
-     * describes the way the value was determined.
+     * Decide whether the feature is turned on to the user, and returns an object that
+     * describes the way the value was decided.
      *
      * @param featureKey the unique key for the feature.
      * @param user       the user requesting the feature.
