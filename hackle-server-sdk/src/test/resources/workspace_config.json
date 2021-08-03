@@ -1,0 +1,435 @@
+{
+  "experiments": [
+    {
+      "id": 1478,
+      "key": 5,
+      "status": "DRAFT",
+      "bucketId": 1478,
+      "variations": [
+        {
+          "id": 4050,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4051,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2950,
+        "status": "READY",
+        "userOverrides": [
+          {
+            "userId": "51",
+            "variationId": 4050
+          },
+          {
+            "userId": "52",
+            "variationId": 4051
+          }
+        ]
+      },
+      "winnerVariationId": null
+    },
+    {
+      "id": 1479,
+      "key": 6,
+      "status": "EXECUTED",
+      "bucketId": 1479,
+      "variations": [
+        {
+          "id": 4052,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4053,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2952,
+        "status": "RUNNING",
+        "userOverrides": [
+          {
+            "userId": "61",
+            "variationId": 4052
+          },
+          {
+            "userId": "62",
+            "variationId": 4053
+          }
+        ]
+      },
+      "winnerVariationId": null
+    },
+    {
+      "id": 1480,
+      "key": 7,
+      "status": "EXECUTED",
+      "bucketId": 1480,
+      "variations": [
+        {
+          "id": 4054,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4055,
+          "key": "B",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4056,
+          "key": "C",
+          "status": "DROPPED"
+        }
+      ],
+      "execution": {
+        "id": 2954,
+        "status": "RUNNING",
+        "userOverrides": []
+      },
+      "winnerVariationId": null
+    },
+    {
+      "id": 1481,
+      "key": 8,
+      "status": "EXECUTED",
+      "bucketId": 1481,
+      "variations": [
+        {
+          "id": 4057,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4058,
+          "key": "B",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4059,
+          "key": "C",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4060,
+          "key": "D",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2956,
+        "status": "PAUSED",
+        "userOverrides": []
+      },
+      "winnerVariationId": null
+    },
+    {
+      "id": 1482,
+      "key": 9,
+      "status": "COMPLETED",
+      "bucketId": 1482,
+      "variations": [
+        {
+          "id": 4061,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4062,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2958,
+        "status": "STOPPED",
+        "userOverrides": []
+      },
+      "winnerVariationId": 4062
+    }
+  ],
+  "featureFlags": [
+    {
+      "id": 1483,
+      "key": 1,
+      "status": "EXECUTED",
+      "bucketId": 1483,
+      "variations": [
+        {
+          "id": 4063,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4064,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2960,
+        "status": "RUNNING",
+        "userOverrides": [
+          {
+            "userId": "11",
+            "variationId": 4063
+          },
+          {
+            "userId": "12",
+            "variationId": 4064
+          }
+        ]
+      },
+      "winnerVariationId": null
+    },
+    {
+      "id": 1484,
+      "key": 2,
+      "status": "EXECUTED",
+      "bucketId": 1484,
+      "variations": [
+        {
+          "id": 4065,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4066,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2962,
+        "status": "RUNNING",
+        "userOverrides": []
+      },
+      "winnerVariationId": null
+    },
+    {
+      "id": 1485,
+      "key": 3,
+      "status": "EXECUTED",
+      "bucketId": 1485,
+      "variations": [
+        {
+          "id": 4067,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4068,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2964,
+        "status": "RUNNING",
+        "userOverrides": [
+          {
+            "userId": "31",
+            "variationId": 4067
+          },
+          {
+            "userId": "32",
+            "variationId": 4068
+          }
+        ]
+      },
+      "winnerVariationId": null
+    }
+  ],
+  "buckets": [
+    {
+      "id": 1474,
+      "seed": 328116020,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 5000,
+          "variationId": 4038
+        },
+        {
+          "startInclusive": 5000,
+          "endExclusive": 10000,
+          "variationId": 4039
+        }
+      ]
+    },
+    {
+      "id": 1475,
+      "seed": 2004828628,
+      "slotSize": 10000,
+      "slots": []
+    },
+    {
+      "id": 1476,
+      "seed": 1433754983,
+      "slotSize": 10000,
+      "slots": []
+    },
+    {
+      "id": 1477,
+      "seed": 1428906105,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 667,
+          "variationId": 4047
+        },
+        {
+          "startInclusive": 667,
+          "endExclusive": 1333,
+          "variationId": 4048
+        },
+        {
+          "startInclusive": 1333,
+          "endExclusive": 2000,
+          "variationId": 4049
+        }
+      ]
+    },
+    {
+      "id": 1478,
+      "seed": 1927910024,
+      "slotSize": 10000,
+      "slots": []
+    },
+    {
+      "id": 1479,
+      "seed": 916529528,
+      "slotSize": 10000,
+      "slots": []
+    },
+    {
+      "id": 1480,
+      "seed": 1728289230,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 1667,
+          "variationId": 4054
+        },
+        {
+          "startInclusive": 1667,
+          "endExclusive": 3333,
+          "variationId": 4055
+        },
+        {
+          "startInclusive": 3333,
+          "endExclusive": 5000,
+          "variationId": 4056
+        }
+      ]
+    },
+    {
+      "id": 1481,
+      "seed": 1989902808,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 2500,
+          "variationId": 4057
+        },
+        {
+          "startInclusive": 2500,
+          "endExclusive": 5000,
+          "variationId": 4058
+        },
+        {
+          "startInclusive": 5000,
+          "endExclusive": 7500,
+          "variationId": 4059
+        },
+        {
+          "startInclusive": 7500,
+          "endExclusive": 10000,
+          "variationId": 4060
+        }
+      ]
+    },
+    {
+      "id": 1482,
+      "seed": 54091494,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 3950,
+          "variationId": 4061
+        },
+        {
+          "startInclusive": 3950,
+          "endExclusive": 7900,
+          "variationId": 4062
+        }
+      ]
+    },
+    {
+      "id": 1483,
+      "seed": 1653168523,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 10000,
+          "variationId": 4063
+        }
+      ]
+    },
+    {
+      "id": 1484,
+      "seed": 1791240461,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 6500,
+          "variationId": 4065
+        },
+        {
+          "startInclusive": 6500,
+          "endExclusive": 10000,
+          "variationId": 4066
+        }
+      ]
+    },
+    {
+      "id": 1485,
+      "seed": 809049883,
+      "slotSize": 10000,
+      "slots": [
+        {
+          "startInclusive": 0,
+          "endExclusive": 10000,
+          "variationId": 4068
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "key": "event_type_1"
+    },
+    {
+      "id": 2,
+      "key": "event_type_2"
+    },
+    {
+      "id": 3,
+      "key": "event_type_3"
+    }
+  ]
+}

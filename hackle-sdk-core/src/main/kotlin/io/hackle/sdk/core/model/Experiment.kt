@@ -13,7 +13,7 @@ sealed class Experiment {
     abstract val variations: Map<Long, Variation>
     abstract val overrides: Map<String, Long>
 
-    class Draft(
+    data class Draft(
         override val id: Long,
         override val key: Long,
         override val type: Type,
@@ -21,7 +21,7 @@ sealed class Experiment {
         override val overrides: Map<String, Long>,
     ) : Experiment()
 
-    class Running(
+    data class Running(
         override val id: Long,
         override val key: Long,
         override val type: Type,
@@ -30,7 +30,7 @@ sealed class Experiment {
         val bucket: Bucket
     ) : Experiment()
 
-    class Paused(
+    data class Paused(
         override val id: Long,
         override val key: Long,
         override val type: Type,
@@ -39,7 +39,7 @@ sealed class Experiment {
     ) : Experiment()
 
 
-    class Completed(
+    data class Completed(
         override val id: Long,
         override val key: Long,
         override val type: Type,
