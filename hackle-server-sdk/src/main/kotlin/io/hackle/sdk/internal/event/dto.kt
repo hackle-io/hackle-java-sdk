@@ -16,7 +16,7 @@ internal data class ExposureEventDto(
     val experimentKey: Long,
     val experimentType: String,
     val variationId: Long?,
-    val variationKey: String?,
+    val variationKey: String,
     val decisionReason: String
 )
 

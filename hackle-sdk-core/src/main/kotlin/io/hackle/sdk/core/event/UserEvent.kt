@@ -46,7 +46,7 @@ sealed class UserEvent {
             )
         }
 
-        fun track(eventType: EventType, event: Event, user: User): UserEvent {
+        internal fun track(eventType: EventType, event: Event, user: User): UserEvent {
             return Track(
                 timestamp = generateTimestamp(),
                 user = user,
