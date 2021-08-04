@@ -119,7 +119,7 @@ interface HackleClient : AutoCloseable {
 
     /**
      * Decide whether the feature is turned on to the user, and returns an object that
-     * describes the way the value was decided.
+     * describes the way the flag was decided.
      *
      * @param featureKey the unique key for the feature.
      * @param userId     the identifier of user.
@@ -132,7 +132,7 @@ interface HackleClient : AutoCloseable {
 
     /**
      * Decide whether the feature is turned on to the user, and returns an object that
-     * describes the way the value was decided.
+     * describes the way the flag was decided.
      *
      * @param featureKey the unique key for the feature.
      * @param user       the user requesting the feature.

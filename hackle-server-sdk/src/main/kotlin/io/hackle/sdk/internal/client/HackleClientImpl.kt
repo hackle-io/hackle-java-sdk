@@ -61,7 +61,7 @@ internal class HackleClientImpl(
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
         return runCatching { client.featureFlag(featureKey, user) }
             .getOrElse {
-                log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[false]: $it" }
+                log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $it" }
                 return FeatureFlagDecision.off(EXCEPTION)
             }
     }
