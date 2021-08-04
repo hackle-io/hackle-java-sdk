@@ -4,6 +4,7 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
+import io.hackle.sdk.common.decision.FeatureFlagDecision
 
 /**
  * The entry point of Hackle SDKs.
@@ -89,6 +90,58 @@ interface HackleClient : AutoCloseable {
      * @return a [Decision] object
      */
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
+
+    /**
+     * Decide whether the feature is turned on to the user.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param userId     the identifier of user.
+     *
+     * @return True if the feature is on.
+     *         False if the feature is off.
+     *
+     * @since 2.0.0
+     */
+    fun isFeatureOn(featureKey: Long, userId: String): Boolean
+
+    /**
+     * Decide whether the feature is turned on to the user.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param user       the user requesting the feature.
+     *
+     * @return True if the feature is on.
+     *         False if the feature is off.
+     *
+     * @since 2.0.0
+     */
+    fun isFeatureOn(featureKey: Long, user: User): Boolean
+
+    /**
+     * Decide whether the feature is turned on to the user, and returns an object that
+     * describes the way the flag was decided.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param userId     the identifier of user.
+     *
+     * @return a [FeatureFlagDecision] object
+     *
+     * @since 2.0.0
+     */
+    fun featureFlagDetail(featureKey: Long, userId: String): FeatureFlagDecision
+
+    /**
+     * Decide whether the feature is turned on to the user, and returns an object that
+     * describes the way the flag was decided.
+     *
+     * @param featureKey the unique key for the feature.
+     * @param user       the user requesting the feature.
+     *
+     * @return a [FeatureFlagDecision] object
+     *
+     * @since 2.0.0
+     */
+    fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision
 
     /**
      * Records the event that occurred by the user.

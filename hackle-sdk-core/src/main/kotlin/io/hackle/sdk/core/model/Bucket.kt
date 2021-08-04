@@ -3,7 +3,7 @@ package io.hackle.sdk.core.model
 /**
  * @author Yong
  */
-class Bucket(
+data class Bucket(
     val seed: Int,
     val slotSize: Int,
     private val slots: List<Slot>

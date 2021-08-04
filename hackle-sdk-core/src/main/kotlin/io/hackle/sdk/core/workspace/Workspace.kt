@@ -10,5 +10,7 @@ interface Workspace {
 
     fun getExperimentOrNull(experimentKey: Long): Experiment?
 
+    fun getFeatureFlagOrNull(featureKey: Long): Experiment?
+
     fun getEventTypeOrNull(eventTypeKey: String): EventType?
 }
