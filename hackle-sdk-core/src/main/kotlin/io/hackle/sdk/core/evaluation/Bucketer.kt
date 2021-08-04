@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.allocation
+package io.hackle.sdk.core.evaluation
 
 import io.hackle.sdk.common.User
 import io.hackle.sdk.core.model.Bucket

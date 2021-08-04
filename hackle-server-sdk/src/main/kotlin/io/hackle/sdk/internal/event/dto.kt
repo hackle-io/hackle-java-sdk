@@ -11,15 +11,19 @@ internal data class EventPayloadDto(
 internal data class ExposureEventDto(
     val timestamp: Long,
     val userId: String,
+    val userProperties: Map<String, Any>,
     val experimentId: Long,
     val experimentKey: Long,
-    val variationId: Long,
-    val variationKey: String
+    val experimentType: String,
+    val variationId: Long?,
+    val variationKey: String,
+    val decisionReason: String
 )
 
 internal data class TrackEventDto(
     val timestamp: Long,
     val userId: String,
+    val userProperties: Map<String, Any>,
     val eventTypeId: Long,
     val eventTypeKey: String,
     val value: Double?,
@@ -46,15 +50,19 @@ internal fun List<UserEvent>.toPayload(): EventPayloadDto {
 internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
     timestamp = timestamp,
     userId = user.id,
+    userProperties = user.properties,
     experimentId = experiment.id,
     experimentKey = experiment.key,
-    variationId = variation.id,
-    variationKey = variation.key
+    experimentType = experiment.type.name,
+    variationId = variationId,
+    variationKey = variationKey,
+    decisionReason = decisionReason.name
 )
 
 internal fun UserEvent.Track.toDto() = TrackEventDto(
     timestamp = timestamp,
     userId = user.id,
+    userProperties = user.properties,
     eventTypeId = eventType.id,
     eventTypeKey = eventType.key,
     value = event.value,

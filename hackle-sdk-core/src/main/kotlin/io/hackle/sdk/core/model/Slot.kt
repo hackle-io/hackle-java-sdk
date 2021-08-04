@@ -3,7 +3,7 @@ package io.hackle.sdk.core.model
 /**
  * @author Yong
  */
-class Slot(
+data class Slot(
     private val startInclusive: Int,
     private val endExclusive: Int,
     val variationId: Long

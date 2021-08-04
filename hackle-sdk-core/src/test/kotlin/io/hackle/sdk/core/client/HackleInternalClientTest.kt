@@ -2,16 +2,14 @@ package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
-import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.common.Variation.*
 import io.hackle.sdk.common.decision.DecisionReason.*
-import io.hackle.sdk.core.allocation.Allocation
-import io.hackle.sdk.core.allocation.Allocation.ForcedAllocated
-import io.hackle.sdk.core.allocation.Allocator
+import io.hackle.sdk.core.evaluation.Evaluation
+import io.hackle.sdk.core.evaluation.Evaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.Variation
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
 import io.mockk.Called
@@ -26,9 +24,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
-import strikt.assertions.isA
-import strikt.assertions.isEqualTo
-import strikt.assertions.isSameInstanceAs
+import strikt.assertions.*
 
 /**
  * @author Yong
@@ -37,7 +33,7 @@ import strikt.assertions.isSameInstanceAs
 internal class HackleInternalClientTest {
 
     @MockK
-    private lateinit var allocator: Allocator
+    private lateinit var evaluator: Evaluator
 
     @MockK
     private lateinit var workspaceFetcher: WorkspaceFetcher
@@ -49,27 +45,28 @@ internal class HackleInternalClientTest {
     private lateinit var sut: HackleInternalClient
 
     @Nested
-    inner class Variations {
+    inner class ExperimentTest {
 
         @Test
-        fun `Workspace를 가져오지 못하면 defaultVariation으로 결정한다`() {
+        fun `Workspace를 가져오지 못하면 defaultVariation으로 결정하고 노출 이벤트는 전송하지 않는다`() {
             // given
             every { workspaceFetcher.fetch() } returns null
 
-            val defaultVariation = io.hackle.sdk.common.Variation.J
+            val defaultVariation = J
 
             // when
-            val actual = sut.variation(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.experiment(42, User.of("TEST_USER_ID"), defaultVariation)
 
             //then
             expectThat(actual) {
-                get { reason } isEqualTo DecisionReason.SDK_NOT_READY
+                get { reason } isEqualTo SDK_NOT_READY
                 get { variation } isEqualTo defaultVariation
             }
+            verify { eventProcessor wasNot Called }
         }
 
         @Test
-        fun `experimentKey에 해당하는 experiment가 없으면 defaultVariation으로 결정한다`() {
+        fun `experimentKey에 해당하는 experiment가 없으면 defaultVariation으로 결정하고 노출 이벤트는 전송하지 않는다`() {
             // given
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns null
@@ -77,72 +74,21 @@ internal class HackleInternalClientTest {
 
             every { workspaceFetcher.fetch() } returns workspace
 
-            val defaultVariation = io.hackle.sdk.common.Variation.J
+            val defaultVariation = J
 
             // when
-            val actual = sut.variation(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.experiment(42, User.of("TEST_USER_ID"), defaultVariation)
 
             //then
             expectThat(actual) {
-                get { reason } isEqualTo DecisionReason.EXPERIMENT_NOT_FOUND
+                get { reason } isEqualTo EXPERIMENT_NOT_FOUND
                 get { variation } isEqualTo defaultVariation
-            }
-        }
-
-        @Test
-        fun `실험에 할당 되지 않으면 defaultVariation으로 결정한다`() {
-            // given
-            val user = User.of("TEST_USER_ID")
-            val experiment = mockk<Experiment>()
-            val workspace = mockk<Workspace> {
-                every { getExperimentOrNull(any()) } returns experiment
-            }
-            every { workspaceFetcher.fetch() } returns workspace
-            every { allocator.allocate(experiment, user) } returns Allocation.NotAllocated(TRAFFIC_NOT_ALLOCATED)
-
-            val defaultVariation = io.hackle.sdk.common.Variation.J
-
-            // when
-            val actual = sut.variation(42, user, defaultVariation)
-
-            //then
-            expectThat(actual) {
-                get { reason } isEqualTo TRAFFIC_NOT_ALLOCATED
-                get { variation } isEqualTo defaultVariation
-            }
-        }
-
-        @Test
-        fun `강제할당된 경우 강제할당된 Variaton으로 결정하고 노출이벤트는 전송하지 않는다`() {
-            // given
-            val user = User.of("TEST_USER_ID")
-            val experiment = mockk<Experiment>()
-            val workspace = mockk<Workspace> {
-                every { getExperimentOrNull(any()) } returns experiment
-            }
-            every { workspaceFetcher.fetch() } returns workspace
-
-            val forcedAllocatedVariation = io.hackle.sdk.common.Variation.E
-            every { allocator.allocate(experiment, user) } returns ForcedAllocated(
-                OVERRIDDEN,
-                forcedAllocatedVariation.name
-            )
-
-            val defaultVariation = io.hackle.sdk.common.Variation.J
-
-            // when
-            val actual = sut.variation(42, user, defaultVariation)
-
-            //then
-            expectThat(actual) {
-                get { reason } isEqualTo OVERRIDDEN
-                get { variation } isEqualTo forcedAllocatedVariation
             }
             verify { eventProcessor wasNot Called }
         }
 
         @Test
-        fun `할당 된 경우 노출 이벤트를 전송하고 할당된 Variation으로 결정한다`() {
+        fun `평가 결과로 노출 이벤트를 전송하고 평가된 결과로 결정한다`() {
             // given
             val user = User.of("TEST_USER_ID")
             val experiment = mockk<Experiment>()
@@ -151,33 +97,143 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val variation = mockk<Variation> {
-                every { key } returns io.hackle.sdk.common.Variation.E.name
-            }
-
-            every { allocator.allocate(experiment, user) } returns Allocation.Allocated(TRAFFIC_ALLOCATED, variation)
-
-            val defaultVariation = io.hackle.sdk.common.Variation.J
+            val defaultVariation = J
+            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED)
+            every { evaluator.evaluate(experiment, user, defaultVariation.name) } returns evaluation
 
             // when
-            val actual = sut.variation(42, user, defaultVariation)
+            val actual = sut.experiment(42, user, defaultVariation)
 
-            //then
+            // then
             expectThat(actual) {
                 get { reason } isEqualTo TRAFFIC_ALLOCATED
-                get { this.variation } isEqualTo io.hackle.sdk.common.Variation.E
+                get { variation } isEqualTo H
             }
             verify(exactly = 1) {
                 eventProcessor.process(withArg {
                     expectThat(it)
-                        .isA<UserEvent.Exposure>()
-                        .and {
-                            get { variation } isSameInstanceAs variation
+                        .isA<UserEvent.Exposure>().and {
+
                         }
                 })
             }
         }
     }
+
+    @Nested
+    inner class FeatureFlagTest {
+        @Test
+        fun `Workspace를 가져오지 못하면 off로 결정하고 노출 이벤트는 전송하지 않는다`() {
+            // given
+            every { workspaceFetcher.fetch() } returns null
+
+
+            // when
+            val actual = sut.featureFlag(42, User.of("TEST_USER_ID"))
+
+            //then
+            expectThat(actual) {
+                get { reason } isEqualTo SDK_NOT_READY
+                get { isOn }.isFalse()
+            }
+            verify { eventProcessor wasNot Called }
+        }
+
+        @Test
+        fun `featureFlagKey에 해당하는 featureFlag가 없으면 off로 결정하고 노출 이벤트는 전송하지 않는다`() {
+            // given
+            val workspace = mockk<Workspace> {
+                every { getFeatureFlagOrNull(any()) } returns null
+            }
+
+            every { workspaceFetcher.fetch() } returns workspace
+
+            // when
+            val actual = sut.featureFlag(42, User.of("TEST_USER_ID"))
+
+            //then
+            expectThat(actual) {
+                get { reason } isEqualTo EXPERIMENT_NOT_FOUND
+                get { isOn }.isFalse()
+            }
+            verify { eventProcessor wasNot Called }
+        }
+
+        @Test
+        fun `평가 결과 이벤트를 전송한다`() {
+            // given
+            val user = User.of("TEST_USER_ID")
+            val featureFlag = mockk<Experiment>()
+            val workspace = mockk<Workspace> {
+                every { getFeatureFlagOrNull(any()) } returns featureFlag
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
+            every { evaluator.evaluate(featureFlag, user, A.name) } returns evaluation
+
+            // when
+            sut.featureFlag(42, user)
+
+            // then
+            verify {
+                eventProcessor.process(withArg {
+                    expectThat(it)
+                        .isA<UserEvent.Exposure>()
+                        .and {
+
+                        }
+                })
+            }
+        }
+
+        @Test
+        fun `평가 결과 Control 그룹이면 off로 결정한다`() {
+            // given
+            val user = User.of("TEST_USER_ID")
+            val featureFlag = mockk<Experiment>()
+            val workspace = mockk<Workspace> {
+                every { getFeatureFlagOrNull(any()) } returns featureFlag
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
+            every { evaluator.evaluate(featureFlag, user, A.name) } returns evaluation
+
+            // when
+            val actual = sut.featureFlag(42, user)
+
+            // then
+            expectThat(actual) {
+                get { isOn }.isFalse()
+                get { reason } isEqualTo TRAFFIC_ALLOCATED
+            }
+        }
+
+        @Test
+        fun `평가 결과가 Control 그룹이 아니면 on으로 결정한다 `() {
+            // given
+            val user = User.of("TEST_USER_ID")
+            val featureFlag = mockk<Experiment>()
+            val workspace = mockk<Workspace> {
+                every { getFeatureFlagOrNull(any()) } returns featureFlag
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED)
+            every { evaluator.evaluate(featureFlag, user, A.name) } returns evaluation
+
+            // when
+            val actual = sut.featureFlag(42, user)
+
+            // then
+            expectThat(actual) {
+                get { isOn }.isTrue()
+                get { reason } isEqualTo TRAFFIC_ALLOCATED
+            }
+        }
+    }
+
 
     @Nested
     inner class Track {

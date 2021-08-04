@@ -17,7 +17,7 @@ internal class HttpWorkspaceFetcher(
     private val httpClient: CloseableHttpClient
 ) {
 
-    private val sdkEndpoint = URI("$sdkBaseUrl/api/v1/workspaces")
+    private val sdkEndpoint = URI("$sdkBaseUrl/api/v2/workspaces")
 
     fun fetch(): Workspace {
         return httpClient.execute(HttpGet(sdkEndpoint)).use { response ->
