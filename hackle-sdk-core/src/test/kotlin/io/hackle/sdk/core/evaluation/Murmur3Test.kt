@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation
 
+import io.hackle.sdk.core.evaluation.bucket.Murmur3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.file.Files

@@ -4,6 +4,7 @@ import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
+import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.workspace.Workspace
 
 /**
@@ -13,6 +14,8 @@ internal class WorkspaceImpl(
     private val experiments: Map<Long, Experiment>,
     private val featureFlags: Map<Long, Experiment>,
     private val eventTypes: Map<String, EventType>,
+    private val buckets: Map<Long, Bucket>,
+    private val segments: Map<Long, Segment>
 ) : Workspace {
 
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
@@ -27,6 +30,14 @@ internal class WorkspaceImpl(
         return experiments[experimentKey]
     }
 
+    override fun getBucketOrNull(bucketId: Long): Bucket? {
+        return buckets[bucketId]
+    }
+
+    override fun getSegmentOrNull(segmentId: Long): Segment? {
+        return segments[segmentId]
+    }
+
     companion object {
 
         private val log = Logger<WorkspaceImpl>()
@@ -37,12 +48,12 @@ internal class WorkspaceImpl(
 
             val experiment: Map<Long, Experiment> =
                 dto.experiments.asSequence()
-                    .mapNotNull { it.toExperiment(AB_TEST, buckets.getValue(it.bucketId)) }
+                    .mapNotNull { it.toExperiment(AB_TEST) }
                     .associateBy { it.key }
 
             val featureFlags: Map<Long, Experiment> =
                 dto.featureFlags.asSequence()
-                    .mapNotNull { it.toExperiment(FEATURE_FLAG, buckets.getValue(it.bucketId)) }
+                    .mapNotNull { it.toExperiment(FEATURE_FLAG) }
                     .associateBy { it.key }
 
             val eventTypes: Map<String, EventType.Custom> = dto.events.associate { it.key to it.toEventType() }
@@ -50,11 +61,13 @@ internal class WorkspaceImpl(
             return WorkspaceImpl(
                 experiments = experiment,
                 featureFlags = featureFlags,
-                eventTypes = eventTypes
+                eventTypes = eventTypes,
+                buckets = buckets,
+                segments = emptyMap()
             )
         }
 
-        private fun ExperimentDto.toExperiment(type: Experiment.Type, bucket: Bucket): Experiment? {
+        private fun ExperimentDto.toExperiment(type: Experiment.Type): Experiment? {
 
             val variations = variations.associate { it.id to it.toVariation() }
             val overrides = execution.userOverrides.associate { it.userId to it.variationId }
@@ -71,9 +84,42 @@ internal class WorkspaceImpl(
                     id = id,
                     key = key,
                     type = type,
-                    bucket = bucket,
                     variations = variations,
-                    overrides = overrides
+                    overrides = overrides,
+                    rules = listOf(
+                        TargetRule(
+                            target = Target(
+                                conditions = listOf(
+                                    Target.Condition(
+                                        key = Target.Key(
+                                            type = Target.Key.Type.USER_PROPERTY,
+                                            name = "age"
+                                        ),
+                                        match = Target.Match(
+                                            type = Target.Match.Type.MATCH,
+                                            operator = Target.Match.Operator.GTE,
+                                            valueType = Target.Match.ValueType.NUMBER,
+                                            values = listOf(20)
+                                        )
+                                    ),
+                                    Target.Condition(
+                                        key = Target.Key(
+                                            type = Target.Key.Type.USER_PROPERTY,
+                                            name = "grade"
+                                        ),
+                                        match = Target.Match(
+                                            type = Target.Match.Type.MATCH,
+                                            operator = Target.Match.Operator.IN,
+                                            valueType = Target.Match.ValueType.STRING,
+                                            values = listOf("GOLD")
+                                        )
+                                    )
+                                )
+                            ),
+                            action = Action.Bucket(bucketId)
+                        ),
+                    ),
+                    defaultAction = Action.Bucket(bucketId)
                 )
                 "PAUSED" -> Experiment.Paused(
                     id = id,
