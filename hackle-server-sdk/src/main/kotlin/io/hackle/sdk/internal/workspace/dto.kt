@@ -11,7 +11,6 @@ internal data class ExperimentDto(
     val id: Long,
     val key: Long,
     val status: String,
-    val bucketId: Long,
     val variations: List<VariationDto>,
     val execution: ExecutionDto,
     val winnerVariationId: Long?,
@@ -26,6 +25,9 @@ internal data class VariationDto(
 internal data class ExecutionDto(
     val status: String,
     val userOverrides: List<UserOverrideDto>,
+    val audiences: List<TargetDto>,
+    val targetRules: List<TargetRuleDto>,
+    val defaultRule: ActionDto
 )
 
 internal data class UserOverrideDto(
@@ -49,4 +51,37 @@ internal data class SlotDto(
 internal data class EventTypeDto(
     val id: Long,
     val key: String,
+)
+
+internal data class TargetRuleDto(
+    val target: TargetDto,
+    val action: ActionDto,
+)
+
+internal data class TargetDto(
+    val conditions: List<ConditionDto>
+) {
+
+    internal data class ConditionDto(
+        val key: KeyDto,
+        val match: MatchDto
+    )
+
+    internal data class KeyDto(
+        val type: String,
+        val name: String
+    )
+
+    internal data class MatchDto(
+        val type: String,
+        val operator: String,
+        val valueType: String,
+        val values: List<Any>
+    )
+}
+
+internal data class ActionDto(
+    val type: String,
+    val variationId: Long?,
+    val bucketId: Long?,
 )

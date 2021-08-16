@@ -16,7 +16,7 @@ interface Logger {
     }
 
     companion object {
-        var factory: Factory = Factory { NoopLogger }
+        var factory: Factory = NoopLogger.Factory
         inline operator fun <reified T> invoke(): Logger = factory.getLogger(T::class.java)
     }
 }

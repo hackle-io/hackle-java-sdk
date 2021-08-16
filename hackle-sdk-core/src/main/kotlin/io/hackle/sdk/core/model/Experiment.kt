@@ -27,8 +27,9 @@ sealed class Experiment {
         override val type: Type,
         override val variations: Map<Long, Variation>,
         override val overrides: Map<String, Long>,
-        val rules: List<TargetRule>,
-        val defaultAction: Action
+        val audiences: List<Target>,
+        val targetRules: List<TargetRule>,
+        val defaultRule: Action
     ) : Experiment()
 
     data class Paused(

@@ -8,4 +8,8 @@ internal object NoopLogger : Logger {
     override fun warn(msg: () -> String) {}
     override fun error(msg: () -> String) {}
     override fun error(x: Throwable, msg: () -> String) {}
+
+    object Factory : Logger.Factory {
+        override fun getLogger(name: String): Logger = NoopLogger
+    }
 }

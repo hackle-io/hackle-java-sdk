@@ -10,25 +10,29 @@ interface ConditionMatcher {
     fun matches(condition: Target.Condition, workspace: Workspace, user: User): Boolean
 }
 
-internal class SegmentMatcher(
-    private val propertyMatcher: PropertyMatcher,
+internal class SegmentConditionMatcher(
+    private val segmentMatcher: SegmentMatcher,
 ) : ConditionMatcher {
     override fun matches(condition: Target.Condition, workspace: Workspace, user: User): Boolean {
-        require(condition.key.type == SEGMENT)
+        require(condition.key.type == SEGMENT) { "Condition key type must be SEGMENT" }
         return condition.match.values.asSequence()
-            .filterIsInstance<Long>()
-            .mapNotNull { workspace.getSegmentOrNull(it) }
-            .any { segmentMatches(it, workspace, user) }
-    }
-
-    private fun segmentMatches(segment: Segment, workspace: Workspace, user: User): Boolean {
-        return segment.target.conditions.asSequence()
-            .filter { it.key.type != SEGMENT }
-            .any { propertyMatcher.matches(it, workspace, user) }
+            .filterIsInstance<Number>()
+            .mapNotNull { workspace.getSegmentOrNull(it.toLong()) }
+            .any { segmentMatcher.matches(it, workspace, user) }
     }
 }
 
-internal class PropertyMatcher(
+internal class SegmentMatcher(
+    private val propertyConditionMatcher: PropertyConditionMatcher,
+) {
+    fun matches(segment: Segment, workspace: Workspace, user: User): Boolean {
+        return segment.target.conditions.asSequence()
+            .filter { it.key.type != SEGMENT }
+            .any { propertyConditionMatcher.matches(it, workspace, user) }
+    }
+}
+
+internal class PropertyConditionMatcher(
     private val valueOperatorMatcher: ValueOperatorMatcher
 ) : ConditionMatcher {
     override fun matches(condition: Target.Condition, workspace: Workspace, user: User): Boolean {
@@ -45,15 +49,20 @@ internal class PropertyMatcher(
     }
 }
 
-internal class ConditionMatcherFactory(
-    private val propertyMatcher: ConditionMatcher,
-    private val segmentMatcher: ConditionMatcher
-) {
+class ConditionMatcherFactory {
+
+    private val propertyConditionMatcher: ConditionMatcher
+    private val segmentConditionMatcher: ConditionMatcher
+
+    init {
+        this.propertyConditionMatcher = PropertyConditionMatcher(ValueOperatorMatcher(ValueOperatorMatcherFactory()))
+        this.segmentConditionMatcher = SegmentConditionMatcher(SegmentMatcher(this.propertyConditionMatcher))
+    }
 
     fun getMatcher(type: Target.Key.Type): ConditionMatcher {
         return when (type) {
-            USER_PROPERTY, HACKLE_PROPERTY -> propertyMatcher
-            SEGMENT -> segmentMatcher
+            USER_PROPERTY, HACKLE_PROPERTY -> propertyConditionMatcher
+            SEGMENT -> segmentConditionMatcher
         }
     }
 }

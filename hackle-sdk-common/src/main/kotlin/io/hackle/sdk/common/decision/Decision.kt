@@ -95,6 +95,13 @@ enum class DecisionReason {
      */
     TRAFFIC_ALLOCATED,
 
+
+    NOT_IN_AUDIENCE,
+
+    TARGET_RULE,
+
+    DEFAULT_RULE,
+
     /**
      * Indicates that the variation could not be decided due to an unexpected exception.
      */
