@@ -3,7 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
-import io.hackle.sdk.core.evaluation.rule.ExperimentAudienceMatcher
+import io.hackle.sdk.core.evaluation.target.TargetAudienceMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -24,7 +24,7 @@ import strikt.assertions.startsWith
 internal class AudienceEvaluatorTest {
 
     @MockK
-    private lateinit var audienceMatcher: ExperimentAudienceMatcher
+    private lateinit var targetAudienceMatcher: TargetAudienceMatcher
 
 
     @InjectMockKs
@@ -72,7 +72,7 @@ internal class AudienceEvaluatorTest {
             every { type } returns Experiment.Type.AB_TEST
         }
 
-        every { audienceMatcher.isUserInAudiences(any(), experiment, any()) } returns true
+        every { targetAudienceMatcher.isUserInAudiences(any(), experiment, any()) } returns true
 
         val evaluation = mockk<Evaluation>()
         val nextFlow = mockk<EvaluationFlow> {
@@ -96,7 +96,7 @@ internal class AudienceEvaluatorTest {
             every { type } returns Experiment.Type.AB_TEST
         }
 
-        every { audienceMatcher.isUserInAudiences(any(), experiment, any()) } returns false
+        every { targetAudienceMatcher.isUserInAudiences(any(), experiment, any()) } returns false
 
         // when
         val actual = sut.evaluate(mockk(), experiment, User.of("123"), "E", mockk())

@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.evaluation.rule
+package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class ExperimentAudienceMatcherTest {
+internal class TargetAudienceMatcherTest {
 
     @MockK
     private lateinit var targetMatcher: TargetMatcher
 
     @InjectMockKs
-    private lateinit var sut: ExperimentAudienceMatcher
+    private lateinit var sut: TargetAudienceMatcher
 
     @Test
     fun `참여대상이 비어있으면 항상 true`() {

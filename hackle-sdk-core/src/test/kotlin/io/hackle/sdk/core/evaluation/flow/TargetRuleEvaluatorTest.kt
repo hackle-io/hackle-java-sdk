@@ -4,7 +4,7 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.rule.ExperimentTargetRuleMatcher
+import io.hackle.sdk.core.evaluation.target.TargetRuleMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.TargetRule
 import io.hackle.sdk.core.model.Variation
@@ -26,7 +26,7 @@ import strikt.assertions.startsWith
 internal class TargetRuleEvaluatorTest {
 
     @MockK
-    private lateinit var targetRuleMatcher: ExperimentTargetRuleMatcher
+    private lateinit var targetRuleMatcher: TargetRuleMatcher
 
     @MockK
     private lateinit var actionResolver: ActionResolver
@@ -75,7 +75,7 @@ internal class TargetRuleEvaluatorTest {
             every { type } returns Experiment.Type.FEATURE_FLAG
         }
 
-        every { targetRuleMatcher.matchesOrNull(any(), any(), any()) } returns null
+        every { targetRuleMatcher.matchesTargetRuleOrNull(any(), any(), any()) } returns null
 
         val evaluation = mockk<Evaluation>()
         val nextFlow = mockk<EvaluationFlow> {
@@ -100,7 +100,7 @@ internal class TargetRuleEvaluatorTest {
             every { action } returns mockk()
         }
 
-        every { targetRuleMatcher.matchesOrNull(any(), any(), any()) } returns targetRule
+        every { targetRuleMatcher.matchesTargetRuleOrNull(any(), any(), any()) } returns targetRule
 
         every { actionResolver.resolveOrNull(targetRule.action, any(), experiment, any()) } returns null
 
@@ -127,7 +127,7 @@ internal class TargetRuleEvaluatorTest {
             every { action } returns mockk()
         }
 
-        every { targetRuleMatcher.matchesOrNull(any(), any(), any()) } returns targetRule
+        every { targetRuleMatcher.matchesTargetRuleOrNull(any(), any(), any()) } returns targetRule
 
         val variation = Variation(534, "E", false)
         every { actionResolver.resolveOrNull(targetRule.action, any(), experiment, any()) } returns variation

@@ -4,8 +4,8 @@ import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.rule.ExperimentAudienceMatcher
-import io.hackle.sdk.core.evaluation.rule.ExperimentTargetRuleMatcher
+import io.hackle.sdk.core.evaluation.target.TargetAudienceMatcher
+import io.hackle.sdk.core.evaluation.target.TargetRuleMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -38,12 +38,12 @@ internal class EvaluationFlowFactory {
         )
 
         val abTestFlow = EvaluationFlow.of(
-            AudienceEvaluator(ExperimentAudienceMatcher(targetMatcher)),
+            AudienceEvaluator(TargetAudienceMatcher(targetMatcher)),
             TrafficAllocateEvaluator(actionResolver)
         )
 
         val featureFlagFlow = EvaluationFlow.of(
-            TargetRuleEvaluator(ExperimentTargetRuleMatcher(targetMatcher), actionResolver),
+            TargetRuleEvaluator(TargetRuleMatcher(targetMatcher), actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )
 

@@ -1,7 +1,8 @@
-package io.hackle.sdk.core.evaluation.rule
+package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
+import io.hackle.sdk.core.evaluation.target.TargetRuleMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.TargetRule
@@ -19,13 +20,13 @@ import strikt.assertions.isNull
 import strikt.assertions.isSameInstanceAs
 
 @ExtendWith(MockKExtension::class)
-internal class ExperimentTargetRuleMatcherTest {
+internal class TargetRuleMatcherTest {
 
     @MockK
     private lateinit var targetMatcher: TargetMatcher
 
     @InjectMockKs
-    private lateinit var sut: ExperimentTargetRuleMatcher
+    private lateinit var sut: TargetRuleMatcher
 
     @Test
     fun `실험의 타겟룰 중에서 첫번째로 일치하는 타겟룰을 찾는다`() {
@@ -40,7 +41,7 @@ internal class ExperimentTargetRuleMatcherTest {
         }
 
         // when
-        val actual = sut.matchesOrNull(mockk(), experiment, User.of("test"))
+        val actual = sut.matchesTargetRuleOrNull(mockk(), experiment, User.of("test"))
 
         // then
         expectThat(actual)
@@ -65,7 +66,7 @@ internal class ExperimentTargetRuleMatcherTest {
         }
 
         // when
-        val actual = sut.matchesOrNull(mockk(), experiment, User.of("test"))
+        val actual = sut.matchesTargetRuleOrNull(mockk(), experiment, User.of("test"))
 
         // then
         expectThat(actual)
