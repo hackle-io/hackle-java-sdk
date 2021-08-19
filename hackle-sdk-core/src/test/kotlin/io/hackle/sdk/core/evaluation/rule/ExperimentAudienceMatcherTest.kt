@@ -28,7 +28,7 @@ internal class ExperimentAudienceMatcherTest {
     fun `참여대상이 비어있으면 항상 true`() {
         // given
         val experiment = mockk<Experiment.Running> {
-            every { audiences } returns emptyList()
+            every { targetAudiences } returns emptyList()
         }
 
         // when
@@ -42,7 +42,7 @@ internal class ExperimentAudienceMatcherTest {
     fun `실험 참여대상중 하나라도 일치하는게 있으면 match true`() {
         // given
         val experiment = mockk<Experiment.Running> {
-            every { audiences } returns listOf(
+            every { targetAudiences } returns listOf(
                 audience(false),
                 audience(false),
                 audience(true),
@@ -65,7 +65,7 @@ internal class ExperimentAudienceMatcherTest {
     fun `실험 참여대상중 일치하는게 하나도 없으면 false`() {
         // given
         val experiment = mockk<Experiment.Running> {
-            every { audiences } returns listOf(
+            every { targetAudiences } returns listOf(
                 audience(false),
                 audience(false),
                 audience(false),

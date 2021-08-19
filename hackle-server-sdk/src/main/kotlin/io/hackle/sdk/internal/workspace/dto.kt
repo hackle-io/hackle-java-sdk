@@ -25,9 +25,9 @@ internal data class VariationDto(
 internal data class ExecutionDto(
     val status: String,
     val userOverrides: List<UserOverrideDto>,
-    val audiences: List<TargetDto>,
+    val targetAudiences: List<TargetDto>,
     val targetRules: List<TargetRuleDto>,
-    val defaultRule: ActionDto
+    val defaultRule: TargetActionDto
 )
 
 internal data class UserOverrideDto(
@@ -53,26 +53,20 @@ internal data class EventTypeDto(
     val key: String,
 )
 
-internal data class TargetRuleDto(
-    val target: TargetDto,
-    val action: ActionDto,
-)
-
 internal data class TargetDto(
     val conditions: List<ConditionDto>
 ) {
-
-    internal data class ConditionDto(
+    data class ConditionDto(
         val key: KeyDto,
         val match: MatchDto
     )
 
-    internal data class KeyDto(
+    data class KeyDto(
         val type: String,
         val name: String
     )
 
-    internal data class MatchDto(
+    data class MatchDto(
         val type: String,
         val operator: String,
         val valueType: String,
@@ -80,8 +74,13 @@ internal data class TargetDto(
     )
 }
 
-internal data class ActionDto(
+internal data class TargetActionDto(
     val type: String,
     val variationId: Long?,
-    val bucketId: Long?,
+    val bucketId: Long?
+)
+
+internal data class TargetRuleDto(
+    val target: TargetDto,
+    val action: TargetActionDto
 )

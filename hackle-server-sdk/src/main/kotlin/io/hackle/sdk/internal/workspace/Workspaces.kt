@@ -28,7 +28,7 @@ internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment
             type = type,
             variations = variations,
             overrides = overrides,
-            audiences = execution.audiences.mapNotNull { it.toTargetOrNull() },
+            targetAudiences = execution.targetAudiences.mapNotNull { it.toTargetOrNull() },
             targetRules = execution.targetRules.mapNotNull { it.toTargetRuleOrNull() },
             defaultRule = execution.defaultRule.toActionOrNull() ?: return null
         )
@@ -93,7 +93,7 @@ internal fun TargetDto.MatchDto.toMatchOrNull(): Target.Match? {
     )
 }
 
-internal fun ActionDto.toActionOrNull(): Action? {
+internal fun TargetActionDto.toActionOrNull(): Action? {
     return when (type) {
         "VARIATION" -> Action.Variation(requireNotNull(variationId))
         "BUCKET" -> Action.Bucket(requireNotNull(bucketId))

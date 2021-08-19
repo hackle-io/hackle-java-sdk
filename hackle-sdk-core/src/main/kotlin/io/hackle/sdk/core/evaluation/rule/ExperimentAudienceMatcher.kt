@@ -10,9 +10,9 @@ internal class ExperimentAudienceMatcher(
 ) {
 
     fun isUserInAudiences(workspace: Workspace, experiment: Experiment.Running, user: User): Boolean {
-        if (experiment.audiences.isEmpty()) {
+        if (experiment.targetAudiences.isEmpty()) {
             return true
         }
-        return experiment.audiences.any { targetMatcher.matches(it, workspace, user) }
+        return experiment.targetAudiences.any { targetMatcher.matches(it, workspace, user) }
     }
 }
