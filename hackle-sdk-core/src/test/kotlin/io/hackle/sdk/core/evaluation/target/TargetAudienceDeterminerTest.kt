@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class TargetAudienceMatcherTest {
+internal class TargetAudienceDeterminerTest {
 
     @MockK
     private lateinit var targetMatcher: TargetMatcher
 
     @InjectMockKs
-    private lateinit var sut: TargetAudienceMatcher
+    private lateinit var sut: TargetAudienceDeterminer
 
     @Test
     fun `참여대상이 비어있으면 항상 true`() {

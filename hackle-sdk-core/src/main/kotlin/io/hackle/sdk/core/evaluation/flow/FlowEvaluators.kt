@@ -4,8 +4,8 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.target.TargetAudienceMatcher
-import io.hackle.sdk.core.evaluation.target.TargetRuleMatcher
+import io.hackle.sdk.core.evaluation.target.TargetAudienceDeterminer
+import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.workspace.Workspace
 
@@ -76,7 +76,7 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
 }
 
 internal class AudienceEvaluator(
-    private val targetAudienceMatcher: TargetAudienceMatcher
+    private val targetAudienceDeterminer: TargetAudienceDeterminer
 ) : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
@@ -88,7 +88,7 @@ internal class AudienceEvaluator(
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
         require(experiment.type == Experiment.Type.AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
-        val isUserInAudiences = targetAudienceMatcher.isUserInAudiences(workspace, experiment, user)
+        val isUserInAudiences = targetAudienceDeterminer.isUserInAudiences(workspace, experiment, user)
         return if (isUserInAudiences) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
@@ -122,7 +122,7 @@ internal class TrafficAllocateEvaluator(
 }
 
 internal class TargetRuleEvaluator(
-    private val targetRuleMatcher: TargetRuleMatcher,
+    private val targetRuleDeterminer: TargetRuleDeterminer,
     private val actionResolver: ActionResolver
 ) : FlowEvaluator {
     override fun evaluate(
@@ -135,7 +135,7 @@ internal class TargetRuleEvaluator(
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
         require(experiment.type == Experiment.Type.FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
-        val targetRule = targetRuleMatcher.matchesTargetRuleOrNull(workspace, experiment, user)
+        val targetRule = targetRuleDeterminer.determineTargetRuleOrNull(workspace, experiment, user)
             ?: return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
 
         val variation = requireNotNull(actionResolver.resolveOrNull(targetRule.action, workspace, experiment, user)) {

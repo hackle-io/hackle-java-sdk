@@ -1,7 +1,5 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.core.model.Target.Match.Operator.*
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -9,9 +7,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 internal class OperatorMatcherTest {
-
-
-
 
     @Nested
     inner class InMatcherTest {

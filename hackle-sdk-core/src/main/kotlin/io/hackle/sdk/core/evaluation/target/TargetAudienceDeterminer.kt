@@ -5,7 +5,7 @@ import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.workspace.Workspace
 
-internal class TargetAudienceMatcher(
+internal class TargetAudienceDeterminer(
     private val targetMatcher: TargetMatcher
 ) {
 
