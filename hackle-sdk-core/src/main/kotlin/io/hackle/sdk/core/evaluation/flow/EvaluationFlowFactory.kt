@@ -30,25 +30,26 @@ internal class EvaluationFlowFactory {
         val targetMatcher = TargetMatcher(ConditionMatcherFactory())
         val actionResolver = ActionResolver(Bucketer())
 
-        val baseFlow = EvaluationFlow.of(
+        val abTestFlow = EvaluationFlow.of(
             OverrideEvaluator(),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-        )
-
-        val abTestFlow = EvaluationFlow.of(
             AudienceEvaluator(TargetAudienceDeterminer(targetMatcher)),
             TrafficAllocateEvaluator(actionResolver)
         )
 
         val featureFlagFlow = EvaluationFlow.of(
+            DraftExperimentEvaluator(),
+            PausedExperimentEvaluator(),
+            CompletedExperimentEvaluator(),
+            IndividualTargetEvaluator(),
             TargetRuleEvaluator(TargetRuleDeterminer(targetMatcher), actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )
 
-        this.abTestFlow = baseFlow + abTestFlow
-        this.featureFlagFlow = baseFlow + featureFlagFlow
+        this.abTestFlow = abTestFlow
+        this.featureFlagFlow = featureFlagFlow
     }
 
     fun getFlow(experimentType: Experiment.Type): EvaluationFlow {

@@ -45,11 +45,3 @@ data class Target(
         }
     }
 }
-
-internal inline fun <reified E : Enum<E>> String.toEnumOrNull(): E? {
-
-
-    return enumValues<E>().find { it.name == this }
-
-
-}

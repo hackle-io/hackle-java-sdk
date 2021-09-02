@@ -98,6 +98,8 @@ enum class DecisionReason {
 
     NOT_IN_AUDIENCE,
 
+    INDIVIDUAL_TARGET,
+
     TARGET_RULE,
 
     DEFAULT_RULE,

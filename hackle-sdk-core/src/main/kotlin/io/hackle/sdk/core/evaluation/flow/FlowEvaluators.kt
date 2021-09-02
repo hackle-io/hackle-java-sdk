@@ -121,6 +121,24 @@ internal class TrafficAllocateEvaluator(
     }
 }
 
+internal class IndividualTargetEvaluator : FlowEvaluator {
+    override fun evaluate(
+        workspace: Workspace,
+        experiment: Experiment,
+        user: User,
+        defaultVariationKey: String,
+        nextFlow: EvaluationFlow
+    ): Evaluation {
+
+        val overriddenVariation = experiment.getOverriddenVariationOrNull(user)
+        if (overriddenVariation != null) {
+            return Evaluation.of(DecisionReason.INDIVIDUAL_TARGET, overriddenVariation)
+        }
+
+        return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
+    }
+}
+
 internal class TargetRuleEvaluator(
     private val targetRuleDeterminer: TargetRuleDeterminer,
     private val actionResolver: ActionResolver
