@@ -7,6 +7,8 @@ import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.target.TargetAudienceDeterminer
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class OverrideEvaluator : FlowEvaluator {
@@ -19,11 +21,14 @@ internal class OverrideEvaluator : FlowEvaluator {
     ): Evaluation {
 
         val overriddenVariation = experiment.getOverriddenVariationOrNull(user)
-        if (overriddenVariation != null) {
-            return Evaluation.of(DecisionReason.OVERRIDDEN, overriddenVariation.key)
+        return if (overriddenVariation != null) {
+            when (experiment.type) {
+                AB_TEST -> Evaluation.of(DecisionReason.OVERRIDDEN, overriddenVariation.key)
+                FEATURE_FLAG -> Evaluation.of(DecisionReason.INDIVIDUAL_TARGET_MATCH, overriddenVariation)
+            }
+        } else {
+            nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
-
-        return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
     }
 }
 
@@ -52,7 +57,11 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
         nextFlow: EvaluationFlow
     ): Evaluation {
         return if (experiment is Experiment.Paused) {
-            Evaluation.of(DecisionReason.EXPERIMENT_PAUSED, defaultVariationKey)
+            when (experiment.type) {
+                AB_TEST -> Evaluation.of(DecisionReason.EXPERIMENT_PAUSED, defaultVariationKey)
+                FEATURE_FLAG -> Evaluation.of(DecisionReason.FEATURE_FLAG_INACTIVE, defaultVariationKey)
+            }
+
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -86,13 +95,13 @@ internal class AudienceEvaluator(
         nextFlow: EvaluationFlow
     ): Evaluation {
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
-        require(experiment.type == Experiment.Type.AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
+        require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val isUserInAudiences = targetAudienceDeterminer.isUserInAudiences(workspace, experiment, user)
         return if (isUserInAudiences) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(DecisionReason.NOT_IN_AUDIENCE, defaultVariationKey)
+            Evaluation.of(DecisionReason.NOT_IN_EXPERIMENT_TARGET, defaultVariationKey)
         }
     }
 }
@@ -108,7 +117,7 @@ internal class TrafficAllocateEvaluator(
         nextFlow: EvaluationFlow
     ): Evaluation {
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
-        require(experiment.type == Experiment.Type.AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
+        require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val variation = actionResolver.resolveOrNull(experiment.defaultRule, workspace, experiment, user)
             ?: return Evaluation.of(DecisionReason.TRAFFIC_NOT_ALLOCATED, defaultVariationKey)
@@ -118,24 +127,6 @@ internal class TrafficAllocateEvaluator(
         }
 
         return Evaluation.of(DecisionReason.TRAFFIC_ALLOCATED, variation)
-    }
-}
-
-internal class IndividualTargetEvaluator : FlowEvaluator {
-    override fun evaluate(
-        workspace: Workspace,
-        experiment: Experiment,
-        user: User,
-        defaultVariationKey: String,
-        nextFlow: EvaluationFlow
-    ): Evaluation {
-
-        val overriddenVariation = experiment.getOverriddenVariationOrNull(user)
-        if (overriddenVariation != null) {
-            return Evaluation.of(DecisionReason.INDIVIDUAL_TARGET, overriddenVariation)
-        }
-
-        return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
     }
 }
 
@@ -151,7 +142,7 @@ internal class TargetRuleEvaluator(
         nextFlow: EvaluationFlow
     ): Evaluation {
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
-        require(experiment.type == Experiment.Type.FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
+        require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         val targetRule = targetRuleDeterminer.determineTargetRuleOrNull(workspace, experiment, user)
             ?: return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -160,7 +151,7 @@ internal class TargetRuleEvaluator(
             "FeatureFlag must decide the Variation [${experiment.id}]"
         }
 
-        return Evaluation.of(DecisionReason.TARGET_RULE, variation)
+        return Evaluation.of(DecisionReason.TARGET_RULE_MATCH, variation)
     }
 }
 
@@ -175,7 +166,7 @@ internal class DefaultRuleEvaluator(
         nextFlow: EvaluationFlow
     ): Evaluation {
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
-        require(experiment.type == Experiment.Type.FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
+        require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         val variation =
             requireNotNull(actionResolver.resolveOrNull(experiment.defaultRule, workspace, experiment, user)) {

@@ -151,7 +151,7 @@ internal class HackleInternalClientTest {
 
             //then
             expectThat(actual) {
-                get { reason } isEqualTo EXPERIMENT_NOT_FOUND
+                get { reason } isEqualTo FEATURE_FLAG_NOT_FOUND
                 get { isOn }.isFalse()
             }
             verify { eventProcessor wasNot Called }

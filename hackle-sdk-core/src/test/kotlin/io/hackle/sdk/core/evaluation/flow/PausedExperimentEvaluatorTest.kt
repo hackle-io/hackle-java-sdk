@@ -15,9 +15,11 @@ internal class PausedExperimentEvaluatorTest {
 
 
     @Test
-    fun `PAUSED 상태면 기본그룹으로 평가한다`() {
+    fun `AB 테스트가 PAUSED 상태면 기본그룹, EXPERIMENT_PAUSED으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Paused>()
+        val experiment = mockk<Experiment.Paused> {
+            every { type } returns Experiment.Type.AB_TEST
+        }
 
         val sut = PausedExperimentEvaluator()
 
@@ -26,6 +28,22 @@ internal class PausedExperimentEvaluatorTest {
 
         // then
         expectThat(actual) isEqualTo Evaluation(null, "B", DecisionReason.EXPERIMENT_PAUSED)
+    }
+
+    @Test
+    fun `기능 플래그가 PAUSED 상태면 기본그룹, FEATURE_FLAG_INACTIVE 로 평가한다`() {
+        // given
+        val experiment = mockk<Experiment.Paused> {
+            every { type } returns Experiment.Type.FEATURE_FLAG
+        }
+
+        val sut = PausedExperimentEvaluator()
+
+        // when
+        val actual = sut.evaluate(mockk(), experiment, mockk(), "A", mockk())
+
+        // then
+        expectThat(actual) isEqualTo Evaluation(null, "A", DecisionReason.FEATURE_FLAG_INACTIVE)
     }
 
     @Test

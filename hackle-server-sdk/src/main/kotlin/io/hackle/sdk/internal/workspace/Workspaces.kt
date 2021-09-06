@@ -48,7 +48,7 @@ internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment
             winnerVariationId = requireNotNull(winnerVariationId)
         )
         else -> {
-            log.warn { "Unknown experiment status [$status]" }
+            log.debug { "Unknown experiment status [$status]" }
             null
         }
     }
@@ -98,7 +98,7 @@ internal fun TargetActionDto.toActionOrNull(): Action? {
         "VARIATION" -> Action.Variation(requireNotNull(variationId))
         "BUCKET" -> Action.Bucket(requireNotNull(bucketId))
         else -> {
-            log.info { "Unsupported action type[$type]. Please use the latest version of sdk" }
+            log.debug { "Unsupported action type[$type]. Please use the latest version of sdk" }
             return null
         }
     }
@@ -115,7 +115,7 @@ internal fun TargetRuleDto.toTargetRuleOrNull(): TargetRule? {
 private inline fun <reified E : Enum<E>> parseEnumOrNull(name: String): E? {
     val enum = enumValueOfOrNull<E>(name)
     if (enum == null) {
-        log.info { "Unsupported type[${E::class.java.name}.$name]. Please use the latest version of sdk." }
+        log.debug { "Unsupported type[${E::class.java.name}.$name]. Please use the latest version of sdk." }
         return null
     }
     return enum

@@ -25,10 +25,10 @@ internal class EvaluationFlowFactoryTest {
     fun `FEATURE_FLAG evaluationFlow`() {
         val actual = EvaluationFlowFactory().getFlow(Experiment.Type.FEATURE_FLAG)
         expectThat(actual)
-            .isDecisionWith<OverrideEvaluator>()
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()
             .isDecisionWith<CompletedExperimentEvaluator>()
+            .isDecisionWith<OverrideEvaluator>()
             .isDecisionWith<TargetRuleEvaluator>()
             .isDecisionWith<DefaultRuleEvaluator>()
             .isA<EvaluationFlow.End>()

@@ -18,13 +18,6 @@ internal sealed class EvaluationFlow {
         }
     }
 
-    operator fun plus(other: EvaluationFlow): EvaluationFlow {
-        return when (this) {
-            is End -> other
-            is Decision -> Decision(flowEvaluator, nextFlow + other)
-        }
-    }
-
     object End : EvaluationFlow()
     class Decision(val flowEvaluator: FlowEvaluator, val nextFlow: EvaluationFlow) : EvaluationFlow()
 
@@ -39,5 +32,3 @@ internal sealed class EvaluationFlow {
         }
     }
 }
-
-

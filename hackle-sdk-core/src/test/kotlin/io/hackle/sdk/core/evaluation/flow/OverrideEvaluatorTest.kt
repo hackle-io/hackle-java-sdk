@@ -16,12 +16,13 @@ import strikt.assertions.isSameInstanceAs
 internal class OverrideEvaluatorTest {
 
     @Test
-    fun `override된 사용자인 경우 overriddenVariation으로 평가한다`() {
+    fun `AbTest 인 경우 override된 사용자인 경우 overriddenVariation, OVERRIDDEN 으로 평가한다`() {
         // given
         val user = User.of("test_id")
         val variation = Variation(320, "B", false)
         val experiment = mockk<Experiment> {
             every { getOverriddenVariationOrNull(user) } returns variation
+            every { type } returns Experiment.Type.AB_TEST
         }
 
         val sut = OverrideEvaluator()
@@ -31,6 +32,25 @@ internal class OverrideEvaluatorTest {
 
         // then
         expectThat(actual) isEqualTo Evaluation(null, "B", DecisionReason.OVERRIDDEN)
+    }
+
+    @Test
+    fun `FeatureFlag 인 경우override된 사용자인 경우 overriddenVariation, INDIVIDUAL_TARGET_MATCH 으로 평가한다`() {
+        // given
+        val user = User.of("test_id")
+        val variation = Variation(320, "B", false)
+        val experiment = mockk<Experiment> {
+            every { getOverriddenVariationOrNull(user) } returns variation
+            every { type } returns Experiment.Type.FEATURE_FLAG
+        }
+
+        val sut = OverrideEvaluator()
+
+        // when
+        val actual = sut.evaluate(mockk(), experiment, user, "C", mockk())
+
+        // then
+        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.INDIVIDUAL_TARGET_MATCH)
     }
 
     @Test

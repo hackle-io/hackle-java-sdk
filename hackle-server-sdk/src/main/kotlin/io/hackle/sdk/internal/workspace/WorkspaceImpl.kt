@@ -5,7 +5,6 @@ import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.Segment
 import io.hackle.sdk.core.workspace.Workspace
 
 /**
@@ -16,7 +15,6 @@ internal class WorkspaceImpl(
     private val featureFlags: Map<Long, Experiment>,
     private val eventTypes: Map<String, EventType>,
     private val buckets: Map<Long, Bucket>,
-    private val segments: Map<Long, Segment>
 ) : Workspace {
 
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
@@ -33,10 +31,6 @@ internal class WorkspaceImpl(
 
     override fun getBucketOrNull(bucketId: Long): Bucket? {
         return buckets[bucketId]
-    }
-
-    override fun getSegmentOrNull(segmentId: Long): Segment? {
-        return segments[segmentId]
     }
 
     companion object {
@@ -63,7 +57,6 @@ internal class WorkspaceImpl(
                 featureFlags = featureFlags,
                 eventTypes = eventTypes,
                 buckets = buckets,
-                segments = emptyMap()
             )
         }
     }

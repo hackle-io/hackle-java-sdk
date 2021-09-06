@@ -43,7 +43,7 @@ internal class EvaluationFlowFactory {
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-            IndividualTargetEvaluator(),
+            OverrideEvaluator(),
             TargetRuleEvaluator(TargetRuleDeterminer(targetMatcher), actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )

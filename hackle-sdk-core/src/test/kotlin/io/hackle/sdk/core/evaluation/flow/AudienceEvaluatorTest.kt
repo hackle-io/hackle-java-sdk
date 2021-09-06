@@ -102,6 +102,6 @@ internal class AudienceEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, User.of("123"), "E", mockk())
 
         // then
-        expectThat(actual) isEqualTo  Evaluation(null, "E", DecisionReason.NOT_IN_AUDIENCE)
+        expectThat(actual) isEqualTo  Evaluation(null, "E", DecisionReason.NOT_IN_EXPERIMENT_TARGET)
     }
 }

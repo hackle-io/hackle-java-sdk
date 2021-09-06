@@ -136,6 +136,6 @@ internal class TargetRuleEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, User.of("154"), "D", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(534, "E", DecisionReason.TARGET_RULE)
+        expectThat(actual) isEqualTo Evaluation(534, "E", DecisionReason.TARGET_RULE_MATCH)
     }
 }
