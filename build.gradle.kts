@@ -69,22 +69,6 @@ subprojects {
         }
         finalizedBy("jacocoTestCoverageVerification")
     }
-
-//    tasks.jacocoTestCoverageVerification {
-//        violationRules {
-//            rule {
-//                limit {
-//                    counter = "BRANCH"
-//                    minimum = "0.85".toBigDecimal()
-//                }
-//
-//                limit {
-//                    counter = "LINE"
-//                    minimum = "0.85".toBigDecimal()
-//                }
-//            }
-//        }
-//    }
 }
 
 /** Configure publishing and signing */

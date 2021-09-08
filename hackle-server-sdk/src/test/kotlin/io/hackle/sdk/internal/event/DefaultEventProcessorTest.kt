@@ -220,7 +220,7 @@ internal class DefaultEventProcessorTest {
             // given
             setDefaultEventProcessor(shutdownTimeoutMillis = 42)
 
-            val consumingTask = mockk<Future<*>>()
+            val consumingTask = mockk<Future<*>>(relaxed = true)
             every { consumingExecutor.submit(any()) } returns consumingTask
 
             every { queue.offer(any(), any(), any()) } returns true
@@ -233,6 +233,24 @@ internal class DefaultEventProcessorTest {
             verify(exactly = 1) {
                 consumingTask.get(42, MILLISECONDS)
             }
+        }
+
+        @Test
+        fun `ConsumingTask 기다리는 동안 타임아웃이 발생하면 무시하고 종료한다`() {
+            // given
+            setDefaultEventProcessor(shutdownTimeoutMillis = 42)
+
+            val consumingTask: Future<*> = CompletableFuture.runAsync { Thread.sleep(100) }
+            every { consumingExecutor.submit(any()) } returns consumingTask
+
+            every { queue.offer(any(), any(), any()) } returns true
+
+            // when
+            sut.start()
+            sut.close()
+
+            //then
+            verify(exactly = 1) { consumingExecutor.shutdownNow() }
         }
 
         @Test

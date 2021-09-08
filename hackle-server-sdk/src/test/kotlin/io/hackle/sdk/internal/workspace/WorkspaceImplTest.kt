@@ -21,37 +21,9 @@ import java.nio.file.Paths
 
 internal class WorkspaceImplTest {
 
-    fun <T : Experiment> Assertion.Builder<T>.identifier(id: Long, key: Long, type: Experiment.Type) =
-        compose("Experiment") {
-            get("Experiment.id") { this.id } isEqualTo id
-            get("Experiment.key") { this.key } isEqualTo key
-            get("Experiment.type") { this.type } isEqualTo type
-        } then {
-            if (allPassed) pass() else fail()
-        }
-
-    fun <T : Experiment> Assertion.Builder<T>.hasVariations(vararg variations: Variation) =
-        assert("Experiment.variations") {
-            val actual = variations.associateBy(Variation::id)
-            if (it.variations == actual) {
-                pass()
-            } else {
-                fail(actual)
-            }
-        }
-
-    fun <T : Experiment> Assertion.Builder<T>.hasOverrides(vararg overrides: Pair<String, Long>) =
-        assert("Experiment.overrides") {
-            val actual = overrides.toMap()
-            if (it.overrides == actual) {
-                pass()
-            } else {
-                fail(actual)
-            }
-        }
 
     @Test
-    fun `worksapce config test`() {
+    fun `workspace config test`() {
         val dto =
             OBJECT_MAPPER.readValue<WorkspaceDto>(Files.readAllBytes(Paths.get("src/test/resources/workspace_config.json")))
 
@@ -422,6 +394,65 @@ internal class WorkspaceImplTest {
         expectThat(workspace.getEventTypeOrNull("d"))
             .isEqualTo(EventType.Custom(3075, "d"))
     }
+
+    @Test
+    fun `Unsupported Type Test`() {
+        val dto =
+            OBJECT_MAPPER.readValue<WorkspaceDto>(Files.readAllBytes(Paths.get("src/test/resources/unsupported_type_workspace_config.json")))
+
+        val workspace = WorkspaceImpl.from(dto)
+
+        expectThat(workspace.getExperimentOrNull(1))
+            .isNotNull()
+            .isA<Experiment.Running>()
+            .and {
+                get { targetAudiences }.hasSize(0)
+                get { targetRules }.hasSize(0)
+            }
+
+        expectThat(workspace.getExperimentOrNull(22))
+            .isNull()
+
+        expectThat(workspace.getExperimentOrNull(23))
+            .isNull()
+
+        expectThat(workspace.getFeatureFlagOrNull(1))
+            .isNotNull()
+            .isA<Experiment.Running>()
+            .and {
+                get { targetAudiences }.hasSize(0)
+                get { targetRules }.hasSize(0)
+            }
+    }
+
+    private fun <T : Experiment> Assertion.Builder<T>.identifier(id: Long, key: Long, type: Experiment.Type) =
+        compose("Experiment") {
+            get("Experiment.id") { this.id } isEqualTo id
+            get("Experiment.key") { this.key } isEqualTo key
+            get("Experiment.type") { this.type } isEqualTo type
+        } then {
+            if (allPassed) pass() else fail()
+        }
+
+    private fun <T : Experiment> Assertion.Builder<T>.hasVariations(vararg variations: Variation) =
+        assert("Experiment.variations") {
+            val actual = variations.associateBy(Variation::id)
+            if (it.variations == actual) {
+                pass()
+            } else {
+                fail(actual)
+            }
+        }
+
+    private fun <T : Experiment> Assertion.Builder<T>.hasOverrides(vararg overrides: Pair<String, Long>) =
+        assert("Experiment.overrides") {
+            val actual = overrides.toMap()
+            if (it.overrides == actual) {
+                pass()
+            } else {
+                fail(actual)
+            }
+        }
 
     private fun Assertion.Builder<Bucket>.slot(startInclusive: Int, endExclusive: Int, variationId: Long) =
         compose("Bucket.getSlotOrNull()") {
