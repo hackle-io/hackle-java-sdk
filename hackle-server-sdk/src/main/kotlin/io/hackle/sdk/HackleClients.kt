@@ -56,8 +56,7 @@ object HackleClients {
             .build()
 
         val httpWorkspaceFetcher = HttpWorkspaceFetcher(
-//            sdkBaseUrl = "https://sdk.hackle.io",
-            sdkBaseUrl = "http://local.hackledev.com:10002",
+            sdkBaseUrl = "https://sdk.hackle.io",
             httpClient = httpClient
         )
 
@@ -70,8 +69,7 @@ object HackleClients {
         )
 
         val eventDispatcher = EventDispatcher(
-//            eventBaseUrl = "https://event.hackle.io",
-            eventBaseUrl = "http://local.hackledev.com:10002",
+            eventBaseUrl = "https://event.hackle.io",
             httpClient = httpClient,
             dispatcherExecutor = PoolingExecutors.newThreadPool(
                 poolSize = 4,
@@ -100,18 +98,4 @@ object HackleClients {
 
         return HackleClientImpl(client = internalClient)
     }
-}
-
-fun main() {
-
-    val client = Hackle.client("wuHHCx5Ym0YQ4TVQOQ5eMBUDirz2MFBO")
-
-    val user = Hackle.user("123") {
-        property("age", 20.0)
-        property("grade", "GOLD")
-    }
-    val variation = client.featureFlagDetail(21, user)
-
-    println(variation)
-
 }
