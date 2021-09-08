@@ -26,7 +26,7 @@ internal class PropertyConditionMatcher(
     }
 }
 
-class ConditionMatcherFactory {
+internal class ConditionMatcherFactory {
 
     private val propertyConditionMatcher: ConditionMatcher
 

@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.target.TargetAudienceDeterminer
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -35,7 +35,7 @@ internal class EvaluationFlowFactory {
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-            AudienceEvaluator(TargetAudienceDeterminer(targetMatcher)),
+            ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             TrafficAllocateEvaluator(actionResolver)
         )
 

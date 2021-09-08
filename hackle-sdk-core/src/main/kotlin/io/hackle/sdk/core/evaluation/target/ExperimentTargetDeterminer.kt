@@ -5,11 +5,11 @@ import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.workspace.Workspace
 
-internal class TargetAudienceDeterminer(
+internal class ExperimentTargetDeterminer(
     private val targetMatcher: TargetMatcher
 ) {
 
-    fun isUserInAudiences(workspace: Workspace, experiment: Experiment.Running, user: User): Boolean {
+    fun isUserInExperimentTarget(workspace: Workspace, experiment: Experiment.Running, user: User): Boolean {
         if (experiment.targetAudiences.isEmpty()) {
             return true
         }

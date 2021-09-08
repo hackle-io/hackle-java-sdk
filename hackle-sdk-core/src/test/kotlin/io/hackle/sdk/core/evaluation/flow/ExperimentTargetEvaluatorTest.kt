@@ -3,7 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
-import io.hackle.sdk.core.evaluation.target.TargetAudienceDeterminer
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -21,14 +21,14 @@ import strikt.assertions.isSameInstanceAs
 import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
-internal class AudienceEvaluatorTest {
+internal class ExperimentTargetEvaluatorTest {
 
     @MockK
-    private lateinit var targetAudienceDeterminer: TargetAudienceDeterminer
+    private lateinit var experimentTargetDeterminer: ExperimentTargetDeterminer
 
 
     @InjectMockKs
-    private lateinit var sut: AudienceEvaluator
+    private lateinit var sut: ExperimentTargetEvaluator
 
 
     @Test
@@ -72,7 +72,7 @@ internal class AudienceEvaluatorTest {
             every { type } returns Experiment.Type.AB_TEST
         }
 
-        every { targetAudienceDeterminer.isUserInAudiences(any(), experiment, any()) } returns true
+        every { experimentTargetDeterminer.isUserInExperimentTarget(any(), experiment, any()) } returns true
 
         val evaluation = mockk<Evaluation>()
         val nextFlow = mockk<EvaluationFlow> {
@@ -96,7 +96,7 @@ internal class AudienceEvaluatorTest {
             every { type } returns Experiment.Type.AB_TEST
         }
 
-        every { targetAudienceDeterminer.isUserInAudiences(any(), experiment, any()) } returns false
+        every { experimentTargetDeterminer.isUserInExperimentTarget(any(), experiment, any()) } returns false
 
         // when
         val actual = sut.evaluate(mockk(), experiment, User.of("123"), "E", mockk())

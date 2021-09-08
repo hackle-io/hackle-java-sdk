@@ -4,7 +4,7 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.target.TargetAudienceDeterminer
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -61,7 +61,6 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
                 AB_TEST -> Evaluation.of(DecisionReason.EXPERIMENT_PAUSED, defaultVariationKey)
                 FEATURE_FLAG -> Evaluation.of(DecisionReason.FEATURE_FLAG_INACTIVE, defaultVariationKey)
             }
-
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -84,8 +83,8 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
     }
 }
 
-internal class AudienceEvaluator(
-    private val targetAudienceDeterminer: TargetAudienceDeterminer
+internal class ExperimentTargetEvaluator(
+    private val experimentTargetDeterminer: ExperimentTargetDeterminer
 ) : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
@@ -97,8 +96,8 @@ internal class AudienceEvaluator(
         require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
         require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
-        val isUserInAudiences = targetAudienceDeterminer.isUserInAudiences(workspace, experiment, user)
-        return if (isUserInAudiences) {
+        val isUserInExperimentTarget = experimentTargetDeterminer.isUserInExperimentTarget(workspace, experiment, user)
+        return if (isUserInExperimentTarget) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
             Evaluation.of(DecisionReason.NOT_IN_EXPERIMENT_TARGET, defaultVariationKey)

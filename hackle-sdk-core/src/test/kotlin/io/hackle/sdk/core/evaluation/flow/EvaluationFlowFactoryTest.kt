@@ -16,7 +16,7 @@ internal class EvaluationFlowFactoryTest {
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()
             .isDecisionWith<CompletedExperimentEvaluator>()
-            .isDecisionWith<AudienceEvaluator>()
+            .isDecisionWith<ExperimentTargetEvaluator>()
             .isDecisionWith<TrafficAllocateEvaluator>()
             .isA<EvaluationFlow.End>()
     }

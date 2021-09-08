@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class TargetAudienceDeterminerTest {
+internal class ExperimentTargetDeterminerTest {
 
     @MockK
     private lateinit var targetMatcher: TargetMatcher
 
     @InjectMockKs
-    private lateinit var sut: TargetAudienceDeterminer
+    private lateinit var sut: ExperimentTargetDeterminer
 
     @Test
     fun `참여대상이 비어있으면 항상 true`() {
@@ -32,7 +32,7 @@ internal class TargetAudienceDeterminerTest {
         }
 
         // when
-        val actual = sut.isUserInAudiences(mockk(), experiment, User.of("test"))
+        val actual = sut.isUserInExperimentTarget(mockk(), experiment, User.of("test"))
 
         // then
         assertTrue(actual)
@@ -51,7 +51,7 @@ internal class TargetAudienceDeterminerTest {
         }
 
         // when
-        val actual = sut.isUserInAudiences(mockk(), experiment, User.of("test"))
+        val actual = sut.isUserInExperimentTarget(mockk(), experiment, User.of("test"))
 
         // then
         assertTrue(actual)
@@ -74,7 +74,7 @@ internal class TargetAudienceDeterminerTest {
         }
 
         // when
-        val actual = sut.isUserInAudiences(mockk(), experiment, User.of("test"))
+        val actual = sut.isUserInExperimentTarget(mockk(), experiment, User.of("test"))
 
         // then
         assertFalse(actual)
