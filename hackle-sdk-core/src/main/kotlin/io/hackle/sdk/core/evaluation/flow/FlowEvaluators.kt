@@ -23,8 +23,8 @@ internal class OverrideEvaluator : FlowEvaluator {
         val overriddenVariation = experiment.getOverriddenVariationOrNull(user)
         return if (overriddenVariation != null) {
             when (experiment.type) {
-                AB_TEST -> Evaluation.of(DecisionReason.OVERRIDDEN, overriddenVariation.key)
-                FEATURE_FLAG -> Evaluation.of(DecisionReason.INDIVIDUAL_TARGET_MATCH, overriddenVariation)
+                AB_TEST -> Evaluation.of(overriddenVariation, DecisionReason.OVERRIDDEN)
+                FEATURE_FLAG -> Evaluation.of(overriddenVariation, DecisionReason.INDIVIDUAL_TARGET_MATCH)
             }
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -41,7 +41,7 @@ internal class DraftExperimentEvaluator : FlowEvaluator {
         nextFlow: EvaluationFlow
     ): Evaluation {
         return if (experiment is Experiment.Draft) {
-            Evaluation.of(DecisionReason.EXPERIMENT_DRAFT, defaultVariationKey)
+            Evaluation.of(experiment, defaultVariationKey, DecisionReason.EXPERIMENT_DRAFT)
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -58,8 +58,9 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
     ): Evaluation {
         return if (experiment is Experiment.Paused) {
             when (experiment.type) {
-                AB_TEST -> Evaluation.of(DecisionReason.EXPERIMENT_PAUSED, defaultVariationKey)
-                FEATURE_FLAG -> Evaluation.of(DecisionReason.FEATURE_FLAG_INACTIVE, defaultVariationKey)
+                AB_TEST -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.EXPERIMENT_PAUSED)
+                FEATURE_FLAG -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.FEATURE_FLAG_INACTIVE)
+
             }
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -76,7 +77,7 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
         nextFlow: EvaluationFlow
     ): Evaluation {
         return if (experiment is Experiment.Completed) {
-            Evaluation.of(DecisionReason.EXPERIMENT_COMPLETED, experiment.winnerVariation.key)
+            Evaluation.of(experiment.winnerVariation, DecisionReason.EXPERIMENT_COMPLETED)
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -100,7 +101,7 @@ internal class ExperimentTargetEvaluator(
         return if (isUserInExperimentTarget) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(DecisionReason.NOT_IN_EXPERIMENT_TARGET, defaultVariationKey)
+            Evaluation.of(experiment, defaultVariationKey, DecisionReason.NOT_IN_EXPERIMENT_TARGET)
         }
     }
 }
@@ -119,13 +120,13 @@ internal class TrafficAllocateEvaluator(
         require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val variation = actionResolver.resolveOrNull(experiment.defaultRule, workspace, experiment, user)
-            ?: return Evaluation.of(DecisionReason.TRAFFIC_NOT_ALLOCATED, defaultVariationKey)
+            ?: return Evaluation.of(experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
 
         if (variation.isDropped) {
-            return Evaluation.of(DecisionReason.VARIATION_DROPPED, defaultVariationKey)
+            return Evaluation.of(experiment, defaultVariationKey, DecisionReason.VARIATION_DROPPED)
         }
 
-        return Evaluation.of(DecisionReason.TRAFFIC_ALLOCATED, variation)
+        return Evaluation.of(variation, DecisionReason.TRAFFIC_ALLOCATED)
     }
 }
 
@@ -150,7 +151,7 @@ internal class TargetRuleEvaluator(
             "FeatureFlag must decide the Variation [${experiment.id}]"
         }
 
-        return Evaluation.of(DecisionReason.TARGET_RULE_MATCH, variation)
+        return Evaluation.of(variation, DecisionReason.TARGET_RULE_MATCH)
     }
 }
 
@@ -172,6 +173,6 @@ internal class DefaultRuleEvaluator(
                 "FeatureFlag must decide the Variation [${experiment.id}]"
             }
 
-        return Evaluation.of(DecisionReason.DEFAULT_RULE, variation)
+        return Evaluation.of(variation, DecisionReason.DEFAULT_RULE)
     }
 }

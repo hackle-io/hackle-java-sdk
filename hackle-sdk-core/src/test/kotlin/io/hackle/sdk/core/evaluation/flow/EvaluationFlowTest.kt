@@ -4,6 +4,7 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Variation
 import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.mockk
@@ -21,8 +22,11 @@ internal class EvaluationFlowTest {
     inner class EvaluateTest {
         @Test
         fun `End는 TRAFFIC_NOT_ALLOCATED + 기본그룹으로 평가됨`() {
-            val evaluation = EvaluationFlow.End.evaluate(mockk(), mockk(), mockk(), "F")
-            expectThat(evaluation) isEqualTo Evaluation.of(DecisionReason.TRAFFIC_NOT_ALLOCATED, "F")
+            val experiment = mockk<Experiment> {
+                every { getVariationOrNull(any<String>()) } returns Variation(42, "F", false)
+            }
+            val evaluation = EvaluationFlow.End.evaluate(mockk(), experiment, mockk(), "F")
+            expectThat(evaluation) isEqualTo Evaluation(42, "F", DecisionReason.TRAFFIC_NOT_ALLOCATED)
         }
 
         @Test

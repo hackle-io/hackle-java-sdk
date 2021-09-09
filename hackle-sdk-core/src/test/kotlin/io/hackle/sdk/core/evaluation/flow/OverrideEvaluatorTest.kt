@@ -31,7 +31,7 @@ internal class OverrideEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, user, "C", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "B", DecisionReason.OVERRIDDEN)
+        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.OVERRIDDEN)
     }
 
     @Test

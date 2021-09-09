@@ -67,6 +67,7 @@ internal class TrafficAllocateEvaluatorTest {
         // given
         val experiment = mockk<Experiment.Running>(relaxed = true) {
             every { type } returns Experiment.Type.AB_TEST
+            every { getVariationOrNull(any<String>()) } returns Variation(42, "G", false)
         }
 
         every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns null
@@ -75,7 +76,7 @@ internal class TrafficAllocateEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, User.of("123"), "G", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "G", DecisionReason.TRAFFIC_NOT_ALLOCATED)
+        expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.TRAFFIC_NOT_ALLOCATED)
     }
 
     @Test
@@ -83,6 +84,7 @@ internal class TrafficAllocateEvaluatorTest {
         // given
         val experiment = mockk<Experiment.Running>(relaxed = true) {
             every { type } returns Experiment.Type.AB_TEST
+            every { getVariationOrNull(any<String>()) } returns Variation(42, "G", false)
         }
 
         val variation = Variation(320, "B", true)
@@ -93,10 +95,9 @@ internal class TrafficAllocateEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, User.of("123"), "G", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "G", DecisionReason.VARIATION_DROPPED)
+        expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.VARIATION_DROPPED)
     }
-
-
+    
     @Test
     fun `할당된 Variation으로 평가한다`() {
         // given

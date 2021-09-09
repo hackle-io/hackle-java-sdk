@@ -13,7 +13,7 @@ internal sealed class EvaluationFlow {
 
     fun evaluate(workspace: Workspace, experiment: Experiment, user: User, defaultVariationKey: String): Evaluation {
         return when (this) {
-            is End -> Evaluation.of(DecisionReason.TRAFFIC_NOT_ALLOCATED, defaultVariationKey)
+            is End -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
             is Decision -> flowEvaluator.evaluate(workspace, experiment, user, defaultVariationKey, nextFlow)
         }
     }

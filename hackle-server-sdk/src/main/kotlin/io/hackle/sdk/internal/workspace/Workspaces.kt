@@ -11,7 +11,7 @@ private val log = Logger<WorkspaceImpl>()
 // Experiment
 internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment? {
 
-    val variations = variations.associate { it.id to it.toVariation() }
+    val variations = variations.map { it.toVariation() }
     val overrides = execution.userOverrides.associate { it.userId to it.variationId }
 
     return when (execution.status) {

@@ -4,6 +4,7 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Variation
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -19,6 +20,7 @@ internal class PausedExperimentEvaluatorTest {
         // given
         val experiment = mockk<Experiment.Paused> {
             every { type } returns Experiment.Type.AB_TEST
+            every { getVariationOrNull(any<String>()) } returns Variation(42, "B", false)
         }
 
         val sut = PausedExperimentEvaluator()
@@ -27,7 +29,7 @@ internal class PausedExperimentEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, mockk(), "B", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "B", DecisionReason.EXPERIMENT_PAUSED)
+        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.EXPERIMENT_PAUSED)
     }
 
     @Test
@@ -35,6 +37,7 @@ internal class PausedExperimentEvaluatorTest {
         // given
         val experiment = mockk<Experiment.Paused> {
             every { type } returns Experiment.Type.FEATURE_FLAG
+            every { getVariationOrNull(any<String>()) } returns Variation(42, "A", false)
         }
 
         val sut = PausedExperimentEvaluator()
@@ -43,7 +46,7 @@ internal class PausedExperimentEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, mockk(), "A", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "A", DecisionReason.FEATURE_FLAG_INACTIVE)
+        expectThat(actual) isEqualTo Evaluation(42, "A", DecisionReason.FEATURE_FLAG_INACTIVE)
     }
 
     @Test

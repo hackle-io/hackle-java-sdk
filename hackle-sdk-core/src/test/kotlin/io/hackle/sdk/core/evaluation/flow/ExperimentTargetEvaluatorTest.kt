@@ -5,6 +5,7 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Variation
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -94,6 +95,7 @@ internal class ExperimentTargetEvaluatorTest {
         // given
         val experiment = mockk<Experiment.Running> {
             every { type } returns Experiment.Type.AB_TEST
+            every { getVariationOrNull(any<String>()) } returns Variation(42, "E", false)
         }
 
         every { experimentTargetDeterminer.isUserInExperimentTarget(any(), experiment, any()) } returns false
@@ -102,6 +104,6 @@ internal class ExperimentTargetEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, User.of("123"), "E", mockk())
 
         // then
-        expectThat(actual) isEqualTo  Evaluation(null, "E", DecisionReason.NOT_IN_EXPERIMENT_TARGET)
+        expectThat(actual) isEqualTo Evaluation(42, "E", DecisionReason.NOT_IN_EXPERIMENT_TARGET)
     }
 }

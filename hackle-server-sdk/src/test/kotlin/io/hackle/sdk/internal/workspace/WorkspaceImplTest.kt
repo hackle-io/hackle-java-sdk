@@ -436,7 +436,7 @@ internal class WorkspaceImplTest {
 
     private fun <T : Experiment> Assertion.Builder<T>.hasVariations(vararg variations: Variation) =
         assert("Experiment.variations") {
-            val actual = variations.associateBy(Variation::id)
+            val actual = variations.toList()
             if (it.variations == actual) {
                 pass()
             } else {

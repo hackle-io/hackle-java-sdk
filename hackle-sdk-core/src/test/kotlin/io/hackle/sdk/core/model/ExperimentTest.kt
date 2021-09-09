@@ -81,9 +81,7 @@ internal class ExperimentTest {
             id = 42,
             key = 320,
             type = Experiment.Type.AB_TEST,
-            variations = variations.associate {
-                it.first.toLong() to Variation(it.first.toLong(), it.second, false)
-            },
+            variations = variations.map { Variation(it.first.toLong(), it.second, false) },
             overrides = overrides
         )
 

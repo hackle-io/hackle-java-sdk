@@ -3,6 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Variation
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -16,14 +17,16 @@ internal class DraftExperimentEvaluatorTest {
     @Test
     fun `DRAFT상태면 기본그룹으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Draft>()
+        val experiment = mockk<Experiment.Draft> {
+            every { getVariationOrNull(any<String>()) } returns Variation(42, "J", false)
+        }
         val sut = DraftExperimentEvaluator()
 
         // when
         val actual = sut.evaluate(mockk(), experiment, mockk(), "J", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "J", DecisionReason.EXPERIMENT_DRAFT)
+        expectThat(actual) isEqualTo Evaluation(42, "J", DecisionReason.EXPERIMENT_DRAFT)
     }
 
     @Test

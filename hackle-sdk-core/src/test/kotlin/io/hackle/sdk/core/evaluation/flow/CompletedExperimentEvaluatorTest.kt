@@ -26,7 +26,7 @@ internal class CompletedExperimentEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, mockk(), "B", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(null, "E", DecisionReason.EXPERIMENT_COMPLETED)
+        expectThat(actual) isEqualTo Evaluation(320, "E", DecisionReason.EXPERIMENT_COMPLETED)
     }
 
     @Test
