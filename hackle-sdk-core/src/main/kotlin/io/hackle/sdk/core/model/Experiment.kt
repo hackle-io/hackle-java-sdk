@@ -52,15 +52,15 @@ sealed class Experiment {
         val winnerVariation: Variation get() = requireNotNull(getVariationOrNull(winnerVariationId)) { "variation[$winnerVariationId]" }
     }
 
-    fun getVariationOrNull(variationId: Long): Variation? {
+    internal fun getVariationOrNull(variationId: Long): Variation? {
         return variations.find { it.id == variationId }
     }
 
-    fun getVariationOrNull(variationKey: String): Variation? {
+    internal fun getVariationOrNull(variationKey: String): Variation? {
         return variations.find { it.key == variationKey }
     }
 
-    fun getOverriddenVariationOrNull(user: User): Variation? {
+    internal fun getOverriddenVariationOrNull(user: User): Variation? {
         val overriddenVariationId = overrides[user.id] ?: return null
         val overriddenVariation = getVariationOrNull(overriddenVariationId)
         return requireNotNull(overriddenVariation) { "experiment[$id] variation[$overriddenVariationId]" }
