@@ -65,7 +65,12 @@ subprojects {
                 name = "MavenCentral"
                 val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
                 val snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-                url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+
+                val snapshotRepoTags = listOf("RC", "SNAPSHOT")
+                val repoUrl =
+                    if (snapshotRepoTags.any { version.toString().contains(it) }) snapshotsRepoUrl else releasesRepoUrl
+
+                url = uri(repoUrl)
                 credentials {
                     username = System.getenv("SONATYPE_USERNAME")
                     password = System.getenv("SONATYPE_PASSWORD")
