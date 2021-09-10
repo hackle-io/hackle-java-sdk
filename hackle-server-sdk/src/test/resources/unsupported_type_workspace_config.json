@@ -1,0 +1,323 @@
+{
+  "workspace": {
+    "id": 1,
+    "environment": {
+      "id": 1,
+      "primary": true
+    }
+  },
+  "experiments": [
+    {
+      "id": 1,
+      "key": 1,
+      "status": "EXECUTED",
+      "bucketId": 1,
+      "variations": [
+        {
+          "id": 1,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 2,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 8634,
+        "status": "RUNNING",
+        "userOverrides": [],
+        "targetAudiences": [
+          {
+            "conditions": [
+              {
+                "key": {
+                  "type": "UNSUPPORTED_TARGET_KEY_TYPE",
+                  "name": "name"
+                },
+                "match": {
+                  "type": "MATCH",
+                  "operator": "IN",
+                  "valueType": "STRING",
+                  "values": [
+                    "hackle"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "key": {
+                  "type": "USER_PROPERTY",
+                  "name": "name"
+                },
+                "match": {
+                  "type": "UNSUPPORTED_MATCH_TYPE",
+                  "operator": "IN",
+                  "valueType": "STRING",
+                  "values": [
+                    "hackle"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "key": {
+                  "type": "USER_PROPERTY",
+                  "name": "name"
+                },
+                "match": {
+                  "type": "MATCH",
+                  "operator": "UNSUPPORTED_OPERATOR",
+                  "valueType": "STRING",
+                  "values": [
+                    "hackle"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "key": {
+                  "type": "USER_PROPERTY",
+                  "name": "name"
+                },
+                "match": {
+                  "type": "MATCH",
+                  "operator": "IN",
+                  "valueType": "UNSUPPORTED_VALUE_TYPE",
+                  "values": [
+                    "hackle"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "targetRules": [],
+        "defaultRule": {
+          "type": "BUCKET",
+          "bucketId": 6100
+        }
+      },
+      "winnerVariationId": null
+    },
+
+    {
+      "id": 22,
+      "key": 22,
+      "status": "EXECUTED",
+      "bucketId": 1,
+      "variations": [
+        {
+          "id": 1,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 2,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 8634,
+        "status": "INVALID_STATUS",
+        "userOverrides": [],
+        "targetAudiences": [],
+        "targetRules": [],
+        "defaultRule": {
+          "type": "BUCKET",
+          "bucketId": 6100
+        }
+      },
+      "winnerVariationId": null
+    },
+
+    {
+      "id": 33,
+      "key": 33,
+      "status": "EXECUTED",
+      "bucketId": 1,
+      "variations": [
+        {
+          "id": 1,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 2,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 8634,
+        "status": "RUNNING",
+        "userOverrides": [],
+        "targetAudiences": [],
+        "targetRules": [],
+        "defaultRule": {
+          "type": "INVALID_TYPE",
+          "bucketId": 6100
+        }
+      },
+      "winnerVariationId": null
+    }
+  ],
+  "featureFlags": [
+    {
+      "id": 2,
+      "key": 1,
+      "status": "EXECUTED",
+      "bucketId": 2,
+      "variations": [
+        {
+          "id": 3,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 8650,
+        "status": "RUNNING",
+        "userOverrides": [],
+        "targetAudiences": [],
+        "targetRules": [
+          {
+            "target": {
+              "conditions": [
+                {
+                  "key": {
+                    "type": "UNSUPPORTED_TYPE",
+                    "name": "key"
+                  },
+                  "match": {
+                    "type": "MATCH",
+                    "operator": "IN",
+                    "valueType": "STRING",
+                    "values": ["value"]
+                  }
+                }
+              ]
+            },
+            "action": {
+              "type": "BUCKET",
+              "bucketId": 6125
+            }
+          },
+
+
+          {
+            "target": {
+              "conditions": [
+                {
+                  "key": {
+                    "type": "USER_PROPERTY",
+                    "name": "key"
+                  },
+                  "match": {
+                    "type": "UNSUPPORTED_TYPE",
+                    "operator": "IN",
+                    "valueType": "STRING",
+                    "values": ["value"]
+                  }
+                }
+              ]
+            },
+            "action": {
+              "type": "BUCKET",
+              "bucketId": 6125
+            }
+          },
+          {
+            "target": {
+              "conditions": [
+                {
+                  "key": {
+                    "type": "USER_PROPERTY",
+                    "name": "key"
+                  },
+                  "match": {
+                    "type": "MATCH",
+                    "operator": "UNSUPPORTED_TYPE",
+                    "valueType": "STRING",
+                    "values": ["value"]
+                  }
+                }
+              ]
+            },
+            "action": {
+              "type": "BUCKET",
+              "bucketId": 6125
+            }
+          },
+          {
+            "target": {
+              "conditions": [
+                {
+                  "key": {
+                    "type": "USER_PROPERTY",
+                    "name": "key"
+                  },
+                  "match": {
+                    "type": "MATCH",
+                    "operator": "IN",
+                    "valueType": "UNSUPPORTED_TYPE",
+                    "values": ["value"]
+                  }
+                }
+              ]
+            },
+            "action": {
+              "type": "BUCKET",
+              "bucketId": 6125
+            }
+          },
+          {
+            "target": {
+              "conditions": [
+                {
+                  "key": {
+                    "type": "USER_PROPERTY",
+                    "name": "key"
+                  },
+                  "match": {
+                    "type": "MATCH",
+                    "operator": "IN",
+                    "valueType": "STRING",
+                    "values": ["value"]
+                  }
+                }
+              ]
+            },
+            "action": {
+              "type": "UNSUPPORTED_TYPE",
+              "bucketId": 6125
+            }
+          }
+        ],
+        "defaultRule": {
+          "type": "BUCKET",
+          "bucketId": 5
+        }
+      },
+      "winnerVariationId": null
+    }
+  ],
+  "buckets": [],
+  "events": []
+}

@@ -28,7 +28,7 @@ class HackleInternalClient internal constructor(
         val experiment =
             workspace.getExperimentOrNull(experimentKey) ?: return Decision.of(defaultVariation, EXPERIMENT_NOT_FOUND)
 
-        val evaluation = evaluator.evaluate(experiment, user, defaultVariation.name)
+        val evaluation = evaluator.evaluate(workspace, experiment, user, defaultVariation.name)
         eventProcessor.process(UserEvent.exposure(experiment, user, evaluation))
 
         return Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
@@ -38,9 +38,9 @@ class HackleInternalClient internal constructor(
 
         val workspace = workspaceFetcher.fetch() ?: return FeatureFlagDecision.off(SDK_NOT_READY)
         val featureFlag =
-            workspace.getFeatureFlagOrNull(featureKey) ?: return FeatureFlagDecision.off(EXPERIMENT_NOT_FOUND)
+            workspace.getFeatureFlagOrNull(featureKey) ?: return FeatureFlagDecision.off(FEATURE_FLAG_NOT_FOUND)
 
-        val evaluation = evaluator.evaluate(featureFlag, user, Variation.CONTROL.name)
+        val evaluation = evaluator.evaluate(workspace, featureFlag, user, Variation.CONTROL.name)
         eventProcessor.process(UserEvent.exposure(featureFlag, user, evaluation))
 
         val variation = Variation.from(evaluation.variationKey)

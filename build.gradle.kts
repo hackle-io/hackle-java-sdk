@@ -3,6 +3,7 @@ plugins {
     `java-library`
     `maven-publish`
     signing
+    jacoco
 }
 
 allprojects {
@@ -18,6 +19,7 @@ subprojects {
     version = "2.0.0"
 
     apply(plugin = "kotlin")
+    apply(plugin = "jacoco")
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
@@ -42,6 +44,30 @@ subprojects {
                 jvmTarget = "1.8"
             }
         }
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
+    tasks.test {
+        extensions.configure(JacocoTaskExtension::class) {
+            setDestinationFile(file("$buildDir/jacoco/jacoco.exec"))
+        }
+
+        finalizedBy("jacocoTestReport")
+    }
+
+    jacoco {
+        toolVersion = "0.8.5"
+    }
+
+    tasks.jacocoTestReport {
+        reports {
+            xml.isEnabled = true
+            html.isEnabled = true
+        }
+        finalizedBy("jacocoTestCoverageVerification")
     }
 }
 

@@ -5,6 +5,7 @@ package io.hackle.sdk.core.internal.log
  */
 interface Logger {
 
+    fun debug(msg: () -> String)
     fun info(msg: () -> String)
     fun warn(msg: () -> String)
     fun error(msg: () -> String)
@@ -16,7 +17,7 @@ interface Logger {
     }
 
     companion object {
-        var factory: Factory = Factory { NoopLogger }
+        var factory: Factory = NoopLogger.Factory
         inline operator fun <reified T> invoke(): Logger = factory.getLogger(T::class.java)
     }
 }
