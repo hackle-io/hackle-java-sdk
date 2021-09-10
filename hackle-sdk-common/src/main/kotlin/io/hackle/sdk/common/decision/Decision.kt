@@ -105,7 +105,6 @@ enum class DecisionReason {
      */
     NOT_IN_EXPERIMENT_TARGET,
 
-
     /**
      * Indicates that no feature flag was found for the feature key provided by the caller.
      */

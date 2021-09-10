@@ -6,6 +6,9 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.TargetRule
 import io.hackle.sdk.core.workspace.Workspace
 
+/**
+ * @author Yong
+ */
 internal class TargetRuleDeterminer(
     private val targetMatcher: TargetMatcher
 ) {

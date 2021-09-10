@@ -5,6 +5,9 @@ import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.workspace.Workspace
 
+/**
+ * @author Yong
+ */
 internal interface FlowEvaluator {
     fun evaluate(
         workspace: Workspace,

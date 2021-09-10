@@ -5,6 +5,9 @@ import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.workspace.Workspace
 
+/**
+ * @author Yong
+ */
 internal class ExperimentTargetDeterminer(
     private val targetMatcher: TargetMatcher
 ) {
