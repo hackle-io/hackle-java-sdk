@@ -1,38 +1,18 @@
 package io.hackle.sdk.core.evaluation
 
 import io.hackle.sdk.common.User
-import io.hackle.sdk.common.decision.DecisionReason.*
+import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.workspace.Workspace
 
+/**
+ * @author Yong
+ */
 internal class Evaluator(
-    private val bucketer: Bucketer,
+    private val evaluationFlowFactory: EvaluationFlowFactory
 ) {
-
-    fun evaluate(experiment: Experiment, user: User, defaultVariationKey: String): Evaluation {
-        val overriddenVariation = experiment.getOverriddenVariationOrNull(user)
-        if (overriddenVariation != null) {
-            return Evaluation.of(OVERRIDDEN, overriddenVariation.key)
-        }
-
-        return when (experiment) {
-            is Experiment.Draft -> Evaluation.of(EXPERIMENT_DRAFT, defaultVariationKey)
-            is Experiment.Running -> evaluate(experiment, user, defaultVariationKey)
-            is Experiment.Paused -> Evaluation.of(EXPERIMENT_PAUSED, defaultVariationKey)
-            is Experiment.Completed -> Evaluation.of(EXPERIMENT_COMPLETED, experiment.winnerVariation.key)
-        }
-    }
-
-    private fun evaluate(runningExperiment: Experiment.Running, user: User, defaultVariationKey: String): Evaluation {
-
-        val allocatedSlot = bucketer.bucketing(runningExperiment.bucket, user)
-            ?: return Evaluation.of(TRAFFIC_NOT_ALLOCATED, defaultVariationKey)
-        val allocatedVariation = runningExperiment.getVariationOrNull(allocatedSlot.variationId)
-            ?: return Evaluation.of(TRAFFIC_NOT_ALLOCATED, defaultVariationKey)
-
-        if (allocatedVariation.isDropped) {
-            return Evaluation.of(VARIATION_DROPPED, defaultVariationKey)
-        }
-
-        return Evaluation.of(TRAFFIC_ALLOCATED, allocatedVariation)
+    fun evaluate(workspace: Workspace, experiment: Experiment, user: User, defaultVariationKey: String): Evaluation {
+        val evaluationFlow = evaluationFlowFactory.getFlow(experiment.type)
+        return evaluationFlow.evaluate(workspace, experiment, user, defaultVariationKey)
     }
 }

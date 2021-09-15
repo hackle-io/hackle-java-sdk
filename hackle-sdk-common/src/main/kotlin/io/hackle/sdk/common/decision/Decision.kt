@@ -56,6 +56,11 @@ enum class DecisionReason {
     SDK_NOT_READY,
 
     /**
+     * Indicates that the variation could not be decided due to an unexpected exception.
+     */
+    EXCEPTION,
+
+    /**
      * Indicates that no experiment was found for the experiment key provided by the caller.
      */
     EXPERIMENT_NOT_FOUND,
@@ -96,7 +101,33 @@ enum class DecisionReason {
     TRAFFIC_ALLOCATED,
 
     /**
-     * Indicates that the variation could not be decided due to an unexpected exception.
+     * Indicates that the user is not the target of the experiment.
      */
-    EXCEPTION,
+    NOT_IN_EXPERIMENT_TARGET,
+
+    /**
+     * Indicates that no feature flag was found for the feature key provided by the caller.
+     */
+    FEATURE_FLAG_NOT_FOUND,
+
+    /**
+     * Indicates that the feature flag is inactive.
+     */
+    FEATURE_FLAG_INACTIVE,
+
+    /**
+     * Indicates that the user is matched to the individual target of the feature flag.
+     */
+    INDIVIDUAL_TARGET_MATCH,
+
+    /**
+     * Indicates that the user is matched to the target rule of the feature flag.
+     */
+    TARGET_RULE_MATCH,
+
+    /**
+     * Indicates that the user did not match any individual targets or target rules.
+     */
+    DEFAULT_RULE,
+
 }

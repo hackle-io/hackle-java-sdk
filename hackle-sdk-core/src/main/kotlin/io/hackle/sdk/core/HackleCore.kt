@@ -1,8 +1,8 @@
 package io.hackle.sdk.core
 
 import io.hackle.sdk.core.client.HackleInternalClient
-import io.hackle.sdk.core.evaluation.Bucketer
 import io.hackle.sdk.core.evaluation.Evaluator
+import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
 
@@ -16,5 +16,11 @@ import io.hackle.sdk.core.workspace.WorkspaceFetcher
  */
 object HackleCore
 
-fun HackleCore.client(workspaceFetcher: WorkspaceFetcher, eventProcessor: EventProcessor): HackleInternalClient =
-    HackleInternalClient(Evaluator(Bucketer()), workspaceFetcher, eventProcessor)
+fun HackleCore.client(workspaceFetcher: WorkspaceFetcher, eventProcessor: EventProcessor): HackleInternalClient {
+    return HackleInternalClient(
+        evaluator = Evaluator(EvaluationFlowFactory()),
+        workspaceFetcher = workspaceFetcher,
+        eventProcessor = eventProcessor
+    )
+}
+
