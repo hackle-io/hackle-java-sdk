@@ -16,3 +16,7 @@ fun Any.tryClose() {
 }
 
 val Any?.safe get() = Unit
+
+inline fun <reified E : Enum<E>> enumValueOfOrNull(name: String): E? {
+    return enumValues<E>().find { it.name == name }
+}

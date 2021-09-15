@@ -8,18 +8,16 @@ import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.Evaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
+import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
-import io.mockk.Called
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -99,7 +97,7 @@ internal class HackleInternalClientTest {
 
             val defaultVariation = J
             val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED)
-            every { evaluator.evaluate(experiment, user, defaultVariation.name) } returns evaluation
+            every { evaluator.evaluate(workspace, experiment, user, defaultVariation.name) } returns evaluation
 
             // when
             val actual = sut.experiment(42, user, defaultVariation)
@@ -153,7 +151,7 @@ internal class HackleInternalClientTest {
 
             //then
             expectThat(actual) {
-                get { reason } isEqualTo EXPERIMENT_NOT_FOUND
+                get { reason } isEqualTo FEATURE_FLAG_NOT_FOUND
                 get { isOn }.isFalse()
             }
             verify { eventProcessor wasNot Called }
@@ -170,7 +168,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
-            every { evaluator.evaluate(featureFlag, user, A.name) } returns evaluation
+            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
             sut.featureFlag(42, user)
@@ -198,7 +196,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
-            every { evaluator.evaluate(featureFlag, user, A.name) } returns evaluation
+            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
             val actual = sut.featureFlag(42, user)
@@ -221,7 +219,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED)
-            every { evaluator.evaluate(featureFlag, user, A.name) } returns evaluation
+            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
             val actual = sut.featureFlag(42, user)
@@ -296,6 +294,24 @@ internal class HackleInternalClientTest {
                         .isSameInstanceAs(eventType)
                 })
             }
+        }
+    }
+
+    @Nested
+    inner class CloseTest {
+
+        @Test
+        fun `workspaceFetcher eventProcessor를 종료한다`() {
+            mockkStatic("io.hackle.sdk.core.internal.utils.AnyKt")
+
+            // when
+            sut.close()
+
+            //then
+            verify(exactly = 1) { workspaceFetcher.tryClose() }
+            verify(exactly = 1) { eventProcessor.tryClose() }
+
+            unmockkStatic("io.hackle.sdk.core.internal.utils.AnyKt")
         }
     }
 }

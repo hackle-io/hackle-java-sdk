@@ -9,7 +9,7 @@ data class Slot(
     val variationId: Long
 ) {
 
-    fun contains(slotNumber: Int): Boolean {
+    internal fun contains(slotNumber: Int): Boolean {
         return (startInclusive <= slotNumber) and (slotNumber < endExclusive)
     }
 }
