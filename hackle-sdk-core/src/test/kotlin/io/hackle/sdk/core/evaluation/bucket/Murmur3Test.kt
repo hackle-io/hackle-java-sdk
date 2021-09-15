@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.evaluation
+package io.hackle.sdk.core.evaluation.bucket
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

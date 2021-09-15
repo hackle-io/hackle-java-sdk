@@ -18,6 +18,7 @@ internal class Slf4jLogger : Logger {
         this.log = LoggerFactory.getLogger(name)
     }
 
+    override fun debug(msg: () -> String) = if (log.isDebugEnabled) log.debug(msg()) else Unit
     override fun info(msg: () -> String) = if (log.isInfoEnabled) log.info(msg()) else Unit
     override fun warn(msg: () -> String) = if (log.isWarnEnabled) log.warn(msg()) else Unit
     override fun error(msg: () -> String) = if (log.isErrorEnabled) log.error(msg()) else Unit
