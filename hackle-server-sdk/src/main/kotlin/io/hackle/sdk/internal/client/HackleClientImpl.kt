@@ -39,11 +39,12 @@ internal class HackleClientImpl(
     }
 
     override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
-        return runCatching { client.experiment(experimentKey, user, defaultVariation) }
-            .getOrElse {
-                log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $it" }
-                Decision.of(defaultVariation, EXCEPTION)
-            }
+        return try {
+            client.experiment(experimentKey, user, defaultVariation)
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $e" }
+            Decision.of(defaultVariation, EXCEPTION)
+        }
     }
 
     override fun isFeatureOn(featureKey: Long, userId: String): Boolean {
@@ -59,11 +60,12 @@ internal class HackleClientImpl(
     }
 
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
-        return runCatching { client.featureFlag(featureKey, user) }
-            .getOrElse {
-                log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $it" }
-                return FeatureFlagDecision.off(EXCEPTION)
-            }
+        return try {
+            client.featureFlag(featureKey, user)
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $e" }
+            return FeatureFlagDecision.off(EXCEPTION)
+        }
     }
 
     override fun track(eventKey: String, userId: String) {
@@ -75,8 +77,11 @@ internal class HackleClientImpl(
     }
 
     override fun track(event: Event, user: User) {
-        runCatching { client.track(event, user) }
-            .onFailure { log.error { "Unexpected exception while tracking event[${event.key}]: $it" } }
+        try {
+            client.track(event, user)
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while tracking event[${event.key}]: $e" }
+        }
     }
 
     override fun close() {
