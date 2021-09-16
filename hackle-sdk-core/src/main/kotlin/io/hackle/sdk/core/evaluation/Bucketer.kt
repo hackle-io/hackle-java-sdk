@@ -3,7 +3,6 @@ package io.hackle.sdk.core.evaluation
 import io.hackle.sdk.common.User
 import io.hackle.sdk.core.model.Bucket
 import io.hackle.sdk.core.model.Slot
-import kotlin.math.absoluteValue
 
 /**
  * @author Yong
@@ -17,6 +16,6 @@ internal class Bucketer {
 
     fun calculateSlotNumber(seed: Int, slotSize: Int, value: String): Int {
         val hashValue = Murmur3.murmurhash3_x86_32(value, seed)
-        return hashValue.absoluteValue % slotSize
+        return Math.abs(hashValue) % slotSize
     }
 }
