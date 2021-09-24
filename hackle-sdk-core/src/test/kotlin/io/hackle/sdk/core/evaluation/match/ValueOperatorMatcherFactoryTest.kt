@@ -12,6 +12,7 @@ internal class ValueOperatorMatcherFactoryTest {
         assertEquals(StringMatcher, ValueOperatorMatcherFactory().getValueMatcher(STRING))
         assertEquals(NumberMatcher, ValueOperatorMatcherFactory().getValueMatcher(NUMBER))
         assertEquals(BooleanMatcher, ValueOperatorMatcherFactory().getValueMatcher(BOOLEAN))
+        assertEquals(VersionMatcher, ValueOperatorMatcherFactory().getValueMatcher(VERSION))
     }
 
     @Test
