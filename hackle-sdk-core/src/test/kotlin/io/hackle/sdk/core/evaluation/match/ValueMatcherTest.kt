@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.model.Version
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
@@ -145,7 +146,7 @@ internal class ValueMatcherTest {
         }
 
         @Test
-        fun `userValue가 Number타입이 아니면 false`() {
+        fun `userValue가 Boolean타입이 아니면 false`() {
             // given
             val userValue = "false"
             val matchValue = false
@@ -162,13 +163,69 @@ internal class ValueMatcherTest {
         }
 
         @Test
-        fun `userValue가 Number타입이지만 matchValue가 Number타입이 아니면 false`() {
+        fun `userValue가 Boolean타입이지만 matchValue가 Boolean타입이 아니면 false`() {
             // given
             val userValue = false
             val matchValue = "false"
             val operatorMatcher = mockk<OperatorMatcher>()
 
             val sut = BooleanMatcher
+
+            // when
+            val actual = sut.matches(operatorMatcher, userValue, matchValue)
+
+            // then
+            assertFalse(actual)
+            verify { operatorMatcher wasNot Called }
+        }
+    }
+
+    @Nested
+    inner class VersionMatcherTest {
+
+        @Test
+        fun `userValue, matchValue가 Version타입이면 OperatorMatcher의 일치 결과로 평가한다`() {
+            // given
+            val userValue = "1.0.0"
+            val matchValue = "2.0.0"
+            val operatorMatcher = mockk<OperatorMatcher> {
+                every { matches(any<Version>(), any<Version>()) } returns true
+            }
+
+            val sut = VersionMatcher
+
+            // when
+            val actual = sut.matches(operatorMatcher, userValue, matchValue)
+
+            // then
+            assertTrue(actual)
+        }
+
+        @Test
+        fun `userValue가 Version타입이 아니면 false`() {
+            // given
+            val userValue = 1
+            val matchValue = "1.0.0"
+            val operatorMatcher = mockk<OperatorMatcher>()
+
+            val sut = VersionMatcher
+
+            // when
+            val actual = sut.matches(operatorMatcher, userValue, matchValue)
+
+            // then
+            assertFalse(actual)
+            verify { operatorMatcher wasNot Called }
+        }
+
+        @Test
+        fun `userValue가 Versio타입이지만 matchValue가 Versio타입이 아니면 false`() {
+            // given
+            val userValue = "1.0.0"
+            val matchValue = 1
+            val operatorMatcher = mockk<OperatorMatcher>()
+
+            val sut = VersionMatcher
 
             // when
             val actual = sut.matches(operatorMatcher, userValue, matchValue)
