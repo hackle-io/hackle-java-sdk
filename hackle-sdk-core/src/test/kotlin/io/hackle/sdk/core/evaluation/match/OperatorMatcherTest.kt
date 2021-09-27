@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.model.Version
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -36,6 +37,12 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
         }
+
+        @Test
+        fun `version`() {
+            assertTrue(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+        }
     }
 
     @Nested
@@ -67,6 +74,12 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
         }
+
+        @Test
+        fun `version`() {
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+        }
     }
 
     @Nested
@@ -94,6 +107,12 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = false, matchValue = false))
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
+        }
+
+        @Test
+        fun `version`() {
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
         }
     }
 
@@ -124,6 +143,12 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
         }
+
+        @Test
+        fun `version`() {
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+        }
     }
 
     @Nested
@@ -152,6 +177,13 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = false, matchValue = false))
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
+        }
+
+        @Test
+        fun `version`() {
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+            assertTrue(sut.matches(userValue = v("2.0.0"), matchValue = v("1.0.0")))
         }
     }
 
@@ -182,6 +214,13 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
         }
+
+        @Test
+        fun `version`() {
+            assertTrue(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+            assertTrue(sut.matches(userValue = v("2.0.0"), matchValue = v("1.0.0")))
+        }
     }
 
     @Nested
@@ -210,6 +249,13 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = false, matchValue = false))
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
+        }
+
+        @Test
+        fun `version`() {
+            assertFalse(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertTrue(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+            assertFalse(sut.matches(userValue = v("2.0.0"), matchValue = v("1.0.0")))
         }
     }
 
@@ -240,5 +286,14 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = true, matchValue = false))
             assertFalse(sut.matches(userValue = false, matchValue = true))
         }
+
+        @Test
+        fun `version`() {
+            assertTrue(sut.matches(userValue = v("1.0.0"), matchValue = v("1.0.0")))
+            assertTrue(sut.matches(userValue = v("1.0.0"), matchValue = v("2.0.0")))
+            assertFalse(sut.matches(userValue = v("2.0.0"), matchValue = v("1.0.0")))
+        }
     }
+
+    private fun v(version: String): Version = Version.parseOrNull(version)!!
 }
