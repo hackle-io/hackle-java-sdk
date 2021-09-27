@@ -49,11 +49,11 @@ internal class Version private constructor(
 
         private val PATTERN: Pattern =
             Pattern.compile(
-                "^(?<major>0|[1-9]\\d*)" +
-                    "(?:\\.(?<minor>0|[1-9]\\d*))?" +
-                    "(?:\\.(?<patch>0|[1-9]\\d*))?" +
-                    "(?:-(?<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?" +
-                    "(?:\\+(?<build>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?\$"
+                "^(0|[1-9]\\d*)" +
+                    "(?:\\.(0|[1-9]\\d*))?" +
+                    "(?:\\.(0|[1-9]\\d*))?" +
+                    "(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?" +
+                    "(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?\$"
             )
 
         fun parseOrNull(version: String): Version? {
@@ -62,13 +62,13 @@ internal class Version private constructor(
                 return null
             }
 
-            val major: Int = matcher.group("major").toInt()
-            val minor: Int = matcher.group("minor")?.toInt() ?: 0
-            val patch: Int = matcher.group("patch")?.toInt() ?: 0
+            val major: Int = matcher.group(1).toInt()
+            val minor: Int = matcher.group(2)?.toInt() ?: 0
+            val patch: Int = matcher.group(3)?.toInt() ?: 0
 
             val coreVersion = CoreVersion(major, minor, patch)
-            val prerelease = MetadataVersion.parse(matcher.group("prerelease"))
-            val build = MetadataVersion.parse(matcher.group("build"))
+            val prerelease = MetadataVersion.parse(matcher.group(4))
+            val build = MetadataVersion.parse(matcher.group(5))
 
             return Version(coreVersion, prerelease, build)
         }
