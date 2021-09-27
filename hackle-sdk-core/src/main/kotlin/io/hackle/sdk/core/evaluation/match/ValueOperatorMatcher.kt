@@ -28,6 +28,7 @@ internal class ValueOperatorMatcherFactory {
             Target.Match.ValueType.STRING -> StringMatcher
             Target.Match.ValueType.NUMBER -> NumberMatcher
             Target.Match.ValueType.BOOLEAN -> BooleanMatcher
+            Target.Match.ValueType.VERSION -> VersionMatcher
         }
     }
 

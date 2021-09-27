@@ -35,13 +35,13 @@ data class Target(
             GTE,
             LT,
             LTE,
-            ;
         }
 
         enum class ValueType {
             STRING,
             NUMBER,
             BOOLEAN,
+            VERSION,
         }
     }
 }
