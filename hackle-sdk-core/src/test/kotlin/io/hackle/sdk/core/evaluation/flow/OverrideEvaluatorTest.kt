@@ -1,9 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
 import io.mockk.every
 import io.mockk.mockk
@@ -18,7 +18,7 @@ internal class OverrideEvaluatorTest {
     @Test
     fun `AbTest 인 경우 override된 사용자인 경우 overriddenVariation, OVERRIDDEN 으로 평가한다`() {
         // given
-        val user = User.of("test_id")
+        val user = HackleUser.of("test_id")
         val variation = Variation(320, "B", false)
         val experiment = mockk<Experiment> {
             every { getOverriddenVariationOrNull(user) } returns variation
@@ -37,7 +37,7 @@ internal class OverrideEvaluatorTest {
     @Test
     fun `FeatureFlag 인 경우override된 사용자인 경우 overriddenVariation, INDIVIDUAL_TARGET_MATCH 으로 평가한다`() {
         // given
-        val user = User.of("test_id")
+        val user = HackleUser.of("test_id")
         val variation = Variation(320, "B", false)
         val experiment = mockk<Experiment> {
             every { getOverriddenVariationOrNull(user) } returns variation
@@ -56,7 +56,7 @@ internal class OverrideEvaluatorTest {
     @Test
     fun `override된 사용자가 아닌경우 다음 Flow로 평가한다`() {
         // given
-        val user = User.of("test_id")
+        val user = HackleUser.of("test_id")
         val experiment = mockk<Experiment> {
             every { getOverriddenVariationOrNull(user) } returns null
         }

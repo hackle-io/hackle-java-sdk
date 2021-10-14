@@ -1,9 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
 import io.mockk.every
 import io.mockk.mockk
@@ -61,7 +61,7 @@ internal class PausedExperimentEvaluatorTest {
         val sut = PausedExperimentEvaluator()
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, User.of("test_id"), "D", nextFlow)
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("test_id"), "D", nextFlow)
 
         // then
         expectThat(actual) isSameInstanceAs evaluation

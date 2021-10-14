@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 /**
@@ -12,7 +12,7 @@ internal interface FlowEvaluator {
     fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation
