@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation.target
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -32,7 +32,7 @@ internal class ExperimentTargetDeterminerTest {
         }
 
         // when
-        val actual = sut.isUserInExperimentTarget(mockk(), experiment, User.of("test"))
+        val actual = sut.isUserInExperimentTarget(mockk(), experiment, HackleUser.of("test"))
 
         // then
         assertTrue(actual)
@@ -51,7 +51,7 @@ internal class ExperimentTargetDeterminerTest {
         }
 
         // when
-        val actual = sut.isUserInExperimentTarget(mockk(), experiment, User.of("test"))
+        val actual = sut.isUserInExperimentTarget(mockk(), experiment, HackleUser.of("test"))
 
         // then
         assertTrue(actual)
@@ -74,7 +74,7 @@ internal class ExperimentTargetDeterminerTest {
         }
 
         // when
-        val actual = sut.isUserInExperimentTarget(mockk(), experiment, User.of("test"))
+        val actual = sut.isUserInExperimentTarget(mockk(), experiment, HackleUser.of("test"))
 
         // then
         assertFalse(actual)

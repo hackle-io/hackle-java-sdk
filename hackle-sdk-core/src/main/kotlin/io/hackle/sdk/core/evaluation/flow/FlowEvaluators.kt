@@ -1,6 +1,5 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
@@ -9,13 +8,14 @@ import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class OverrideEvaluator : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -36,7 +36,7 @@ internal class DraftExperimentEvaluator : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -52,7 +52,7 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -72,7 +72,7 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -90,7 +90,7 @@ internal class ExperimentTargetEvaluator(
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -112,7 +112,7 @@ internal class TrafficAllocateEvaluator(
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -137,7 +137,7 @@ internal class TargetRuleEvaluator(
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
@@ -161,7 +161,7 @@ internal class DefaultRuleEvaluator(
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
-        user: User,
+        user: HackleUser,
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {

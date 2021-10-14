@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation.*
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.Evaluation
@@ -11,6 +10,7 @@ import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
 import io.mockk.*
@@ -53,7 +53,7 @@ internal class HackleInternalClientTest {
             val defaultVariation = J
 
             // when
-            val actual = sut.experiment(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.experiment(42, HackleUser.of("TEST_USER_ID"), defaultVariation)
 
             //then
             expectThat(actual) {
@@ -75,7 +75,7 @@ internal class HackleInternalClientTest {
             val defaultVariation = J
 
             // when
-            val actual = sut.experiment(42, User.of("TEST_USER_ID"), defaultVariation)
+            val actual = sut.experiment(42, HackleUser.of("TEST_USER_ID"), defaultVariation)
 
             //then
             expectThat(actual) {
@@ -88,7 +88,7 @@ internal class HackleInternalClientTest {
         @Test
         fun `평가 결과로 노출 이벤트를 전송하고 평가된 결과로 결정한다`() {
             // given
-            val user = User.of("TEST_USER_ID")
+            val user = HackleUser.of("TEST_USER_ID")
             val experiment = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns experiment
@@ -127,7 +127,7 @@ internal class HackleInternalClientTest {
 
 
             // when
-            val actual = sut.featureFlag(42, User.of("TEST_USER_ID"))
+            val actual = sut.featureFlag(42, HackleUser.of("TEST_USER_ID"))
 
             //then
             expectThat(actual) {
@@ -147,7 +147,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             // when
-            val actual = sut.featureFlag(42, User.of("TEST_USER_ID"))
+            val actual = sut.featureFlag(42, HackleUser.of("TEST_USER_ID"))
 
             //then
             expectThat(actual) {
@@ -160,7 +160,7 @@ internal class HackleInternalClientTest {
         @Test
         fun `평가 결과 이벤트를 전송한다`() {
             // given
-            val user = User.of("TEST_USER_ID")
+            val user = HackleUser.of("TEST_USER_ID")
             val featureFlag = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
@@ -188,7 +188,7 @@ internal class HackleInternalClientTest {
         @Test
         fun `평가 결과 Control 그룹이면 off로 결정한다`() {
             // given
-            val user = User.of("TEST_USER_ID")
+            val user = HackleUser.of("TEST_USER_ID")
             val featureFlag = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
@@ -211,7 +211,7 @@ internal class HackleInternalClientTest {
         @Test
         fun `평가 결과가 Control 그룹이 아니면 on으로 결정한다 `() {
             // given
-            val user = User.of("TEST_USER_ID")
+            val user = HackleUser.of("TEST_USER_ID")
             val featureFlag = mockk<Experiment>()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
@@ -242,7 +242,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns null
 
             // when
-            sut.track(Event.of("test_event_key"), User.of("TEST_USER_ID"))
+            sut.track(Event.of("test_event_key"), HackleUser.of("TEST_USER_ID"))
 
             //then
             verify { eventProcessor wasNot Called }
@@ -257,7 +257,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             // when
-            sut.track(Event.of("undefined_event_key"), User.of("TEST_USER_ID"))
+            sut.track(Event.of("undefined_event_key"), HackleUser.of("TEST_USER_ID"))
 
             //then
             verify(exactly = 1) {
@@ -284,7 +284,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             // when
-            sut.track(Event.of("custom_event_key"), User.of("TEST_USER_ID"))
+            sut.track(Event.of("custom_event_key"), HackleUser.of("TEST_USER_ID"))
 
             //then
             verify(exactly = 1) {

@@ -1,6 +1,5 @@
 package io.hackle.sdk.core.model
 
-import io.hackle.sdk.common.User
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -43,7 +42,7 @@ internal class ExperimentTest {
                 overrides = emptyMap()
             )
 
-            val variation = experiment.getOverriddenVariationOrNull(User.of("test"))
+            val variation = experiment.getOverriddenVariationOrNull(HackleUser.of("test"))
             expectThat(variation).isNull()
         }
 
@@ -57,7 +56,7 @@ internal class ExperimentTest {
 
             // when
             val exception = assertThrows<IllegalArgumentException> {
-                experiment.getOverriddenVariationOrNull(User.of("test_id"))
+                experiment.getOverriddenVariationOrNull(HackleUser.of("test_id"))
             }
 
             // then
@@ -75,7 +74,7 @@ internal class ExperimentTest {
             )
 
             // when
-            val variation = experiment.getOverriddenVariationOrNull(User.of("test_id"))
+            val variation = experiment.getOverriddenVariationOrNull(HackleUser.of("test_id"))
 
             // then
             expectThat(variation)
