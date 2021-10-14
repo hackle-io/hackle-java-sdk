@@ -1,10 +1,10 @@
 package io.hackle.sdk.core.evaluation
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -41,7 +41,7 @@ internal class EvaluatorTest {
 
         val workspace = mockk<Workspace>()
         val experiment = mockk<Experiment> { every { type } returns Experiment.Type.AB_TEST }
-        val user = User.of("test_id")
+        val user = HackleUser.of("test_id")
 
         // when
         val actual = sut.evaluate(workspace, experiment, user, "J")

@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.bucket
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.model.Bucket
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Slot
 
 /**
@@ -9,7 +9,7 @@ import io.hackle.sdk.core.model.Slot
  */
 internal class Bucketer {
 
-    fun bucketing(bucket: Bucket, user: User): Slot? {
+    fun bucketing(bucket: Bucket, user: HackleUser): Slot? {
         val slotNumber = calculateSlotNumber(seed = bucket.seed, slotSize = bucket.slotSize, value = user.id)
         return bucket.getSlotOrNull(slotNumber)
     }

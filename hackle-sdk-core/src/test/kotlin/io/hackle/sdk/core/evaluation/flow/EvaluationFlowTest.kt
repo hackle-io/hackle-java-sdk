@@ -1,9 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
 import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
@@ -34,7 +34,7 @@ internal class EvaluationFlowTest {
             // given
             val workspace = mockk<Workspace>()
             val experiment = mockk<Experiment>()
-            val user = mockk<User>()
+            val user = mockk<HackleUser>()
 
             val evaluation = mockk<Evaluation>()
             val nextFlow = mockk<EvaluationFlow>()
