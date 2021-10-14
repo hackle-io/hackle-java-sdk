@@ -1,6 +1,5 @@
 package io.hackle.sdk.core.evaluation.action
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.workspace.Workspace
@@ -86,7 +85,7 @@ internal class ActionResolverTest {
 
             // when
             val exception = assertThrows<IllegalArgumentException> {
-                sut.resolveOrNull(action, workspace, mockk(), User.of("test_id"))
+                sut.resolveOrNull(action, workspace, mockk(), HackleUser.of("test_id"))
             }
 
             // then
@@ -98,7 +97,7 @@ internal class ActionResolverTest {
         @Test
         fun `슬롯에 할당 안된 사용자는 null을 리턴한다`() {
             // given
-            val user = User.of("test_id")
+            val user = HackleUser.of("test_id")
             val action = Action.Bucket(42)
             val bucket = mockk<Bucket>()
             val workspace = mockk<Workspace> {
@@ -116,7 +115,7 @@ internal class ActionResolverTest {
         @Test
         fun `슬롯에 할당되었지만 슬롯의 variationId에 해당하는 Variation이 Experiment에 없으면 null리턴`() {
             // given
-            val user = User.of("test_id")
+            val user = HackleUser.of("test_id")
             val action = Action.Bucket(42)
             val bucket = mockk<Bucket>()
             val workspace = mockk<Workspace> {
@@ -138,7 +137,7 @@ internal class ActionResolverTest {
         @Test
         fun `버켓팅을 통해 할당된 Variaiton리턴`() {
             // given
-            val user = User.of("test_id")
+            val user = HackleUser.of("test_id")
             val action = Action.Bucket(42)
             val bucket = mockk<Bucket>()
             val workspace = mockk<Workspace> {

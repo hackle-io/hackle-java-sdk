@@ -1,7 +1,5 @@
 package io.hackle.sdk.core.model
 
-import io.hackle.sdk.common.User
-
 /**
  * @author Yong
  */
@@ -60,7 +58,7 @@ sealed class Experiment {
         return variations.find { it.key == variationKey }
     }
 
-    internal fun getOverriddenVariationOrNull(user: User): Variation? {
+    internal fun getOverriddenVariationOrNull(user: HackleUser): Variation? {
         val overriddenVariationId = overrides[user.id] ?: return null
         val overriddenVariation = getVariationOrNull(overriddenVariationId)
         return requireNotNull(overriddenVariation) { "experiment[$id] variation[$overriddenVariationId]" }

@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation.target
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.TargetRule
 import io.mockk.every
@@ -40,7 +40,7 @@ internal class TargetRuleDeterminerTest {
         }
 
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, User.of("test"))
+        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, HackleUser.of("test"))
 
         // then
         expectThat(actual)
@@ -65,7 +65,7 @@ internal class TargetRuleDeterminerTest {
         }
 
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, User.of("test"))
+        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, HackleUser.of("test"))
 
         // then
         expectThat(actual)

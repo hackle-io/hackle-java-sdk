@@ -1,10 +1,10 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -73,7 +73,7 @@ internal class TrafficAllocateEvaluatorTest {
         every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns null
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, User.of("123"), "G", mockk())
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
 
         // then
         expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.TRAFFIC_NOT_ALLOCATED)
@@ -92,12 +92,12 @@ internal class TrafficAllocateEvaluatorTest {
         every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns variation
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, User.of("123"), "G", mockk())
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
 
         // then
         expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.VARIATION_DROPPED)
     }
-    
+
     @Test
     fun `할당된 Variation으로 평가한다`() {
         // given
@@ -110,7 +110,7 @@ internal class TrafficAllocateEvaluatorTest {
         every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns variation
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, User.of("123"), "G", mockk())
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
 
         // then
         expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.TRAFFIC_ALLOCATED)

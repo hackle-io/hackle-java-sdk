@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.Bucket
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Slot
 import io.mockk.every
 import io.mockk.mockk
@@ -38,7 +38,7 @@ internal class BucketerTest {
             val slotNumber = 5123
             every { sut.calculateSlotNumber(1, 10000, userId) } returns slotNumber
 
-            val user = User.of(userId)
+            val user = HackleUser.of(userId)
 
             // when
             val actual = sut.bucketing(bucket, user)

@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 /**
@@ -11,7 +11,12 @@ import io.hackle.sdk.core.workspace.Workspace
 internal class Evaluator(
     private val evaluationFlowFactory: EvaluationFlowFactory
 ) {
-    fun evaluate(workspace: Workspace, experiment: Experiment, user: User, defaultVariationKey: String): Evaluation {
+    fun evaluate(
+        workspace: Workspace,
+        experiment: Experiment,
+        user: HackleUser,
+        defaultVariationKey: String
+    ): Evaluation {
         val evaluationFlow = evaluationFlowFactory.getFlow(experiment.type)
         return evaluationFlow.evaluate(workspace, experiment, user, defaultVariationKey)
     }

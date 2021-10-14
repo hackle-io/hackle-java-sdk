@@ -1,6 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.common.User
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -31,7 +31,7 @@ internal class PropertyConditionMatcherTest {
         }
 
         // when
-        val actual = sut.matches(condition, mockk(), User.of("1"))
+        val actual = sut.matches(condition, mockk(), HackleUser.of("1"))
 
         // then
         assertFalse(actual)
@@ -44,9 +44,8 @@ internal class PropertyConditionMatcherTest {
             every { key } returns Target.Key(Target.Key.Type.USER_PROPERTY, "age")
         }
 
-
         // when
-        val actual = sut.matches(condition, mockk(), User.of("1"))
+        val actual = sut.matches(condition, mockk(), HackleUser.of("1"))
 
         // then
         assertFalse(actual)
@@ -61,8 +60,9 @@ internal class PropertyConditionMatcherTest {
             every { this@mockk.match } returns match
         }
 
-        val user = User.builder("13").property("age", 30).build()
-
+        val user = HackleUser.of(
+            io.hackle.sdk.common.User.builder("13").property("age", 30).build()
+        )
 
         every { valueOperatorMatcher.matches(any(), any()) } returns true
 
@@ -73,6 +73,49 @@ internal class PropertyConditionMatcherTest {
         assertTrue(actual)
         verify {
             valueOperatorMatcher.matches(30, match)
+        }
+    }
+
+    @Test
+    fun `HACKLE_PROPERTY 에 해당하는 값이 없는 경우 match false`() {
+        // given
+        val match = mockk<Target.Match>()
+        val condition = mockk<Target.Condition> {
+            every { key } returns Target.Key(Target.Key.Type.HACKLE_PROPERTY, "platform")
+            every { this@mockk.match } returns match
+        }
+
+        // when
+        val actual = sut.matches(condition, mockk(), HackleUser.of("1"))
+
+        // then
+        assertFalse(actual)
+    }
+
+    @Test
+    fun `HACKLE_PROPERTY 에 해당하는 속성값을 가져와서 valueOperator 로 매칭한다`() {
+        // given
+        val match = mockk<Target.Match>()
+        val condition = mockk<Target.Condition> {
+            every { key } returns Target.Key(Target.Key.Type.HACKLE_PROPERTY, "platform")
+            every { this@mockk.match } returns match
+        }
+
+        val user = HackleUser(
+            id = "test_id",
+            properties = emptyMap(),
+            hackleProperties = mapOf("platform" to "Web")
+        )
+
+        every { valueOperatorMatcher.matches(any(), any()) } returns true
+
+        // when
+        val actual = sut.matches(condition, mockk(), user)
+
+        // then
+        assertTrue(actual)
+        verify(exactly = 1) {
+            valueOperatorMatcher.matches("Web", match)
         }
     }
 }

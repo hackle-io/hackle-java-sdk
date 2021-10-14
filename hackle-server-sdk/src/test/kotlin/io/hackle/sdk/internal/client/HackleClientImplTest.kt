@@ -4,24 +4,26 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
-import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
-import io.hackle.sdk.common.decision.DecisionReason.TRAFFIC_ALLOCATED
+import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.utils.tryClose
-import io.mockk.*
+import io.hackle.sdk.core.model.HackleUser
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isFalse
 import strikt.assertions.isSameInstanceAs
 import strikt.assertions.isTrue
+
 
 /**
  * @author Yong
@@ -37,49 +39,106 @@ internal class HackleClientImplTest {
     private lateinit var sut: HackleClientImpl
 
     @Nested
-    inner class Variations {
+    inner class VariationTest {
 
         @Test
-        fun `Control Variation을 전달한다`() {
+        fun `key, userId`() {
             // given
-            val spy = spyk(sut)
-
-            val decision = mockk<Decision>()
-            every { spy.variationDetail(any(), any(), any()) } returns decision
-
-            val user = User.of("test_user_id")
+            every { client.experiment(any(), any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
 
             // when
-            val actual = spy.variationDetail(320L, user)
+            val actual = sut.variation(42, "42")
 
-            //then
-            expectThat(actual) isSameInstanceAs decision
+            // then
+            expectThat(actual) isEqualTo Variation.G
             verify(exactly = 1) {
-                spy.variationDetail(320, user, Variation.CONTROL)
+                client.experiment(42, HackleUser.of("42"), Variation.A)
             }
         }
 
         @Test
-        fun `internalClient 한테 입력을 그대로 전달하고 리턴받은 값을 바로 리턴한다`() {
+        fun `key, user`() {
             // given
-            val experimentKey = 320L
-            val user = mockk<User>()
-            val defaultVariation = mockk<Variation>()
-            val decision = mockk<Decision>()
-
-            every { client.experiment(experimentKey, user, defaultVariation) } returns decision
+            every { client.experiment(any(), any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            val user = User.of("42")
 
             // when
-            val actual = sut.variationDetail(experimentKey, user, defaultVariation)
+            val actual = sut.variation(42, user)
+
+            // then
+            expectThat(actual) isEqualTo Variation.G
+            verify(exactly = 1) {
+                client.experiment(42, HackleUser.of(user), Variation.A)
+            }
+        }
+
+        @Test
+        fun `key, user, defaultVariation`() {
+            // given
+            every { client.experiment(any(), any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            val user = User.of("42")
+
+            // when
+            val actual = sut.variation(42, user, Variation.C)
+
+            // then
+            expectThat(actual) isEqualTo Variation.G
+            verify(exactly = 1) {
+                client.experiment(42, HackleUser.of(user), Variation.C)
+            }
+        }
+    }
+
+    @Nested
+    inner class VariationDetailTest {
+
+        @Test
+        fun `key, userId`() {
+            // given
+            val decision = Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            every { client.experiment(any(), any(), any()) } returns decision
+
+            // when
+            val actual = sut.variationDetail(42, "42")
+
+            // then
+            expectThat(actual) isSameInstanceAs decision
+            verify(exactly = 1) {
+                client.experiment(42, HackleUser.of("42"), Variation.A)
+            }
+        }
+
+        @Test
+        fun `key, user`() {
+            // given
+            val decision = Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            every { client.experiment(any(), any(), any()) } returns decision
+            val user = User.of("42")
+
+            // when
+            val actual = sut.variationDetail(42, user)
+
+            // then
+            expectThat(actual) isSameInstanceAs decision
+            verify(exactly = 1) {
+                client.experiment(42, HackleUser.of(user), Variation.A)
+            }
+        }
+
+        @Test
+        fun `internalClient 의 experiment 를 호출하고 리턴받은 값을 바로 리턴한다`() {
+            // given
+            val user = User.of("42")
+            val decision = Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            every { client.experiment(any(), any(), any()) } returns decision
+
+            // when
+            val actual = sut.variationDetail(42L, user, Variation.J)
 
             //then
             expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                client.experiment(
-                    experimentKey = withArg { expectThat(it) isEqualTo 320L },
-                    user = withArg { expectThat(it) isSameInstanceAs user },
-                    defaultVariation = withArg { expectThat(it) isSameInstanceAs defaultVariation }
-                )
+                client.experiment(42L, io.hackle.sdk.core.model.HackleUser.of("42"), Variation.J)
             }
         }
 
@@ -91,85 +150,134 @@ internal class HackleClientImplTest {
             val defaultVariation = Variation.I
 
             // when
-            val actual = sut.variationDetail(320L, User.of("test_user_id"), defaultVariation)
+            val actual = sut.variationDetail(42, User.of("42"), defaultVariation)
 
             //then
             expectThat(actual) {
-                get { reason } isEqualTo DecisionReason.EXCEPTION
+                get { reason } isEqualTo EXCEPTION
                 get { variation } isSameInstanceAs defaultVariation
             }
         }
     }
 
     @Nested
-    inner class FeatureFlag {
+    inner class IsFeatureOnTest {
 
         @Test
-        fun `feature flag on`() {
+        fun `key, userId`() {
             // given
-            every { client.featureFlag(42, User.of("test_id")) } returns FeatureFlagDecision.on(TRAFFIC_ALLOCATED)
+            val decision = FeatureFlagDecision.on(DEFAULT_RULE)
+            every { client.featureFlag(any(), any()) } returns decision
 
             // when
-            val actual = sut.isFeatureOn(42, "test_id")
+            val actual = sut.isFeatureOn(42, "42")
 
             // then
             expectThat(actual).isTrue()
-        }
-
-        @Test
-        fun `예외가 발생하면 feature off`() {
-            // given
-            every { client.featureFlag(any(), any()) } answers { throw IllegalArgumentException("Fail") }
-
-            // when
-            val actual = sut.featureFlagDetail(42, "abc")
-
-            // then
-            expectThat(actual) {
-                get { isOn }.isFalse()
-                get { reason } isEqualTo EXCEPTION
+            verify(exactly = 1) {
+                client.featureFlag(42, HackleUser.of("42"))
             }
         }
 
+        @Test
+        fun `key, user`() {
+            // given
+            val decision = FeatureFlagDecision.on(DEFAULT_RULE)
+            every { client.featureFlag(any(), any()) } returns decision
+            val user = User.of("42")
+
+            // when
+            val actual = sut.isFeatureOn(42, user)
+
+            // then
+            expectThat(actual).isTrue()
+            verify(exactly = 1) {
+                client.featureFlag(42, HackleUser.of(user))
+            }
+        }
+    }
+
+    @Nested
+    inner class FeatureFlagDetailTest {
+
+        @Test
+        fun `key, userId`() {
+            // given
+            val decision = FeatureFlagDecision.on(DEFAULT_RULE)
+            every { client.featureFlag(any(), any()) } returns decision
+
+            // when
+            val actual = sut.featureFlagDetail(42, "42")
+
+            // then
+            expectThat(actual) isSameInstanceAs decision
+            verify(exactly = 1) {
+                client.featureFlag(42, HackleUser.of("42"))
+            }
+        }
+
+
+        @Test
+        fun `internalClient 의 featureFlag 를 호출하고 리턴받은 값을 그대로 리턴한다`() {
+            // given
+            val decision = FeatureFlagDecision.on(DEFAULT_RULE)
+            every { client.featureFlag(any(), any()) } returns decision
+            val user = User.of("42")
+
+            // when
+            val actual = sut.featureFlagDetail(42, user)
+
+            // then
+            expectThat(actual) isSameInstanceAs decision
+            verify(exactly = 1) {
+                client.featureFlag(42, HackleUser.of(user))
+            }
+        }
+
+        @Test
+        fun `internalClient 에서 예외가 발생하면 off 를 리턴한다`() {
+            // given
+            every { client.featureFlag(any(), any()) } throws IllegalArgumentException()
+
+            // when
+            val actual = sut.featureFlagDetail(42, User.of("42"))
+
+            // then
+            expectThat(actual) isEqualTo FeatureFlagDecision.off(EXCEPTION)
+        }
     }
 
     @Nested
     inner class Track {
 
         @Test
-        fun `eventKey로 Event를 생성해서 전달한다`() {
-            // given
-            val spy = spyk(sut)
-
-            val user = User.of("test_user_id")
-
-            // when
-            spy.track("test_event_key", user)
-
-            //then
+        fun `key, userId`() {
+            sut.track("key", "42")
             verify(exactly = 1) {
-                spy.track(
-                    event = withArg { expectThat(it).get { key } isEqualTo "test_event_key" },
-                    user = user
-                )
+                client.track(Event.of("key"), HackleUser.of("42"))
+            }
+        }
+
+        @Test
+        fun `key, user`() {
+            sut.track("key", User.of("42"))
+            verify(exactly = 1) {
+                client.track(Event.of("key"), HackleUser.of("42"))
             }
         }
 
         @Test
         fun `internalClient로 event와 user를 전달한다`() {
             // given
-            val event = mockk<Event>()
-            val user = mockk<User>()
+            val event = Event.of("key")
+            val user = User.of("test")
 
             // when
             sut.track(event, user)
 
             //then
             verify(exactly = 1) {
-                client.track(
-                    event = withArg { expectThat(it) isSameInstanceAs event },
-                    user = withArg { expectThat(it) isSameInstanceAs user }
-                )
+                client.track(event, HackleUser.of(user))
             }
         }
     }

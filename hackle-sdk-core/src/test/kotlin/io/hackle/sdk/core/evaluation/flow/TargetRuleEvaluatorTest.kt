@@ -1,11 +1,11 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.TargetRule
 import io.hackle.sdk.core.model.Variation
 import io.mockk.every
@@ -83,7 +83,7 @@ internal class TargetRuleEvaluatorTest {
         }
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, User.of("123"), "E", nextFlow)
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "E", nextFlow)
 
         // then
         expectThat(actual) isSameInstanceAs evaluation
@@ -106,7 +106,7 @@ internal class TargetRuleEvaluatorTest {
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, User.of("123"), "E", mockk())
+            sut.evaluate(mockk(), experiment, HackleUser.of("123"), "E", mockk())
         }
 
         // then
@@ -133,7 +133,7 @@ internal class TargetRuleEvaluatorTest {
         every { actionResolver.resolveOrNull(targetRule.action, any(), experiment, any()) } returns variation
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, User.of("154"), "D", mockk())
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("154"), "D", mockk())
 
         // then
         expectThat(actual) isEqualTo Evaluation(534, "E", DecisionReason.TARGET_RULE_MATCH)

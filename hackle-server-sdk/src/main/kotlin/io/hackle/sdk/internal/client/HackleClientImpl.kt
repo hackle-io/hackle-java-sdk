@@ -10,6 +10,7 @@ import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.core.model.HackleUser
 
 /**
  * @author Yong
@@ -40,7 +41,7 @@ internal class HackleClientImpl(
 
     override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
         return try {
-            client.experiment(experimentKey, user, defaultVariation)
+            client.experiment(experimentKey, HackleUser.of(user), defaultVariation)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $e" }
             Decision.of(defaultVariation, EXCEPTION)
@@ -61,7 +62,7 @@ internal class HackleClientImpl(
 
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
         return try {
-            client.featureFlag(featureKey, user)
+            client.featureFlag(featureKey, HackleUser.of(user))
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $e" }
             return FeatureFlagDecision.off(EXCEPTION)
@@ -78,7 +79,7 @@ internal class HackleClientImpl(
 
     override fun track(event: Event, user: User) {
         try {
-            client.track(event, user)
+            client.track(event, HackleUser.of(user))
         } catch (e: Exception) {
             log.error { "Unexpected exception while tracking event[${event.key}]: $e" }
         }
