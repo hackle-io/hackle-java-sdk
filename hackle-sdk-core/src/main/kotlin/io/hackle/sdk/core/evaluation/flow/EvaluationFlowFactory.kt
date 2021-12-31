@@ -32,10 +32,10 @@ internal class EvaluationFlowFactory {
 
         val abTestFlow = EvaluationFlow.of(
             OverrideEvaluator(),
+            ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-            ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             TrafficAllocateEvaluator(actionResolver)
         )
 

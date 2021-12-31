@@ -15,7 +15,6 @@ internal class VersionTest {
     @Nested
     inner class ParseTest {
 
-
         @Test
         fun `이미 Version 타입이면 그대로 리턴한다`() {
             // given

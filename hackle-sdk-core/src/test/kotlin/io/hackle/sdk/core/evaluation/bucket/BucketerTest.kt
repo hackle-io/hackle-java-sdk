@@ -1,17 +1,16 @@
-package io.hackle.sdk.core.evaluation
+package io.hackle.sdk.core.evaluation.bucket
 
-import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.Bucket
 import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Slot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isNotNull
 import strikt.assertions.isSameInstanceAs
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -23,30 +22,30 @@ internal class BucketerTest {
 
     @Nested
     inner class Bucketing {
-
-        private val sut = spyk<Bucketer>()
-
         @Test
         fun `버켓정보로 계산된 슬롯번호로 슬롯을 가져온다`() {
             // given
+            val sut = spyk(Bucketer())
+            every { sut.calculateSlotNumber(any(), any(), any()) } answers { 999 }
+
             val slot = mockk<Slot>()
-            val bucket = spyk(Bucket(32, 10000, emptyList())) {
+            val bucket = mockk<Bucket> {
+                every { id } returns 42
+                every { seed } returns 320
+                every { slotSize } returns 10000
                 every { getSlotOrNull(any()) } returns slot
             }
 
-            val userId = "abc"
-            val slotNumber = 5123
-            every { sut.calculateSlotNumber(1, 10000, userId) } returns slotNumber
-
-            val user = HackleUser.of(userId)
+            val user = HackleUser.of("abc")
 
             // when
             val actual = sut.bucketing(bucket, user)
 
             //then
-            expectThat(actual)
-                .isNotNull()
-                .isSameInstanceAs(slot)
+            expectThat(actual).isSameInstanceAs(slot)
+            verify(exactly = 1) {
+                bucket.getSlotOrNull(999)
+            }
         }
     }
 

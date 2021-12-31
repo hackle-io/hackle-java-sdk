@@ -2,6 +2,7 @@ package io.hackle.sdk.internal.workspace
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.model.Experiment.Status.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.model.Target
@@ -34,7 +35,6 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getExperimentOrNull(5))
             .isNotNull()
-            .isA<Experiment.Draft>()
             .identifier(4318, 5, AB_TEST)
             .hasVariations(
                 Variation(13378, "A", false),
@@ -44,7 +44,6 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getExperimentOrNull(6))
             .isNotNull()
-            .isA<Experiment.Draft>()
             .identifier(4319, 6, AB_TEST)
             .hasVariations(
                 Variation(13380, "A", false),
@@ -54,10 +53,12 @@ internal class WorkspaceImplTest {
                 "user_1" to 13380,
                 "user_2" to 13381
             )
+            .and {
+                get { status } isEqualTo DRAFT
+            }
 
         expectThat(workspace.getExperimentOrNull(7))
             .isNotNull()
-            .isA<Experiment.Running>()
             .identifier(4320, 7, AB_TEST)
             .hasVariations(
                 Variation(13382, "A", false),
@@ -66,6 +67,7 @@ internal class WorkspaceImplTest {
             )
             .hasOverrides()
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }
                     .hasSize(3)
                     .and {
@@ -110,7 +112,6 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getExperimentOrNull(8))
             .isNotNull()
-            .isA<Experiment.Running>()
             .identifier(4321, 8, AB_TEST)
             .hasVariations(
                 Variation(13385, "A", false),
@@ -118,6 +119,7 @@ internal class WorkspaceImplTest {
             )
             .hasOverrides()
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }
                     .hasSize(4)
                     .and {
@@ -170,7 +172,6 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getExperimentOrNull(9))
             .isNotNull()
-            .isA<Experiment.Running>()
             .identifier(4322, 9, AB_TEST)
             .hasVariations(
                 Variation(13387, "A", false),
@@ -178,23 +179,25 @@ internal class WorkspaceImplTest {
                 Variation(13389, "C", true),
             )
             .hasOverrides()
+            .and { get { status } isEqualTo RUNNING }
             .get { defaultRule }
             .isA<Action.Bucket>()
             .get { bucketId } isEqualTo 6106
 
         expectThat(workspace.getExperimentOrNull(10))
             .isNotNull()
-            .isA<Experiment.Paused>()
             .identifier(4323, 10, AB_TEST)
             .hasVariations(
                 Variation(13390, "A", false),
                 Variation(13391, "B", false),
             )
             .hasOverrides()
+            .and {
+                get { status } isEqualTo PAUSED
+            }
 
         expectThat(workspace.getExperimentOrNull(11))
             .isNotNull()
-            .isA<Experiment.Completed>()
             .identifier(4324, 11, AB_TEST)
             .hasVariations(
                 Variation(13392, "A", false),
@@ -203,22 +206,26 @@ internal class WorkspaceImplTest {
                 Variation(13395, "D", false),
             )
             .hasOverrides()
+            .and {
+                get { status } isEqualTo COMPLETED
+            }
             .get { winnerVariation } isEqualTo Variation(13395, "D", false)
 
 
         expectThat(workspace.getFeatureFlagOrNull(1))
             .isNotNull()
-            .isA<Experiment.Paused>()
             .identifier(4325, 1, FEATURE_FLAG)
             .hasVariations(
                 Variation(13396, "A", false),
                 Variation(13397, "B", false),
             )
             .hasOverrides()
+            .and {
+                get { status } isEqualTo PAUSED
+            }
 
         expectThat(workspace.getFeatureFlagOrNull(2))
             .isNotNull()
-            .isA<Experiment.Running>()
             .identifier(4326, 2, FEATURE_FLAG)
             .hasVariations(
                 Variation(13398, "A", false),
@@ -226,6 +233,7 @@ internal class WorkspaceImplTest {
             )
             .hasOverrides()
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }.hasSize(0)
                 get { targetRules }.hasSize(0)
                 get { defaultRule } isEqualTo Action.Bucket(6118)
@@ -233,7 +241,6 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getFeatureFlagOrNull(3))
             .isNotNull()
-            .isA<Experiment.Running>()
             .identifier(4327, 3, FEATURE_FLAG)
             .hasVariations(
                 Variation(13400, "A", false),
@@ -241,6 +248,7 @@ internal class WorkspaceImplTest {
             )
             .hasOverrides()
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }.hasSize(0)
                 get { targetRules }.hasSize(0)
                 get { defaultRule } isEqualTo Action.Bucket(6121)
@@ -248,7 +256,6 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getFeatureFlagOrNull(4))
             .isNotNull()
-            .isA<Experiment.Running>()
             .identifier(4328, 4, FEATURE_FLAG)
             .hasVariations(
                 Variation(13402, "A", false),
@@ -259,6 +266,7 @@ internal class WorkspaceImplTest {
                 "user2" to 13403,
             )
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }.hasSize(0)
                 get { targetRules }
                     .hasSize(4)
@@ -404,8 +412,8 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getExperimentOrNull(1))
             .isNotNull()
-            .isA<Experiment.Running>()
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }.hasSize(0)
                 get { targetRules }.hasSize(0)
             }
@@ -418,14 +426,14 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getFeatureFlagOrNull(1))
             .isNotNull()
-            .isA<Experiment.Running>()
             .and {
+                get { status } isEqualTo RUNNING
                 get { targetAudiences }.hasSize(0)
                 get { targetRules }.hasSize(0)
             }
     }
 
-    private fun <T : Experiment> Assertion.Builder<T>.identifier(id: Long, key: Long, type: Experiment.Type) =
+    private fun Assertion.Builder<Experiment>.identifier(id: Long, key: Long, type: Experiment.Type) =
         compose("Experiment") {
             get("Experiment.id") { this.id } isEqualTo id
             get("Experiment.key") { this.key } isEqualTo key
@@ -434,7 +442,7 @@ internal class WorkspaceImplTest {
             if (allPassed) pass() else fail()
         }
 
-    private fun <T : Experiment> Assertion.Builder<T>.hasVariations(vararg variations: Variation) =
+    private fun Assertion.Builder<Experiment>.hasVariations(vararg variations: Variation) =
         assert("Experiment.variations") {
             val actual = variations.toList()
             if (it.variations == actual) {
@@ -444,7 +452,7 @@ internal class WorkspaceImplTest {
             }
         }
 
-    private fun <T : Experiment> Assertion.Builder<T>.hasOverrides(vararg overrides: Pair<String, Long>) =
+    private fun Assertion.Builder<Experiment>.hasOverrides(vararg overrides: Pair<String, Long>) =
         assert("Experiment.overrides") {
             val actual = overrides.toMap()
             if (it.overrides == actual) {

@@ -2,7 +2,6 @@ package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.TargetRule
 import io.mockk.every
@@ -14,7 +13,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
-import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import strikt.assertions.isSameInstanceAs
 
@@ -28,50 +26,49 @@ internal class TargetRuleDeterminerTest {
     private lateinit var sut: TargetRuleDeterminer
 
     @Test
-    fun `실험의 타겟룰 중에서 첫번째로 일치하는 타겟룰을 찾는다`() {
+    fun `첫번째로 매치된 룰을 리턴한다`() {
         // given
-        val tr1 = targetRule(false)
-        val tr2 = targetRule(false)
-        val tr3 = targetRule(true)
-        val tr4 = targetRule(false)
-
-        val experiment = mockk<Experiment.Running> {
-            every { targetRules } returns listOf(tr1, tr2, tr3, tr4)
+        val matchedTargetRule = targetRule(true)
+        val experiment = mockk<Experiment> {
+            every { targetRules } returns listOf(
+                targetRule(false),
+                targetRule(false),
+                targetRule(false),
+                matchedTargetRule,
+                targetRule(false),
+                targetRule(false),
+            )
         }
 
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, HackleUser.of("test"))
+        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, mockk())
 
         // then
-        expectThat(actual)
-            .isNotNull()
-            .isSameInstanceAs(tr3)
-
-        verify(exactly = 3) {
+        expectThat(actual) isSameInstanceAs matchedTargetRule
+        verify(exactly = 4) {
             targetMatcher.matches(any(), any(), any())
         }
     }
 
     @Test
-    fun `실험의 타겟룰중 일치하는 타겟이 하나도 없으면 null을 리턴헌다`() {
+    fun `매치된 룰이 없으면 null을 리턴한다`() {
         // given
-        val tr1 = targetRule(false)
-        val tr2 = targetRule(false)
-        val tr3 = targetRule(false)
-        val tr4 = targetRule(false)
-
-        val experiment = mockk<Experiment.Running> {
-            every { targetRules } returns listOf(tr1, tr2, tr3, tr4)
+        val experiment = mockk<Experiment> {
+            every { targetRules } returns listOf(
+                targetRule(false),
+                targetRule(false),
+                targetRule(false),
+                targetRule(false),
+                targetRule(false),
+            )
         }
 
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, HackleUser.of("test"))
+        val actual = sut.determineTargetRuleOrNull(mockk(), experiment, mockk())
 
         // then
-        expectThat(actual)
-            .isNull()
-
-        verify(exactly = 4) {
+        expectThat(actual).isNull()
+        verify(exactly = 5) {
             targetMatcher.matches(any(), any(), any())
         }
     }
@@ -79,8 +76,6 @@ internal class TargetRuleDeterminerTest {
     private fun targetRule(isMatch: Boolean): TargetRule {
         val target = mockk<Target>()
         every { targetMatcher.matches(target, any(), any()) } returns isMatch
-        return mockk {
-            every { this@mockk.target } returns target
-        }
+        return TargetRule(target, mockk())
     }
 }
