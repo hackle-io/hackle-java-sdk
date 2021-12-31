@@ -13,10 +13,10 @@ internal class EvaluationFlowFactoryTest {
         val actual = EvaluationFlowFactory().getFlow(Experiment.Type.AB_TEST)
         expectThat(actual)
             .isDecisionWith<OverrideEvaluator>()
+            .isDecisionWith<ExperimentTargetEvaluator>()
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()
             .isDecisionWith<CompletedExperimentEvaluator>()
-            .isDecisionWith<ExperimentTargetEvaluator>()
             .isDecisionWith<TrafficAllocateEvaluator>()
             .isA<EvaluationFlow.End>()
     }

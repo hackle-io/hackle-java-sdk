@@ -27,7 +27,7 @@ internal class ExperimentTargetDeterminerTest {
     @Test
     fun `참여대상이 비어있으면 항상 true`() {
         // given
-        val experiment = mockk<Experiment.Running> {
+        val experiment = mockk<Experiment> {
             every { targetAudiences } returns emptyList()
         }
 
@@ -41,7 +41,7 @@ internal class ExperimentTargetDeterminerTest {
     @Test
     fun `실험 참여대상중 하나라도 일치하는게 있으면 match true`() {
         // given
-        val experiment = mockk<Experiment.Running> {
+        val experiment = mockk<Experiment> {
             every { targetAudiences } returns listOf(
                 audience(false),
                 audience(false),
@@ -64,7 +64,7 @@ internal class ExperimentTargetDeterminerTest {
     @Test
     fun `실험 참여대상중 일치하는게 하나도 없으면 false`() {
         // given
-        val experiment = mockk<Experiment.Running> {
+        val experiment = mockk<Experiment> {
             every { targetAudiences } returns listOf(
                 audience(false),
                 audience(false),

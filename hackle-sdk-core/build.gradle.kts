@@ -2,6 +2,19 @@ dependencies {
     api(project(":hackle-sdk-common"))
 }
 
+tasks.jacocoTestReport {
+    classDirectories.setFrom(
+        fileTree(project.buildDir) {
+            exclude(
+                "**/Murmur3.*"
+            )
+            include(
+                "**/classes/**/main/**"
+            )
+        }
+    )
+}
+
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
