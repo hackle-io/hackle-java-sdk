@@ -4,10 +4,11 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
-import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.HackleUser
-import io.hackle.sdk.core.model.TargetRule
-import io.hackle.sdk.core.model.Variation
+import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.model.Experiment.Status.DRAFT
+import io.hackle.sdk.core.model.Experiment.Status.RUNNING
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -37,7 +38,7 @@ internal class TargetRuleEvaluatorTest {
     @Test
     fun `실행중이 아니면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment>(relaxed = true)
+        val experiment = experiment(type = FEATURE_FLAG, status = DRAFT)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
@@ -47,15 +48,13 @@ internal class TargetRuleEvaluatorTest {
         // then
         expectThat(exception.message)
             .isNotNull()
-            .startsWith("experiment must be running")
+            .startsWith("experiment status must be RUNNING")
     }
 
     @Test
     fun `FEATURE_FLAG 타입이 아니면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.AB_TEST
-        }
+        val experiment = experiment(type = AB_TEST, status = RUNNING)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
@@ -71,9 +70,7 @@ internal class TargetRuleEvaluatorTest {
     @Test
     fun `타겟룰에 해당하지 않으면 다음 플로우를 실행한다`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-        }
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
 
         every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any(), any()) } returns null
 
@@ -92,13 +89,10 @@ internal class TargetRuleEvaluatorTest {
     @Test
     fun `타겟룰에 매치했지만 Action에 해당하는 Variation이 결정되지 않으면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-        }
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
 
-        val targetRule = mockk<TargetRule> {
-            every { action } returns mockk()
-        }
+        val action = mockk<Action>()
+        val targetRule = TargetRule(mockk(), action)
 
         every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any(), any()) } returns targetRule
 
@@ -118,16 +112,13 @@ internal class TargetRuleEvaluatorTest {
     @Test
     fun `일치하는 타겟룰이 있는경우 해당 룰에 해당하는 Variation으로 결정한다`() {
         // given
-        // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-        }
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
 
         val targetRule = mockk<TargetRule> {
             every { action } returns mockk()
         }
 
-        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any(), any()) } returns targetRule
+        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), experiment, any()) } returns targetRule
 
         val variation = Variation(534, "E", false)
         every { actionResolver.resolveOrNull(targetRule.action, any(), experiment, any()) } returns variation

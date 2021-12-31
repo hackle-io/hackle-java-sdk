@@ -40,7 +40,7 @@ internal class DraftExperimentEvaluator : FlowEvaluator {
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        return if (experiment is Experiment.Draft) {
+        return if (experiment.status == Experiment.Status.DRAFT) {
             Evaluation.of(experiment, defaultVariationKey, DecisionReason.EXPERIMENT_DRAFT)
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -56,11 +56,10 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        return if (experiment is Experiment.Paused) {
+        return if (experiment.status == Experiment.Status.PAUSED) {
             when (experiment.type) {
                 AB_TEST -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.EXPERIMENT_PAUSED)
                 FEATURE_FLAG -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.FEATURE_FLAG_INACTIVE)
-
             }
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -76,8 +75,9 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        return if (experiment is Experiment.Completed) {
-            Evaluation.of(experiment.winnerVariation, DecisionReason.EXPERIMENT_COMPLETED)
+        return if (experiment.status == Experiment.Status.COMPLETED) {
+            val winnerVariation = requireNotNull(experiment.winnerVariation) { "winner variation [${experiment.id}]" }
+            Evaluation.of(winnerVariation, DecisionReason.EXPERIMENT_COMPLETED)
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -94,7 +94,6 @@ internal class ExperimentTargetEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
         require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val isUserInExperimentTarget = experimentTargetDeterminer.isUserInExperimentTarget(workspace, experiment, user)
@@ -116,7 +115,7 @@ internal class TrafficAllocateEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
+        require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val variation = actionResolver.resolveOrNull(experiment.defaultRule, workspace, experiment, user)
@@ -141,7 +140,7 @@ internal class TargetRuleEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
+        require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         val targetRule = targetRuleDeterminer.determineTargetRuleOrNull(workspace, experiment, user)
@@ -165,7 +164,7 @@ internal class DefaultRuleEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        require(experiment is Experiment.Running) { "experiment must be running [${experiment.id}]" }
+        require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         val variation =

@@ -12,7 +12,7 @@ internal class ExperimentTargetDeterminer(
     private val targetMatcher: TargetMatcher
 ) {
 
-    fun isUserInExperimentTarget(workspace: Workspace, experiment: Experiment.Running, user: HackleUser): Boolean {
+    fun isUserInExperimentTarget(workspace: Workspace, experiment: Experiment, user: HackleUser): Boolean {
         if (experiment.targetAudiences.isEmpty()) {
             return true
         }

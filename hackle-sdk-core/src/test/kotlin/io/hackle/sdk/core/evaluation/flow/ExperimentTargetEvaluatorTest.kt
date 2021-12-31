@@ -1,11 +1,14 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.common.Variation.E
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
-import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Experiment.Status.RUNNING
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.model.HackleUser
-import io.hackle.sdk.core.model.Variation
+import io.hackle.sdk.core.model.experiment
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -31,29 +34,10 @@ internal class ExperimentTargetEvaluatorTest {
     @InjectMockKs
     private lateinit var sut: ExperimentTargetEvaluator
 
-
-    @Test
-    fun `실행중이 아니면 예외 발생`() {
-        // given
-        val experiment = mockk<Experiment>(relaxed = true)
-
-        // when
-        val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, mockk(), "E", mockk())
-        }
-
-        // then
-        expectThat(exception.message)
-            .isNotNull()
-            .startsWith("experiment must be running")
-    }
-
     @Test
     fun `AB_TEST 타입이 아니면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-        }
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
@@ -69,9 +53,7 @@ internal class ExperimentTargetEvaluatorTest {
     @Test
     fun `사용자가 실험 참여 대상이면 다음 플로우를 실행한다`() {
         // given
-        val experiment = mockk<Experiment.Running> {
-            every { type } returns Experiment.Type.AB_TEST
-        }
+        val experiment = experiment(type = AB_TEST, status = RUNNING)
 
         every { experimentTargetDeterminer.isUserInExperimentTarget(any(), experiment, any()) } returns true
 
@@ -93,11 +75,11 @@ internal class ExperimentTargetEvaluatorTest {
     @Test
     fun `사용자가 실험 참여 대상이 아니면 기본그룹으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Running> {
-            every { type } returns Experiment.Type.AB_TEST
-            every { getVariationOrNull(any<String>()) } returns Variation(42, "E", false)
+        val experiment = experiment(type = AB_TEST, status = RUNNING) {
+            variations {
+                E(42)
+            }
         }
-
         every { experimentTargetDeterminer.isUserInExperimentTarget(any(), experiment, any()) } returns false
 
         // when

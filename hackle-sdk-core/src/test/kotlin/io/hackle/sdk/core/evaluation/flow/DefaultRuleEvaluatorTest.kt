@@ -1,11 +1,17 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.common.Variation.A
+import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Experiment.Status.RUNNING
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
+import io.hackle.sdk.core.model.experiment
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -41,15 +47,13 @@ internal class DefaultRuleEvaluatorTest {
         // then
         expectThat(exception.message)
             .isNotNull()
-            .startsWith("experiment must be running")
+            .startsWith("experiment status must be RUNNING")
     }
 
     @Test
     fun `FEATURE_FLAG 타입이 아니면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.AB_TEST
-        }
+        val experiment = experiment(type = AB_TEST, status = RUNNING)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
@@ -66,11 +70,7 @@ internal class DefaultRuleEvaluatorTest {
     @Test
     fun `기본룰에 해당하는 Variation을 결정하지 못하면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-            every { defaultRule } returns mockk()
-        }
-
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
         every { actionResolver.resolveOrNull(experiment.defaultRule, any(), experiment, any()) } returns null
 
         // when
@@ -87,11 +87,7 @@ internal class DefaultRuleEvaluatorTest {
     @Test
     fun `기본룰에 해당하는 Variation으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-            every { defaultRule } returns mockk()
-        }
-
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
         val variation = Variation(513, "H", false)
 
         every { actionResolver.resolveOrNull(experiment.defaultRule, any(), experiment, any()) } returns variation

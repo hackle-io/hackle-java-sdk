@@ -1,11 +1,17 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.common.Variation.*
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Experiment.Status.DRAFT
+import io.hackle.sdk.core.model.Experiment.Status.RUNNING
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
+import io.hackle.sdk.core.model.experiment
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -31,7 +37,7 @@ internal class TrafficAllocateEvaluatorTest {
     @Test
     fun `실행중이 아니면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment>(relaxed = true)
+        val experiment = experiment(type = AB_TEST, status = DRAFT)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
@@ -41,15 +47,13 @@ internal class TrafficAllocateEvaluatorTest {
         // then
         expectThat(exception.message)
             .isNotNull()
-            .startsWith("experiment must be running")
+            .startsWith("experiment status must be RUNNING")
     }
 
     @Test
     fun `AB_TEST 타입이 아니면 예외 발생`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-        }
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
@@ -65,12 +69,13 @@ internal class TrafficAllocateEvaluatorTest {
     @Test
     fun `기본룰에 해당하는 Variation이 없으면 기본그룹으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.AB_TEST
-            every { getVariationOrNull(any<String>()) } returns Variation(42, "G", false)
+        val experiment = experiment(type = AB_TEST, status = RUNNING) {
+            variations {
+                G(42)
+            }
         }
 
-        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns null
+        every { actionResolver.resolveOrNull(any(), any(), experiment, any()) } returns null
 
         // when
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
@@ -82,37 +87,39 @@ internal class TrafficAllocateEvaluatorTest {
     @Test
     fun `할당된 Variation이 드랍되었으면 기본그룹으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.AB_TEST
-            every { getVariationOrNull(any<String>()) } returns Variation(42, "G", false)
+        val experiment = experiment(type = AB_TEST, status = RUNNING) {
+            variations {
+                A(41, false)
+                B(42, false)
+                C(43, true)
+            }
         }
 
-        val variation = Variation(320, "B", true)
-
-        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns variation
+        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns experiment.getVariationOrNull("C")
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "B", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.VARIATION_DROPPED)
+        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.VARIATION_DROPPED)
     }
 
     @Test
     fun `할당된 Variation으로 평가한다`() {
         // given
-        val experiment = mockk<Experiment.Running>(relaxed = true) {
-            every { type } returns Experiment.Type.AB_TEST
+        val experiment = experiment(type = AB_TEST, status = RUNNING) {
+            variations {
+                A(41, false)
+                B(42, false)
+            }
         }
 
-        val variation = Variation(320, "B", false)
-
-        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns variation
+        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns experiment.getVariationOrNull("B")
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "A", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.TRAFFIC_ALLOCATED)
+        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.TRAFFIC_ALLOCATED)
     }
 }

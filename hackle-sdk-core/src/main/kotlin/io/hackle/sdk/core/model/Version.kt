@@ -9,6 +9,21 @@ internal class Version private constructor(
     val build: MetadataVersion,
 ) : Comparable<Version> {
 
+    val plainString: String
+        get() {
+            return buildString {
+                append(coreVersion)
+                if (prerelease.isNotEmpty) {
+                    append("-")
+                    append(prerelease)
+                }
+                if (build.isNotEmpty) {
+                    append("+")
+                    append(build)
+                }
+            }
+        }
+
     override fun compareTo(other: Version): Int {
         val result = this.coreVersion.compareTo(other.coreVersion)
         if (result != 0) {
@@ -30,19 +45,7 @@ internal class Version private constructor(
     }
 
     override fun toString(): String {
-        return buildString {
-            append("Version(")
-            append(coreVersion)
-            if (prerelease.isNotEmpty) {
-                append("-")
-                append(prerelease)
-            }
-            if (build.isNotEmpty) {
-                append("+")
-                append(build)
-            }
-            append(")")
-        }
+        return "Version($plainString)"
     }
 
     companion object {
@@ -84,9 +87,9 @@ internal class Version private constructor(
 }
 
 internal data class CoreVersion(
-    val major: Int,
-    val minor: Int,
-    val patch: Int,
+    private val major: Int,
+    private val minor: Int,
+    private val patch: Int,
 ) : Comparable<CoreVersion> {
     override fun compareTo(other: CoreVersion): Int {
         val majorDiff = this.major.compareTo(other.major)
