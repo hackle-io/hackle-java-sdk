@@ -1,5 +1,9 @@
 package io.hackle.sdk.core.model
 
+import io.hackle.sdk.common.Variation.A
+import io.hackle.sdk.common.Variation.B
+import io.hackle.sdk.core.model.Experiment.Status.*
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,7 +19,12 @@ internal class ExperimentTest {
 
         @Test
         fun `get variation by id`() {
-            val experiment = experiment(variations = listOf(1 to "A", 2 to "B"))
+            val experiment = experiment(type = AB_TEST, status = DRAFT) {
+                variations {
+                    A(1, false)
+                    B(2, false)
+                }
+            }
 
             expectThat(experiment.getVariationOrNull(1)) isEqualTo Variation(1, "A", false)
             expectThat(experiment.getVariationOrNull(2)) isEqualTo Variation(2, "B", false)
@@ -24,7 +33,12 @@ internal class ExperimentTest {
 
         @Test
         fun `get variation by key`() {
-            val experiment = experiment(variations = listOf(1 to "A", 2 to "B"))
+            val experiment = experiment(type = AB_TEST, status = DRAFT) {
+                variations {
+                    A(1, false)
+                    B(2, false)
+                }
+            }
 
             expectThat(experiment.getVariationOrNull("A")) isEqualTo Variation(1, "A", false)
             expectThat(experiment.getVariationOrNull("B")) isEqualTo Variation(2, "B", false)
@@ -37,10 +51,12 @@ internal class ExperimentTest {
 
         @Test
         fun `userId에 해당하는 수동할당이 없으면 null 리턴`() {
-            val experiment = experiment(
-                variations = listOf(1 to "A", 2 to "B"),
-                overrides = emptyMap()
-            )
+            val experiment = experiment(type = AB_TEST, status = DRAFT) {
+                variations {
+                    A(1, false)
+                    B(2, false)
+                }
+            }
 
             val variation = experiment.getOverriddenVariationOrNull(HackleUser.of("test"))
             expectThat(variation).isNull()
@@ -49,10 +65,13 @@ internal class ExperimentTest {
         @Test
         fun `수동할당된 variationId에 해당하는 Variation이 없으면 예외 발생`() {
             // given
-            val experiment = experiment(
-                variations = listOf(1 to "A", 2 to "B"),
-                overrides = mapOf("test_id" to 3)
-            )
+            val experiment = experiment(id = 42, type = AB_TEST, status = DRAFT) {
+                variations {
+                    A(1, false)
+                    B(2, false)
+                }
+            }.copy(overrides = mapOf("test_id" to 3))
+
 
             // when
             val exception = assertThrows<IllegalArgumentException> {
@@ -68,10 +87,15 @@ internal class ExperimentTest {
         @Test
         fun `수동할당된 Variation을 갸져온다`() {
             // given
-            val experiment = experiment(
-                variations = listOf(1 to "A", 2 to "B"),
-                overrides = mapOf("test_id" to 2)
-            )
+            val experiment = experiment(id = 42, type = AB_TEST, status = DRAFT) {
+                variations {
+                    A(1, false)
+                    B(2, false)
+                }
+                overrides {
+                    B("test_id")
+                }
+            }
 
             // when
             val variation = experiment.getOverriddenVariationOrNull(HackleUser.of("test_id"))
@@ -88,48 +112,36 @@ internal class ExperimentTest {
 
         @Test
         fun `get winner variation`() {
-            val experiment = Experiment.Completed(
-                id = 42,
-                key = 320,
-                type = Experiment.Type.AB_TEST,
-                variations = listOf(
-                    Variation(1, "A", false),
-                    Variation(2, "B", false),
-                ),
-                overrides = emptyMap(),
-                winnerVariationId = 2
-            )
 
-            expectThat(experiment.winnerVariation) isEqualTo Variation(2, "B", false)
+            val experiment = experiment(id = 42, type = AB_TEST, status = COMPLETED) {
+                variations {
+                    A(41)
+                    B(42)
+                }
+                winner(B)
+            }
+
+            expectThat(experiment.winnerVariation) isEqualTo Variation(42, "B", false)
         }
 
         @Test
         fun `get winner variation fail`() {
-            val experiment = Experiment.Completed(
-                id = 42,
-                key = 320,
-                type = Experiment.Type.AB_TEST,
-                variations = listOf(
-                    Variation(1, "A", false),
-                    Variation(2, "B", false),
-                ),
-                overrides = emptyMap(),
-                winnerVariationId = 3
-            )
+            val experiment = experiment(id = 42, type = AB_TEST, status = COMPLETED) {
+                variations {
+                    A(41)
+                    B(42)
+                }
+            }
 
-            assertThrows<IllegalArgumentException> { experiment.winnerVariation }
+            expectThat(experiment.winnerVariation).isNull()
         }
     }
 
-    private fun experiment(variations: List<Pair<Int, String>>, overrides: Map<String, Long> = emptyMap()): Experiment {
-
-        return Experiment.Draft(
-            id = 42,
-            key = 320,
-            type = Experiment.Type.AB_TEST,
-            variations = variations.map { Variation(it.first.toLong(), it.second, false) },
-            overrides = overrides
-        )
-
+    @Test
+    fun `status`() {
+        expectThat(Experiment.Status.fromExecutionStatusOrNull("READY")) isEqualTo DRAFT
+        expectThat(Experiment.Status.fromExecutionStatusOrNull("RUNNING")) isEqualTo RUNNING
+        expectThat(Experiment.Status.fromExecutionStatusOrNull("PAUSED")) isEqualTo PAUSED
+        expectThat(Experiment.Status.fromExecutionStatusOrNull("STOPPED")) isEqualTo COMPLETED
     }
 }

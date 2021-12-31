@@ -13,7 +13,7 @@ internal class TargetRuleDeterminer(
     private val targetMatcher: TargetMatcher
 ) {
 
-    fun determineTargetRuleOrNull(workspace: Workspace, experiment: Experiment.Running, user: HackleUser): TargetRule? {
+    fun determineTargetRuleOrNull(workspace: Workspace, experiment: Experiment, user: HackleUser): TargetRule? {
         return experiment.targetRules.find { targetMatcher.matches(it.target, workspace, user) }
     }
 }
