@@ -6,10 +6,8 @@ import io.hackle.sdk.core.model.Experiment.Status.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 
 internal class ExperimentTest {
@@ -43,67 +41,6 @@ internal class ExperimentTest {
             expectThat(experiment.getVariationOrNull("A")) isEqualTo Variation(1, "A", false)
             expectThat(experiment.getVariationOrNull("B")) isEqualTo Variation(2, "B", false)
             expectThat(experiment.getVariationOrNull("C")).isNull()
-        }
-    }
-
-    @Nested
-    inner class OverriddenVariationTest {
-
-        @Test
-        fun `userId에 해당하는 수동할당이 없으면 null 리턴`() {
-            val experiment = experiment(type = AB_TEST, status = DRAFT) {
-                variations {
-                    A(1, false)
-                    B(2, false)
-                }
-            }
-
-            val variation = experiment.getOverriddenVariationOrNull(HackleUser.of("test"))
-            expectThat(variation).isNull()
-        }
-
-        @Test
-        fun `수동할당된 variationId에 해당하는 Variation이 없으면 예외 발생`() {
-            // given
-            val experiment = experiment(id = 42, type = AB_TEST, status = DRAFT) {
-                variations {
-                    A(1, false)
-                    B(2, false)
-                }
-            }.copy(overrides = mapOf("test_id" to 3))
-
-
-            // when
-            val exception = assertThrows<IllegalArgumentException> {
-                experiment.getOverriddenVariationOrNull(HackleUser.of("test_id"))
-            }
-
-            // then
-            expectThat(exception.message)
-                .isNotNull()
-                .isEqualTo("experiment[42] variation[3]")
-        }
-
-        @Test
-        fun `수동할당된 Variation을 갸져온다`() {
-            // given
-            val experiment = experiment(id = 42, type = AB_TEST, status = DRAFT) {
-                variations {
-                    A(1, false)
-                    B(2, false)
-                }
-                overrides {
-                    B("test_id")
-                }
-            }
-
-            // when
-            val variation = experiment.getOverriddenVariationOrNull(HackleUser.of("test_id"))
-
-            // then
-            expectThat(variation)
-                .isNotNull()
-                .isEqualTo(Variation(2, "B", false))
         }
     }
 

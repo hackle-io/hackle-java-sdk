@@ -1,10 +1,13 @@
 package io.hackle.sdk.internal.workspace
 
+import io.hackle.sdk.core.model.Segment
+
 internal data class WorkspaceDto(
     val experiments: List<ExperimentDto>,
     val featureFlags: List<ExperimentDto>,
     val buckets: List<BucketDto>,
     val events: List<EventTypeDto>,
+    val segments: List<SegmentDto> = emptyList(),
 )
 
 internal data class ExperimentDto(
@@ -25,6 +28,7 @@ internal data class VariationDto(
 internal data class ExecutionDto(
     val status: String,
     val userOverrides: List<UserOverrideDto>,
+    val segmentOverrides: List<TargetRuleDto> = emptyList(),
     val targetAudiences: List<TargetDto>,
     val targetRules: List<TargetRuleDto>,
     val defaultRule: TargetActionDto
@@ -83,4 +87,11 @@ internal data class TargetActionDto(
 internal data class TargetRuleDto(
     val target: TargetDto,
     val action: TargetActionDto
+)
+
+internal data class SegmentDto(
+    val id: Long,
+    val key: String,
+    val type: Segment.Type,
+    val targets: List<TargetDto>,
 )
