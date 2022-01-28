@@ -36,11 +36,13 @@ internal class SegmentConditionMatcher(
 ) : ConditionMatcher {
     override fun matches(condition: Target.Condition, workspace: Workspace, user: HackleUser): Boolean {
         require(condition.key.type == SEGMENT) { "Unsupported target.key.type [${condition.key.type}]" }
-        val segmentKeys = condition.match.values
-        return segmentKeys.asSequence()
-            .filterIsInstance<String>()
-            .mapNotNull { workspace.getSegmentOrNull(it) }
-            .any { segmentMatcher.matches(it, workspace, user) }
+        return condition.match.values.any { matches(it, workspace, user) }
+    }
+
+    private fun matches(value: Any, workspace: Workspace, user: HackleUser): Boolean {
+        val segmentKey = requireNotNull(value as? String) { "SegmentKey[$value]" }
+        val segment = requireNotNull(workspace.getSegmentOrNull(segmentKey)) { "Segment[$segmentKey]" }
+        return segmentMatcher.matches(segment, workspace, user)
     }
 }
 

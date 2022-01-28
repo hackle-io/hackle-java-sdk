@@ -57,7 +57,10 @@ internal class WorkspaceImpl(
             val buckets: Map<Long, Bucket> =
                 dto.buckets.associate { it.id to it.toBucket() }
 
-            val segments = dto.segments.associate { it.key to it.toSegment() }
+            val segments =
+                dto.segments.asSequence()
+                    .mapNotNull { it.toSegmentOrNull() }
+                    .associateBy { it.key }
 
             return WorkspaceImpl(
                 experiments = experiment,

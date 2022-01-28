@@ -1,7 +1,5 @@
 package io.hackle.sdk.internal.workspace
 
-import io.hackle.sdk.core.model.Segment
-
 internal data class WorkspaceDto(
     val experiments: List<ExperimentDto>,
     val featureFlags: List<ExperimentDto>,
@@ -92,6 +90,6 @@ internal data class TargetRuleDto(
 internal data class SegmentDto(
     val id: Long,
     val key: String,
-    val type: Segment.Type,
+    val type: String,
     val targets: List<TargetDto>,
 )

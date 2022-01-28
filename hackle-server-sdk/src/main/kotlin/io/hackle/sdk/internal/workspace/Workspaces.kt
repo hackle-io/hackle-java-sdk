@@ -115,11 +115,11 @@ internal fun SlotDto.toSlot() = Slot(
 internal fun EventTypeDto.toEventType() = EventType.Custom(id, key)
 
 // Segment
-internal fun SegmentDto.toSegment(): Segment {
+internal fun SegmentDto.toSegmentOrNull(): Segment? {
     return Segment(
         id = id,
         key = key,
-        type = type,
+        type = parseEnumOrNull<Segment.Type>(type) ?: return null,
         targets = targets.mapNotNull { it.toTargetOrNull(TargetingType.SEGMENT) }
     )
 }

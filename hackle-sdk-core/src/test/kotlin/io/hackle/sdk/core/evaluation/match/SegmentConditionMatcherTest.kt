@@ -51,7 +51,7 @@ internal class SegmentConditionMatcherTest {
     }
 
     @Test
-    fun `등록된 segmentKey 가 String 타입이 아니면 필터링 한다`() {
+    fun `등록된 segmentKey 가 String 타입이 아니면 예외가 발생한다`() {
         // given
         val condition = condition {
             SEGMENT("SEGMENT")
@@ -59,14 +59,18 @@ internal class SegmentConditionMatcherTest {
         }
 
         // when
-        val actual = sut.matches(condition, mockk(), mockk())
+        val exception = assertThrows<IllegalArgumentException> {
+            sut.matches(condition, mockk(), mockk())
+        }
 
         // then
-        assertFalse(actual)
+        expectThat(exception.message)
+            .isNotNull()
+            .isEqualTo("SegmentKey[1]")
     }
 
     @Test
-    fun `등록된 segmentKey 에 해당하는 Segment 가 없으면 필터링 한다`() {
+    fun `등록된 segmentKey 에 해당하는 Segment 가 없으면 예외가 발생한다`() {
         // given
         val condition = condition {
             SEGMENT("SEGMENT")
@@ -76,10 +80,14 @@ internal class SegmentConditionMatcherTest {
         val workspace = workspace()
 
         // when
-        val actual = sut.matches(condition, workspace, mockk())
+        val exception = assertThrows<IllegalArgumentException> {
+            sut.matches(condition, workspace, mockk())
+        }
 
         // then
-        assertFalse(actual)
+        expectThat(exception.message)
+            .isNotNull()
+            .isEqualTo("Segment[seg1]")
     }
 
     @Test
