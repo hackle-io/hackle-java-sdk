@@ -2,10 +2,13 @@ package io.hackle.sdk.core.model
 
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
+import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
+import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
 import io.hackle.sdk.core.model.Target.Match.ValueType.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
+import kotlin.reflect.full.isSubclassOf
 
 typealias VariationKey = io.hackle.sdk.common.Variation
 
@@ -39,6 +42,7 @@ class ExperimentDsl(
     private lateinit var variations: List<Variation>
     private var winnerVariationId: Long? = null
     private val overrides = mutableMapOf<String, Long>()
+    private val segmentOverrides = mutableListOf<TargetRule>()
     private val targetAudiences = mutableListOf<Target>()
     private val targetRules = mutableListOf<TargetRule>()
     private var defaultRule: Action? = null
@@ -63,7 +67,9 @@ class ExperimentDsl(
 
     // Override
     fun overrides(init: OverrideDsl.() -> Unit) {
-        overrides.putAll(OverrideDsl(variations).apply(init).build())
+        val (userOverrides, segmentOverrides) = OverrideDsl(variations).apply(init).build()
+        this.overrides.putAll(userOverrides)
+        this.segmentOverrides.addAll(segmentOverrides)
     }
 
     // Audiences
@@ -91,6 +97,7 @@ class ExperimentDsl(
             status,
             variations,
             overrides,
+            segmentOverrides,
             targetAudiences,
             targetRules,
             defaultRule,
@@ -106,30 +113,34 @@ class TargetRulesDsl(
     private val targetRules = mutableListOf<TargetRule>()
 
     fun targetRule(init: TargetRuleDsl.() -> Unit) {
-        targetRules += TargetRuleDsl().apply(init).build()
+        targetRules += TargetRuleDsl(variations, bucketRegistry).apply(init).build()
     }
 
     fun build(): List<TargetRule> {
         return targetRules
     }
+}
 
-    inner class TargetRuleDsl {
+class TargetRuleDsl(
+    private val variations: List<Variation>,
+    private val bucketRegistry: BucketRegistry,
+) {
 
-        private lateinit var target: Target
-        private lateinit var action: Action
-        fun target(init: TargetDsl.() -> Unit) {
-            target = TargetDsl().apply(init).build()
-        }
+    private lateinit var target: Target
+    private lateinit var action: Action
+    fun target(init: TargetDsl.() -> Unit) {
+        target = TargetDsl().apply(init).build()
+    }
 
-        fun action(init: ActionDsl.() -> Unit) {
-            action = ActionDsl(variations, bucketRegistry).apply(init).build()
-        }
+    fun action(init: ActionDsl.() -> Unit) {
+        action = ActionDsl(variations, bucketRegistry).apply(init).build()
+    }
 
-        fun build(): TargetRule {
-            return TargetRule(target, action)
-        }
+    fun build(): TargetRule {
+        return TargetRule(target, action)
     }
 }
+
 
 class ActionDsl(
     private val variations: List<Variation>,
@@ -173,6 +184,14 @@ class AudiencesDsl {
     }
 }
 
+fun target(init: TargetDsl.() -> Unit): Target {
+    return TargetDsl().apply(init).build()
+}
+
+fun condition(init: TargetDsl.ConditionDsl.() -> Unit): Target.Condition {
+    return TargetDsl.ConditionDsl().apply(init).build()
+}
+
 class TargetDsl {
 
     private val conditions = mutableListOf<Target.Condition>()
@@ -213,11 +232,15 @@ class TargetDsl {
 
 
         internal inline operator fun <reified T : Any> Target.Match.Operator.invoke(vararg values: T) {
-            val match = when (T::class) {
-                String::class -> Target.Match(MATCH, this, STRING, values.toList())
-                Number::class -> Target.Match(MATCH, this, NUMBER, values.toList())
-                Boolean::class -> Target.Match(MATCH, this, BOOLEAN, values.toList())
-                Version::class -> Target.Match(MATCH, this, VERSION, values.map { (it as Version).plainString })
+            val match = when {
+                T::class.isSubclassOf(String::class) -> Target.Match(MATCH, this, STRING, values.toList())
+                T::class.isSubclassOf(Number::class) -> Target.Match(MATCH, this, NUMBER, values.toList())
+                T::class.isSubclassOf(Boolean::class) -> Target.Match(MATCH, this, BOOLEAN, values.toList())
+                T::class.isSubclassOf(Version::class) -> Target.Match(
+                    MATCH,
+                    this,
+                    VERSION,
+                    values.map { (it as Version).plainString })
                 else -> throw IllegalArgumentException("Unsupported type [${T::class.java.simpleName}]")
             }
             match(match)
@@ -253,6 +276,7 @@ class VariationDsl {
 class OverrideDsl(private val variations: List<Variation>) {
 
     private val overrides = mutableMapOf<String, Long>()
+    private val segmentOverrides = mutableListOf<TargetRule>()
 
     operator fun VariationKey.invoke(vararg userIds: String) {
         val variation = variations.first { it.key == this.name }
@@ -261,8 +285,44 @@ class OverrideDsl(private val variations: List<Variation>) {
         }
     }
 
-    fun build(): Map<String, Long> {
-        return overrides
+    operator fun VariationKey.invoke(init: OverrideVariationDsl.() -> Unit) {
+        val (overrides, segmentOverride) =
+            OverrideVariationDsl(variations.first { it.key == this.name }).apply(init).build()
+        this@OverrideDsl.overrides.putAll(overrides)
+        if (segmentOverride != null) {
+            this@OverrideDsl.segmentOverrides.add(segmentOverride)
+        }
+    }
+
+    fun build(): Pair<Map<String, Long>, List<TargetRule>> {
+        return overrides to segmentOverrides
+    }
+
+    class OverrideVariationDsl(private val variation: Variation) {
+
+        private val overrides = mutableMapOf<String, Long>()
+        private var segmentOverride: TargetRule? = null
+
+        fun user(vararg userIds: String) {
+            for (userId in userIds) {
+                overrides[userId] = variation.id
+            }
+        }
+
+        fun segment(vararg segmentKeys: String) {
+            val target = target {
+                condition {
+                    USER_ID("USER_ID")
+                    IN(*segmentKeys)
+                }
+            }
+            val action = Action.Variation(variation.id)
+            segmentOverride = TargetRule(target, action)
+        }
+
+        fun build(): Pair<Map<String, Long>, TargetRule?> {
+            return overrides to segmentOverride
+        }
     }
 }
 
@@ -285,6 +345,23 @@ class BucketDsl(
         return Bucket(id, seed, slotSize, slots).also {
             bucketRegistry.register(it)
         }
+    }
+}
+
+class SegmentDsl(
+    private val id: Long,
+    private val key: String,
+    private val type: Segment.Type,
+) {
+
+    private val targets = mutableListOf<Target>()
+
+    fun target(init: TargetDsl.() -> Unit) {
+        targets += TargetDsl().apply(init).build()
+    }
+
+    fun build(): Segment {
+        return Segment(id, key, type, targets)
     }
 }
 
