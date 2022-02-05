@@ -237,7 +237,7 @@ internal class HackleInternalClientTest {
     inner class Track {
 
         @Test
-        fun `Workspace를 가져오지 못하면 이벤트를 전송하지 않는다`() {
+        fun `Workspace를 가져오지 못하면 Undefined 이벤트를 전송한다`() {
             // given
             every { workspaceFetcher.fetch() } returns null
 
@@ -245,7 +245,18 @@ internal class HackleInternalClientTest {
             sut.track(Event.of("test_event_key"), HackleUser.of("TEST_USER_ID"))
 
             //then
-            verify { eventProcessor wasNot Called }
+            verify(exactly = 1) {
+                eventProcessor.process(withArg {
+                    expectThat(it)
+                        .isA<UserEvent.Track>()
+                        .and {
+                            get { eventType }
+                                .isA<EventType.Undefined>()
+                                .get { key }
+                                .isEqualTo("test_event_key")
+                        }
+                })
+            }
         }
 
         @Test
