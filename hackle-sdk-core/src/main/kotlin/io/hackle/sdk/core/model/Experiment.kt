@@ -9,7 +9,8 @@ data class Experiment(
     val type: Type,
     val status: Status,
     val variations: List<Variation>,
-    val overrides: Map<String, Long>,
+    val userOverrides: Map<String, Long>,
+    val segmentOverrides: List<TargetRule>,
     val targetAudiences: List<Target>,
     val targetRules: List<TargetRule>,
     val defaultRule: Action,
@@ -24,12 +25,6 @@ data class Experiment(
 
     internal fun getVariationOrNull(variationKey: String): Variation? {
         return variations.find { it.key == variationKey }
-    }
-
-    internal fun getOverriddenVariationOrNull(user: HackleUser): Variation? {
-        val overriddenVariationId = overrides[user.id] ?: return null
-        val overriddenVariation = getVariationOrNull(overriddenVariationId)
-        return requireNotNull(overriddenVariation) { "experiment[$id] variation[$overriddenVariationId]" }
     }
 
     enum class Status {

@@ -12,7 +12,10 @@ data class Target(
     data class Key(val type: Type, val name: String) {
 
         enum class Type {
-            HACKLE_PROPERTY, USER_PROPERTY
+            USER_ID,
+            USER_PROPERTY,
+            HACKLE_PROPERTY,
+            SEGMENT
         }
     }
 

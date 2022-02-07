@@ -10,8 +10,10 @@ internal class ConditionMatcherFactoryTest {
     @Test
     fun `getMatcher`() {
         val sut = ConditionMatcherFactory()
-        expectThat(sut.getMatcher(Target.Key.Type.USER_PROPERTY)).isA<PropertyConditionMatcher>()
-        expectThat(sut.getMatcher(Target.Key.Type.HACKLE_PROPERTY)).isA<PropertyConditionMatcher>()
+        expectThat(sut.getMatcher(Target.Key.Type.USER_ID)).isA<UserConditionMatcher>()
+        expectThat(sut.getMatcher(Target.Key.Type.USER_PROPERTY)).isA<UserConditionMatcher>()
+        expectThat(sut.getMatcher(Target.Key.Type.HACKLE_PROPERTY)).isA<UserConditionMatcher>()
+        expectThat(sut.getMatcher(Target.Key.Type.SEGMENT)).isA<SegmentConditionMatcher>()
+
     }
 }
-

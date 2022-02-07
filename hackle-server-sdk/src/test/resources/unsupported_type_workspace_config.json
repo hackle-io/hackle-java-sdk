@@ -28,6 +28,7 @@
         "id": 8634,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [
           {
             "conditions": [
@@ -110,7 +111,6 @@
       },
       "winnerVariationId": null
     },
-
     {
       "id": 22,
       "key": 22,
@@ -132,6 +132,7 @@
         "id": 8634,
         "status": "INVALID_STATUS",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -141,7 +142,6 @@
       },
       "winnerVariationId": null
     },
-
     {
       "id": 33,
       "key": 33,
@@ -163,6 +163,7 @@
         "id": 8634,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -195,6 +196,7 @@
         "id": 8650,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [
           {
@@ -209,7 +211,9 @@
                     "type": "MATCH",
                     "operator": "IN",
                     "valueType": "STRING",
-                    "values": ["value"]
+                    "values": [
+                      "value"
+                    ]
                   }
                 }
               ]
@@ -219,8 +223,6 @@
               "bucketId": 6125
             }
           },
-
-
           {
             "target": {
               "conditions": [
@@ -233,7 +235,9 @@
                     "type": "UNSUPPORTED_TYPE",
                     "operator": "IN",
                     "valueType": "STRING",
-                    "values": ["value"]
+                    "values": [
+                      "value"
+                    ]
                   }
                 }
               ]
@@ -255,7 +259,9 @@
                     "type": "MATCH",
                     "operator": "UNSUPPORTED_TYPE",
                     "valueType": "STRING",
-                    "values": ["value"]
+                    "values": [
+                      "value"
+                    ]
                   }
                 }
               ]
@@ -277,7 +283,9 @@
                     "type": "MATCH",
                     "operator": "IN",
                     "valueType": "UNSUPPORTED_TYPE",
-                    "values": ["value"]
+                    "values": [
+                      "value"
+                    ]
                   }
                 }
               ]
@@ -299,7 +307,9 @@
                     "type": "MATCH",
                     "operator": "IN",
                     "valueType": "STRING",
-                    "values": ["value"]
+                    "values": [
+                      "value"
+                    ]
                   }
                 }
               ]
@@ -319,5 +329,6 @@
     }
   ],
   "buckets": [],
-  "events": []
+  "events": [],
+  "segments": []
 }

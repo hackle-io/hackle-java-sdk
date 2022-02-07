@@ -5,6 +5,7 @@ import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
+import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -29,9 +30,10 @@ internal class EvaluationFlowFactory {
 
         val targetMatcher = TargetMatcher(ConditionMatcherFactory())
         val actionResolver = ActionResolver(Bucketer())
+        val overrideResolver = OverrideResolver(targetMatcher, actionResolver)
 
         val abTestFlow = EvaluationFlow.of(
-            OverrideEvaluator(),
+            OverrideEvaluator(overrideResolver),
             ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
@@ -43,7 +45,7 @@ internal class EvaluationFlowFactory {
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-            OverrideEvaluator(),
+            OverrideEvaluator(overrideResolver),
             TargetRuleEvaluator(TargetRuleDeterminer(targetMatcher), actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )
