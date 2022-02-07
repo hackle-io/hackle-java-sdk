@@ -4,6 +4,7 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
+import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -11,7 +12,9 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
-internal class OverrideEvaluator : FlowEvaluator {
+internal class OverrideEvaluator(
+    private val overrideResolver: OverrideResolver
+) : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
@@ -19,8 +22,7 @@ internal class OverrideEvaluator : FlowEvaluator {
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-
-        val overriddenVariation = experiment.getOverriddenVariationOrNull(user)
+        val overriddenVariation = overrideResolver.resolveOrNull(workspace, experiment, user)
         return if (overriddenVariation != null) {
             when (experiment.type) {
                 AB_TEST -> Evaluation.of(overriddenVariation, DecisionReason.OVERRIDDEN)

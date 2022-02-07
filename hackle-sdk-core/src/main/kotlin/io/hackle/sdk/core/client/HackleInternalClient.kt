@@ -52,8 +52,7 @@ class HackleInternalClient internal constructor(
     }
 
     fun track(event: Event, user: HackleUser) {
-        val workspace = workspaceFetcher.fetch() ?: return
-        val eventType = workspace.getEventTypeOrNull(event.key) ?: EventType.Undefined(event.key)
+        val eventType = workspaceFetcher.fetch()?.getEventTypeOrNull(event.key) ?: EventType.Undefined(event.key)
         eventProcessor.process(UserEvent.track(eventType, event, user))
     }
 

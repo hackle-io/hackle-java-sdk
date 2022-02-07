@@ -28,6 +28,7 @@
         "id": 8630,
         "status": "READY",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -67,6 +68,7 @@
             "variationId": 13381
           }
         ],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -102,6 +104,7 @@
         "id": 8634,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [
           {
             "conditions": [
@@ -202,6 +205,7 @@
         "id": 8636,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [
           {
             "conditions": [
@@ -324,6 +328,7 @@
         "id": 8638,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -354,6 +359,7 @@
         "id": 8640,
         "status": "PAUSED",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -394,6 +400,7 @@
         "id": 8642,
         "status": "STOPPED",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -426,6 +433,7 @@
         "id": 8644,
         "status": "PAUSED",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -456,6 +464,7 @@
         "id": 8646,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -486,6 +495,7 @@
         "id": 8648,
         "status": "RUNNING",
         "userOverrides": [],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [],
         "defaultRule": {
@@ -525,6 +535,7 @@
             "variationId": 13403
           }
         ],
+        "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [
           {
@@ -943,5 +954,6 @@
       "id": 3075,
       "key": "d"
     }
-  ]
+  ],
+  "segments": []
 }

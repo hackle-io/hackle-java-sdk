@@ -455,7 +455,7 @@ internal class WorkspaceImplTest {
     private fun Assertion.Builder<Experiment>.hasOverrides(vararg overrides: Pair<String, Long>) =
         assert("Experiment.overrides") {
             val actual = overrides.toMap()
-            if (it.overrides == actual) {
+            if (it.userOverrides == actual) {
                 pass()
             } else {
                 fail(actual)
