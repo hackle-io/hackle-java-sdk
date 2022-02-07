@@ -12,13 +12,6 @@ internal class ValueOperatorMatcher(
         val isMatched = match.values.any { valueMatcher.matches(operatorMatcher, userValue, it) }
         return match.type.matches(isMatched)
     }
-
-    private fun Target.Match.Type.matches(isMatched: Boolean): Boolean {
-        return when (this) {
-            Target.Match.Type.MATCH -> isMatched
-            Target.Match.Type.NOT_MATCH -> !isMatched
-        }
-    }
 }
 
 internal class ValueOperatorMatcherFactory {

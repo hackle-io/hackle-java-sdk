@@ -36,7 +36,8 @@ internal class SegmentConditionMatcher(
 ) : ConditionMatcher {
     override fun matches(condition: Target.Condition, workspace: Workspace, user: HackleUser): Boolean {
         require(condition.key.type == SEGMENT) { "Unsupported target.key.type [${condition.key.type}]" }
-        return condition.match.values.any { matches(it, workspace, user) }
+        val isMatched = condition.match.values.any { matches(it, workspace, user) }
+        return condition.match.type.matches(isMatched)
     }
 
     private fun matches(value: Any, workspace: Workspace, user: HackleUser): Boolean {
