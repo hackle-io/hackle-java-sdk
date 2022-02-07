@@ -4,6 +4,8 @@ import io.hackle.sdk.core.model.Segment
 import io.hackle.sdk.core.model.Target.Key.Type.SEGMENT
 import io.hackle.sdk.core.model.Target.Key.Type.USER_PROPERTY
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
+import io.hackle.sdk.core.model.Target.Match.Type.NOT_MATCH
+import io.hackle.sdk.core.model.Target.Match.ValueType.STRING
 import io.hackle.sdk.core.model.condition
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.workspace
@@ -108,6 +110,29 @@ internal class SegmentConditionMatcherTest {
 
         // then
         assertTrue(actual)
+        verify(exactly = 2) {
+            segmentMatcher.matches(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `등록된 segment 중 일치하는게 있지만 MatchType 이 NOT_MATCH 면 false`() {
+        // given
+        val condition = condition {
+            key(SEGMENT, "SEGMENT")
+            match(NOT_MATCH, IN, STRING, "seg1", "seg2", "seg3")
+        }
+
+        val workspace = mockk<Workspace>()
+        segment(workspace, "seg1", false)
+        segment(workspace, "seg2", true)
+        segment(workspace, "seg3", false)
+
+        // when
+        val actual = sut.matches(condition, workspace, mockk())
+
+        // then
+        assertFalse(actual)
         verify(exactly = 2) {
             segmentMatcher.matches(any(), any(), any())
         }
