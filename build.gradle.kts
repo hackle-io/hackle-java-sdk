@@ -16,14 +16,13 @@ allprojects {
 subprojects {
 
     group = "io.hackle"
-    version = "2.4.1"
+    version = "2.4.2-SNAPSHOT"
 
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
 
     dependencies {
-        implementation(kotlin("stdlib-jdk8"))
-        implementation(kotlin("reflect"))
+        implementation(kotlin("stdlib"))
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
@@ -36,7 +35,7 @@ subprojects {
         compileKotlin {
             kotlinOptions {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
-                jvmTarget = "1.8"
+                jvmTarget = "1.6"
             }
         }
         compileTestKotlin {

@@ -1,6 +1,5 @@
 package io.hackle.sdk.internal.workspace
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Status.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -12,7 +11,7 @@ import io.hackle.sdk.core.model.Target.Match.Operator.*
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
 import io.hackle.sdk.core.model.Target.Match.Type.NOT_MATCH
 import io.hackle.sdk.core.model.Target.Match.ValueType.*
-import io.hackle.sdk.internal.utils.OBJECT_MAPPER
+import io.hackle.sdk.internal.utils.parseJson
 import org.junit.jupiter.api.Test
 import strikt.api.Assertion
 import strikt.api.expectThat
@@ -26,8 +25,7 @@ internal class WorkspaceImplTest {
     @Test
     fun `workspace config test`() {
         val dto =
-            OBJECT_MAPPER.readValue<WorkspaceDto>(Files.readAllBytes(Paths.get("src/test/resources/workspace_config.json")))
-
+            String(Files.readAllBytes(Paths.get("src/test/resources/workspace_config.json"))).parseJson<WorkspaceDto>()
         val workspace = WorkspaceImpl.from(dto)
 
 
@@ -75,11 +73,11 @@ internal class WorkspaceImplTest {
                             listOf(
                                 Condition(
                                     Key(USER_PROPERTY, "age"),
-                                    Match(MATCH, GTE, NUMBER, listOf(20))
+                                    Match(MATCH, GTE, NUMBER, listOf(20.0))
                                 ),
                                 Condition(
                                     Key(USER_PROPERTY, "age"),
-                                    Match(MATCH, LT, NUMBER, listOf(30))
+                                    Match(MATCH, LT, NUMBER, listOf(30.0))
                                 )
                             )
                         )
@@ -154,11 +152,11 @@ internal class WorkspaceImplTest {
                             listOf(
                                 Condition(
                                     Key(USER_PROPERTY, "point"),
-                                    Match(MATCH, GT, NUMBER, listOf(100))
+                                    Match(MATCH, GT, NUMBER, listOf(100.0))
                                 ),
                                 Condition(
                                     Key(USER_PROPERTY, "point"),
-                                    Match(MATCH, LTE, NUMBER, listOf(200))
+                                    Match(MATCH, LTE, NUMBER, listOf(200.0))
                                 )
                             )
                         )
@@ -406,8 +404,7 @@ internal class WorkspaceImplTest {
     @Test
     fun `Unsupported Type Test`() {
         val dto =
-            OBJECT_MAPPER.readValue<WorkspaceDto>(Files.readAllBytes(Paths.get("src/test/resources/unsupported_type_workspace_config.json")))
-
+            String(Files.readAllBytes(Paths.get("src/test/resources/unsupported_type_workspace_config.json"))).parseJson<WorkspaceDto>()
         val workspace = WorkspaceImpl.from(dto)
 
         expectThat(workspace.getExperimentOrNull(1))
