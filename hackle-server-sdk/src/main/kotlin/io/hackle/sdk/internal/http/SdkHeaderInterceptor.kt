@@ -16,6 +16,7 @@ internal class SdkHeaderInterceptor(
         request.addHeader(SDK_KEY_HEADER, sdk.key)
         request.addHeader(SDK_NAME_HEADER, sdk.name)
         request.addHeader(SDK_VERSION_HEADER, sdk.version)
+        request.addHeader(SDK_TIME_HEADER_NAME, System.currentTimeMillis().toString())
         request.addHeader(USER_AGENT, "${sdk.name}/${sdk.version}")
     }
 
@@ -23,6 +24,7 @@ internal class SdkHeaderInterceptor(
         private const val SDK_KEY_HEADER = "X-HACKLE-SDK-KEY"
         private const val SDK_NAME_HEADER = "X-HACKLE-SDK-NAME"
         private const val SDK_VERSION_HEADER = "X-HACKLE-SDK-VERSION"
+        private const val SDK_TIME_HEADER_NAME = "X-HACKLE-SDK-TIME"
         private const val USER_AGENT = "User-Agent"
     }
 }
