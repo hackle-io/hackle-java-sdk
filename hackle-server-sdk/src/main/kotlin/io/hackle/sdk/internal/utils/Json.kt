@@ -1,14 +1,9 @@
 package io.hackle.sdk.internal.utils
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
-internal val OBJECT_MAPPER: ObjectMapper =
-    jacksonObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+internal val GSON: Gson = GsonBuilder().create()
 
-internal fun Any.toJson(): String = OBJECT_MAPPER.writeValueAsString(this)
-internal inline fun <reified T> String.parseJson(): T = OBJECT_MAPPER.readValue(this)
+internal fun Any.toJson(): String = GSON.toJson(this)
+internal inline fun <reified T> String.parseJson(): T = GSON.fromJson(this, T::class.java)
