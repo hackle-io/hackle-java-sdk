@@ -13,12 +13,16 @@ internal class OverrideResolver(
 ) {
 
     fun resolveOrNull(workspace: Workspace, experiment: Experiment, user: HackleUser): Variation? {
-        val identifier = user.identifiers[experiment.identifierType] ?: return null
-        val overriddenVariationId = experiment.userOverrides[identifier]
-        if (overriddenVariationId != null) {
-            return experiment.getVariationOrNull(overriddenVariationId)
-        }
+        return resolveUserOverride(experiment, user) ?: resolveSegmentOverride(workspace, experiment, user)
+    }
 
+    private fun resolveUserOverride(experiment: Experiment, user: HackleUser): Variation? {
+        val identifier = user.identifiers[experiment.identifierType] ?: return null
+        val overriddenVariationId = experiment.userOverrides[identifier] ?: return null
+        return experiment.getVariationOrNull(overriddenVariationId)
+    }
+
+    private fun resolveSegmentOverride(workspace: Workspace, experiment: Experiment, user: HackleUser): Variation? {
         val overriddenRule =
             experiment.segmentOverrides.find { targetMatcher.matches(it.target, workspace, user) } ?: return null
 
