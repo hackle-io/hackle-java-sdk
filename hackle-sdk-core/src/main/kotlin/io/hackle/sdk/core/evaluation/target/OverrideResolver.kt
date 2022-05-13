@@ -13,7 +13,8 @@ internal class OverrideResolver(
 ) {
 
     fun resolveOrNull(workspace: Workspace, experiment: Experiment, user: HackleUser): Variation? {
-        val overriddenVariationId = experiment.userOverrides[user.id]
+        val identifier = user.identifiers[experiment.identifierType] ?: return null
+        val overriddenVariationId = experiment.userOverrides[identifier]
         if (overriddenVariationId != null) {
             return experiment.getVariationOrNull(overriddenVariationId)
         }

@@ -1,7 +1,10 @@
 package io.hackle.sdk.core.evaluation.action
 
+import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.model.Experiment.Status.RUNNING
+import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -95,18 +98,37 @@ internal class ActionResolverTest {
         }
 
         @Test
+        fun `Experiment identifierType에 해당하는 식별자가 없으면 null을 리턴한다`() {
+            // given
+            val user = HackleUser.of("test_id")
+            val action = Action.Bucket(42)
+            val bucket = mockk<Bucket>()
+            val experiment = experiment(identifierType = "custom_id", type = AB_TEST, status = RUNNING)
+            val workspace = mockk<Workspace> {
+                every { getBucketOrNull(any()) } returns bucket
+            }
+
+            // when
+            val actual = sut.resolveOrNull(action, workspace, experiment, user)
+
+            // then
+            expectThat(actual).isNull()
+        }
+
+        @Test
         fun `슬롯에 할당 안된 사용자는 null을 리턴한다`() {
             // given
             val user = HackleUser.of("test_id")
             val action = Action.Bucket(42)
             val bucket = mockk<Bucket>()
+            val experiment = experiment(identifierType = Identifiers.Type.ID.key, type = AB_TEST, status = RUNNING)
             val workspace = mockk<Workspace> {
                 every { getBucketOrNull(any()) } returns bucket
             }
-            every { bucketer.bucketing(bucket, user) } returns null
+            every { bucketer.bucketing(bucket, any()) } returns null
 
             // when
-            val actual = sut.resolveOrNull(action, workspace, mockk(), user)
+            val actual = sut.resolveOrNull(action, workspace, experiment, user)
 
             // then
             expectThat(actual).isNull()
@@ -122,8 +144,9 @@ internal class ActionResolverTest {
                 every { getBucketOrNull(any()) } returns bucket
             }
             val slot = Slot(0, 100, 320)
-            every { bucketer.bucketing(bucket, user) } returns slot
+            every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
+                every { identifierType } returns Identifiers.Type.ID.key
                 every { getVariationOrNull(320) } returns null
             }
 
@@ -144,8 +167,9 @@ internal class ActionResolverTest {
                 every { getBucketOrNull(any()) } returns bucket
             }
             val slot = Slot(0, 100, 320)
-            every { bucketer.bucketing(bucket, user) } returns slot
+            every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
+                every { identifierType } returns Identifiers.Type.ID.key
                 every { getVariationOrNull(320) } returns Variation(320, "C", false)
             }
 

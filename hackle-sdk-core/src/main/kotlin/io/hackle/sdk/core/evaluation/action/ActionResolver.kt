@@ -32,7 +32,8 @@ internal class ActionResolver(
         user: HackleUser
     ): Variation? {
         val bucket = requireNotNull(workspace.getBucketOrNull(action.bucketId)) { "bucket[${action.bucketId}]" }
-        val allocatedSlot = bucketer.bucketing(bucket, user) ?: return null
+        val identifier = user.identifiers[experiment.identifierType] ?: return null
+        val allocatedSlot = bucketer.bucketing(bucket, identifier) ?: return null
         return experiment.getVariationOrNull(allocatedSlot.variationId)
     }
 }

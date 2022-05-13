@@ -32,6 +32,43 @@ internal class OverrideResolverTest {
     @InjectMockKs
     private lateinit var sut: OverrideResolver
 
+
+    @Test
+    fun `Experiment identifierType 에 해당하는 식별자가 없는 경우 null 리턴`() {
+        // given
+        var experiment: Experiment? = null
+        workspace {
+            experiment = experiment(identifierType = "customId", status = Experiment.Status.DRAFT) {
+                variations(A, B)
+                overrides {
+                    A {
+                        segment("seg_01")
+                    }
+                    B {
+                        user("user_01")
+                    }
+                }
+            }
+            segment(key = "seg_01", type = Segment.Type.USER_ID) {
+                target {
+                    condition {
+                        Target.Key.Type.USER_ID("USER_ID")
+                        Target.Match.Operator.IN("user_01")
+                    }
+                }
+            }
+        }
+
+        val user = HackleUser.of("user_01")
+
+        // when
+        val actual = sut.resolveOrNull(mockk(), experiment!!, user)
+
+        // then
+        expectThat(actual)
+            .isNull()
+    }
+
     @Test
     fun `직접 입력한 override 를 먼저 평가한다`() {
         // given
