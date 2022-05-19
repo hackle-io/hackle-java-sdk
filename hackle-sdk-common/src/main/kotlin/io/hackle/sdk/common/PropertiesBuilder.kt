@@ -5,7 +5,7 @@ import java.util.*
 
 internal class PropertiesBuilder {
 
-    private val properties = mutableMapOf<String, Any>()
+    private val properties = hashMapOf<String, Any>()
 
     fun add(key: String, value: Any): PropertiesBuilder = apply {
         if (isValid(key, value)) {
