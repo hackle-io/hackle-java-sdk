@@ -36,7 +36,8 @@
           "bucketId": 6094
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4319,
@@ -76,7 +77,8 @@
           "bucketId": 6097
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4320,
@@ -182,7 +184,8 @@
           "bucketId": 6100
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4321,
@@ -300,7 +303,8 @@
           "bucketId": 6103
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4322,
@@ -336,7 +340,8 @@
           "bucketId": 6106
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4323,
@@ -367,7 +372,8 @@
           "bucketId": 6109
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4324,
@@ -408,7 +414,8 @@
           "bucketId": 6112
         }
       },
-      "winnerVariationId": 13395
+      "winnerVariationId": 13395,
+      "identifierType": "$id"
     }
   ],
   "featureFlags": [
@@ -441,7 +448,8 @@
           "bucketId": 6115
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4326,
@@ -472,7 +480,8 @@
           "bucketId": 6118
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4327,
@@ -503,7 +512,8 @@
           "bucketId": 6121
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 4328,
@@ -671,7 +681,8 @@
           "bucketId": 6124
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     }
   ],
   "buckets": [

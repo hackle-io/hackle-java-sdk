@@ -7,6 +7,7 @@ data class Experiment(
     val id: Long,
     val key: Long,
     val type: Type,
+    val identifierType: String,
     val status: Status,
     val variations: List<Variation>,
     val userOverrides: Map<String, Long>,

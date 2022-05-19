@@ -23,7 +23,7 @@ internal class UserConditionMatcher(
 internal class UserValueResolver {
     fun resolveOrNull(user: HackleUser, key: Target.Key): Any? {
         return when (key.type) {
-            USER_ID -> user.id
+            USER_ID -> user.identifiers[key.name]
             USER_PROPERTY -> user.properties[key.name]
             HACKLE_PROPERTY -> user.hackleProperties[key.name]
             SEGMENT -> throw IllegalArgumentException("Unsupported target.key.type [${key.type}]")

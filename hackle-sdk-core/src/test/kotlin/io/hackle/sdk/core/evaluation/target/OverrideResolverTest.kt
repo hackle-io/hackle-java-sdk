@@ -33,18 +33,17 @@ internal class OverrideResolverTest {
     private lateinit var sut: OverrideResolver
 
     @Test
-    fun `직접 입력한 override 를 먼저 평가한다`() {
-        // given
+    fun `Experiment identifierType에 해당하는 식별자가 없는 경우 Segement Override 를 평가한다`() {
         var experiment: Experiment? = null
-        workspace {
-            experiment = experiment(status = Experiment.Status.DRAFT) {
+        val workspace = workspace {
+            experiment = experiment(identifierType = "customId", status = Experiment.Status.DRAFT) {
                 variations(A, B)
                 overrides {
                     A {
                         segment("seg_01")
                     }
                     B {
-                        user("user_01")
+                        user("user_02")
                     }
                 }
             }
@@ -58,19 +57,22 @@ internal class OverrideResolverTest {
             }
         }
 
+        every { targetMatcher.matches(any(), any(), any()) } returns true
+
+        val variation = mockk<Variation>()
+        every { actionResolver.resolveOrNull(any(), workspace, experiment!!, any()) } returns variation
+
         val user = HackleUser.of("user_01")
 
         // when
-        val actual = sut.resolveOrNull(mockk(), experiment!!, user)
+        val actual = sut.resolveOrNull(workspace, experiment!!, user)
 
         // then
-        expectThat(actual)
-            .isNotNull()
-            .get { key } isEqualTo "B"
+        expectThat(actual) isSameInstanceAs variation
     }
 
     @Test
-    fun `직접 입력된 override 가 없으면 SegmentOverride 를 확인한다`() {
+    fun `직접 입력으로 override 되어있지 않으면 SegmentOverride 를 확인한다`() {
         var experiment: Experiment? = null
         val workspace = workspace {
             experiment = experiment(status = Experiment.Status.DRAFT) {
@@ -107,6 +109,44 @@ internal class OverrideResolverTest {
         // then
         expectThat(actual) isSameInstanceAs variation
     }
+
+    @Test
+    fun `직접 입력한 override 를 먼저 평가한다`() {
+        // given
+        var experiment: Experiment? = null
+        workspace {
+            experiment = experiment(status = Experiment.Status.DRAFT) {
+                variations(A, B)
+                overrides {
+                    A {
+                        segment("seg_01")
+                    }
+                    B {
+                        user("user_01")
+                    }
+                }
+            }
+            segment(key = "seg_01", type = Segment.Type.USER_ID) {
+                target {
+                    condition {
+                        Target.Key.Type.USER_ID("USER_ID")
+                        Target.Match.Operator.IN("user_01")
+                    }
+                }
+            }
+        }
+
+        val user = HackleUser.of("user_01")
+
+        // when
+        val actual = sut.resolveOrNull(mockk(), experiment!!, user)
+
+        // then
+        expectThat(actual)
+            .isNotNull()
+            .get { key } isEqualTo "B"
+    }
+
 
     @Test
     fun `직접입력, Segment 둘다 override 되어 있지않으면 null 리턴`() {

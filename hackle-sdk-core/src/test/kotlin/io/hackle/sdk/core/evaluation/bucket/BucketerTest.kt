@@ -36,10 +36,8 @@ internal class BucketerTest {
                 every { getSlotOrNull(any()) } returns slot
             }
 
-            val user = HackleUser.of("abc")
-
             // when
-            val actual = sut.bucketing(bucket, user)
+            val actual = sut.bucketing(bucket, "abc")
 
             //then
             expectThat(actual).isSameInstanceAs(slot)
