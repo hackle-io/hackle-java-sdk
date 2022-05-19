@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.common.User
 import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
@@ -23,9 +24,12 @@ internal class UserValueResolverTest {
     @Test
     fun `USER_ID`() {
         val user = HackleUser.of("test_user_id")
-        expectThat(sut.resolveOrNull(user, Target.Key(USER_ID, "USER_ID")))
+        expectThat(sut.resolveOrNull(user, Target.Key(USER_ID, Identifiers.Type.ID.key)))
             .isNotNull()
             .isEqualTo("test_user_id")
+
+        expectThat(sut.resolveOrNull(user, Target.Key(USER_ID, "customId")))
+            .isNull()
     }
 
     @Test

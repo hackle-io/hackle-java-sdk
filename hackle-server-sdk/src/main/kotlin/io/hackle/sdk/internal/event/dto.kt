@@ -1,5 +1,6 @@
 package io.hackle.sdk.internal.event
 
+import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.safe
 
@@ -9,10 +10,14 @@ internal data class EventPayloadDto(
 )
 
 internal data class ExposureEventDto(
+
     val timestamp: Long,
-    val userId: String,
+
+    val userId: String?,
+    val identifiers: Map<String, String>,
     val userProperties: Map<String, Any>,
     val hackleProperties: Map<String, Any>,
+
     val experimentId: Long,
     val experimentKey: Long,
     val experimentType: String,
@@ -23,9 +28,12 @@ internal data class ExposureEventDto(
 
 internal data class TrackEventDto(
     val timestamp: Long,
-    val userId: String,
+
+    val userId: String?,
+    val identifiers: Map<String, String>,
     val userProperties: Map<String, Any>,
     val hackleProperties: Map<String, Any>,
+
     val eventTypeId: Long,
     val eventTypeKey: String,
     val value: Double?,
@@ -51,9 +59,12 @@ internal fun List<UserEvent>.toPayload(): EventPayloadDto {
 
 internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
     timestamp = timestamp,
-    userId = user.id,
+
+    userId = user.identifiers[Identifiers.Type.ID],
+    identifiers = user.identifiers,
     userProperties = user.properties,
     hackleProperties = user.hackleProperties,
+
     experimentId = experiment.id,
     experimentKey = experiment.key,
     experimentType = experiment.type.name,
@@ -64,9 +75,12 @@ internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
 
 internal fun UserEvent.Track.toDto() = TrackEventDto(
     timestamp = timestamp,
-    userId = user.id,
+
+    userId = user.identifiers[Identifiers.Type.ID],
+    identifiers = user.identifiers,
     userProperties = user.properties,
     hackleProperties = user.hackleProperties,
+
     eventTypeId = eventType.id,
     eventTypeKey = eventType.key,
     value = event.value,
