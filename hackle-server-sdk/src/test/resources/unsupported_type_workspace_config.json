@@ -109,7 +109,8 @@
           "bucketId": 6100
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     },
     {
       "id": 22,
@@ -171,7 +172,8 @@
           "bucketId": 6100
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     }
   ],
   "featureFlags": [
@@ -325,7 +327,8 @@
           "bucketId": 5
         }
       },
-      "winnerVariationId": null
+      "winnerVariationId": null,
+      "identifierType": "$id"
     }
   ],
   "buckets": [],

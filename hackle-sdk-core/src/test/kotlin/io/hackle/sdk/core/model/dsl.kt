@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.model
 
+import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
@@ -23,18 +24,20 @@ fun interface BucketRegistry {
 fun experiment(
     id: Long = IdentifierGenerator.generate("experiment"),
     key: Long = IdentifierGenerator.generate("experimentKey"),
+    identifierType: String = Identifiers.Type.ID.key,
     type: Experiment.Type,
     status: Experiment.Status,
     bucketRegistry: BucketRegistry = BucketRegistry.None,
     init: ExperimentDsl.() -> Unit = { variations(A, B) }
 ): Experiment {
-    return ExperimentDsl(id, key, type, status, bucketRegistry).apply(init).build()
+    return ExperimentDsl(id, key, type, identifierType, status, bucketRegistry).apply(init).build()
 }
 
 class ExperimentDsl(
     private val id: Long,
     private val key: Long,
     private val type: Experiment.Type,
+    private val identifierType: String,
     private val status: Experiment.Status,
     private val bucketRegistry: BucketRegistry,
 ) {
@@ -94,6 +97,7 @@ class ExperimentDsl(
             id,
             key,
             type,
+            identifierType,
             status,
             variations,
             overrides,

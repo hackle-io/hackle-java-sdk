@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.workspace
 
+import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -19,10 +20,11 @@ class WorkspaceDsl : BucketRegistry, Workspace {
     fun experiment(
         id: Long = IdentifierGenerator.generate("experiment"),
         key: Long = IdentifierGenerator.generate("experimentKey"),
+        identifierType: String = Identifiers.Type.ID.key,
         status: Experiment.Status,
         init: ExperimentDsl.() -> Unit
     ): Experiment {
-        return ExperimentDsl(id, key, AB_TEST, status, this).apply(init).build().also {
+        return ExperimentDsl(id, key, AB_TEST, identifierType, status, this).apply(init).build().also {
             experiments[it.key] = it
         }
 
@@ -34,7 +36,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
         status: Experiment.Status,
         init: ExperimentDsl.() -> Unit
     ): Experiment {
-        return ExperimentDsl(id, key, FEATURE_FLAG, status, this).apply(init).build().also {
+        return ExperimentDsl(id, key, FEATURE_FLAG, Identifiers.Type.ID.key, status, this).apply(init).build().also {
             featureFlags[it.key] = it
         }
     }
