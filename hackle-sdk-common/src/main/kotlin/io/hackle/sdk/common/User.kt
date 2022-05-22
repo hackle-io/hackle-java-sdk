@@ -4,20 +4,24 @@ package io.hackle.sdk.common
  * @author Yong
  */
 data class User internal constructor(
+    val id: String?,
+    val userId: String?,
+    val deviceId: String?,
     val identifiers: Identifiers,
     val properties: Map<String, Any>,
 ) {
 
-    val id get() = identifiers[Identifiers.Type.ID]
-
     class Builder internal constructor() {
 
-        private val properties = PropertiesBuilder()
+        private var id: String? = null
+        private var userId: String? = null
+        private var deviceId: String? = null
         private val identifiers = Identifiers.builder()
+        private val properties = PropertiesBuilder()
 
-        internal fun id(id: String) = apply { identifiers.add(Identifiers.Type.ID, id) }
-        fun userId(userId: String?) = apply { identifiers.add(Identifiers.Type.USER, userId) }
-        fun deviceId(deviceId: String?) = apply { identifiers.add(Identifiers.Type.DEVICE, deviceId) }
+        internal fun id(id: String) = apply { this.id = id }
+        fun userId(userId: String?) = apply { this.userId = userId }
+        fun deviceId(deviceId: String?) = apply { this.deviceId = deviceId }
         fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
         fun property(key: String, value: Int) = apply { properties.add(key, value) }
         fun property(key: String, value: Long) = apply { properties.add(key, value) }
@@ -27,6 +31,9 @@ data class User internal constructor(
 
         fun build(): User {
             return User(
+                id = id,
+                userId = userId,
+                deviceId = deviceId,
                 identifiers = identifiers.build(),
                 properties = properties.build()
             )

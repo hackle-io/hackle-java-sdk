@@ -11,6 +11,7 @@ import io.hackle.sdk.internal.event.DefaultEventProcessor
 import io.hackle.sdk.internal.event.EventDispatcher
 import io.hackle.sdk.internal.http.SdkHeaderInterceptor
 import io.hackle.sdk.internal.log.Slf4jLogger
+import io.hackle.sdk.internal.user.HackleUserResolver
 import io.hackle.sdk.internal.workspace.HttpWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.PollingWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.Sdk
@@ -96,6 +97,9 @@ object HackleClients {
             eventProcessor = defaultEventProcessor.apply { start() }
         )
 
-        return HackleClientImpl(client = internalClient)
+        return HackleClientImpl(
+            client = internalClient,
+            userResolver = HackleUserResolver()
+        )
     }
 }

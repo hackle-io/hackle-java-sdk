@@ -3,11 +3,22 @@ package io.hackle.sdk.common
 import java.util.*
 
 data class Identifiers internal constructor(
-    private val identifiers: Map<String, String>
-) : Map<String, String> by identifiers {
+    private val identifiers: MutableMap<String, String>
+) {
+
+    val isEmpty: Boolean get() = identifiers.isEmpty()
+
+    operator fun get(type: String): String? {
+        identifiers.isEmpty()
+        return identifiers[type]
+    }
 
     operator fun get(type: Type): String? {
         return get(type.key)
+    }
+
+    fun toBuilder(): Builder {
+        return Builder(identifiers)
     }
 
     enum class Type(val key: String) {
@@ -16,9 +27,11 @@ data class Identifiers internal constructor(
         DEVICE("\$deviceId"),
     }
 
-    internal class Builder {
+    class Builder internal constructor(
+        private val identifiers: MutableMap<String, String>
+    ) {
 
-        private val identifiers = hashMapOf<String, String>()
+        internal constructor() : this(hashMapOf())
 
         fun add(type: Type, value: String?) = apply {
             add(type.key, value)
