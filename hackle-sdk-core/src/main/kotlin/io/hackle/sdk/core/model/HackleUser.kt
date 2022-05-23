@@ -15,8 +15,15 @@ data class HackleUser(
         }
 
         fun of(user: User, hackleProperties: Map<String, Any> = emptyMap()): HackleUser {
+
+            val identifiers = user.identifiers.toBuilder()
+                .add(Identifiers.Type.ID, user.id)
+                .add(Identifiers.Type.DEVICE, user.deviceId)
+                .add(Identifiers.Type.USER, user.userId)
+                .build()
+
             return HackleUser(
-                identifiers = user.identifiers,
+                identifiers = identifiers,
                 properties = user.properties,
                 hackleProperties = hackleProperties
             )
