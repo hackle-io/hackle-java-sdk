@@ -1,6 +1,5 @@
 package io.hackle.sdk.core.model
 
-import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
@@ -24,7 +23,7 @@ fun interface BucketRegistry {
 fun experiment(
     id: Long = IdentifierGenerator.generate("experiment"),
     key: Long = IdentifierGenerator.generate("experimentKey"),
-    identifierType: String = Identifiers.Type.ID.key,
+    identifierType: String = "\$id",
     type: Experiment.Type,
     status: Experiment.Status,
     bucketRegistry: BucketRegistry = BucketRegistry.None,

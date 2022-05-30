@@ -10,7 +10,7 @@ import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
-import io.hackle.sdk.core.model.HackleUser
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
 
 /**

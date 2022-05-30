@@ -1,10 +1,9 @@
-package io.hackle.sdk.core.model
+package io.hackle.sdk.core.user
 
-import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.common.User
 
-data class HackleUser(
-    val identifiers: Identifiers,
+data class HackleUser internal constructor(
+    val identifiers: Map<String, String>,
     val properties: Map<String, Any>,
     val hackleProperties: Map<String, Any>
 ) {
@@ -15,11 +14,11 @@ data class HackleUser(
         }
 
         fun of(user: User, hackleProperties: Map<String, Any> = emptyMap()): HackleUser {
-
-            val identifiers = user.identifiers.toBuilder()
-                .add(Identifiers.Type.ID, user.id)
-                .add(Identifiers.Type.DEVICE, user.deviceId)
-                .add(Identifiers.Type.USER, user.userId)
+            val identifiers = IdentifiersBuilder()
+                .add(user.identifiers)
+                .add(IdentifierType.ID, user.id)
+                .add(IdentifierType.USER, user.userId)
+                .add(IdentifierType.DEVICE, user.deviceId)
                 .build()
 
             return HackleUser(
