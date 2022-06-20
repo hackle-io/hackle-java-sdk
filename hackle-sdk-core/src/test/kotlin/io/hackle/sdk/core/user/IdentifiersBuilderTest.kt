@@ -38,6 +38,24 @@ internal class IdentifiersBuilderTest {
     }
 
     @Test
+    fun `identifier value 는 blank 일 수 없다`() {
+        val identifiers = IdentifiersBuilder()
+            .add("a", " ")
+            .build()
+
+        expectThat(identifiers.isEmpty()).isTrue()
+    }
+
+    @Test
+    fun `identifier value 는 empty 일 수 없다`() {
+        val identifiers = IdentifiersBuilder()
+            .add("a", "")
+            .build()
+
+        expectThat(identifiers.isEmpty()).isTrue()
+    }
+
+    @Test
     fun `build`() {
         // given
 

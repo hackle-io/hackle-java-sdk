@@ -31,6 +31,10 @@ internal class IdentifiersBuilder {
             return false
         }
 
+        if (value.isBlank()) {
+            return false
+        }
+
         return true
     }
 
