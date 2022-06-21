@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.common.Variation.A
+import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
@@ -86,7 +88,12 @@ internal class DefaultRuleEvaluatorTest {
     @Test
     fun `identifierType에 해당하는 식별자가 없으면 다음 플로우를 실행한다`() {
         // given
-        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING, identifierType = "customId")
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING, identifierType = "customId") {
+            variations {
+                A(41, false)
+                B(42, false)
+            }
+        }
 
         val evaluation = mockk<Evaluation>()
         val nextFlow = mockk<EvaluationFlow> {
@@ -94,10 +101,10 @@ internal class DefaultRuleEvaluatorTest {
         }
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "E", nextFlow)
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
 
         // then
-        expectThat(actual) isSameInstanceAs evaluation
+        expectThat(actual) isEqualTo Evaluation(41, "A", DecisionReason.DEFAULT_RULE)
     }
 
     @Test
