@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
+import strikt.assertions.isSameInstanceAs
 import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
@@ -80,6 +81,23 @@ internal class DefaultRuleEvaluatorTest {
         expectThat(exception.message)
             .isNotNull()
             .startsWith("FeatureFlag must decide the Variation")
+    }
+
+    @Test
+    fun `identifierType에 해당하는 식별자가 없으면 다음 플로우를 실행한다`() {
+        // given
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING, identifierType = "customId")
+
+        val evaluation = mockk<Evaluation>()
+        val nextFlow = mockk<EvaluationFlow> {
+            every { evaluate(any(), any(), any(), any()) } returns evaluation
+        }
+
+        // when
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "E", nextFlow)
+
+        // then
+        expectThat(actual) isSameInstanceAs evaluation
     }
 
     @Test
