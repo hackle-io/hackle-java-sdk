@@ -9,7 +9,7 @@ import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.HackleUser
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class OverrideEvaluator(

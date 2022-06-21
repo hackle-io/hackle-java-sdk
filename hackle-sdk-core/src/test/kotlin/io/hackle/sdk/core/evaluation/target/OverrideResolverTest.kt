@@ -4,8 +4,11 @@ import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.Segment
 import io.hackle.sdk.core.model.Target
+import io.hackle.sdk.core.model.Variation
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs

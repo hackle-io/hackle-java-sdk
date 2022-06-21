@@ -9,9 +9,9 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.model.Experiment.Status.*
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target.Key.Type.USER_PROPERTY
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceDsl
 import io.hackle.sdk.core.workspace.WorkspaceFetcher

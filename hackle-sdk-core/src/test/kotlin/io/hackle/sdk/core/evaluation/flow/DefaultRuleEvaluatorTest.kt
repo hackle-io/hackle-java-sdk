@@ -1,7 +1,5 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.Variation.A
-import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
@@ -9,9 +7,9 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
 import io.hackle.sdk.core.model.experiment
+import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK

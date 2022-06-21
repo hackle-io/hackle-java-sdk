@@ -1,10 +1,9 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.common.User
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
+import io.hackle.sdk.core.user.HackleUser
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Test
@@ -24,7 +23,7 @@ internal class UserValueResolverTest {
     @Test
     fun `USER_ID`() {
         val user = HackleUser.of("test_user_id")
-        expectThat(sut.resolveOrNull(user, Target.Key(USER_ID, Identifiers.Type.ID.key)))
+        expectThat(sut.resolveOrNull(user, Target.Key(USER_ID, "\$id")))
             .isNotNull()
             .isEqualTo("test_user_id")
 
