@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
-import strikt.assertions.isSameInstanceAs
 import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
@@ -86,18 +85,13 @@ internal class DefaultRuleEvaluatorTest {
     }
 
     @Test
-    fun `identifierType에 해당하는 식별자가 없으면 다음 플로우를 실행한다`() {
+    fun `identifierType에 해당하는 식별자가 없으면 defaultVariation 을 리턴한다`() {
         // given
         val experiment = experiment(type = FEATURE_FLAG, status = RUNNING, identifierType = "customId") {
             variations {
                 A(41, false)
                 B(42, false)
             }
-        }
-
-        val evaluation = mockk<Evaluation>()
-        val nextFlow = mockk<EvaluationFlow> {
-            every { evaluate(any(), any(), any(), any()) } returns evaluation
         }
 
         // when
