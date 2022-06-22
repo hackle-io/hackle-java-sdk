@@ -6,17 +6,19 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
+import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.utils.tryClose
-import io.hackle.sdk.core.model.HackleUser
+import io.hackle.sdk.internal.user.HackleUserResolver
 
 /**
  * @author Yong
  */
 internal class HackleClientImpl(
-    private val client: HackleInternalClient
+    private val client: HackleInternalClient,
+    private val userResolver: HackleUserResolver,
 ) : HackleClient {
 
     override fun variation(experimentKey: Long, userId: String): Variation {
@@ -41,7 +43,8 @@ internal class HackleClientImpl(
 
     override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
         return try {
-            client.experiment(experimentKey, HackleUser.of(user), defaultVariation)
+            val hackleUser = userResolver.resolveOrNull(user) ?: return Decision.of(defaultVariation, INVALID_INPUT)
+            client.experiment(experimentKey, hackleUser, defaultVariation)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $e" }
             Decision.of(defaultVariation, EXCEPTION)
@@ -62,7 +65,8 @@ internal class HackleClientImpl(
 
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
         return try {
-            client.featureFlag(featureKey, HackleUser.of(user))
+            val hackleUser = userResolver.resolveOrNull(user) ?: return FeatureFlagDecision.off(INVALID_INPUT)
+            client.featureFlag(featureKey, hackleUser)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $e" }
             return FeatureFlagDecision.off(EXCEPTION)
@@ -79,7 +83,8 @@ internal class HackleClientImpl(
 
     override fun track(event: Event, user: User) {
         try {
-            client.track(event, HackleUser.of(user))
+            val hackleUser = userResolver.resolveOrNull(user) ?: return
+            client.track(event, hackleUser)
         } catch (e: Exception) {
             log.error { "Unexpected exception while tracking event[${event.key}]: $e" }
         }

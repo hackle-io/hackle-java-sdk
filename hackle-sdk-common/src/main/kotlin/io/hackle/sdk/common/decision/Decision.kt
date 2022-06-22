@@ -61,6 +61,11 @@ enum class DecisionReason {
     EXCEPTION,
 
     /**
+     * Indicates that the input value is invalid.
+     */
+    INVALID_INPUT,
+
+    /**
      * Indicates that no experiment was found for the experiment key provided by the caller.
      */
     EXPERIMENT_NOT_FOUND,
