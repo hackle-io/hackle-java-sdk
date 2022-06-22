@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.common.Variation.A
+import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
@@ -80,6 +82,23 @@ internal class DefaultRuleEvaluatorTest {
         expectThat(exception.message)
             .isNotNull()
             .startsWith("FeatureFlag must decide the Variation")
+    }
+
+    @Test
+    fun `identifierType에 해당하는 식별자가 없으면 defaultVariation 을 리턴한다`() {
+        // given
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING, identifierType = "customId") {
+            variations {
+                A(41, false)
+                B(42, false)
+            }
+        }
+
+        // when
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
+
+        // then
+        expectThat(actual) isEqualTo Evaluation(41, "A", DecisionReason.DEFAULT_RULE)
     }
 
     @Test
