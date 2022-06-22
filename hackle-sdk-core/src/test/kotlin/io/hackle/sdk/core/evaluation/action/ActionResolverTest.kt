@@ -1,10 +1,10 @@
 package io.hackle.sdk.core.evaluation.action
 
-import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -121,7 +121,7 @@ internal class ActionResolverTest {
             val user = HackleUser.of("test_id")
             val action = Action.Bucket(42)
             val bucket = mockk<Bucket>()
-            val experiment = experiment(identifierType = Identifiers.Type.ID.key, type = AB_TEST, status = RUNNING)
+            val experiment = experiment(identifierType = "\$id", type = AB_TEST, status = RUNNING)
             val workspace = mockk<Workspace> {
                 every { getBucketOrNull(any()) } returns bucket
             }
@@ -146,7 +146,7 @@ internal class ActionResolverTest {
             val slot = Slot(0, 100, 320)
             every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
-                every { identifierType } returns Identifiers.Type.ID.key
+                every { identifierType } returns "\$id"
                 every { getVariationOrNull(320) } returns null
             }
 
@@ -169,7 +169,7 @@ internal class ActionResolverTest {
             val slot = Slot(0, 100, 320)
             every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
-                every { identifierType } returns Identifiers.Type.ID.key
+                every { identifierType } returns "\$id"
                 every { getVariationOrNull(320) } returns Variation(320, "C", false)
             }
 

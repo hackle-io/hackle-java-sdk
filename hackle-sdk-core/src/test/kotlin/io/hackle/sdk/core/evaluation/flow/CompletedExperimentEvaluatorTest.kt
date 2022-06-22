@@ -6,8 +6,8 @@ import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment.Status.COMPLETED
 import io.hackle.sdk.core.model.Experiment.Status.DRAFT
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.experiment
+import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test

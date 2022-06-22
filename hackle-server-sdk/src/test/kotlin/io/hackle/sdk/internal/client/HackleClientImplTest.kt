@@ -8,17 +8,12 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.utils.tryClose
-import io.hackle.sdk.core.model.HackleUser
-import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import io.mockk.verify
+import io.hackle.sdk.core.user.HackleUser
+import io.hackle.sdk.internal.user.HackleUserResolver
+import io.mockk.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
@@ -28,15 +23,21 @@ import strikt.assertions.isTrue
 /**
  * @author Yong
  */
-@ExtendWith(MockKExtension::class)
 internal class HackleClientImplTest {
 
 
-    @RelaxedMockK
     private lateinit var client: HackleInternalClient
 
-    @InjectMockKs
+    private lateinit var userResolver: HackleUserResolver
+
     private lateinit var sut: HackleClientImpl
+
+    @BeforeEach
+    fun beforeEach() {
+        client = mockk()
+        userResolver = HackleUserResolver()
+        sut = HackleClientImpl(client, userResolver)
+    }
 
     @Nested
     inner class VariationTest {
@@ -138,7 +139,7 @@ internal class HackleClientImplTest {
             //then
             expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                client.experiment(42L, io.hackle.sdk.core.model.HackleUser.of("42"), Variation.J)
+                client.experiment(42L, HackleUser.of("42"), Variation.J)
             }
         }
 

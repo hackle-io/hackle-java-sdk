@@ -5,7 +5,7 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.HackleUser
+import io.hackle.sdk.core.user.HackleUser
 
 /**
  * @author Yong

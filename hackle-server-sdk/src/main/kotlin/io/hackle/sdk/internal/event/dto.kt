@@ -1,8 +1,8 @@
 package io.hackle.sdk.internal.event
 
-import io.hackle.sdk.common.Identifiers
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.safe
+import io.hackle.sdk.core.user.IdentifierType
 
 internal data class EventPayloadDto(
     val exposureEvents: List<ExposureEventDto>,
@@ -21,6 +21,7 @@ internal data class ExposureEventDto(
     val experimentId: Long,
     val experimentKey: Long,
     val experimentType: String,
+    val experimentVersion: Int,
     val variationId: Long?,
     val variationKey: String,
     val decisionReason: String
@@ -60,7 +61,7 @@ internal fun List<UserEvent>.toPayload(): EventPayloadDto {
 internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
     timestamp = timestamp,
 
-    userId = user.identifiers[Identifiers.Type.ID],
+    userId = user.identifiers[IdentifierType.ID.key],
     identifiers = user.identifiers,
     userProperties = user.properties,
     hackleProperties = user.hackleProperties,
@@ -68,6 +69,7 @@ internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
     experimentId = experiment.id,
     experimentKey = experiment.key,
     experimentType = experiment.type.name,
+    experimentVersion = experiment.version,
     variationId = variationId,
     variationKey = variationKey,
     decisionReason = decisionReason.name
@@ -76,7 +78,7 @@ internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
 internal fun UserEvent.Track.toDto() = TrackEventDto(
     timestamp = timestamp,
 
-    userId = user.identifiers[Identifiers.Type.ID],
+    userId = user.identifiers[IdentifierType.ID.key],
     identifiers = user.identifiers,
     userProperties = user.properties,
     hackleProperties = user.hackleProperties,

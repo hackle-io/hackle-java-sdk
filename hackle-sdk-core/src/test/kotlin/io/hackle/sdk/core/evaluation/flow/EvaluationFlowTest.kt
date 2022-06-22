@@ -3,8 +3,8 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.mockk
