@@ -34,6 +34,7 @@ internal class EvaluationFlowFactory {
 
         val abTestFlow = EvaluationFlow.of(
             OverrideEvaluator(overrideResolver),
+            ContainerEvaluator(),
             ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),

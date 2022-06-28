@@ -1,11 +1,8 @@
 package io.hackle.sdk.internal.workspace
 
-import io.hackle.sdk.core.model.Bucket
-import io.hackle.sdk.core.model.EventType
-import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.Segment
 import io.hackle.sdk.core.workspace.Workspace
 
 /**
@@ -16,7 +13,8 @@ internal class WorkspaceImpl(
     private val featureFlags: Map<Long, Experiment>,
     private val eventTypes: Map<String, EventType>,
     private val buckets: Map<Long, Bucket>,
-    private val segments: Map<String, Segment>
+    private val segments: Map<String, Segment>,
+    private val containerGroups: Map<Long, ContainerGroup>
 ) : Workspace {
 
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
@@ -38,6 +36,11 @@ internal class WorkspaceImpl(
     override fun getSegmentOrNull(segmentKey: String): Segment? {
         return segments[segmentKey]
     }
+
+    override fun getContainerGroup(containerGroupId: Long): ContainerGroup? {
+        return containerGroups[containerGroupId]
+    }
+
 
     companion object {
         fun from(dto: WorkspaceDto): Workspace {
@@ -62,12 +65,17 @@ internal class WorkspaceImpl(
                     .mapNotNull { it.toSegmentOrNull() }
                     .associateBy { it.key }
 
+            val containerGroups = dto.containers.asSequence()
+                .flatMap { it.groups.map { group -> group.toContainerGroup(it) } }
+                .associateBy { it.containerGroupId }
+
             return WorkspaceImpl(
                 experiments = experiment,
                 featureFlags = featureFlags,
                 eventTypes = eventTypes,
                 buckets = buckets,
                 segments = segments,
+                containerGroups = containerGroups
             )
         }
     }

@@ -1,9 +1,6 @@
 package io.hackle.sdk.core.workspace
 
-import io.hackle.sdk.core.model.Bucket
-import io.hackle.sdk.core.model.EventType
-import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.Segment
+import io.hackle.sdk.core.model.*
 
 /**
  * @author Yong
@@ -19,4 +16,6 @@ interface Workspace {
     fun getBucketOrNull(bucketId: Long): Bucket?
 
     fun getSegmentOrNull(segmentKey: String): Segment?
+
+    fun getContainerGroup(containerGroupId: Long): ContainerGroup?
 }
