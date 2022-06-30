@@ -17,5 +17,5 @@ interface Workspace {
 
     fun getSegmentOrNull(segmentKey: String): Segment?
 
-    fun getContainerGroup(containerGroupId: Long): ContainerGroup?
+    fun getContainerOrNull(containerId: Long): Container?
 }

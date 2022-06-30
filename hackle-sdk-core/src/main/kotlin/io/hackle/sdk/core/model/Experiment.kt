@@ -15,7 +15,7 @@ data class Experiment(
     val targetAudiences: List<Target>,
     val targetRules: List<TargetRule>,
     val defaultRule: Action,
-    val containerGroupId: Long?,
+    val containerId: Long?,
     private val winnerVariationId: Long?
 ) {
 

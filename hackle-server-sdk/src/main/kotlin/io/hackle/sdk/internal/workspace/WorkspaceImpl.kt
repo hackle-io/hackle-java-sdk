@@ -14,7 +14,7 @@ internal class WorkspaceImpl(
     private val eventTypes: Map<String, EventType>,
     private val buckets: Map<Long, Bucket>,
     private val segments: Map<String, Segment>,
-    private val containerGroups: Map<Long, ContainerGroup>
+    private val containers: Map<Long, Container>
 ) : Workspace {
 
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
@@ -37,8 +37,8 @@ internal class WorkspaceImpl(
         return segments[segmentKey]
     }
 
-    override fun getContainerGroup(containerGroupId: Long): ContainerGroup? {
-        return containerGroups[containerGroupId]
+    override fun getContainerOrNull(containerId: Long): Container? {
+        return containers[containerId]
     }
 
 
@@ -65,9 +65,9 @@ internal class WorkspaceImpl(
                     .mapNotNull { it.toSegmentOrNull() }
                     .associateBy { it.key }
 
-            val containerGroups = dto.containers.asSequence()
-                .flatMap { it.groups.map { group -> group.toContainerGroup(it) } }
-                .associateBy { it.containerGroupId }
+            val containers = dto.containers.asSequence()
+                .mapNotNull { it.toContainer() }
+                .associateBy { it.containerId }
 
             return WorkspaceImpl(
                 experiments = experiment,
@@ -75,7 +75,7 @@ internal class WorkspaceImpl(
                 eventTypes = eventTypes,
                 buckets = buckets,
                 segments = segments,
-                containerGroups = containerGroups
+                containers = containers
             )
         }
     }

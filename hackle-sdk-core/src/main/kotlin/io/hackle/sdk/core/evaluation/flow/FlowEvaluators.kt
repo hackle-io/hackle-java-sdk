@@ -1,10 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.bucket.Bucketer
+import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
@@ -180,7 +179,9 @@ internal class DefaultRuleEvaluator(
     }
 }
 
-internal class ContainerEvaluator: FlowEvaluator {
+internal class ContainerEvaluator(
+    private val containerResolver: ContainerResolver
+): FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
@@ -188,20 +189,13 @@ internal class ContainerEvaluator: FlowEvaluator {
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        if (experiment.containerGroupId == null) {
-            return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
-        }
+        val identifier = user.identifiers[experiment.identifierType] ?: return Evaluation.of(
+            experiment,
+            defaultVariationKey,
+            DecisionReason.TRAFFIC_NOT_ALLOCATED
+        )
 
-        val containerGroup = workspace.getContainerGroup(experiment.containerGroupId)
-        requireNotNull(containerGroup) { "container group not exist. containerGroupId = ${experiment.containerGroupId}" }
-        val bucket = workspace.getBucketOrNull(containerGroup.container.bucketId)
-        requireNotNull(bucket) { "container group bucket not exist. bucketId = ${containerGroup.container.bucketId}" }
-
-        val identifier = user.identifiers[experiment.identifierType] ?: return Evaluation.of(experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
-
-        val bucketer = Bucketer()
-        val allocatedSlot = bucketer.bucketing(bucket, identifier)
-        return if (allocatedSlot != null && allocatedSlot.variationId == containerGroup.containerGroupId) {
+        return if (containerResolver.resolve(workspace, experiment, identifier)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
             Evaluation.of(experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
