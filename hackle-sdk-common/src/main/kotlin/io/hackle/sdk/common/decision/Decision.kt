@@ -96,6 +96,16 @@ enum class DecisionReason {
     TRAFFIC_NOT_ALLOCATED,
 
     /**
+     * Indicates that the experiment is running but the user is not allocated to the container.
+     */
+    CONTAINER_NOT_ALLOCATED,
+
+    /**
+     * Indicates that no found identifier of experiment for the user provided by the caller.
+     */
+    IDENTIFIER_NOT_FOUND,
+
+    /**
      * Indicates that the original decided variation has been dropped.
      */
     VARIATION_DROPPED,

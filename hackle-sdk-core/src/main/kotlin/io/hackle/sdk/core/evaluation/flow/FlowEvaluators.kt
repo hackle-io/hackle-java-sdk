@@ -200,13 +200,13 @@ internal class ContainerEvaluator(
         val identifier = user.identifiers[experiment.identifierType] ?: return Evaluation.of(
             experiment,
             defaultVariationKey,
-            DecisionReason.TRAFFIC_NOT_ALLOCATED
+            DecisionReason.IDENTIFIER_NOT_FOUND
         )
 
         return if (containerResolver.resolve(workspace, experiment, identifier)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
+            Evaluation.of(experiment, defaultVariationKey, DecisionReason.CONTAINER_NOT_ALLOCATED)
         }
     }
 }

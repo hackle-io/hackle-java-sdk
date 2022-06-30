@@ -2,7 +2,6 @@ package io.hackle.sdk.core.evaluation.container
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class ContainerResolver(
