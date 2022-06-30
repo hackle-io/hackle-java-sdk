@@ -197,11 +197,8 @@ internal class ContainerEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        val identifier = user.identifiers[experiment.identifierType] ?: return Evaluation.of(
-            experiment,
-            defaultVariationKey,
-            DecisionReason.IDENTIFIER_NOT_FOUND
-        )
+        val identifier = user.identifiers[experiment.identifierType] ?:
+        return Evaluation.of(experiment, defaultVariationKey, DecisionReason.IDENTIFIER_NOT_FOUND)
 
         return if (containerResolver.resolve(workspace, experiment, identifier)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
