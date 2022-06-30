@@ -10,7 +10,7 @@ import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.HackleUser
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class OverrideEvaluator(
@@ -146,6 +146,10 @@ internal class TargetRuleEvaluator(
         require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
+        if (user.identifiers[experiment.identifierType] == null) {
+            return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
+        }
+
         val targetRule = targetRuleDeterminer.determineTargetRuleOrNull(workspace, experiment, user)
             ?: return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
 
@@ -169,6 +173,10 @@ internal class DefaultRuleEvaluator(
     ): Evaluation {
         require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
+
+        if (user.identifiers[experiment.identifierType] == null) {
+            return Evaluation.of(experiment, defaultVariationKey, DecisionReason.DEFAULT_RULE)
+        }
 
         val variation =
             requireNotNull(actionResolver.resolveOrNull(experiment.defaultRule, workspace, experiment, user)) {

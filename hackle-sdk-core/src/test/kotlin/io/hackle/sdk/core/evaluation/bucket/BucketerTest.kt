@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.evaluation.bucket
 
 import io.hackle.sdk.core.model.Bucket
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Slot
 import io.mockk.every
 import io.mockk.mockk

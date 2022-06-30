@@ -9,6 +9,7 @@ data class Experiment(
     val type: Type,
     val identifierType: String,
     val status: Status,
+    val version: Int,
     val variations: List<Variation>,
     val userOverrides: Map<String, Long>,
     val segmentOverrides: List<TargetRule>,

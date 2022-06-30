@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Target
+import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class TargetMatcher(

@@ -9,9 +9,9 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.Variation
 import io.hackle.sdk.core.model.experiment
+import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -82,6 +82,23 @@ internal class DefaultRuleEvaluatorTest {
         expectThat(exception.message)
             .isNotNull()
             .startsWith("FeatureFlag must decide the Variation")
+    }
+
+    @Test
+    fun `identifierType에 해당하는 식별자가 없으면 defaultVariation 을 리턴한다`() {
+        // given
+        val experiment = experiment(type = FEATURE_FLAG, status = RUNNING, identifierType = "customId") {
+            variations {
+                A(41, false)
+                B(42, false)
+            }
+        }
+
+        // when
+        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
+
+        // then
+        expectThat(actual) isEqualTo Evaluation(41, "A", DecisionReason.DEFAULT_RULE)
     }
 
     @Test

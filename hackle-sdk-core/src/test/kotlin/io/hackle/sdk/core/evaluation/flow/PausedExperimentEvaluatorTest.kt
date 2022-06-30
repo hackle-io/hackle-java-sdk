@@ -5,8 +5,8 @@ import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.HackleUser
 import io.hackle.sdk.core.model.experiment
+import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
