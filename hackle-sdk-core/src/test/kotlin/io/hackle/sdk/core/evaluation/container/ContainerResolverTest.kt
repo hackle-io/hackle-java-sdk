@@ -73,7 +73,7 @@ internal class ContainerResolverTest{
     }
 
     @Test
-    fun `bucketing 결과 sloat 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
+    fun `bucketing 결과 slot 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
         val bucket = mockk<Bucket>()
         val container = mockk<Container> {
             every { containerId } returns 1
@@ -124,7 +124,7 @@ internal class ContainerResolverTest{
         val container = mockk<Container> {
             every { containerId } returns 1
             every { bucketId } returns 1
-            every { findGroup(any()) } returns ContainerGroup(12, listOf(experimentId))
+            every { findGroup(any()) } returns ContainerGroup(22, listOf(23L))
         }
         val workspace = mockk<Workspace> {
             every { getContainerOrNull(1) } returns container
@@ -149,7 +149,7 @@ internal class ContainerResolverTest{
         val container = mockk<Container> {
             every { containerId } returns 1
             every { bucketId } returns 1
-            every { findGroup(slot.variationId) } returns ContainerGroup(12, listOf(experimentId))
+            every { findGroup(slot.variationId) } returns ContainerGroup(22, listOf(experimentId))
         }
         val workspace = mockk<Workspace> {
             every { getContainerOrNull(1) } returns container
