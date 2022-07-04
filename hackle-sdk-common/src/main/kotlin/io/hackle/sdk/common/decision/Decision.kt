@@ -96,10 +96,10 @@ enum class DecisionReason {
     TRAFFIC_NOT_ALLOCATED,
 
     /**
-     * Indicates that the experiment is running but the user is not allocated to the container.
+     * Indicates that the experiment is running but the user is not allocated to the mutual exclusion experiment.
      */
-    CONTAINER_NOT_ALLOCATED,
-
+    NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT,
+    
     /**
      * Indicates that no found identifier of experiment for the user provided by the caller.
      */

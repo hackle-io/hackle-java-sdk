@@ -1,7 +1,9 @@
-package io.hackle.sdk.core.evaluation.container
+package io.hackle.sdk.core.evaluation.mutualexclusion
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.user.HackleUser
+import io.hackle.sdk.core.user.IdentifierType
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.workspace
 import io.mockk.every
@@ -19,42 +21,42 @@ import strikt.assertions.isTrue
 import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
-internal class ContainerResolverTest{
+internal class MutualExclusionResolverTest{
 
     @MockK
     private lateinit var bucketer: Bucketer
 
     @InjectMockKs
-    private lateinit var sut: ContainerResolver
+    private lateinit var sut: MutualExclusionResolver
 
-    private val identifier = "test_id"
+    private val user = HackleUser.of("test_id")
 
     @Test
-    fun `container에 속하지 않은 실험은 Next Flow로 진행한다`() {
+    fun `상호배타에 속하지 않은 실험은 Next Flow로 진행한다`() {
         val workspace = workspace {}
         val experiment = mockk<Experiment> {
             every { containerId } returns null
         }
 
-        val actual = sut.resolve(workspace, experiment, identifier)
+        val actual = sut.resolve(workspace, experiment, user)
 
         expectThat(actual).isTrue()
     }
 
     @Test
-    fun `container에 속해있지만 container 정보를 찾을 수 없을때 Exception 발생`() {
+    fun `상호배타에 속해있지만 container 정보를 찾을 수 없을때 Exception 발생`() {
         val workspace = workspace {}
         val experiment = mockk<Experiment> {
             every { containerId } returns 1
         }
 
-        val actual = assertThrows<IllegalArgumentException> { sut.resolve(workspace, experiment, identifier) }
+        val actual = assertThrows<IllegalArgumentException> { sut.resolve(workspace, experiment, user) }
 
         expectThat(actual.message).isNotNull().startsWith("container group not exist.")
     }
 
     @Test
-    fun `container에 속해있지만 container Bucket 정보를 찾을 수 없을때 Exception 발생`() {
+    fun `상호배타에 속해있지만 container Bucket 정보를 찾을 수 없을때 Exception 발생`() {
         val container = mockk<Container> {
             every { containerId } returns 1
             every { bucketId } returns 1
@@ -67,7 +69,7 @@ internal class ContainerResolverTest{
             every { containerId } returns 1
         }
 
-        val actual = assertThrows<IllegalArgumentException> { sut.resolve(workspace, experiment, identifier) }
+        val actual = assertThrows<IllegalArgumentException> { sut.resolve(workspace, experiment, user) }
 
         expectThat(actual.message).isNotNull().startsWith("container group bucket not exist.")
     }
@@ -84,11 +86,13 @@ internal class ContainerResolverTest{
             every { getBucketOrNull(any()) } returns bucket
         }
         val experiment = mockk<Experiment> {
+            every { id } returns 1
             every { containerId } returns 1
+            every { identifierType } returns IdentifierType.ID.key
         }
         every { bucketer.bucketing(bucket, any()) } returns null
 
-        val actual = sut.resolve(workspace, experiment, identifier)
+        val actual = sut.resolve(workspace, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -107,11 +111,13 @@ internal class ContainerResolverTest{
             every { getBucketOrNull(any()) } returns bucket
         }
         val experiment = mockk<Experiment> {
+            every { id } returns 1
             every { containerId } returns 1
+            every { identifierType } returns IdentifierType.ID.key
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.resolve(workspace, experiment, identifier)
+        val actual = sut.resolve(workspace, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -133,10 +139,11 @@ internal class ContainerResolverTest{
         val experiment = mockk<Experiment> {
             every { id } returns 1
             every { containerId } returns 1
+            every { identifierType } returns IdentifierType.ID.key
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.resolve(workspace, experiment, identifier)
+        val actual = sut.resolve(workspace, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -158,10 +165,11 @@ internal class ContainerResolverTest{
         val experiment = mockk<Experiment> {
             every { id } returns experimentId
             every { containerId } returns 1
+            every { identifierType } returns IdentifierType.ID.key
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.resolve(workspace, experiment, identifier)
+        val actual = sut.resolve(workspace, experiment, user)
 
         expectThat(actual).isTrue()
     }

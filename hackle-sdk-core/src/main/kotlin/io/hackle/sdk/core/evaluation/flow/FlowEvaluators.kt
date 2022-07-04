@@ -3,7 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.container.ContainerResolver
+import io.hackle.sdk.core.evaluation.mutualexclusion.MutualExclusionResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
@@ -187,8 +187,8 @@ internal class DefaultRuleEvaluator(
     }
 }
 
-internal class ContainerEvaluator(
-    private val containerResolver: ContainerResolver
+internal class MutableExclusionEvaluator(
+    private val mutualExclusionResolver: MutualExclusionResolver
 ): FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
@@ -197,13 +197,26 @@ internal class ContainerEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        val identifier = user.identifiers[experiment.identifierType] ?:
-        return Evaluation.of(experiment, defaultVariationKey, DecisionReason.IDENTIFIER_NOT_FOUND)
-
-        return if (containerResolver.resolve(workspace, experiment, identifier)) {
+        return if (mutualExclusionResolver.resolve(workspace, experiment, user)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(experiment, defaultVariationKey, DecisionReason.CONTAINER_NOT_ALLOCATED)
+            Evaluation.of(experiment, defaultVariationKey, DecisionReason.NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT)
+        }
+    }
+}
+
+internal class IdentifierEvaluator : FlowEvaluator {
+    override fun evaluate(
+        workspace: Workspace,
+        experiment: Experiment,
+        user: HackleUser,
+        defaultVariationKey: String,
+        nextFlow: EvaluationFlow
+    ): Evaluation {
+        return if (user.identifiers[experiment.identifierType] != null) {
+            nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
+        } else {
+            Evaluation.of(experiment, defaultVariationKey, DecisionReason.IDENTIFIER_NOT_FOUND)
         }
     }
 }
