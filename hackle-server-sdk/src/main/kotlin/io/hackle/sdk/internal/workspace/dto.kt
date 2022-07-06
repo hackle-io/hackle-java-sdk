@@ -107,6 +107,5 @@ internal data class ContainerDto(
 
 internal data class ContainerGroupDto(
     val id: Long,
-    val containerId: Long,
     val experiments: List<Long>
 )
