@@ -67,7 +67,7 @@ internal class WorkspaceImpl(
 
             val containers = dto.containers.asSequence()
                 .mapNotNull { it.toContainer() }
-                .associateBy { it.containerId }
+                .associateBy { it.id }
 
             return WorkspaceImpl(
                 experiments = experiment,

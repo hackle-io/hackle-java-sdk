@@ -128,12 +128,12 @@ internal fun SegmentDto.toSegmentOrNull(): Segment? {
 }
 
 internal fun ContainerDto.toContainer() = Container (
-    containerId = containerId,
+    id = id,
     bucketId = bucketId,
     groups = groups.map { it.toContainerGroup() }
 )
 
 internal fun ContainerGroupDto.toContainerGroup() = ContainerGroup(
-    containerGroupId = containerGroupId,
+    id = id,
     experiments = experiments
 )

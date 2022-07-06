@@ -99,14 +99,14 @@ internal data class SegmentDto(
 )
 
 internal data class ContainerDto(
-    val containerId: Long,
+    val id: Long,
     val environmentId: Long,
     val bucketId: Long,
     val groups: List<ContainerGroupDto>
 )
 
 internal data class ContainerGroupDto(
-    val containerGroupId: Long,
+    val id: Long,
     val containerId: Long,
     val experiments: List<Long>
 )

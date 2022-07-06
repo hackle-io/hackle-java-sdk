@@ -1,6 +1,6 @@
 package io.hackle.sdk.core.model
 
 data class ContainerGroup (
-    val containerGroupId: Long,
+    val id: Long,
     val experiments: List<Long>
 )

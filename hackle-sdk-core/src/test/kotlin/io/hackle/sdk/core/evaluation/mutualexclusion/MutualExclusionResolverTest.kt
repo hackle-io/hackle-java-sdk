@@ -58,7 +58,7 @@ internal class MutualExclusionResolverTest{
     @Test
     fun `상호배타에 속해있지만 container Bucket 정보를 찾을 수 없을때 Exception 발생`() {
         val container = mockk<Container> {
-            every { containerId } returns 1
+            every { id } returns 1
             every { bucketId } returns 1
         }
         val workspace = mockk<Workspace> {
@@ -78,7 +78,7 @@ internal class MutualExclusionResolverTest{
     fun `bucketing 결과 slot 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
         val bucket = mockk<Bucket>()
         val container = mockk<Container> {
-            every { containerId } returns 1
+            every { id } returns 1
             every { bucketId } returns 1
         }
         val workspace = mockk<Workspace> {
@@ -102,7 +102,7 @@ internal class MutualExclusionResolverTest{
         val slot = Slot(0, 100, 320)
         val bucket = mockk<Bucket>()
         val container = mockk<Container> {
-            every { containerId } returns 1
+            every { id } returns 1
             every { bucketId } returns 1
             every { findGroup(any()) } returns null
         }
@@ -128,7 +128,7 @@ internal class MutualExclusionResolverTest{
         val slot = Slot(0, 100, 22)
         val bucket = mockk<Bucket>()
         val container = mockk<Container> {
-            every { containerId } returns 1
+            every { id } returns 1
             every { bucketId } returns 1
             every { findGroup(any()) } returns ContainerGroup(22, listOf(23L))
         }
@@ -154,7 +154,7 @@ internal class MutualExclusionResolverTest{
         val slot = Slot(0, 100, 22)
         val bucket = mockk<Bucket>()
         val container = mockk<Container> {
-            every { containerId } returns 1
+            every { id } returns 1
             every { bucketId } returns 1
             every { findGroup(slot.variationId) } returns ContainerGroup(22, listOf(experimentId))
         }
