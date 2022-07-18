@@ -38,7 +38,7 @@ internal class MutualExclusionResolverTest{
             every { containerId } returns null
         }
 
-        val actual = sut.resolve(workspace, experiment, user)
+        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
 
         expectThat(actual).isTrue()
     }
@@ -50,7 +50,7 @@ internal class MutualExclusionResolverTest{
             every { containerId } returns 1
         }
 
-        val actual = assertThrows<IllegalArgumentException> { sut.resolve(workspace, experiment, user) }
+        val actual = assertThrows<IllegalArgumentException> { sut.isMutualExclusionGroup(workspace, experiment, user) }
 
         expectThat(actual.message).isNotNull().startsWith("container group not exist.")
     }
@@ -69,7 +69,7 @@ internal class MutualExclusionResolverTest{
             every { containerId } returns 1
         }
 
-        val actual = assertThrows<IllegalArgumentException> { sut.resolve(workspace, experiment, user) }
+        val actual = assertThrows<IllegalArgumentException> { sut.isMutualExclusionGroup(workspace, experiment, user) }
 
         expectThat(actual.message).isNotNull().startsWith("container group bucket not exist.")
     }
@@ -92,7 +92,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns null
 
-        val actual = sut.resolve(workspace, experiment, user)
+        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -117,7 +117,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.resolve(workspace, experiment, user)
+        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -143,7 +143,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.resolve(workspace, experiment, user)
+        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -169,7 +169,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.resolve(workspace, experiment, user)
+        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
 
         expectThat(actual).isTrue()
     }

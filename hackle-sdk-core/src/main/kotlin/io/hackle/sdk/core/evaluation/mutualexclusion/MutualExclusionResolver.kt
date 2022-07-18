@@ -9,7 +9,7 @@ internal class MutualExclusionResolver(
     private val bucketer: Bucketer
 ) {
 
-    fun resolve(workspace: Workspace, experiment: Experiment, user: HackleUser): Boolean {
+    fun isMutualExclusionGroup(workspace: Workspace, experiment: Experiment, user: HackleUser): Boolean {
         if (experiment.containerId == null) {
             return true
         }

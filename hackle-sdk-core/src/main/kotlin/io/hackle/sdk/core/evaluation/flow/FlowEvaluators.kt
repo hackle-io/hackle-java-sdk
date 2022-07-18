@@ -197,7 +197,7 @@ internal class MutableExclusionEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        return if (mutualExclusionResolver.resolve(workspace, experiment, user)) {
+        return if (mutualExclusionResolver.isMutualExclusionGroup(workspace, experiment, user)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
             Evaluation.of(experiment, defaultVariationKey, DecisionReason.NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT)
