@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.evaluation.mutualexclusion
+package io.hackle.sdk.core.evaluation.container
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.Bucket

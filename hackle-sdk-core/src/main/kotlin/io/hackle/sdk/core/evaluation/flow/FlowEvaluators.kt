@@ -3,7 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.mutualexclusion.ContainerResolver
+import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer

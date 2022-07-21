@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.mutualexclusion.ContainerResolver
+import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
