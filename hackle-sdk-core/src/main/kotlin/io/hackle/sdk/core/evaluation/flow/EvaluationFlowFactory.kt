@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.mutualexclusion.MutualExclusionResolver
+import io.hackle.sdk.core.evaluation.mutualexclusion.ContainerResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
@@ -32,12 +32,12 @@ internal class EvaluationFlowFactory {
         val targetMatcher = TargetMatcher(ConditionMatcherFactory())
         val actionResolver = ActionResolver(Bucketer())
         val overrideResolver = OverrideResolver(targetMatcher, actionResolver)
-        val mutualExclusionResolver = MutualExclusionResolver(Bucketer())
+        val containerResolver = ContainerResolver(Bucketer())
 
         val abTestFlow = EvaluationFlow.of(
             OverrideEvaluator(overrideResolver),
             IdentifierEvaluator(),
-            MutableExclusionEvaluator(mutualExclusionResolver),
+            ContainerEvaluator(containerResolver),
             ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),

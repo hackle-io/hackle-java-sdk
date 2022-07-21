@@ -3,7 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.mutualexclusion.MutualExclusionResolver
+import io.hackle.sdk.core.evaluation.mutualexclusion.ContainerResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
@@ -187,8 +187,8 @@ internal class DefaultRuleEvaluator(
     }
 }
 
-internal class MutableExclusionEvaluator(
-    private val mutualExclusionResolver: MutualExclusionResolver
+internal class ContainerEvaluator(
+    private val containerResolver: ContainerResolver
 ): FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
@@ -197,7 +197,14 @@ internal class MutableExclusionEvaluator(
         defaultVariationKey: String,
         nextFlow: EvaluationFlow
     ): Evaluation {
-        return if (mutualExclusionResolver.isMutualExclusionGroup(workspace, experiment, user)) {
+        val containerId =
+            experiment.containerId ?: return nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
+        val container = workspace.getContainerOrNull(containerId)
+        requireNotNull(container) { "container group not exist. containerId = ${experiment.containerId}" }
+        val bucket = workspace.getBucketOrNull(container.bucketId)
+        requireNotNull(bucket) { "container group bucket not exist. bucketId = ${container.bucketId}" }
+
+        return if (containerResolver.isUserInContainerGroup(container, bucket, experiment, user)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
             Evaluation.of(experiment, defaultVariationKey, DecisionReason.NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT)
