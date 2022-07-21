@@ -21,7 +21,7 @@ internal class MutualExclusionResolver(
         val identifier = user.identifiers[experiment.identifierType] ?: return false
 
         val allocatedSlot = bucketer.bucketing(bucket, identifier) ?: return false
-        val containerGroup = container.findGroup(allocatedSlot.variationId) ?: return false
+        val containerGroup = container.getGroupOrNull(allocatedSlot.variationId) ?: return false
         return containerGroup.experiments.contains(experiment.id)
     }
 

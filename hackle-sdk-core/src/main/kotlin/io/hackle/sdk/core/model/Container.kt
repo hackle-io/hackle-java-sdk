@@ -6,7 +6,7 @@ class Container (
     val groups: List<ContainerGroup>
 ) {
 
-    fun findGroup(containerGroupId: Long): ContainerGroup? {
+    fun getGroupOrNull(containerGroupId: Long): ContainerGroup? {
         return groups.firstOrNull { it.id == containerGroupId }
     }
 }

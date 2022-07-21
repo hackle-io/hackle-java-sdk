@@ -104,7 +104,7 @@ internal class MutualExclusionResolverTest{
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
-            every { findGroup(any()) } returns null
+            every { getGroupOrNull(any()) } returns null
         }
         val workspace = mockk<Workspace> {
             every { getContainerOrNull(1) } returns container
@@ -130,7 +130,7 @@ internal class MutualExclusionResolverTest{
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
-            every { findGroup(any()) } returns ContainerGroup(22, listOf(23L))
+            every { getGroupOrNull(any()) } returns ContainerGroup(22, listOf(23L))
         }
         val workspace = mockk<Workspace> {
             every { getContainerOrNull(1) } returns container
@@ -156,7 +156,7 @@ internal class MutualExclusionResolverTest{
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
-            every { findGroup(slot.variationId) } returns ContainerGroup(22, listOf(experimentId))
+            every { getGroupOrNull(slot.variationId) } returns ContainerGroup(22, listOf(experimentId))
         }
         val workspace = mockk<Workspace> {
             every { getContainerOrNull(1) } returns container

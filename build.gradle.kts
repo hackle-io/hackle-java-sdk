@@ -10,13 +10,14 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
+        mavenLocal()
     }
 }
 
 subprojects {
 
     group = "io.hackle"
-    version = "2.5.2-SNAPSHOT"
+    version = "2.6.0"
 
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
