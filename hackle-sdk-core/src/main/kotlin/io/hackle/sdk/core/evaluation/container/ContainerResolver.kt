@@ -5,7 +5,6 @@ import io.hackle.sdk.core.model.Bucket
 import io.hackle.sdk.core.model.Container
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
 
 internal class ContainerResolver(
     private val bucketer: Bucketer

@@ -1,78 +1,31 @@
-package io.hackle.sdk.core.evaluation.mutualexclusion
+package io.hackle.sdk.core.evaluation.container
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.user.IdentifierType
 import io.hackle.sdk.core.workspace.Workspace
-import io.hackle.sdk.core.workspace.workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isFalse
-import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
-import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
-internal class MutualExclusionResolverTest{
+internal class ContainerResolverTest{
 
     @MockK
     private lateinit var bucketer: Bucketer
 
     @InjectMockKs
-    private lateinit var sut: MutualExclusionResolver
+    private lateinit var sut: ContainerResolver
 
     private val user = HackleUser.of("test_id")
-
-    @Test
-    fun `상호배타에 속하지 않은 실험은 Next Flow로 진행한다`() {
-        val workspace = workspace {}
-        val experiment = mockk<Experiment> {
-            every { containerId } returns null
-        }
-
-        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
-
-        expectThat(actual).isTrue()
-    }
-
-    @Test
-    fun `상호배타에 속해있지만 container 정보를 찾을 수 없을때 Exception 발생`() {
-        val workspace = workspace {}
-        val experiment = mockk<Experiment> {
-            every { containerId } returns 1
-        }
-
-        val actual = assertThrows<IllegalArgumentException> { sut.isMutualExclusionGroup(workspace, experiment, user) }
-
-        expectThat(actual.message).isNotNull().startsWith("container group not exist.")
-    }
-
-    @Test
-    fun `상호배타에 속해있지만 container Bucket 정보를 찾을 수 없을때 Exception 발생`() {
-        val container = mockk<Container> {
-            every { id } returns 1
-            every { bucketId } returns 1
-        }
-        val workspace = mockk<Workspace> {
-            every { getContainerOrNull(1) } returns container
-            every { getBucketOrNull(1) } answers {null}
-        }
-        val experiment = mockk<Experiment> {
-            every { containerId } returns 1
-        }
-
-        val actual = assertThrows<IllegalArgumentException> { sut.isMutualExclusionGroup(workspace, experiment, user) }
-
-        expectThat(actual.message).isNotNull().startsWith("container group bucket not exist.")
-    }
 
     @Test
     fun `bucketing 결과 slot 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
@@ -92,7 +45,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns null
 
-        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
+        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -117,7 +70,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
+        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -143,7 +96,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
+        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
 
         expectThat(actual).isFalse()
     }
@@ -169,7 +122,7 @@ internal class MutualExclusionResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.isMutualExclusionGroup(workspace, experiment, user)
+        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
 
         expectThat(actual).isTrue()
     }

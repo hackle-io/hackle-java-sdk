@@ -14,7 +14,7 @@ internal class EvaluationFlowFactoryTest {
         expectThat(actual)
             .isDecisionWith<OverrideEvaluator>()
             .isDecisionWith<IdentifierEvaluator>()
-            .isDecisionWith<MutableExclusionEvaluator>()
+            .isDecisionWith<ContainerEvaluator>()
             .isDecisionWith<ExperimentTargetEvaluator>()
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()
