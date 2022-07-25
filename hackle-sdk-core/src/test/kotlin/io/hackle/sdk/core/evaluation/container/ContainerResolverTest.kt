@@ -4,17 +4,19 @@ import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.user.IdentifierType
-import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isFalse
+import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
+import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
 internal class ContainerResolverTest{
@@ -33,10 +35,6 @@ internal class ContainerResolverTest{
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
-        }
-        val workspace = mockk<Workspace> {
-            every { getContainerOrNull(1) } returns container
-            every { getBucketOrNull(any()) } returns bucket
         }
         val experiment = mockk<Experiment> {
             every { id } returns 1
@@ -59,10 +57,6 @@ internal class ContainerResolverTest{
             every { bucketId } returns 1
             every { getGroupOrNull(any()) } returns null
         }
-        val workspace = mockk<Workspace> {
-            every { getContainerOrNull(1) } returns container
-            every { getBucketOrNull(any()) } returns bucket
-        }
         val experiment = mockk<Experiment> {
             every { id } returns 1
             every { containerId } returns 1
@@ -70,9 +64,11 @@ internal class ContainerResolverTest{
         }
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
+        val actual = assertThrows<IllegalArgumentException> {
+            sut.isUserInContainerGroup(container, bucket, experiment, user)
+        }
 
-        expectThat(actual).isFalse()
+        expectThat(actual.message).isNotNull().startsWith("container group not found.")
     }
 
     @Test
@@ -84,10 +80,6 @@ internal class ContainerResolverTest{
             every { id } returns 1
             every { bucketId } returns 1
             every { getGroupOrNull(any()) } returns ContainerGroup(22, listOf(23L))
-        }
-        val workspace = mockk<Workspace> {
-            every { getContainerOrNull(1) } returns container
-            every { getBucketOrNull(any()) } returns bucket
         }
         val experiment = mockk<Experiment> {
             every { id } returns 1
@@ -110,10 +102,6 @@ internal class ContainerResolverTest{
             every { id } returns 1
             every { bucketId } returns 1
             every { getGroupOrNull(slot.variationId) } returns ContainerGroup(22, listOf(experimentId))
-        }
-        val workspace = mockk<Workspace> {
-            every { getContainerOrNull(1) } returns container
-            every { getBucketOrNull(any()) } returns bucket
         }
         val experiment = mockk<Experiment> {
             every { id } returns experimentId

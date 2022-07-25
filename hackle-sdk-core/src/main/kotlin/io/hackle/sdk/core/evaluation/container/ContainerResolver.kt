@@ -13,7 +13,8 @@ internal class ContainerResolver(
     fun isUserInContainerGroup(container: Container, bucket: Bucket, experiment: Experiment, user: HackleUser): Boolean {
         val identifier = user.identifiers[experiment.identifierType] ?: return false
         val allocatedSlot = bucketer.bucketing(bucket, identifier) ?: return false
-        val containerGroup = container.getGroupOrNull(allocatedSlot.variationId) ?: return false
+        val containerGroup = container.getGroupOrNull(allocatedSlot.variationId)
+        requireNotNull(containerGroup) { "container group not found. variationId = [${allocatedSlot.variationId}]" }
         return containerGroup.experiments.contains(experiment.id)
     }
 
