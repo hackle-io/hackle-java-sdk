@@ -138,6 +138,9 @@ subprojects {
     }
 
     signing {
+        val signingKey = System.getenv("SIGNING_KEY")
+        val signingPassword = System.getenv("SIGNING_PASSWORD")
+        useInMemoryPgpKeys(signingKey, signingPassword)
         sign(publishing.publications["hackleJavaSdk"])
     }
 }
