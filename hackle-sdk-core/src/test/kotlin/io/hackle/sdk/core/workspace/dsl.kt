@@ -15,6 +15,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
     private val eventTypes = mutableMapOf<String, EventType>()
     private val buckets = mutableMapOf<Long, Bucket>()
     private val segments = mutableMapOf<String, Segment>()
+    private val containers = mutableMapOf<Long, Container>()
 
     fun experiment(
         id: Long = IdentifierGenerator.generate("experiment"),
@@ -57,6 +58,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? = eventTypes[eventTypeKey]
     override fun getBucketOrNull(bucketId: Long): Bucket? = buckets[bucketId]
     override fun getSegmentOrNull(segmentKey: String): Segment? = segments[segmentKey]
+    override fun getContainerOrNull(containerId: Long): Container? = containers[containerId]
 
     override fun register(bucket: Bucket) {
         buckets[bucket.id] = bucket

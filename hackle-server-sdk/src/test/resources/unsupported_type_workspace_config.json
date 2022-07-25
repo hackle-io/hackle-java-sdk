@@ -110,7 +110,8 @@
         }
       },
       "winnerVariationId": null,
-      "identifierType": "$id"
+      "identifierType": "$id",
+      "containerId": null
     },
     {
       "id": 22,
@@ -173,7 +174,8 @@
         }
       },
       "winnerVariationId": null,
-      "identifierType": "$id"
+      "identifierType": "$id",
+      "containerId": null
     }
   ],
   "featureFlags": [
@@ -328,10 +330,12 @@
         }
       },
       "winnerVariationId": null,
-      "identifierType": "$id"
+      "identifierType": "$id",
+      "containerId": null
     }
   ],
   "buckets": [],
   "events": [],
-  "segments": []
+  "segments": [],
+  "containers": []
 }
