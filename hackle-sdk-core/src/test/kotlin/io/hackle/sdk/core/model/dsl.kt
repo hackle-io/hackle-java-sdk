@@ -50,6 +50,7 @@ class ExperimentDsl(
     private val targetAudiences = mutableListOf<Target>()
     private val targetRules = mutableListOf<TargetRule>()
     private var defaultRule: Action? = null
+    private var containerId: Long? = null
 
     // Variation
     fun variations(init: VariationDsl.() -> Unit) {
@@ -107,6 +108,7 @@ class ExperimentDsl(
             targetAudiences,
             targetRules,
             defaultRule,
+            containerId,
             winnerVariationId
         )
     }
