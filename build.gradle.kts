@@ -16,7 +16,7 @@ allprojects {
 subprojects {
 
     group = "io.hackle"
-    version = "2.6.0"
+    version = "2.6.1-SNAPSHOT"
 
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
@@ -136,11 +136,11 @@ subprojects {
             }
         }
     }
-
-    signing {
-        val signingKey = System.getenv("SIGNING_KEY")
-        val signingPassword = System.getenv("SIGNING_PASSWORD")
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications["hackleJavaSdk"])
-    }
+//
+//    signing {
+//        val signingKey = System.getenv("SIGNING_KEY")
+//        val signingPassword = System.getenv("SIGNING_PASSWORD")
+//        useInMemoryPgpKeys(signingKey, signingPassword)
+//        sign(publishing.publications["hackleJavaSdk"])
+//    }
 }
