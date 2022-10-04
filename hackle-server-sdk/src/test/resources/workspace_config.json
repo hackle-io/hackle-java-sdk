@@ -16,7 +16,8 @@
         {
           "id": 13378,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "configId": 1
         },
         {
           "id": 13379,
@@ -978,5 +979,42 @@
     }
   ],
   "segments": [],
-  "containers": []
+  "containers": [],
+  "parameterConfigurations": [
+    {
+      "id": 1,
+      "parameters": [
+        {
+          "key": "string_key_1",
+          "value": "string_value_1",
+          "type" : "STRING"
+        },
+        {
+          "key": "boolean_key_1",
+          "value": true,
+          "type" : "BOOLEAN"
+        },
+        {
+          "key": "int_key_1",
+          "value": 2147483647,
+          "type" : "NUMBER"
+        },
+        {
+          "key": "long_key_1",
+          "value": 92147483647,
+          "type" : "NUMBER"
+        },
+        {
+          "key": "double_key_1",
+          "value": 320.1523,
+          "type" : "NUMBER"
+        },
+        {
+          "key": "json_key_1",
+          "value": "{\"json_key\": \"json_value\"}",
+          "type" : "JSON"
+        }
+      ]
+    }
+  ]
 }

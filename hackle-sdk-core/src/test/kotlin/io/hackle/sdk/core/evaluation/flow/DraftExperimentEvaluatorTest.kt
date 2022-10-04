@@ -33,7 +33,7 @@ internal class DraftExperimentEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, mockk(), "B", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(43, "B", DecisionReason.EXPERIMENT_DRAFT)
+        expectThat(actual) isEqualTo Evaluation(43, "B", DecisionReason.EXPERIMENT_DRAFT, null)
     }
 
     @Test

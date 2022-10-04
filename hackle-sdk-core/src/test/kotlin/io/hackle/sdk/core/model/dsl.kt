@@ -266,9 +266,10 @@ class VariationDsl {
 
     operator fun VariationKey.invoke(
         id: Long = IdentifierGenerator.generate("variation"),
-        isDropped: Boolean = false
+        isDropped: Boolean = false,
+        configId: Long? = null
     ) {
-        variations += Variation(id, this.name, isDropped)
+        variations += Variation(id, this.name, isDropped, configId)
     }
 
     operator fun VariationKey.unaryPlus() {

@@ -31,7 +31,7 @@ internal class EvaluatorTest {
     fun `evaluationFlowFactory에서 ExperimentType으로 Flow를 가져와서 평가한다`() {
         // given
 
-        val evaluation = Evaluation(430, "B", DecisionReason.TRAFFIC_ALLOCATED)
+        val evaluation = Evaluation(430, "B", DecisionReason.TRAFFIC_ALLOCATED, null)
 
         val evaluationFlow = mockk<EvaluationFlow> {
             every { evaluate(any(), any(), any(), any()) } returns evaluation

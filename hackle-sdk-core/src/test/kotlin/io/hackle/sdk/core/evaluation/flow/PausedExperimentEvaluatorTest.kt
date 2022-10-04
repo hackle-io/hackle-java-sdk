@@ -33,7 +33,7 @@ internal class PausedExperimentEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, mockk(), "B", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.EXPERIMENT_PAUSED)
+        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.EXPERIMENT_PAUSED, null)
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class PausedExperimentEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, mockk(), "A", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "A", DecisionReason.FEATURE_FLAG_INACTIVE)
+        expectThat(actual) isEqualTo Evaluation(42, "A", DecisionReason.FEATURE_FLAG_INACTIVE, null)
     }
 
     @Test

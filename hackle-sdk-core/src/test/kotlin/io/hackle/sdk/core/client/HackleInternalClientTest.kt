@@ -96,7 +96,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             val defaultVariation = J
-            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED)
+            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED, null)
             every { evaluator.evaluate(workspace, experiment, user, defaultVariation.name) } returns evaluation
 
             // when
@@ -167,7 +167,7 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
+            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED, null)
             every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
@@ -195,7 +195,7 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
+            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED, null)
             every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
@@ -218,7 +218,7 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED)
+            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, null)
             every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when

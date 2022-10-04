@@ -18,4 +18,6 @@ interface Workspace {
     fun getSegmentOrNull(segmentKey: String): Segment?
 
     fun getContainerOrNull(containerId: Long): Container?
+
+    fun getParameterConfigurationOrNull(configId: Long): ParameterConfiguration?
 }

@@ -31,7 +31,8 @@ internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment
 internal fun VariationDto.toVariation() = Variation(
     id = id,
     key = key,
-    isDropped = status == "DROPPED"
+    isDropped = status == "DROPPED",
+    configId = configId,
 )
 
 internal fun TargetDto.toTargetOrNull(targetingType: TargetingType): Target? {
@@ -127,7 +128,7 @@ internal fun SegmentDto.toSegmentOrNull(): Segment? {
     )
 }
 
-internal fun ContainerDto.toContainer() = Container (
+internal fun ContainerDto.toContainer() = Container(
     id = id,
     bucketId = bucketId,
     groups = groups.map { it.toContainerGroup() }
@@ -137,3 +138,16 @@ internal fun ContainerGroupDto.toContainerGroup() = ContainerGroup(
     id = id,
     experiments = experiments
 )
+
+internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterConfiguration(
+    id = id,
+    parameters = parameters.mapNotNull { it.toParameterOrNull() }
+)
+
+internal fun ParameterConfigurationDto.ParameterDto.toParameterOrNull(): Parameter? {
+    return Parameter(
+        key = key,
+        value = value,
+        type = parseEnumOrNull<Parameter.Type>(type) ?: return null
+    )
+}

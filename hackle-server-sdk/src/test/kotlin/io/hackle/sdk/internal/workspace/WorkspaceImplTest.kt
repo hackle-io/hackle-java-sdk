@@ -35,8 +35,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4318, 5, AB_TEST)
             .hasVariations(
-                Variation(13378, "A", false),
-                Variation(13379, "B", false),
+                Variation(13378, "A", false, null),
+                Variation(13379, "B", false, null),
             )
             .hasOverrides()
 
@@ -44,8 +44,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4319, 6, AB_TEST)
             .hasVariations(
-                Variation(13380, "A", false),
-                Variation(13381, "B", false),
+                Variation(13380, "A", false, null),
+                Variation(13381, "B", false, null),
             )
             .hasOverrides(
                 "user_1" to 13380,
@@ -59,9 +59,9 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4320, 7, AB_TEST)
             .hasVariations(
-                Variation(13382, "A", false),
-                Variation(13383, "B", false),
-                Variation(13384, "C", false),
+                Variation(13382, "A", false, null),
+                Variation(13383, "B", false, null),
+                Variation(13384, "C", false, null),
             )
             .hasOverrides()
             .and {
@@ -112,8 +112,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4321, 8, AB_TEST)
             .hasVariations(
-                Variation(13385, "A", false),
-                Variation(13386, "B", false),
+                Variation(13385, "A", false, null),
+                Variation(13386, "B", false, null),
             )
             .hasOverrides()
             .and {
@@ -172,9 +172,9 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4322, 9, AB_TEST)
             .hasVariations(
-                Variation(13387, "A", false),
-                Variation(13388, "B", false),
-                Variation(13389, "C", true),
+                Variation(13387, "A", false, null),
+                Variation(13388, "B", false, null),
+                Variation(13389, "C", true, null),
             )
             .hasOverrides()
             .and { get { status } isEqualTo RUNNING }
@@ -186,8 +186,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4323, 10, AB_TEST)
             .hasVariations(
-                Variation(13390, "A", false),
-                Variation(13391, "B", false),
+                Variation(13390, "A", false, null),
+                Variation(13391, "B", false, null),
             )
             .hasOverrides()
             .and {
@@ -198,24 +198,24 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4324, 11, AB_TEST)
             .hasVariations(
-                Variation(13392, "A", false),
-                Variation(13393, "B", false),
-                Variation(13394, "C", false),
-                Variation(13395, "D", false),
+                Variation(13392, "A", false, null),
+                Variation(13393, "B", false, null),
+                Variation(13394, "C", false, null),
+                Variation(13395, "D", false, null),
             )
             .hasOverrides()
             .and {
                 get { status } isEqualTo COMPLETED
             }
-            .get { winnerVariation } isEqualTo Variation(13395, "D", false)
+            .get { winnerVariation } isEqualTo Variation(13395, "D", false, null)
 
 
         expectThat(workspace.getFeatureFlagOrNull(1))
             .isNotNull()
             .identifier(4325, 1, FEATURE_FLAG)
             .hasVariations(
-                Variation(13396, "A", false),
-                Variation(13397, "B", false),
+                Variation(13396, "A", false, null),
+                Variation(13397, "B", false, null),
             )
             .hasOverrides()
             .and {
@@ -226,8 +226,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4326, 2, FEATURE_FLAG)
             .hasVariations(
-                Variation(13398, "A", false),
-                Variation(13399, "B", false),
+                Variation(13398, "A", false, null),
+                Variation(13399, "B", false, null),
             )
             .hasOverrides()
             .and {
@@ -241,8 +241,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4327, 3, FEATURE_FLAG)
             .hasVariations(
-                Variation(13400, "A", false),
-                Variation(13401, "B", false),
+                Variation(13400, "A", false, null),
+                Variation(13401, "B", false, null),
             )
             .hasOverrides()
             .and {
@@ -256,8 +256,8 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4328, 4, FEATURE_FLAG)
             .hasVariations(
-                Variation(13402, "A", false),
-                Variation(13403, "B", false),
+                Variation(13402, "A", false, null),
+                Variation(13403, "B", false, null),
             )
             .hasOverrides(
                 "user1" to 13402,

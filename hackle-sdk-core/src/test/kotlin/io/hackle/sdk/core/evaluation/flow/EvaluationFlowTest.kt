@@ -23,10 +23,10 @@ internal class EvaluationFlowTest {
         @Test
         fun `End는 TRAFFIC_NOT_ALLOCATED + 기본그룹으로 평가됨`() {
             val experiment = mockk<Experiment> {
-                every { getVariationOrNull(any<String>()) } returns Variation(42, "F", false)
+                every { getVariationOrNull(any<String>()) } returns Variation(42, "F", false, null)
             }
             val evaluation = EvaluationFlow.End.evaluate(mockk(), experiment, mockk(), "F")
-            expectThat(evaluation) isEqualTo Evaluation(42, "F", DecisionReason.TRAFFIC_NOT_ALLOCATED)
+            expectThat(evaluation) isEqualTo Evaluation(42, "F", DecisionReason.TRAFFIC_NOT_ALLOCATED, null)
         }
 
         @Test

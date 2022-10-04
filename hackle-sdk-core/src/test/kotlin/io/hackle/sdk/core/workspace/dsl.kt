@@ -16,6 +16,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
     private val buckets = mutableMapOf<Long, Bucket>()
     private val segments = mutableMapOf<String, Segment>()
     private val containers = mutableMapOf<Long, Container>()
+    private val parameterConfigurations = mutableMapOf<Long, ParameterConfiguration>()
 
     fun experiment(
         id: Long = IdentifierGenerator.generate("experiment"),
@@ -59,6 +60,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
     override fun getBucketOrNull(bucketId: Long): Bucket? = buckets[bucketId]
     override fun getSegmentOrNull(segmentKey: String): Segment? = segments[segmentKey]
     override fun getContainerOrNull(containerId: Long): Container? = containers[containerId]
+    override fun getParameterConfigurationOrNull(configId: Long): ParameterConfiguration? = parameterConfigurations[configId]
 
     override fun register(bucket: Bucket) {
         buckets[bucket.id] = bucket

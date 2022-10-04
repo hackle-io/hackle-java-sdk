@@ -98,14 +98,14 @@ internal class DefaultRuleEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(41, "A", DecisionReason.DEFAULT_RULE)
+        expectThat(actual) isEqualTo Evaluation(41, "A", DecisionReason.DEFAULT_RULE, null)
     }
 
     @Test
     fun `기본룰에 해당하는 Variation으로 평가한다`() {
         // given
         val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
-        val variation = Variation(513, "H", false)
+        val variation = Variation(513, "H", false, null)
 
         every { actionResolver.resolveOrNull(experiment.defaultRule, any(), experiment, any()) } returns variation
 
@@ -113,6 +113,6 @@ internal class DefaultRuleEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(513, "H", DecisionReason.DEFAULT_RULE)
+        expectThat(actual) isEqualTo Evaluation(513, "H", DecisionReason.DEFAULT_RULE, null)
     }
 }

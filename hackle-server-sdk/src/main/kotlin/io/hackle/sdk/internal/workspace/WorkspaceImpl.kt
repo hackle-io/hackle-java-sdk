@@ -14,7 +14,8 @@ internal class WorkspaceImpl(
     private val eventTypes: Map<String, EventType>,
     private val buckets: Map<Long, Bucket>,
     private val segments: Map<String, Segment>,
-    private val containers: Map<Long, Container>
+    private val containers: Map<Long, Container>,
+    private val parameterConfigurations: Map<Long, ParameterConfiguration>,
 ) : Workspace {
 
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
@@ -41,6 +42,9 @@ internal class WorkspaceImpl(
         return containers[containerId]
     }
 
+    override fun getParameterConfigurationOrNull(configId: Long): ParameterConfiguration? {
+        return parameterConfigurations[configId]
+    }
 
     companion object {
         fun from(dto: WorkspaceDto): Workspace {
@@ -66,8 +70,13 @@ internal class WorkspaceImpl(
                     .associateBy { it.key }
 
             val containers = dto.containers.asSequence()
-                .mapNotNull { it.toContainer() }
+                .map { it.toContainer() }
                 .associateBy { it.id }
+
+            val parameterConfigurations =
+                dto.parameterConfigurations.asSequence()
+                    .map { it.toParameterConfiguration() }
+                    .associateBy { it.id }
 
             return WorkspaceImpl(
                 experiments = experiment,
@@ -75,7 +84,8 @@ internal class WorkspaceImpl(
                 eventTypes = eventTypes,
                 buckets = buckets,
                 segments = segments,
-                containers = containers
+                containers = containers,
+                parameterConfigurations = parameterConfigurations,
             )
         }
     }
