@@ -26,7 +26,7 @@ internal data class VariationDto(
     val id: Long,
     val key: String,
     val status: String,
-    val configId: Long?,
+    val parameterConfigurationId: Long?,
 )
 
 internal data class ExecutionDto(

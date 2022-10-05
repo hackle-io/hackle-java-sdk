@@ -19,8 +19,10 @@ internal data class Evaluation(
         private val log = Logger<Evaluation>()
 
         fun of(workspace: Workspace, variation: Variation, reason: DecisionReason): Evaluation {
-            val config = variation.configId?.let { workspace.getParameterConfigurationOrNull(it) }
-            return Evaluation(variation.id, variation.key, reason, config)
+            val parameterConfiguration = variation.parameterConfigurationId?.let {
+                requireNotNull(workspace.getParameterConfigurationOrNull(it)) { "ParameterConfiguration[$it]" }
+            }
+            return Evaluation(variation.id, variation.key, reason, parameterConfiguration)
         }
 
         fun of(workspace: Workspace, experiment: Experiment, variationKey: String, reason: DecisionReason): Evaluation {

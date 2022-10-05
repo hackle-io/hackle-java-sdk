@@ -32,7 +32,7 @@ internal fun VariationDto.toVariation() = Variation(
     id = id,
     key = key,
     isDropped = status == "DROPPED",
-    configId = configId,
+    parameterConfigurationId = parameterConfigurationId,
 )
 
 internal fun TargetDto.toTargetOrNull(targetingType: TargetingType): Target? {
@@ -147,7 +147,6 @@ internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterCon
 internal fun ParameterConfigurationDto.ParameterDto.toParameterOrNull(): Parameter? {
     return Parameter(
         key = key,
-        value = value,
-        type = parseEnumOrNull<Parameter.Type>(type) ?: return null
+        value = value
     )
 }

@@ -4,5 +4,5 @@ data class Variation(
     val id: Long,
     val key: String,
     val isDropped: Boolean,
-    val configId: Long?,
+    val parameterConfigurationId: Long?,
 )
