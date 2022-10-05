@@ -92,6 +92,18 @@ interface HackleClient : AutoCloseable {
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
     /**
+     * Decide the variations for all experiments, and returns a map of decision results.
+     *
+     * @param user the user requesting the experiments
+     *
+     * @return key   - experimentKey
+     *         value - decision result
+     *
+     * @since 2.7.0
+     */
+    fun allExperimentsDecision(user: User): Map<Long, Decision>
+
+    /**
      * Decide whether the feature is turned on to the user.
      *
      * @param featureKey the unique key for the feature.
