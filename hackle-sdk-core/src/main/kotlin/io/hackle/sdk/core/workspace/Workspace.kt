@@ -7,6 +7,10 @@ import io.hackle.sdk.core.model.*
  */
 interface Workspace {
 
+    val experiments: List<Experiment>
+
+    val featureFlags: List<Experiment>
+
     fun getExperimentOrNull(experimentKey: Long): Experiment?
 
     fun getFeatureFlagOrNull(featureKey: Long): Experiment?

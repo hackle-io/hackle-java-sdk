@@ -99,7 +99,7 @@ enum class DecisionReason {
      * Indicates that the experiment is running but the user is not allocated to the mutual exclusion experiment.
      */
     NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT,
-    
+
     /**
      * Indicates that no found identifier of experiment for the user provided by the caller.
      */
