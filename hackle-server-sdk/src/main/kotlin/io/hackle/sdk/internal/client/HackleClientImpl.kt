@@ -57,7 +57,7 @@ internal class HackleClientImpl(
             client.experiments(hackleUser)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding variation for all experiments: $e" }
-            emptyMap()
+            hashMapOf()
         }
     }
 
