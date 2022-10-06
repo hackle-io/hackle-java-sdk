@@ -51,16 +51,6 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun allExperimentsDecision(user: User): Map<Long, Decision> {
-        return try {
-            val hackleUser = userResolver.resolveOrNull(user) ?: return hashMapOf()
-            client.experiments(hackleUser)
-        } catch (e: Exception) {
-            log.error { "Unexpected exception while deciding variation for all experiments: $e" }
-            hashMapOf()
-        }
-    }
-
     override fun isFeatureOn(featureKey: Long, userId: String): Boolean {
         return isFeatureOn(featureKey, User.of(userId))
     }
