@@ -2,6 +2,8 @@ package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.Variation.*
+import io.hackle.sdk.common.decision.Decision
+import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.Evaluator
@@ -115,6 +117,66 @@ internal class HackleInternalClientTest {
                         }
                 })
             }
+        }
+    }
+
+    @Nested
+    inner class ExperimentsTest {
+        @Test
+        fun `Workspace 를 가져오지 못하면 비어있는 map 을 리턴한다`() {
+            // given
+            every { workspaceFetcher.fetch() } returns null
+            val user = HackleUser.of("TEST_USER_ID")
+
+            // when
+            val actual = sut.experiments(user)
+
+            // then
+            expectThat(actual).hasSize(0)
+        }
+
+        @Test
+        fun `모든 실험에 대한 분배 결과를 리턴한다`() {
+            // given
+            val workspace = mockk<Workspace> {
+                every { experiments } returns listOf(
+                    experiment(1, 4, "A", EXPERIMENT_DRAFT),
+                    experiment(3, 7, "B", EXPERIMENT_COMPLETED),
+                    experiment(4, 10, "A", OVERRIDDEN),
+                    experiment(7, 21, "C", TRAFFIC_ALLOCATED),
+                    experiment(10, 27, "A", NOT_IN_EXPERIMENT_TARGET),
+                )
+            }
+
+            every { workspaceFetcher.fetch() } returns workspace
+            val user = HackleUser.of("TEST_USER_ID")
+
+            // when
+            val actual = sut.experiments(user)
+
+            // then
+            expectThat(actual) isEqualTo mapOf(
+                1L to Decision.of(A, EXPERIMENT_DRAFT),
+                3L to Decision.of(B, EXPERIMENT_COMPLETED),
+                4L to Decision.of(A, OVERRIDDEN),
+                7L to Decision.of(C, TRAFFIC_ALLOCATED),
+                10L to Decision.of(A, NOT_IN_EXPERIMENT_TARGET),
+            )
+        }
+
+        private fun experiment(
+            experimentKey: Long,
+            variationId: Long,
+            variationKey: String,
+            reason: DecisionReason
+        ): Experiment {
+
+            val experiment = mockk<Experiment> {
+                every { key } returns experimentKey
+            }
+            val evaluation = Evaluation(variationId, variationKey, reason)
+            every { evaluator.evaluate(any(), experiment, any(), "A") } returns evaluation
+            return experiment
         }
     }
 

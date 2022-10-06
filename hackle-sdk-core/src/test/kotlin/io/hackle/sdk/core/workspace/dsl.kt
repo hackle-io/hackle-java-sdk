@@ -10,13 +10,16 @@ fun workspace(init: WorkspaceDsl.() -> Unit = {}): Workspace {
 
 class WorkspaceDsl : BucketRegistry, Workspace {
 
-    private val experiments = mutableMapOf<Long, Experiment>()
-    private val featureFlags = mutableMapOf<Long, Experiment>()
+    private val _experiments = mutableMapOf<Long, Experiment>()
+    private val _featureFlags = mutableMapOf<Long, Experiment>()
     private val eventTypes = mutableMapOf<String, EventType>()
     private val buckets = mutableMapOf<Long, Bucket>()
     private val segments = mutableMapOf<String, Segment>()
     private val containers = mutableMapOf<Long, Container>()
     private val parameterConfigurations = mutableMapOf<Long, ParameterConfiguration>()
+
+    override val experiments: List<Experiment> get() = _experiments.values.toList()
+    override val featureFlags: List<Experiment> get() = _featureFlags.values.toList()
 
     fun experiment(
         id: Long = IdentifierGenerator.generate("experiment"),
@@ -27,7 +30,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
         init: ExperimentDsl.() -> Unit
     ): Experiment {
         return ExperimentDsl(id, key, AB_TEST, identifierType, status, version, this).apply(init).build().also {
-            experiments[it.key] = it
+            _experiments[it.key] = it
         }
 
     }
@@ -39,7 +42,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
         init: ExperimentDsl.() -> Unit
     ): Experiment {
         return ExperimentDsl(id, key, FEATURE_FLAG, "\$id", status, 1, this).apply(init).build().also {
-            featureFlags[it.key] = it
+            _featureFlags[it.key] = it
         }
     }
 
@@ -54,8 +57,8 @@ class WorkspaceDsl : BucketRegistry, Workspace {
         }
     }
 
-    override fun getExperimentOrNull(experimentKey: Long): Experiment? = experiments[experimentKey]
-    override fun getFeatureFlagOrNull(featureKey: Long): Experiment? = featureFlags[featureKey]
+    override fun getExperimentOrNull(experimentKey: Long): Experiment? = _experiments[experimentKey]
+    override fun getFeatureFlagOrNull(featureKey: Long): Experiment? = _featureFlags[featureKey]
     override fun getEventTypeOrNull(eventTypeKey: String): EventType? = eventTypes[eventTypeKey]
     override fun getBucketOrNull(bucketId: Long): Bucket? = buckets[bucketId]
     override fun getSegmentOrNull(segmentKey: String): Segment? = segments[segmentKey]

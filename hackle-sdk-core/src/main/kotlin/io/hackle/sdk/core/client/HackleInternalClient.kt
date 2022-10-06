@@ -37,6 +37,17 @@ class HackleInternalClient internal constructor(
         return Decision.of(variation, evaluation.reason, config)
     }
 
+    fun experiments(user: HackleUser): Map<Long, Decision> {
+        val decisions = hashMapOf<Long, Decision>()
+        val workspace = workspaceFetcher.fetch() ?: return decisions
+        for (experiment in workspace.experiments) {
+            val evaluation = evaluator.evaluate(workspace, experiment, user, Variation.CONTROL.name)
+            val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
+            decisions[experiment.key] = decision
+        }
+        return decisions
+    }
+
     fun featureFlag(featureKey: Long, user: HackleUser): FeatureFlagDecision {
 
         val workspace = workspaceFetcher.fetch() ?: return FeatureFlagDecision.off(SDK_NOT_READY)
