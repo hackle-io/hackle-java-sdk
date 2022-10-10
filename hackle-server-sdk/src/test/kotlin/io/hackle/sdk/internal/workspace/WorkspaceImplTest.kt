@@ -21,7 +21,6 @@ import java.nio.file.Paths
 
 internal class WorkspaceImplTest {
 
-
     @Test
     fun `workspace config test`() {
         val dto =
@@ -418,6 +417,13 @@ internal class WorkspaceImplTest {
                         )
                     )
                 }
+
+                get { getString("string_key_1", "!!") } isEqualTo "string_value_1"
+                get { getBoolean("boolean_key_1", false) } isEqualTo true
+                get { getInt("int_key_1", -1) } isEqualTo 2147483647
+                get { getLong("long_key_1", -1) } isEqualTo 92147483647L
+                get { getDouble("double_key_1", -1.0) } isEqualTo 320.1523
+                get { getString("json_key_1", "!!") } isEqualTo "{\"json_key\": \"json_value\"}"
             }
     }
 
