@@ -45,8 +45,8 @@ internal class WorkspaceImpl(
         return containers[containerId]
     }
 
-    override fun getParameterConfigurationOrNull(configId: Long): ParameterConfiguration? {
-        return parameterConfigurations[configId]
+    override fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration? {
+        return parameterConfigurations[parameterConfigurationId]
     }
 
     companion object {

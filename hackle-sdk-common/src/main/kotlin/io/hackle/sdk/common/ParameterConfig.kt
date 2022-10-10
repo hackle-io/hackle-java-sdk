@@ -12,8 +12,6 @@ interface ParameterConfig {
 
     fun getBoolean(key: String, defaultValue: Boolean): Boolean
 
-    fun getJson(key: String, defaultValue: Map<String, Any>): Map<String, Any>
-
     companion object {
         fun empty(): ParameterConfig {
             return EmptyParameterConfig
@@ -27,5 +25,4 @@ private object EmptyParameterConfig : ParameterConfig {
     override fun getLong(key: String, defaultValue: Long): Long = defaultValue
     override fun getBoolean(key: String, defaultValue: Boolean): Boolean = defaultValue
     override fun getDouble(key: String, defaultValue: Double): Double = defaultValue
-    override fun getJson(key: String, defaultValue: Map<String, Any>): Map<String, Any> = defaultValue
 }

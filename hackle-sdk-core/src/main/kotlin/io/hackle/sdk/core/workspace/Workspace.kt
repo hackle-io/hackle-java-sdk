@@ -23,5 +23,5 @@ interface Workspace {
 
     fun getContainerOrNull(containerId: Long): Container?
 
-    fun getParameterConfigurationOrNull(configId: Long): ParameterConfiguration?
+    fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration?
 }

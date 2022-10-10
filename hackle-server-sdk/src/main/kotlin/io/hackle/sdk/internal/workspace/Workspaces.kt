@@ -141,10 +141,10 @@ internal fun ContainerGroupDto.toContainerGroup() = ContainerGroup(
 
 internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterConfiguration(
     id = id,
-    parameters = parameters.mapNotNull { it.toParameterOrNull() }
+    parameters = parameters.map { it.toParameter() }
 )
 
-internal fun ParameterConfigurationDto.ParameterDto.toParameterOrNull(): Parameter? {
+internal fun ParameterConfigurationDto.ParameterDto.toParameter(): Parameter {
     return Parameter(
         key = key,
         value = value

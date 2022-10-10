@@ -29,10 +29,6 @@ data class ParameterConfiguration(
         return getOrNull(key) ?: defaultValue
     }
 
-    override fun getJson(key: String, defaultValue: Map<String, Any>): Map<String, Any> {
-        return getOrNull(key) ?: defaultValue
-    }
-
     private inline fun <reified T> getOrNull(key: String): T? {
         val parameter = parameterMap[key] ?: return null
         return parameter.value as? T

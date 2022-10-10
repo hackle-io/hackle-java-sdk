@@ -17,7 +17,7 @@
           "id": 13378,
           "key": "A",
           "status": "ACTIVE",
-          "configId": 1
+          "parameterConfigurationId": 1
         },
         {
           "id": 13379,
@@ -986,33 +986,27 @@
       "parameters": [
         {
           "key": "string_key_1",
-          "value": "string_value_1",
-          "type" : "STRING"
+          "value": "string_value_1"
         },
         {
           "key": "boolean_key_1",
-          "value": true,
-          "type" : "BOOLEAN"
+          "value": true
         },
         {
           "key": "int_key_1",
-          "value": 2147483647,
-          "type" : "NUMBER"
+          "value": 2147483647
         },
         {
           "key": "long_key_1",
-          "value": 92147483647,
-          "type" : "NUMBER"
+          "value": 92147483647
         },
         {
           "key": "double_key_1",
-          "value": 320.1523,
-          "type" : "NUMBER"
+          "value": 320.1523
         },
         {
           "key": "json_key_1",
-          "value": "{\"json_key\": \"json_value\"}",
-          "type" : "JSON"
+          "value": "{\"json_key\": \"json_value\"}"
         }
       ]
     }

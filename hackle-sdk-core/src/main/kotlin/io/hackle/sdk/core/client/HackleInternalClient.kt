@@ -42,7 +42,8 @@ class HackleInternalClient internal constructor(
         val workspace = workspaceFetcher.fetch() ?: return decisions
         for (experiment in workspace.experiments) {
             val evaluation = evaluator.evaluate(workspace, experiment, user, Variation.CONTROL.name)
-            val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
+            val config = evaluation.config ?: ParameterConfig.empty()
+            val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config)
             decisions[experiment.key] = decision
         }
         return decisions

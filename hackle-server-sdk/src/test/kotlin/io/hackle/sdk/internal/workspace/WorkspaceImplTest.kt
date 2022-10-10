@@ -35,7 +35,7 @@ internal class WorkspaceImplTest {
             .isNotNull()
             .identifier(4318, 5, AB_TEST)
             .hasVariations(
-                Variation(13378, "A", false, null),
+                Variation(13378, "A", false, 1),
                 Variation(13379, "B", false, null),
             )
             .hasOverrides()
@@ -399,6 +399,26 @@ internal class WorkspaceImplTest {
 
         expectThat(workspace.getEventTypeOrNull("d"))
             .isEqualTo(EventType.Custom(3075, "d"))
+
+        expectThat(workspace.getParameterConfigurationOrNull(999)).isNull()
+        expectThat(workspace.getParameterConfigurationOrNull(1))
+            .isNotNull()
+            .and {
+                get { id } isEqualTo 1
+                get { parameters }.and {
+                    hasSize(6)
+                    isEqualTo(
+                        listOf(
+                            Parameter("string_key_1", "string_value_1"),
+                            Parameter("boolean_key_1", true),
+                            Parameter("int_key_1", 2147483647.toDouble()),
+                            Parameter("long_key_1", 92147483647.toDouble()),
+                            Parameter("double_key_1", 320.1523),
+                            Parameter("json_key_1", "{\"json_key\": \"json_value\"}"),
+                        )
+                    )
+                }
+            }
     }
 
     @Test

@@ -18,21 +18,20 @@ internal data class Evaluation(
 
         private val log = Logger<Evaluation>()
 
-        fun of(workspace: Workspace, variation: Variation, reason: DecisionReason): Evaluation {
-            val parameterConfiguration = variation.parameterConfigurationId?.let {
-                requireNotNull(workspace.getParameterConfigurationOrNull(it)) { "ParameterConfiguration[$it]" }
-            }
-            return Evaluation(variation.id, variation.key, reason, parameterConfiguration)
-        }
-
         fun of(workspace: Workspace, experiment: Experiment, variationKey: String, reason: DecisionReason): Evaluation {
             val variation = experiment.getVariationOrNull(variationKey)
             return if (variation != null) {
                 of(workspace, variation, reason)
             } else {
-                log.debug { "Variation not founded in experiment [${experiment.id} / $variationKey]" }
                 Evaluation(null, variationKey, reason, null)
             }
+        }
+
+        fun of(workspace: Workspace, variation: Variation, reason: DecisionReason): Evaluation {
+            val parameterConfiguration = variation.parameterConfigurationId?.let {
+                requireNotNull(workspace.getParameterConfigurationOrNull(it)) { "ParameterConfiguration[$it]" }
+            }
+            return Evaluation(variation.id, variation.key, reason, parameterConfiguration)
         }
     }
 }

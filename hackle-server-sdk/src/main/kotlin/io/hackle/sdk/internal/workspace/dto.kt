@@ -120,6 +120,5 @@ internal data class ParameterConfigurationDto(
     data class ParameterDto(
         val key: String,
         val value: Any,
-        val type: String
     )
 }

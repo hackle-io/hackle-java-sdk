@@ -48,7 +48,7 @@ sealed class UserEvent {
             )
         }
 
-        private const val CONFIG_ID_PROPERTY_KEY = "\$configId"
+        private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
         
         private fun exposureProperties(evaluation: Evaluation): Map<String, Any> {
             val properties = hashMapOf<String, Any>()
