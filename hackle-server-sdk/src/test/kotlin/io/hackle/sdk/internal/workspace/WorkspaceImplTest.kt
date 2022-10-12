@@ -407,13 +407,13 @@ internal class WorkspaceImplTest {
                 get { parameters }.and {
                     hasSize(6)
                     isEqualTo(
-                        listOf(
-                            Parameter("string_key_1", "string_value_1"),
-                            Parameter("boolean_key_1", true),
-                            Parameter("int_key_1", 2147483647.toDouble()),
-                            Parameter("long_key_1", 92147483647.toDouble()),
-                            Parameter("double_key_1", 320.1523),
-                            Parameter("json_key_1", "{\"json_key\": \"json_value\"}"),
+                        mapOf(
+                            Pair("string_key_1", "string_value_1"),
+                            Pair("boolean_key_1", true),
+                            Pair("int_key_1", 2147483647.toDouble()),
+                            Pair("long_key_1", 92147483647.toDouble()),
+                            Pair("double_key_1", 320.1523),
+                            Pair("json_key_1", "{\"json_key\": \"json_value\"}"),
                         )
                     )
                 }

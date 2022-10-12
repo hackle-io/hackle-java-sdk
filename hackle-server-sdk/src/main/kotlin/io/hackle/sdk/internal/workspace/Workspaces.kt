@@ -141,12 +141,5 @@ internal fun ContainerGroupDto.toContainerGroup() = ContainerGroup(
 
 internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterConfiguration(
     id = id,
-    parameters = parameters.map { it.toParameter() }
+    parameters = parameters.associate { it.key to it.value }
 )
-
-internal fun ParameterConfigurationDto.ParameterDto.toParameter(): Parameter {
-    return Parameter(
-        key = key,
-        value = value
-    )
-}

@@ -4,10 +4,8 @@ import io.hackle.sdk.common.ParameterConfig
 
 data class ParameterConfiguration(
     val id: Long,
-    val parameters: List<Parameter>
+    val parameters: Map<String, Any>
 ) : ParameterConfig {
-
-    private val parameterMap = parameters.associateBy { it.key }
 
     override fun getString(key: String, defaultValue: String): String {
         return getOrNull(key) ?: defaultValue
@@ -30,7 +28,7 @@ data class ParameterConfiguration(
     }
 
     private inline fun <reified T> getOrNull(key: String): T? {
-        val parameter = parameterMap[key] ?: return null
-        return parameter.value as? T
+        val parameterValue = parameters[key] ?: return null
+        return parameterValue as? T
     }
 }

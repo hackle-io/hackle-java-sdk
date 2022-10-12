@@ -12,18 +12,18 @@ internal class ParameterConfigurationTest {
 
         val parameterConfiguration = ParameterConfiguration(
             42,
-            listOf(
-                Parameter("string_key", "string_value"),
-                Parameter("empty_string_key", ""),
-                Parameter("int_key", 42.0),
-                Parameter("zero_int_key", 0),
-                Parameter("negative_int_key", -1),
-                Parameter("max_int_key", Int.MAX_VALUE),
-                Parameter("long_key", 320.0),
-                Parameter("long_key2", 92147483647.0),
-                Parameter("double_key", 0.42),
-                Parameter("true_boolean_key", true),
-                Parameter("false_boolean_key", false),
+            mapOf(
+                Pair("string_key", "string_value"),
+                Pair("empty_string_key", ""),
+                Pair("int_key", 42.0),
+                Pair("zero_int_key", 0),
+                Pair("negative_int_key", -1),
+                Pair("max_int_key", Int.MAX_VALUE),
+                Pair("long_key", 320.0),
+                Pair("long_key2", 92147483647.0),
+                Pair("double_key", 0.42),
+                Pair("true_boolean_key", true),
+                Pair("false_boolean_key", false),
             )
         )
 

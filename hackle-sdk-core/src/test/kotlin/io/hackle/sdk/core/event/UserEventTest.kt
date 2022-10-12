@@ -21,7 +21,7 @@ internal class UserEventTest {
         @Test
         fun `parameterConfigurationId 를 속성으로 설정한다`() {
             // given
-            val parameterConfiguration = ParameterConfiguration(42, emptyList())
+            val parameterConfiguration = ParameterConfiguration(42, emptyMap())
             val evaluation = Evaluation(320, "B", DecisionReason.TRAFFIC_ALLOCATED, parameterConfiguration)
             val experiment = mockk<Experiment>()
             val user = HackleUser.of("test_id")
