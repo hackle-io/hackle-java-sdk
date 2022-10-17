@@ -31,7 +31,7 @@ internal class OverrideEvaluatorTest {
     fun `AbTest 인 경우 override된 사용자인 경우 overriddenVariation, OVERRIDDEN 으로 평가한다`() {
         // given
         val user = HackleUser.of("test_id")
-        val variation = Variation(320, "B", false)
+        val variation = Variation(320, "B", false, null)
         val experiment = mockk<Experiment> {
             every { type } returns Experiment.Type.AB_TEST
         }
@@ -41,14 +41,14 @@ internal class OverrideEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, user, "C", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.OVERRIDDEN)
+        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.OVERRIDDEN, null)
     }
 
     @Test
     fun `FeatureFlag 인 경우override된 사용자인 경우 overriddenVariation, INDIVIDUAL_TARGET_MATCH 으로 평가한다`() {
         // given
         val user = HackleUser.of("test_id")
-        val variation = Variation(320, "B", false)
+        val variation = Variation(320, "B", false, null)
         val experiment = mockk<Experiment> {
             every { type } returns Experiment.Type.FEATURE_FLAG
         }
@@ -58,7 +58,7 @@ internal class OverrideEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, user, "C", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.INDIVIDUAL_TARGET_MATCH)
+        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.INDIVIDUAL_TARGET_MATCH, null)
     }
 
     @Test

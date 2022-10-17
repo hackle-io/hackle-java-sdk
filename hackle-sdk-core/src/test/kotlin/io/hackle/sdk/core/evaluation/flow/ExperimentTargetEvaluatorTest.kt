@@ -86,6 +86,6 @@ internal class ExperimentTargetEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "E", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "E", DecisionReason.NOT_IN_EXPERIMENT_TARGET)
+        expectThat(actual) isEqualTo Evaluation(42, "E", DecisionReason.NOT_IN_EXPERIMENT_TARGET, null)
     }
 }
