@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.ParameterConfig
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
@@ -31,7 +32,9 @@ class HackleInternalClient internal constructor(
         val evaluation = evaluator.evaluate(workspace, experiment, user, defaultVariation.name)
         eventProcessor.process(UserEvent.exposure(experiment, user, evaluation))
 
-        return Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
+        val variation = Variation.from(evaluation.variationKey)
+        val config = evaluation.config ?: ParameterConfig.empty()
+        return Decision.of(variation, evaluation.reason, config)
     }
 
     fun experiments(user: HackleUser): Map<Long, Decision> {
@@ -39,7 +42,8 @@ class HackleInternalClient internal constructor(
         val workspace = workspaceFetcher.fetch() ?: return decisions
         for (experiment in workspace.experiments) {
             val evaluation = evaluator.evaluate(workspace, experiment, user, Variation.CONTROL.name)
-            val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason)
+            val config = evaluation.config ?: ParameterConfig.empty()
+            val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config)
             decisions[experiment.key] = decision
         }
         return decisions
@@ -55,10 +59,11 @@ class HackleInternalClient internal constructor(
         eventProcessor.process(UserEvent.exposure(featureFlag, user, evaluation))
 
         val variation = Variation.from(evaluation.variationKey)
+        val config = evaluation.config ?: ParameterConfig.empty()
         return if (variation.isControl) {
-            FeatureFlagDecision.off(evaluation.reason)
+            FeatureFlagDecision.off(evaluation.reason, config)
         } else {
-            FeatureFlagDecision.on(evaluation.reason)
+            FeatureFlagDecision.on(evaluation.reason, config)
         }
     }
 

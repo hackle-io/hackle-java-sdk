@@ -141,13 +141,13 @@ internal class TargetRuleEvaluatorTest {
 
         every { targetRuleDeterminer.determineTargetRuleOrNull(any(), experiment, any()) } returns targetRule
 
-        val variation = Variation(534, "E", false)
+        val variation = Variation(534, "E", false, null)
         every { actionResolver.resolveOrNull(targetRule.action, any(), experiment, any()) } returns variation
 
         // when
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("154"), "D", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(534, "E", DecisionReason.TARGET_RULE_MATCH)
+        expectThat(actual) isEqualTo Evaluation(534, "E", DecisionReason.TARGET_RULE_MATCH, null)
     }
 }

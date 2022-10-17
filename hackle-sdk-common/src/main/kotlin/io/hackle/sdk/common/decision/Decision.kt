@@ -1,5 +1,6 @@
 package io.hackle.sdk.common.decision
 
+import io.hackle.sdk.common.ParameterConfig
 import io.hackle.sdk.common.Variation
 
 /**
@@ -7,16 +8,21 @@ import io.hackle.sdk.common.Variation
  */
 data class Decision internal constructor(
     val variation: Variation,
-    val reason: DecisionReason
-) {
+    val reason: DecisionReason,
+    val config: ParameterConfig,
+) : ParameterConfig by config {
 
     companion object {
-        private val DECISIONS =
-            Variation.values().associateWith { v -> DecisionReason.values().associateWith { r -> Decision(v, r) } }
 
         @JvmStatic
-        fun of(variation: Variation, reason: DecisionReason) =
-            DECISIONS[variation]?.get(reason) ?: Decision(variation, reason)
+        @JvmOverloads
+        fun of(
+            variation: Variation,
+            reason: DecisionReason,
+            config: ParameterConfig = ParameterConfig.empty()
+        ): Decision {
+            return Decision(variation, reason, config)
+        }
     }
 }
 
@@ -25,22 +31,22 @@ data class Decision internal constructor(
  */
 data class FeatureFlagDecision internal constructor(
     val isOn: Boolean,
-    val reason: DecisionReason
-) {
+    val reason: DecisionReason,
+    val config: ParameterConfig,
+) : ParameterConfig by config {
 
     companion object {
 
-        private val ON = DecisionReason.values().associate { it to FeatureFlagDecision(true, it) }
-        private val OFF = DecisionReason.values().associate { it to FeatureFlagDecision(false, it) }
-
         @JvmStatic
-        fun on(reason: DecisionReason): FeatureFlagDecision {
-            return ON[reason] ?: FeatureFlagDecision(true, reason)
+        @JvmOverloads
+        fun on(reason: DecisionReason, config: ParameterConfig = ParameterConfig.empty()): FeatureFlagDecision {
+            return FeatureFlagDecision(true, reason, config)
         }
 
         @JvmStatic
-        fun off(reason: DecisionReason): FeatureFlagDecision {
-            return OFF[reason] ?: FeatureFlagDecision(false, reason)
+        @JvmOverloads
+        fun off(reason: DecisionReason, config: ParameterConfig = ParameterConfig.empty()): FeatureFlagDecision {
+            return FeatureFlagDecision(false, reason, config)
         }
     }
 }

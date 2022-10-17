@@ -170,7 +170,7 @@ internal class ActionResolverTest {
             every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
                 every { identifierType } returns "\$id"
-                every { getVariationOrNull(320) } returns Variation(320, "C", false)
+                every { getVariationOrNull(320) } returns Variation(320, "C", false, null)
             }
 
             // when
@@ -179,7 +179,7 @@ internal class ActionResolverTest {
             // then
             expectThat(actual)
                 .isNotNull()
-                .isEqualTo(Variation(320, "C", false))
+                .isEqualTo(Variation(320, "C", false, null))
         }
     }
 }

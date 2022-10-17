@@ -24,8 +24,8 @@ internal class ExperimentTest {
                 }
             }
 
-            expectThat(experiment.getVariationOrNull(1)) isEqualTo Variation(1, "A", false)
-            expectThat(experiment.getVariationOrNull(2)) isEqualTo Variation(2, "B", false)
+            expectThat(experiment.getVariationOrNull(1)) isEqualTo Variation(1, "A", false, null)
+            expectThat(experiment.getVariationOrNull(2)) isEqualTo Variation(2, "B", false, null)
             expectThat(experiment.getVariationOrNull(3)).isNull()
         }
 
@@ -38,8 +38,8 @@ internal class ExperimentTest {
                 }
             }
 
-            expectThat(experiment.getVariationOrNull("A")) isEqualTo Variation(1, "A", false)
-            expectThat(experiment.getVariationOrNull("B")) isEqualTo Variation(2, "B", false)
+            expectThat(experiment.getVariationOrNull("A")) isEqualTo Variation(1, "A", false, null)
+            expectThat(experiment.getVariationOrNull("B")) isEqualTo Variation(2, "B", false, null)
             expectThat(experiment.getVariationOrNull("C")).isNull()
         }
     }
@@ -58,7 +58,7 @@ internal class ExperimentTest {
                 winner(B)
             }
 
-            expectThat(experiment.winnerVariation) isEqualTo Variation(42, "B", false)
+            expectThat(experiment.winnerVariation) isEqualTo Variation(42, "B", false, null)
         }
 
         @Test
