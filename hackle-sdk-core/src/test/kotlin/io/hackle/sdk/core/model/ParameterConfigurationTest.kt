@@ -41,6 +41,7 @@ internal class ParameterConfigurationTest {
             get { getInt("negative_int_key", 999) } isEqualTo -1
             get { getInt("max_int_key", 999) } isEqualTo 2147483647
             get { getInt("invalid_int_key", 999) } isEqualTo 999
+            get { getInt("double_key", 999) } isEqualTo 0
 
             get { getLong("long_key", 999L) } isEqualTo 320L
             get { getLong("long_key2", 999L) } isEqualTo 92147483647L
@@ -48,6 +49,7 @@ internal class ParameterConfigurationTest {
 
             get { getDouble("double_key", 99.9) } isEqualTo 0.42
             get { getDouble("invalid_double_key", 99.9) } isEqualTo 99.9
+            get { getDouble("int_key", 99.9) } isEqualTo 42.0
 
             get { getBoolean("true_boolean_key", false) } isEqualTo true
             get { getBoolean("false_boolean_key", true) } isEqualTo false

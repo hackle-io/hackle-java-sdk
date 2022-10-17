@@ -405,13 +405,14 @@ internal class WorkspaceImplTest {
             .and {
                 get { id } isEqualTo 1
                 get { parameters }.and {
-                    hasSize(6)
+                    hasSize(7)
                     isEqualTo(
                         mapOf(
                             Pair("string_key_1", "string_value_1"),
                             Pair("boolean_key_1", true),
-                            Pair("int_key_1", 2147483647.toDouble()),
-                            Pair("long_key_1", 92147483647.toDouble()),
+                            Pair("int_key_1", 2147483647.0),
+                            Pair("int_key_2", 42.0),
+                            Pair("long_key_1", 92147483647.0),
                             Pair("double_key_1", 320.1523),
                             Pair("json_key_1", "{\"json_key\": \"json_value\"}"),
                         )
@@ -421,8 +422,12 @@ internal class WorkspaceImplTest {
                 get { getString("string_key_1", "!!") } isEqualTo "string_value_1"
                 get { getBoolean("boolean_key_1", false) } isEqualTo true
                 get { getInt("int_key_1", -1) } isEqualTo 2147483647
+                get { getInt("int_key_2", -1) } isEqualTo 42
+                get { getInt("double_key_1", -1) } isEqualTo 320
                 get { getLong("long_key_1", -1) } isEqualTo 92147483647L
                 get { getDouble("double_key_1", -1.0) } isEqualTo 320.1523
+                get { getDouble("int_key_1", -1.0) } isEqualTo 2147483647.0
+                get { getDouble("int_key_2", -1.0) } isEqualTo 42.0
                 get { getString("json_key_1", "!!") } isEqualTo "{\"json_key\": \"json_value\"}"
             }
     }
