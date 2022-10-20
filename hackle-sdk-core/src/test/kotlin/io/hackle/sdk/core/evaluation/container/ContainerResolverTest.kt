@@ -30,6 +30,19 @@ internal class ContainerResolverTest{
     private val user = HackleUser.of("test_id")
 
     @Test
+    fun `식별자가 없으면 false`() {
+        val experiment = mockk<Experiment> {
+            every { id } returns 1
+            every { containerId } returns 1
+            every { identifierType } returns "customId"
+        }
+
+        val actual = sut.isUserInContainerGroup(mockk(), mockk(), experiment, user)
+
+        expectThat(actual).isFalse()
+    }
+
+    @Test
     fun `bucketing 결과 slot 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
         val bucket = mockk<Bucket>()
         val container = mockk<Container> {

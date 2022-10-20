@@ -79,7 +79,7 @@ internal class TrafficAllocateEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.TRAFFIC_NOT_ALLOCATED)
+        expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.TRAFFIC_NOT_ALLOCATED, null)
     }
 
     @Test
@@ -99,7 +99,7 @@ internal class TrafficAllocateEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "B", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.VARIATION_DROPPED)
+        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.VARIATION_DROPPED, null)
     }
 
     @Test
@@ -118,6 +118,6 @@ internal class TrafficAllocateEvaluatorTest {
         val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "A", mockk())
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.TRAFFIC_ALLOCATED)
+        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.TRAFFIC_ALLOCATED, null)
     }
 }

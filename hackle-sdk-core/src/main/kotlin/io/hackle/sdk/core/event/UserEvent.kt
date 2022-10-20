@@ -22,6 +22,7 @@ sealed class UserEvent {
         val variationId: Long?,
         val variationKey: String,
         val decisionReason: DecisionReason,
+        val properties: Map<String, Any>
     ) : UserEvent()
 
     data class Track internal constructor(
@@ -42,8 +43,19 @@ sealed class UserEvent {
                 experiment = experiment,
                 variationId = evaluation.variationId,
                 variationKey = evaluation.variationKey,
-                decisionReason = evaluation.reason
+                decisionReason = evaluation.reason,
+                properties = exposureProperties(evaluation)
             )
+        }
+
+        private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
+        
+        private fun exposureProperties(evaluation: Evaluation): Map<String, Any> {
+            val properties = hashMapOf<String, Any>()
+            if (evaluation.config != null) {
+                properties[CONFIG_ID_PROPERTY_KEY] = evaluation.config.id
+            }
+            return properties
         }
 
         internal fun track(eventType: EventType, event: Event, user: HackleUser): UserEvent {
