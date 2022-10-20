@@ -337,5 +337,6 @@
   "buckets": [],
   "events": [],
   "segments": [],
-  "containers": []
+  "containers": [],
+  "parameterConfigurations": []
 }

@@ -1,6 +1,6 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.container.ContainerResolver
@@ -26,8 +26,8 @@ internal class OverrideEvaluator(
         val overriddenVariation = overrideResolver.resolveOrNull(workspace, experiment, user)
         return if (overriddenVariation != null) {
             when (experiment.type) {
-                AB_TEST -> Evaluation.of(overriddenVariation, DecisionReason.OVERRIDDEN)
-                FEATURE_FLAG -> Evaluation.of(overriddenVariation, DecisionReason.INDIVIDUAL_TARGET_MATCH)
+                AB_TEST -> Evaluation.of(workspace, overriddenVariation, OVERRIDDEN)
+                FEATURE_FLAG -> Evaluation.of(workspace, overriddenVariation, INDIVIDUAL_TARGET_MATCH)
             }
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -44,7 +44,7 @@ internal class DraftExperimentEvaluator : FlowEvaluator {
         nextFlow: EvaluationFlow
     ): Evaluation {
         return if (experiment.status == Experiment.Status.DRAFT) {
-            Evaluation.of(experiment, defaultVariationKey, DecisionReason.EXPERIMENT_DRAFT)
+            Evaluation.of(workspace, experiment, defaultVariationKey, EXPERIMENT_DRAFT)
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -61,8 +61,8 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
     ): Evaluation {
         return if (experiment.status == Experiment.Status.PAUSED) {
             when (experiment.type) {
-                AB_TEST -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.EXPERIMENT_PAUSED)
-                FEATURE_FLAG -> Evaluation.of(experiment, defaultVariationKey, DecisionReason.FEATURE_FLAG_INACTIVE)
+                AB_TEST -> Evaluation.of(workspace, experiment, defaultVariationKey, EXPERIMENT_PAUSED)
+                FEATURE_FLAG -> Evaluation.of(workspace, experiment, defaultVariationKey, FEATURE_FLAG_INACTIVE)
             }
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
@@ -80,7 +80,7 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
     ): Evaluation {
         return if (experiment.status == Experiment.Status.COMPLETED) {
             val winnerVariation = requireNotNull(experiment.winnerVariation) { "winner variation [${experiment.id}]" }
-            Evaluation.of(winnerVariation, DecisionReason.EXPERIMENT_COMPLETED)
+            Evaluation.of(workspace, winnerVariation, EXPERIMENT_COMPLETED)
         } else {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         }
@@ -103,7 +103,7 @@ internal class ExperimentTargetEvaluator(
         return if (isUserInExperimentTarget) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(experiment, defaultVariationKey, DecisionReason.NOT_IN_EXPERIMENT_TARGET)
+            Evaluation.of(workspace, experiment, defaultVariationKey, NOT_IN_EXPERIMENT_TARGET)
         }
     }
 }
@@ -122,13 +122,13 @@ internal class TrafficAllocateEvaluator(
         require(experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val variation = actionResolver.resolveOrNull(experiment.defaultRule, workspace, experiment, user)
-            ?: return Evaluation.of(experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
+            ?: return Evaluation.of(workspace, experiment, defaultVariationKey, TRAFFIC_NOT_ALLOCATED)
 
         if (variation.isDropped) {
-            return Evaluation.of(experiment, defaultVariationKey, DecisionReason.VARIATION_DROPPED)
+            return Evaluation.of(workspace, experiment, defaultVariationKey, VARIATION_DROPPED)
         }
 
-        return Evaluation.of(variation, DecisionReason.TRAFFIC_ALLOCATED)
+        return Evaluation.of(workspace, variation, TRAFFIC_ALLOCATED)
     }
 }
 
@@ -157,7 +157,7 @@ internal class TargetRuleEvaluator(
             "FeatureFlag must decide the Variation [${experiment.id}]"
         }
 
-        return Evaluation.of(variation, DecisionReason.TARGET_RULE_MATCH)
+        return Evaluation.of(workspace, variation, TARGET_RULE_MATCH)
     }
 }
 
@@ -175,7 +175,7 @@ internal class DefaultRuleEvaluator(
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         if (user.identifiers[experiment.identifierType] == null) {
-            return Evaluation.of(experiment, defaultVariationKey, DecisionReason.DEFAULT_RULE)
+            return Evaluation.of(workspace, experiment, defaultVariationKey, DEFAULT_RULE)
         }
 
         val variation =
@@ -183,13 +183,13 @@ internal class DefaultRuleEvaluator(
                 "FeatureFlag must decide the Variation [${experiment.id}]"
             }
 
-        return Evaluation.of(variation, DecisionReason.DEFAULT_RULE)
+        return Evaluation.of(workspace, variation, DEFAULT_RULE)
     }
 }
 
 internal class ContainerEvaluator(
     private val containerResolver: ContainerResolver
-): FlowEvaluator {
+) : FlowEvaluator {
     override fun evaluate(
         workspace: Workspace,
         experiment: Experiment,
@@ -207,7 +207,7 @@ internal class ContainerEvaluator(
         return if (containerResolver.isUserInContainerGroup(container, bucket, experiment, user)) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(experiment, defaultVariationKey, DecisionReason.NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT)
+            Evaluation.of(workspace, experiment, defaultVariationKey, NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT)
         }
     }
 }
@@ -223,7 +223,7 @@ internal class IdentifierEvaluator : FlowEvaluator {
         return if (user.identifiers[experiment.identifierType] != null) {
             nextFlow.evaluate(workspace, experiment, user, defaultVariationKey)
         } else {
-            Evaluation.of(experiment, defaultVariationKey, DecisionReason.IDENTIFIER_NOT_FOUND)
+            Evaluation.of(workspace, experiment, defaultVariationKey, IDENTIFIER_NOT_FOUND)
         }
     }
 }

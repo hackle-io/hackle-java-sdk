@@ -1,10 +1,12 @@
 package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.ParameterConfig
 import io.hackle.sdk.common.Variation.*
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
+import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.Evaluator
 import io.hackle.sdk.core.event.EventProcessor
@@ -12,6 +14,7 @@ import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
@@ -98,25 +101,49 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             val defaultVariation = J
-            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED)
+            val config = mockk<ParameterConfiguration> { every { id } returns 420 }
+            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED, config)
             every { evaluator.evaluate(workspace, experiment, user, defaultVariation.name) } returns evaluation
 
             // when
             val actual = sut.experiment(42, user, defaultVariation)
 
             // then
-            expectThat(actual) {
-                get { reason } isEqualTo TRAFFIC_ALLOCATED
-                get { variation } isEqualTo H
-            }
+            expectThat(actual) isEqualTo Decision.of(H, TRAFFIC_ALLOCATED, config)
             verify(exactly = 1) {
                 eventProcessor.process(withArg {
                     expectThat(it)
                         .isA<UserEvent.Exposure>().and {
-
+                            get { this.user } isSameInstanceAs user
+                            get { this.experiment } isSameInstanceAs experiment
+                            get { this.variationId } isEqualTo 320
+                            get { this.variationKey } isEqualTo "H"
+                            get { this.decisionReason } isEqualTo TRAFFIC_ALLOCATED
+                            get { this.properties } isEqualTo hashMapOf("\$parameterConfigurationId" to 420L)
                         }
                 })
             }
+        }
+
+        @Test
+        fun `평가결과 Config 가 없으면 empty config 를 리턴한다`() {
+            // given
+            val user = HackleUser.of("TEST_USER_ID")
+            val experiment = mockk<Experiment>()
+            val workspace = mockk<Workspace> {
+                every { getExperimentOrNull(any()) } returns experiment
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val defaultVariation = J
+            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED, null)
+            every { evaluator.evaluate(workspace, experiment, user, defaultVariation.name) } returns evaluation
+
+            // when
+            val actual = sut.experiment(42, user, defaultVariation)
+
+            // then
+            expectThat(actual) isEqualTo Decision.of(H, TRAFFIC_ALLOCATED, ParameterConfig.empty())
         }
     }
 
@@ -138,13 +165,15 @@ internal class HackleInternalClientTest {
         @Test
         fun `모든 실험에 대한 분배 결과를 리턴한다`() {
             // given
+            val parameterConfiguration42 = mockk<ParameterConfiguration> { every { id } returns 42 }
+            val parameterConfiguration43 = mockk<ParameterConfiguration> { every { id } returns 43 }
             val workspace = mockk<Workspace> {
                 every { experiments } returns listOf(
-                    experiment(1, 4, "A", EXPERIMENT_DRAFT),
-                    experiment(3, 7, "B", EXPERIMENT_COMPLETED),
-                    experiment(4, 10, "A", OVERRIDDEN),
-                    experiment(7, 21, "C", TRAFFIC_ALLOCATED),
-                    experiment(10, 27, "A", NOT_IN_EXPERIMENT_TARGET),
+                    experiment(1, 4, "A", EXPERIMENT_DRAFT, parameterConfiguration42),
+                    experiment(3, 7, "B", EXPERIMENT_COMPLETED, parameterConfiguration43),
+                    experiment(4, 10, "A", OVERRIDDEN, null),
+                    experiment(7, 21, "C", TRAFFIC_ALLOCATED, null),
+                    experiment(10, 27, "A", NOT_IN_EXPERIMENT_TARGET, null),
                 )
             }
 
@@ -156,8 +185,8 @@ internal class HackleInternalClientTest {
 
             // then
             expectThat(actual) isEqualTo mapOf(
-                1L to Decision.of(A, EXPERIMENT_DRAFT),
-                3L to Decision.of(B, EXPERIMENT_COMPLETED),
+                1L to Decision.of(A, EXPERIMENT_DRAFT, parameterConfiguration42),
+                3L to Decision.of(B, EXPERIMENT_COMPLETED, parameterConfiguration43),
                 4L to Decision.of(A, OVERRIDDEN),
                 7L to Decision.of(C, TRAFFIC_ALLOCATED),
                 10L to Decision.of(A, NOT_IN_EXPERIMENT_TARGET),
@@ -168,13 +197,14 @@ internal class HackleInternalClientTest {
             experimentKey: Long,
             variationId: Long,
             variationKey: String,
-            reason: DecisionReason
+            reason: DecisionReason,
+            config: ParameterConfiguration? = null
         ): Experiment {
 
             val experiment = mockk<Experiment> {
                 every { key } returns experimentKey
             }
-            val evaluation = Evaluation(variationId, variationKey, reason)
+            val evaluation = Evaluation(variationId, variationKey, reason, config)
             every { evaluator.evaluate(any(), experiment, any(), "A") } returns evaluation
             return experiment
         }
@@ -229,7 +259,8 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
+            val config = mockk<ParameterConfiguration> { every { id } returns 420 }
+            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED, config)
             every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
@@ -241,7 +272,12 @@ internal class HackleInternalClientTest {
                     expectThat(it)
                         .isA<UserEvent.Exposure>()
                         .and {
-
+                            get { this.user } isSameInstanceAs user
+                            get { this.experiment } isSameInstanceAs featureFlag
+                            get { this.variationId } isEqualTo 320
+                            get { this.variationKey } isEqualTo "A"
+                            get { this.decisionReason } isEqualTo TRAFFIC_ALLOCATED
+                            get { this.properties } isEqualTo hashMapOf("\$parameterConfigurationId" to 420L)
                         }
                 })
             }
@@ -257,7 +293,7 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED)
+            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED, null)
             every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
@@ -280,7 +316,7 @@ internal class HackleInternalClientTest {
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED)
+            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, null)
             every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
 
             // when
@@ -291,6 +327,47 @@ internal class HackleInternalClientTest {
                 get { isOn }.isTrue()
                 get { reason } isEqualTo TRAFFIC_ALLOCATED
             }
+        }
+
+        @Test
+        fun `평가된 config를 사용한다`() {
+            // given
+            val user = HackleUser.of("TEST_USER_ID")
+            val featureFlag = mockk<Experiment>()
+            val workspace = mockk<Workspace> {
+                every { getFeatureFlagOrNull(any()) } returns featureFlag
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val config = mockk<ParameterConfiguration> { every { id } returns 420 }
+            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, config)
+            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+
+            // when
+            val actual = sut.featureFlag(42, user)
+
+            // then
+            expectThat(actual) isEqualTo FeatureFlagDecision.on(TRAFFIC_ALLOCATED, config)
+        }
+
+        @Test
+        fun `평가된 config 가 없으면 empty config 를 사용한다`() {
+            // given
+            val user = HackleUser.of("TEST_USER_ID")
+            val featureFlag = mockk<Experiment>()
+            val workspace = mockk<Workspace> {
+                every { getFeatureFlagOrNull(any()) } returns featureFlag
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, null)
+            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+
+            // when
+            val actual = sut.featureFlag(42, user)
+
+            // then
+            expectThat(actual) isEqualTo FeatureFlagDecision.on(TRAFFIC_ALLOCATED, ParameterConfig.empty())
         }
     }
 
