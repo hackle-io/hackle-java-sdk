@@ -2,6 +2,8 @@ package io.hackle.sdk.common
 
 interface ParameterConfig {
 
+    val parameters: Map<String, Any>
+
     fun getString(key: String, defaultValue: String): String
 
     fun getInt(key: String, defaultValue: Int): Int
@@ -20,6 +22,7 @@ interface ParameterConfig {
 }
 
 private object EmptyParameterConfig : ParameterConfig {
+    override val parameters: Map<String, Any> = emptyMap()
     override fun getString(key: String, defaultValue: String): String = defaultValue
     override fun getInt(key: String, defaultValue: Int): Int = defaultValue
     override fun getLong(key: String, defaultValue: Long): Long = defaultValue

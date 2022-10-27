@@ -4,7 +4,7 @@ import io.hackle.sdk.common.ParameterConfig
 
 data class ParameterConfiguration(
     val id: Long,
-    val parameters: Map<String, Any>
+    override val parameters: Map<String, Any>
 ) : ParameterConfig {
 
     override fun getString(key: String, defaultValue: String): String {
