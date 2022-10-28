@@ -6,16 +6,19 @@ import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.user.HackleUser
+import java.util.*
 
 /**
  * @author Yong
  */
 sealed class UserEvent {
 
+    abstract val insertId: String
     abstract val timestamp: Long
     abstract val user: HackleUser
 
     data class Exposure internal constructor(
+        override val insertId: String,
         override val timestamp: Long,
         override val user: HackleUser,
         val experiment: Experiment,
@@ -26,6 +29,7 @@ sealed class UserEvent {
     ) : UserEvent()
 
     data class Track internal constructor(
+        override val insertId: String,
         override val timestamp: Long,
         override val user: HackleUser,
         val eventType: EventType,
@@ -38,6 +42,7 @@ sealed class UserEvent {
 
         internal fun exposure(experiment: Experiment, user: HackleUser, evaluation: Evaluation): UserEvent {
             return Exposure(
+                insertId = UUID.randomUUID().toString(),
                 timestamp = generateTimestamp(),
                 user = user,
                 experiment = experiment,
@@ -60,6 +65,7 @@ sealed class UserEvent {
 
         internal fun track(eventType: EventType, event: Event, user: HackleUser): UserEvent {
             return Track(
+                insertId = UUID.randomUUID().toString(),
                 timestamp = generateTimestamp(),
                 user = user,
                 eventType = eventType,
