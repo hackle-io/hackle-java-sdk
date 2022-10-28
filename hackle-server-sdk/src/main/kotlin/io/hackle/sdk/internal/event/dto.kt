@@ -10,7 +10,7 @@ internal data class EventPayloadDto(
 )
 
 internal data class ExposureEventDto(
-
+    val insertId: String,
     val timestamp: Long,
 
     val userId: String?,
@@ -29,6 +29,7 @@ internal data class ExposureEventDto(
 )
 
 internal data class TrackEventDto(
+    val insertId: String,
     val timestamp: Long,
 
     val userId: String?,
@@ -60,6 +61,7 @@ internal fun List<UserEvent>.toPayload(): EventPayloadDto {
 }
 
 internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
+    insertId = insertId,
     timestamp = timestamp,
 
     userId = user.identifiers[IdentifierType.ID.key],
@@ -78,6 +80,7 @@ internal fun UserEvent.Exposure.toDto() = ExposureEventDto(
 )
 
 internal fun UserEvent.Track.toDto() = TrackEventDto(
+    insertId = insertId,
     timestamp = timestamp,
 
     userId = user.identifiers[IdentifierType.ID.key],
