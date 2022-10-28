@@ -16,7 +16,7 @@ allprojects {
 subprojects {
 
     group = "io.hackle"
-    version = "2.8.0"
+    version = "2.8.1-SNAPSHOT"
 
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
