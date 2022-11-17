@@ -6,11 +6,13 @@ import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
+import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.evaluation.Evaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
+import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
 
@@ -70,6 +72,20 @@ class HackleInternalClient internal constructor(
     fun track(event: Event, user: HackleUser) {
         val eventType = workspaceFetcher.fetch()?.getEventTypeOrNull(event.key) ?: EventType.Undefined(event.key)
         eventProcessor.process(UserEvent.track(eventType, event, user))
+    }
+
+    fun <T : Any> remoteConfig(
+        parameterKey: String,
+        user: HackleUser,
+        requiredType: ValueType,
+        defaultValue: T,
+    ): RemoteConfigDecision<T> {
+        val workspace = workspaceFetcher.fetch() ?: return RemoteConfigDecision.of(defaultValue, SDK_NOT_READY)
+        val parameter = workspace.getRemoteConfigParameterOrNull(parameterKey)
+            ?: return RemoteConfigDecision.of(defaultValue, REMOTE_CONFIG_PARAMETER_NOT_FOUND)
+        val evaluation = evaluator.evaluate(workspace, parameter, user, requiredType, defaultValue)
+        eventProcessor.process(UserEvent.remoteConfig(parameter, user, evaluation, requiredType, defaultValue))
+        return RemoteConfigDecision.of(evaluation.value, evaluation.reason)
     }
 
     override fun close() {

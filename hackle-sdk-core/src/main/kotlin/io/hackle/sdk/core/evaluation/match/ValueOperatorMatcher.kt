@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.model.Target
+import io.hackle.sdk.core.model.ValueType
 
 internal class ValueOperatorMatcher(
     private val factory: ValueOperatorMatcherFactory
@@ -16,12 +17,12 @@ internal class ValueOperatorMatcher(
 
 internal class ValueOperatorMatcherFactory {
 
-    fun getValueMatcher(valueType: Target.Match.ValueType): ValueMatcher {
+    fun getValueMatcher(valueType: ValueType): ValueMatcher {
         return when (valueType) {
-            Target.Match.ValueType.STRING -> StringMatcher
-            Target.Match.ValueType.NUMBER -> NumberMatcher
-            Target.Match.ValueType.BOOLEAN -> BooleanMatcher
-            Target.Match.ValueType.VERSION -> VersionMatcher
+            ValueType.STRING, ValueType.JSON -> StringMatcher
+            ValueType.NUMBER -> NumberMatcher
+            ValueType.BOOLEAN -> BooleanMatcher
+            ValueType.VERSION -> VersionMatcher
         }
     }
 

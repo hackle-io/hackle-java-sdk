@@ -1,10 +1,14 @@
 package io.hackle.sdk.core.event
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
+import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.RemoteConfigParameter
+import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
 import java.util.*
 
@@ -36,6 +40,16 @@ sealed class UserEvent {
         val event: Event
     ) : UserEvent()
 
+    data class RemoteConfig internal constructor(
+        override val insertId: String,
+        override val timestamp: Long,
+        override val user: HackleUser,
+        val parameter: RemoteConfigParameter,
+        val valueId: Long?,
+        val decisionReason: DecisionReason,
+        val properties: Map<String, Any>,
+    ) : UserEvent()
+
     companion object {
 
         private fun generateTimestamp() = System.currentTimeMillis()
@@ -54,7 +68,7 @@ sealed class UserEvent {
         }
 
         private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
-        
+
         private fun exposureProperties(evaluation: Evaluation): Map<String, Any> {
             val properties = hashMapOf<String, Any>()
             if (evaluation.config != null) {
@@ -70,6 +84,29 @@ sealed class UserEvent {
                 user = user,
                 eventType = eventType,
                 event = event
+            )
+        }
+
+        internal fun remoteConfig(
+            parameter: RemoteConfigParameter,
+            user: HackleUser,
+            evaluation: RemoteConfigEvaluation<Any>,
+            requiredType: ValueType,
+            defaultValue: Any,
+        ): UserEvent {
+            val properties = PropertiesBuilder()
+                .add("request.requiredType", requiredType.name)
+                .add("request.defaultValue", defaultValue)
+                .add("return.value", evaluation.value)
+                .build()
+            return RemoteConfig(
+                insertId = UUID.randomUUID().toString(),
+                timestamp = generateTimestamp(),
+                user = user,
+                parameter = parameter,
+                valueId = evaluation.valueId,
+                decisionReason = evaluation.reason,
+                properties = properties
             )
         }
     }

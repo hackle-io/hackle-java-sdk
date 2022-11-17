@@ -17,6 +17,14 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
  */
 internal class EvaluationFlowFactory {
 
+    val bucketer: Bucketer
+    val targetMatcher: TargetMatcher
+    val actionResolver: ActionResolver
+    val overrideResolver: OverrideResolver
+    val containerResolver: ContainerResolver
+    val experimentTargetDeterminer: ExperimentTargetDeterminer
+    val targetRuleDeterminer: TargetRuleDeterminer
+
     /**
      * [EvaluationFlow] for [AB_TEST]
      */
@@ -29,17 +37,19 @@ internal class EvaluationFlowFactory {
 
     init {
 
-        val bucketer = Bucketer()
-        val targetMatcher = TargetMatcher(ConditionMatcherFactory())
-        val actionResolver = ActionResolver(bucketer)
-        val overrideResolver = OverrideResolver(targetMatcher, actionResolver)
-        val containerResolver = ContainerResolver(bucketer)
+        this.bucketer = Bucketer()
+        this.targetMatcher = TargetMatcher(ConditionMatcherFactory())
+        this.actionResolver = ActionResolver(bucketer)
+        this.overrideResolver = OverrideResolver(targetMatcher, actionResolver)
+        this.containerResolver = ContainerResolver(bucketer)
+        this.experimentTargetDeterminer = ExperimentTargetDeterminer(targetMatcher)
+        this.targetRuleDeterminer = TargetRuleDeterminer(targetMatcher, bucketer)
 
         val abTestFlow = EvaluationFlow.of(
             OverrideEvaluator(overrideResolver),
             IdentifierEvaluator(),
             ContainerEvaluator(containerResolver),
-            ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
+            ExperimentTargetEvaluator(experimentTargetDeterminer),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
@@ -52,7 +62,7 @@ internal class EvaluationFlowFactory {
             CompletedExperimentEvaluator(),
             OverrideEvaluator(overrideResolver),
             IdentifierEvaluator(),
-            TargetRuleEvaluator(TargetRuleDeterminer(targetMatcher), actionResolver),
+            TargetRuleEvaluator(targetRuleDeterminer, actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )
 

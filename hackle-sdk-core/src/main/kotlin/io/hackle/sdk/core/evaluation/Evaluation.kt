@@ -33,3 +33,10 @@ internal data class Evaluation(
         }
     }
 }
+
+
+internal data class RemoteConfigEvaluation<out T>(
+    val valueId: Long?,
+    val value: T,
+    val reason: DecisionReason,
+)
