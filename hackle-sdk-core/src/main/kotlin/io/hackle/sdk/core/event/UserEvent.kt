@@ -95,7 +95,7 @@ sealed class UserEvent {
             defaultValue: Any,
         ): UserEvent {
             val properties = PropertiesBuilder()
-                .add("request.requiredType", requiredType.name)
+                .add("request.valueType", requiredType.name)
                 .add("request.defaultValue", defaultValue)
                 .add("return.value", evaluation.value)
                 .build()

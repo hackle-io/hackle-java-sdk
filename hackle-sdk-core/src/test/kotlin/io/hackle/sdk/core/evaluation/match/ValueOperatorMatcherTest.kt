@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.model.Target.Match
+import io.hackle.sdk.core.model.ValueType
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -13,7 +14,7 @@ internal class ValueOperatorMatcherTest {
         val match = Match(
             type = Match.Type.MATCH,
             operator = Match.Operator.IN,
-            valueType = Match.ValueType.NUMBER,
+            valueType = ValueType.NUMBER,
             values = listOf(1, 2, 3)
         )
 
@@ -32,7 +33,7 @@ internal class ValueOperatorMatcherTest {
         val match = Match(
             type = Match.Type.MATCH,
             operator = Match.Operator.IN,
-            valueType = Match.ValueType.NUMBER,
+            valueType = ValueType.NUMBER,
             values = listOf(1, 2, 3)
         )
 
@@ -51,7 +52,7 @@ internal class ValueOperatorMatcherTest {
         val match = Match(
             type = Match.Type.NOT_MATCH,
             operator = Match.Operator.IN,
-            valueType = Match.ValueType.NUMBER,
+            valueType = ValueType.NUMBER,
             values = listOf(1, 2, 3)
         )
 
@@ -70,7 +71,7 @@ internal class ValueOperatorMatcherTest {
         val match = Match(
             type = Match.Type.NOT_MATCH,
             operator = Match.Operator.IN,
-            valueType = Match.ValueType.NUMBER,
+            valueType = ValueType.NUMBER,
             values = listOf(1, 2, 3)
         )
 

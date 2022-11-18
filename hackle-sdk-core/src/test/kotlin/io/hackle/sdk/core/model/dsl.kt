@@ -5,7 +5,7 @@ import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
-import io.hackle.sdk.core.model.Target.Match.ValueType.*
+import io.hackle.sdk.core.model.ValueType.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import kotlin.reflect.full.isSubclassOf
@@ -232,7 +232,7 @@ class TargetDsl {
         fun match(
             type: Target.Match.Type,
             operator: Target.Match.Operator,
-            valueType: Target.Match.ValueType,
+            valueType: ValueType,
             vararg values: Any
         ) {
             match = Target.Match(type, operator, valueType, values.toList())

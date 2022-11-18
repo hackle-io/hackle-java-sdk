@@ -5,8 +5,8 @@ import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetRuleDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
-import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -133,7 +133,7 @@ internal class TrafficAllocateEvaluator(
 }
 
 internal class TargetRuleEvaluator(
-    private val targetRuleDeterminer: TargetRuleDeterminer,
+    private val targetRuleDeterminer: ExperimentTargetRuleDeterminer,
     private val actionResolver: ActionResolver
 ) : FlowEvaluator {
     override fun evaluate(

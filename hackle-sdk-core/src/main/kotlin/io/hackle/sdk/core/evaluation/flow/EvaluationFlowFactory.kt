@@ -6,8 +6,9 @@ import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetRuleDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
-import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
+import io.hackle.sdk.core.evaluation.target.RemoteConfigParameterTargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -16,14 +17,6 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
  * @author Yong
  */
 internal class EvaluationFlowFactory {
-
-    val bucketer: Bucketer
-    val targetMatcher: TargetMatcher
-    val actionResolver: ActionResolver
-    val overrideResolver: OverrideResolver
-    val containerResolver: ContainerResolver
-    val experimentTargetDeterminer: ExperimentTargetDeterminer
-    val targetRuleDeterminer: TargetRuleDeterminer
 
     /**
      * [EvaluationFlow] for [AB_TEST]
@@ -35,21 +28,22 @@ internal class EvaluationFlowFactory {
      */
     private val featureFlagFlow: EvaluationFlow
 
+
+    val remoteConfigParameterTargetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
+
     init {
 
-        this.bucketer = Bucketer()
-        this.targetMatcher = TargetMatcher(ConditionMatcherFactory())
-        this.actionResolver = ActionResolver(bucketer)
-        this.overrideResolver = OverrideResolver(targetMatcher, actionResolver)
-        this.containerResolver = ContainerResolver(bucketer)
-        this.experimentTargetDeterminer = ExperimentTargetDeterminer(targetMatcher)
-        this.targetRuleDeterminer = TargetRuleDeterminer(targetMatcher, bucketer)
+        val bucketer = Bucketer()
+        val targetMatcher = TargetMatcher(ConditionMatcherFactory())
+        val actionResolver = ActionResolver(bucketer)
+        val overrideResolver = OverrideResolver(targetMatcher, actionResolver)
+        val containerResolver = ContainerResolver(bucketer)
 
         val abTestFlow = EvaluationFlow.of(
             OverrideEvaluator(overrideResolver),
             IdentifierEvaluator(),
             ContainerEvaluator(containerResolver),
-            ExperimentTargetEvaluator(experimentTargetDeterminer),
+            ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
@@ -62,12 +56,14 @@ internal class EvaluationFlowFactory {
             CompletedExperimentEvaluator(),
             OverrideEvaluator(overrideResolver),
             IdentifierEvaluator(),
-            TargetRuleEvaluator(targetRuleDeterminer, actionResolver),
+            TargetRuleEvaluator(ExperimentTargetRuleDeterminer(targetMatcher), actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )
 
         this.abTestFlow = abTestFlow
         this.featureFlagFlow = featureFlagFlow
+        this.remoteConfigParameterTargetRuleDeterminer =
+            RemoteConfigParameterTargetRuleDeterminer(targetMatcher, bucketer)
     }
 
     fun getFlow(experimentType: Experiment.Type): EvaluationFlow {

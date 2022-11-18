@@ -37,7 +37,7 @@ internal class Evaluator(
             return RemoteConfigEvaluation(null, defaultValue, IDENTIFIER_NOT_FOUND)
         }
 
-        val targetRuleDeterminer = evaluationFlowFactory.targetRuleDeterminer
+        val targetRuleDeterminer = evaluationFlowFactory.remoteConfigParameterTargetRuleDeterminer
         val targetRule = targetRuleDeterminer.determineTargetRuleOrNull(workspace, parameter, user)
         if (targetRule != null) {
             return evaluation(targetRule.value, TARGET_RULE_MATCH, requiredType, defaultValue)

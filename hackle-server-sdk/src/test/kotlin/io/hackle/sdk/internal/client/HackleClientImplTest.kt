@@ -1,6 +1,7 @@
 package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.HackleRemoteConfig
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
@@ -30,13 +31,16 @@ internal class HackleClientImplTest {
 
     private lateinit var userResolver: HackleUserResolver
 
+    private lateinit var remoteConfig: HackleRemoteConfig
+
     private lateinit var sut: HackleClientImpl
 
     @BeforeEach
     fun beforeEach() {
         client = mockk()
         userResolver = HackleUserResolver()
-        sut = HackleClientImpl(client, userResolver)
+        remoteConfig = mockk()
+        sut = HackleClientImpl(client, userResolver, remoteConfig)
     }
 
     @Nested
