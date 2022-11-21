@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 
 
 @ExtendWith(MockKExtension::class)
@@ -97,13 +98,21 @@ internal class EvaluatorTest {
             val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), STRING, "default")
 
             // then
-            expectThat(actual) isEqualTo RemoteConfigEvaluation(null, "default", IDENTIFIER_NOT_FOUND)
+            expectThat(actual) isEqualTo RemoteConfigEvaluation(
+                null, "default", IDENTIFIER_NOT_FOUND, mapOf(
+                    "request.valueType" to "STRING",
+                    "request.defaultValue" to "default",
+                    "return.value" to "default",
+                )
+            )
         }
 
         @Test
         fun `TargetRule 에 해당하는 경우`() {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule> {
+                every { key } returns "target_rule_key"
+                every { name } returns "target_rule_name"
                 every { value } returns Value(320, "targetRuleValue")
             }
             val parameter = parameter(
@@ -120,7 +129,15 @@ internal class EvaluatorTest {
             val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), STRING, "default")
 
             // then
-            expectThat(actual) isEqualTo RemoteConfigEvaluation(320, "targetRuleValue", TARGET_RULE_MATCH)
+            expectThat(actual) isEqualTo RemoteConfigEvaluation(
+                320, "targetRuleValue", TARGET_RULE_MATCH, mapOf(
+                    "request.valueType" to "STRING",
+                    "request.defaultValue" to "default",
+                    "return.value" to "targetRuleValue",
+                    "targetRuleKey" to "target_rule_key",
+                    "targetRuleName" to "target_rule_name",
+                )
+            )
         }
 
         @Test
@@ -139,7 +156,13 @@ internal class EvaluatorTest {
             val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), STRING, "default")
 
             // then
-            expectThat(actual) isEqualTo RemoteConfigEvaluation(43, "hello value", DEFAULT_RULE)
+            expectThat(actual) isEqualTo RemoteConfigEvaluation(
+                43, "hello value", DEFAULT_RULE, mapOf(
+                    "request.valueType" to "STRING",
+                    "request.defaultValue" to "default",
+                    "return.value" to "hello value",
+                )
+            )
         }
 
         @Test
@@ -160,11 +183,11 @@ internal class EvaluatorTest {
             verityTypeMatch(NUMBER, 0.0, 999, true)
             verityTypeMatch(NUMBER, 1.0, 999, true)
             verityTypeMatch(NUMBER, -1.0, 999, true)
-            verityTypeMatch(NUMBER, 1.1 ,999, true)
-            verityTypeMatch(NUMBER, "1" ,999, false)
-            verityTypeMatch(NUMBER, "0" ,999, false)
-            verityTypeMatch(NUMBER, true ,999, false)
-            verityTypeMatch(NUMBER, false ,999, false)
+            verityTypeMatch(NUMBER, 1.1, 999, true)
+            verityTypeMatch(NUMBER, "1", 999, false)
+            verityTypeMatch(NUMBER, "0", 999, false)
+            verityTypeMatch(NUMBER, true, 999, false)
+            verityTypeMatch(NUMBER, false, 999, false)
 
             verityTypeMatch(BOOLEAN, true, false, true)
             verityTypeMatch(BOOLEAN, false, true, true)
@@ -184,9 +207,17 @@ internal class EvaluatorTest {
             val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), requiredType, defaultValue)
 
             if (isMatch) {
-                expectThat(actual) isEqualTo RemoteConfigEvaluation(43, matchValue, DEFAULT_RULE)
+                expectThat(actual) {
+                    get { valueId } isEqualTo 43
+                    get { value } isEqualTo matchValue
+                    get { reason } isEqualTo DEFAULT_RULE
+                }
             } else {
-                expectThat(actual) isEqualTo RemoteConfigEvaluation(null, defaultValue, TYPE_MISMATCH)
+                expectThat(actual) {
+                    get { valueId }.isNull()
+                    get { value } isEqualTo defaultValue
+                    get { reason } isEqualTo TYPE_MISMATCH
+                }
             }
         }
 

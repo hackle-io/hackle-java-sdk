@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation
 
+import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.ParameterConfiguration
@@ -35,8 +36,22 @@ internal data class Evaluation(
 }
 
 
-internal data class RemoteConfigEvaluation<out T>(
+internal data class RemoteConfigEvaluation<out T : Any>(
     val valueId: Long?,
     val value: T,
     val reason: DecisionReason,
-)
+    val properties: Map<String, Any> = emptyMap()
+) {
+
+    companion object {
+        fun <T : Any> of(
+            valueId: Long?,
+            value: T,
+            reason: DecisionReason,
+            propertiesBuilder: PropertiesBuilder
+        ): RemoteConfigEvaluation<T> {
+            propertiesBuilder.add("return.value", value)
+            return RemoteConfigEvaluation(valueId, value, reason, propertiesBuilder.build())
+        }
+    }
+}

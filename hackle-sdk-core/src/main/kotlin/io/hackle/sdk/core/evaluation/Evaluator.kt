@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation
 
+import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
@@ -25,7 +26,7 @@ internal class Evaluator(
         return evaluationFlow.evaluate(workspace, experiment, user, defaultVariationKey)
     }
 
-    fun <T> evaluate(
+    fun <T : Any> evaluate(
         workspace: Workspace,
         parameter: RemoteConfigParameter,
         user: HackleUser,
@@ -33,24 +34,31 @@ internal class Evaluator(
         defaultValue: T,
     ): RemoteConfigEvaluation<T> {
 
+        val propertiesBuilder = PropertiesBuilder()
+            .add("request.valueType", requiredType.name)
+            .add("request.defaultValue", defaultValue as Any)
+
         if (user.identifiers[parameter.identifierType] == null) {
-            return RemoteConfigEvaluation(null, defaultValue, IDENTIFIER_NOT_FOUND)
+            return RemoteConfigEvaluation.of(null, defaultValue, IDENTIFIER_NOT_FOUND, propertiesBuilder)
         }
 
         val targetRuleDeterminer = evaluationFlowFactory.remoteConfigParameterTargetRuleDeterminer
         val targetRule = targetRuleDeterminer.determineTargetRuleOrNull(workspace, parameter, user)
         if (targetRule != null) {
-            return evaluation(targetRule.value, TARGET_RULE_MATCH, requiredType, defaultValue)
+            propertiesBuilder.add("targetRuleKey", targetRule.key)
+            propertiesBuilder.add("targetRuleName", targetRule.name)
+            return evaluation(targetRule.value, TARGET_RULE_MATCH, requiredType, defaultValue, propertiesBuilder)
         }
 
-        return evaluation(parameter.defaultValue, DEFAULT_RULE, requiredType, defaultValue)
+        return evaluation(parameter.defaultValue, DEFAULT_RULE, requiredType, defaultValue, propertiesBuilder)
     }
 
-    private fun <T> evaluation(
+    private fun <T : Any> evaluation(
         parameterValue: RemoteConfigParameter.Value,
         reason: DecisionReason,
         requiredType: ValueType,
         defaultValue: T,
+        propertiesBuilder: PropertiesBuilder,
     ): RemoteConfigEvaluation<T> {
 
         @Suppress("UNCHECKED_CAST")
@@ -62,9 +70,9 @@ internal class Evaluator(
         } as? T
 
         return if (value != null) {
-            RemoteConfigEvaluation(parameterValue.id, value, reason)
+            RemoteConfigEvaluation.of(parameterValue.id, value, reason, propertiesBuilder)
         } else {
-            RemoteConfigEvaluation(null, defaultValue, TYPE_MISMATCH)
+            RemoteConfigEvaluation.of(null, defaultValue, TYPE_MISMATCH, propertiesBuilder)
         }
     }
 }

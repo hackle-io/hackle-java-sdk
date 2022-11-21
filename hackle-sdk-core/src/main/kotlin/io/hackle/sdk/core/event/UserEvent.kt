@@ -1,14 +1,12 @@
 package io.hackle.sdk.core.event
 
 import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.RemoteConfigParameter
-import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
 import java.util.*
 
@@ -91,14 +89,7 @@ sealed class UserEvent {
             parameter: RemoteConfigParameter,
             user: HackleUser,
             evaluation: RemoteConfigEvaluation<Any>,
-            requiredType: ValueType,
-            defaultValue: Any,
         ): UserEvent {
-            val properties = PropertiesBuilder()
-                .add("request.valueType", requiredType.name)
-                .add("request.defaultValue", defaultValue)
-                .add("return.value", evaluation.value)
-                .build()
             return RemoteConfig(
                 insertId = UUID.randomUUID().toString(),
                 timestamp = generateTimestamp(),
@@ -106,7 +97,7 @@ sealed class UserEvent {
                 parameter = parameter,
                 valueId = evaluation.valueId,
                 decisionReason = evaluation.reason,
-                properties = properties
+                properties = evaluation.properties
             )
         }
     }

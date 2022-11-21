@@ -6,7 +6,6 @@ import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.RemoteConfigParameter
-import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
@@ -50,11 +49,16 @@ internal class UserEventTest {
             // given
             val remoteConfigParameter = mockk<RemoteConfigParameter>()
             val user = HackleUser.of("id")
-            val evaluation = RemoteConfigEvaluation(42, "remote config value", DecisionReason.DEFAULT_RULE)
+            val evaluation = RemoteConfigEvaluation(
+                42, "remote config value", DecisionReason.DEFAULT_RULE, mapOf(
+                    "request.valueType" to "STRING",
+                    "request.defaultValue" to "default value",
+                    "return.value" to "remote config value",
+                )
+            )
 
             // when
-            val remoteConfigEvent =
-                UserEvent.remoteConfig(remoteConfigParameter, user, evaluation, ValueType.STRING, "default value")
+            val remoteConfigEvent = UserEvent.remoteConfig(remoteConfigParameter, user, evaluation)
 
             // then
             expectThat(remoteConfigEvent)

@@ -84,7 +84,7 @@ class HackleInternalClient internal constructor(
         val parameter = workspace.getRemoteConfigParameterOrNull(parameterKey)
             ?: return RemoteConfigDecision.of(defaultValue, REMOTE_CONFIG_PARAMETER_NOT_FOUND)
         val evaluation = evaluator.evaluate(workspace, parameter, user, requiredType, defaultValue)
-        eventProcessor.process(UserEvent.remoteConfig(parameter, user, evaluation, requiredType, defaultValue))
+        eventProcessor.process(UserEvent.remoteConfig(parameter, user, evaluation))
         return RemoteConfigDecision.of(evaluation.value, evaluation.reason)
     }
 
