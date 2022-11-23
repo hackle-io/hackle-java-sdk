@@ -100,9 +100,9 @@ internal class EvaluatorTest {
             // then
             expectThat(actual) isEqualTo RemoteConfigEvaluation(
                 null, "default", IDENTIFIER_NOT_FOUND, mapOf(
-                    "request.valueType" to "STRING",
-                    "request.defaultValue" to "default",
-                    "return.value" to "default",
+                    "requestValueType" to "STRING",
+                    "requestDefaultValue" to "default",
+                    "returnValue" to "default",
                 )
             )
         }
@@ -131,9 +131,9 @@ internal class EvaluatorTest {
             // then
             expectThat(actual) isEqualTo RemoteConfigEvaluation(
                 320, "targetRuleValue", TARGET_RULE_MATCH, mapOf(
-                    "request.valueType" to "STRING",
-                    "request.defaultValue" to "default",
-                    "return.value" to "targetRuleValue",
+                    "requestValueType" to "STRING",
+                    "requestDefaultValue" to "default",
+                    "returnValue" to "targetRuleValue",
                     "targetRuleKey" to "target_rule_key",
                     "targetRuleName" to "target_rule_name",
                 )
@@ -158,9 +158,9 @@ internal class EvaluatorTest {
             // then
             expectThat(actual) isEqualTo RemoteConfigEvaluation(
                 43, "hello value", DEFAULT_RULE, mapOf(
-                    "request.valueType" to "STRING",
-                    "request.defaultValue" to "default",
-                    "return.value" to "hello value",
+                    "requestValueType" to "STRING",
+                    "requestDefaultValue" to "default",
+                    "returnValue" to "hello value",
                 )
             )
         }

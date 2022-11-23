@@ -7,7 +7,6 @@ import io.hackle.sdk.core.internal.scheduler.Schedulers
 import io.hackle.sdk.core.internal.threads.NamedThreadFactory
 import io.hackle.sdk.core.internal.threads.PoolingExecutors
 import io.hackle.sdk.internal.client.HackleClientImpl
-import io.hackle.sdk.internal.client.HackleRemoteConfigImpl
 import io.hackle.sdk.internal.event.DefaultEventProcessor
 import io.hackle.sdk.internal.event.EventDispatcher
 import io.hackle.sdk.internal.http.SdkHeaderInterceptor
@@ -97,13 +96,10 @@ object HackleClients {
             workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
             eventProcessor = defaultEventProcessor.apply { start() }
         )
-        val userResolver = HackleUserResolver()
-        val remoteConfig = HackleRemoteConfigImpl(internalClient, userResolver)
 
         return HackleClientImpl(
             client = internalClient,
-            userResolver = userResolver,
-            remoteConfig = remoteConfig
+            userResolver = HackleUserResolver()
         )
     }
 }

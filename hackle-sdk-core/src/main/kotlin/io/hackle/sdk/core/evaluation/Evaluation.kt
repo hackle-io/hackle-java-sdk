@@ -50,7 +50,7 @@ internal data class RemoteConfigEvaluation<out T : Any>(
             reason: DecisionReason,
             propertiesBuilder: PropertiesBuilder
         ): RemoteConfigEvaluation<T> {
-            propertiesBuilder.add("return.value", value)
+            propertiesBuilder.add("returnValue", value)
             return RemoteConfigEvaluation(valueId, value, reason, propertiesBuilder.build())
         }
     }

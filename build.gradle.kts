@@ -9,14 +9,13 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
-        jcenter()
     }
 }
 
 subprojects {
 
     group = "io.hackle"
-    version = "2.9.0-DEV"
+    version = "2.9.0-SNAPSHOT"
 
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
@@ -28,7 +27,7 @@ subprojects {
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
         testImplementation("io.mockk:mockk:1.10.0")
         testImplementation("org.assertj:assertj-core:3.11.1")
-        testImplementation("io.strikt:strikt-core:0.27.0")
+        testImplementation("io.strikt:strikt-core:0.32.0")
     }
 
     tasks {

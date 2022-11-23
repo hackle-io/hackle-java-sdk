@@ -35,8 +35,8 @@ internal class Evaluator(
     ): RemoteConfigEvaluation<T> {
 
         val propertiesBuilder = PropertiesBuilder()
-            .add("request.valueType", requiredType.name)
-            .add("request.defaultValue", defaultValue as Any)
+            .add("requestValueType", requiredType.name)
+            .add("requestDefaultValue", defaultValue as Any)
 
         if (user.identifiers[parameter.identifierType] == null) {
             return RemoteConfigEvaluation.of(null, defaultValue, IDENTIFIER_NOT_FOUND, propertiesBuilder)
