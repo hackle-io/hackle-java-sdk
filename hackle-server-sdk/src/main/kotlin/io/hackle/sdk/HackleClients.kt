@@ -15,7 +15,6 @@ import io.hackle.sdk.internal.user.HackleUserResolver
 import io.hackle.sdk.internal.workspace.HttpWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.PollingWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.Sdk
-import io.hackle.sdk.internal.workspace.loadVersion
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
@@ -28,16 +27,13 @@ import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
  */
 object HackleClients {
 
+    @JvmOverloads
     @JvmStatic
-    fun create(sdkKey: String): HackleClient {
+    fun create(sdkKey: String, config: HackleConfig = HackleConfig.DEFAULT): HackleClient {
 
         Logger.factory = Slf4jLogger.Factory
 
-        val sdk = Sdk(
-            key = sdkKey,
-            name = "java-server-sdk",
-            version = loadVersion()
-        )
+        val sdk = Sdk.load(sdkKey)
 
         val cm = PoolingHttpClientConnectionManager().apply {
             maxTotal = 20
@@ -57,7 +53,7 @@ object HackleClients {
             .build()
 
         val httpWorkspaceFetcher = HttpWorkspaceFetcher(
-            sdkBaseUrl = "https://sdk.hackle.io",
+            sdkBaseUrl = config.sdkUrl,
             httpClient = httpClient
         )
 
@@ -70,7 +66,7 @@ object HackleClients {
         )
 
         val eventDispatcher = EventDispatcher(
-            eventBaseUrl = "https://event.hackle.io",
+            eventBaseUrl = config.eventUrl,
             httpClient = httpClient,
             dispatcherExecutor = PoolingExecutors.newThreadPool(
                 poolSize = 4,
