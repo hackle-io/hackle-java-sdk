@@ -1,8 +1,8 @@
 package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.HackleClient
-import io.hackle.sdk.HackleRemoteConfig
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.HackleRemoteConfig
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision

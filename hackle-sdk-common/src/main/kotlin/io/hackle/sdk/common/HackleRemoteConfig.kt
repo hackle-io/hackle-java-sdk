@@ -1,6 +1,4 @@
-package io.hackle.sdk
-
-import io.hackle.sdk.common.Config
+package io.hackle.sdk.common
 
 interface HackleRemoteConfig : Config {
     override fun getString(key: String, defaultValue: String): String

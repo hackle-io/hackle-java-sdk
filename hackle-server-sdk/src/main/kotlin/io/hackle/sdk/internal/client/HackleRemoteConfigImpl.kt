@@ -1,6 +1,6 @@
 package io.hackle.sdk.internal.client
 
-import io.hackle.sdk.HackleRemoteConfig
+import io.hackle.sdk.common.HackleRemoteConfig
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
 import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
