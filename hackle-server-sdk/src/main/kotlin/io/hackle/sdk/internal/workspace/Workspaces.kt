@@ -68,7 +68,7 @@ internal fun TargetDto.MatchDto.toMatchOrNull(): Target.Match? {
     return Target.Match(
         type = parseEnumOrNull<Target.Match.Type>(type) ?: return null,
         operator = parseEnumOrNull<Target.Match.Operator>(operator) ?: return null,
-        valueType = parseEnumOrNull<Target.Match.ValueType>(valueType) ?: return null,
+        valueType = parseEnumOrNull<ValueType>(valueType) ?: return null,
         values = values
     )
 }
@@ -143,3 +143,31 @@ internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterCon
     id = id,
     parameters = parameters.associate { it.key to it.value }
 )
+
+
+internal fun RemoteConfigParameterDto.toRemoteConfigParameterOrNull(): RemoteConfigParameter? {
+    return RemoteConfigParameter(
+        id = id,
+        key = key,
+        type = parseEnumOrNull<ValueType>(type) ?: return null,
+        identifierType = identifierType,
+        targetRules = targetRules.mapNotNull { it.toTargetRuleOrNull() },
+        defaultValue = RemoteConfigParameter.Value(
+            id = defaultValue.id,
+            rawValue = defaultValue.value
+        )
+    )
+}
+
+internal fun RemoteConfigParameterDto.TargetRuleDto.toTargetRuleOrNull(): RemoteConfigParameter.TargetRule? {
+    return RemoteConfigParameter.TargetRule(
+        key = key,
+        name = name,
+        target = target.toTargetOrNull(TargetingType.PROPERTY) ?: return null,
+        bucketId = bucketId,
+        value = RemoteConfigParameter.Value(
+            id = value.id,
+            rawValue = value.value
+        )
+    )
+}

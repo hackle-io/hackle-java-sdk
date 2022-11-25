@@ -338,5 +338,6 @@
   "events": [],
   "segments": [],
   "containers": [],
-  "parameterConfigurations": []
+  "parameterConfigurations": [],
+  "remoteConfigParameters": []
 }

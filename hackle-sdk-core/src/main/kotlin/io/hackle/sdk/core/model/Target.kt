@@ -39,12 +39,5 @@ data class Target(
             LT,
             LTE,
         }
-
-        enum class ValueType {
-            STRING,
-            NUMBER,
-            BOOLEAN,
-            VERSION,
-        }
     }
 }

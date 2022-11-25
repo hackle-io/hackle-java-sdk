@@ -6,8 +6,9 @@ import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetRuleDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
-import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
+import io.hackle.sdk.core.evaluation.target.RemoteConfigParameterTargetRuleDeterminer
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -26,6 +27,9 @@ internal class EvaluationFlowFactory {
      * [EvaluationFlow] for [FEATURE_FLAG]
      */
     private val featureFlagFlow: EvaluationFlow
+
+
+    val remoteConfigParameterTargetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
 
     init {
 
@@ -52,12 +56,14 @@ internal class EvaluationFlowFactory {
             CompletedExperimentEvaluator(),
             OverrideEvaluator(overrideResolver),
             IdentifierEvaluator(),
-            TargetRuleEvaluator(TargetRuleDeterminer(targetMatcher), actionResolver),
+            TargetRuleEvaluator(ExperimentTargetRuleDeterminer(targetMatcher), actionResolver),
             DefaultRuleEvaluator(actionResolver)
         )
 
         this.abTestFlow = abTestFlow
         this.featureFlagFlow = featureFlagFlow
+        this.remoteConfigParameterTargetRuleDeterminer =
+            RemoteConfigParameterTargetRuleDeterminer(targetMatcher, bucketer)
     }
 
     fun getFlow(experimentType: Experiment.Type): EvaluationFlow {

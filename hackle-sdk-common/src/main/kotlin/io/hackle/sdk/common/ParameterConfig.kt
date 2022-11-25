@@ -1,18 +1,18 @@
 package io.hackle.sdk.common
 
-interface ParameterConfig {
+interface ParameterConfig : Config {
 
     val parameters: Map<String, Any>
 
-    fun getString(key: String, defaultValue: String): String
+    override fun getString(key: String, defaultValue: String): String
 
-    fun getInt(key: String, defaultValue: Int): Int
+    override fun getInt(key: String, defaultValue: Int): Int
 
-    fun getLong(key: String, defaultValue: Long): Long
+    override fun getLong(key: String, defaultValue: Long): Long
 
-    fun getDouble(key: String, defaultValue: Double): Double
+    override fun getDouble(key: String, defaultValue: Double): Double
 
-    fun getBoolean(key: String, defaultValue: Boolean): Boolean
+    override fun getBoolean(key: String, defaultValue: Boolean): Boolean
 
     companion object {
         fun empty(): ParameterConfig {

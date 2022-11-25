@@ -20,12 +20,12 @@ tasks.jacocoTestCoverageVerification {
         rule {
             limit {
                 counter = "BRANCH"
-                minimum = "0.85".toBigDecimal()
+                minimum = "0.95".toBigDecimal()
             }
 
             limit {
                 counter = "LINE"
-                minimum = "0.85".toBigDecimal()
+                minimum = "0.90".toBigDecimal()
             }
         }
     }

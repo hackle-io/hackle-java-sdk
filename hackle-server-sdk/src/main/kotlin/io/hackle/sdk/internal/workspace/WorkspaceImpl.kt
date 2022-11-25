@@ -16,6 +16,7 @@ internal class WorkspaceImpl(
     private val segments: Map<String, Segment>,
     private val containers: Map<Long, Container>,
     private val parameterConfigurations: Map<Long, ParameterConfiguration>,
+    private val remoteConfigParameters: Map<String, RemoteConfigParameter>
 ) : Workspace {
 
     private val _experiments = experiments.associateBy { it.key }
@@ -49,6 +50,10 @@ internal class WorkspaceImpl(
         return parameterConfigurations[parameterConfigurationId]
     }
 
+    override fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter? {
+        return remoteConfigParameters[parameterKey]
+    }
+
     companion object {
         fun from(dto: WorkspaceDto): Workspace {
 
@@ -75,6 +80,11 @@ internal class WorkspaceImpl(
                     .map { it.toParameterConfiguration() }
                     .associateBy { it.id }
 
+            val remoteConfigParameters = dto.remoteConfigParameters.asSequence()
+                .mapNotNull { it.toRemoteConfigParameterOrNull() }
+                .associateBy { it.key }
+
+
             return WorkspaceImpl(
                 experiments = experiments,
                 featureFlags = featureFlags,
@@ -83,6 +93,7 @@ internal class WorkspaceImpl(
                 segments = segments,
                 containers = containers,
                 parameterConfigurations = parameterConfigurations,
+                remoteConfigParameters = remoteConfigParameters,
             )
         }
     }

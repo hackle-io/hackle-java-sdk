@@ -9,14 +9,19 @@ internal class Sdk(
     val key: String,
     val name: String,
     val version: String
-)
-
-internal fun loadVersion(): String =
-    try {
-        val properties = Sdk::class.java.getResourceAsStream("/hackle-server-sdk.properties").use {
-            Properties().apply { load(it) }
+) {
+    companion object {
+        fun load(sdkKey: String): Sdk {
+            return try {
+                val properties = Sdk::class.java.getResourceAsStream("/hackle-server-sdk.properties").use {
+                    Properties().apply { load(it) }
+                }
+                val sdkName = properties.getProperty("sdk.name", "unknown")
+                val sdkVersion = properties.getProperty("sdk.version", "unknown")
+                Sdk(sdkKey, sdkName, sdkVersion)
+            } catch (e: Exception) {
+                Sdk(sdkKey, "unknown", "unknown")
+            }
         }
-        properties.getProperty("sdk.version", "unknown")
-    } catch (e: Exception) {
-        "unknown"
     }
+}

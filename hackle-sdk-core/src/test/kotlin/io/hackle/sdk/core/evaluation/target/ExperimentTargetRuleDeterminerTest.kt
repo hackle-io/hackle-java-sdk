@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.target
 
+import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target
@@ -17,13 +18,16 @@ import strikt.assertions.isNull
 import strikt.assertions.isSameInstanceAs
 
 @ExtendWith(MockKExtension::class)
-internal class TargetRuleDeterminerTest {
+internal class ExperimentTargetRuleDeterminerTest {
 
     @MockK
     private lateinit var targetMatcher: TargetMatcher
 
+    @MockK
+    private lateinit var bucketer: Bucketer
+
     @InjectMockKs
-    private lateinit var sut: TargetRuleDeterminer
+    private lateinit var sut: ExperimentTargetRuleDeterminer
 
     @Test
     fun `첫번째로 매치된 룰을 리턴한다`() {

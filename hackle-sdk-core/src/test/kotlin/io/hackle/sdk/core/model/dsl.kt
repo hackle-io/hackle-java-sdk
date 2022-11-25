@@ -5,10 +5,9 @@ import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
-import io.hackle.sdk.core.model.Target.Match.ValueType.*
+import io.hackle.sdk.core.model.ValueType.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
-import kotlin.reflect.full.isSubclassOf
 
 typealias VariationKey = io.hackle.sdk.common.Variation
 
@@ -232,7 +231,7 @@ class TargetDsl {
         fun match(
             type: Target.Match.Type,
             operator: Target.Match.Operator,
-            valueType: Target.Match.ValueType,
+            valueType: ValueType,
             vararg values: Any
         ) {
             match = Target.Match(type, operator, valueType, values.toList())
@@ -240,15 +239,23 @@ class TargetDsl {
 
 
         internal inline operator fun <reified T : Any> Target.Match.Operator.invoke(vararg values: T) {
+
             val match = when {
-                T::class.isSubclassOf(String::class) -> Target.Match(MATCH, this, STRING, values.toList())
-                T::class.isSubclassOf(Number::class) -> Target.Match(MATCH, this, NUMBER, values.toList())
-                T::class.isSubclassOf(Boolean::class) -> Target.Match(MATCH, this, BOOLEAN, values.toList())
-                T::class.isSubclassOf(Version::class) -> Target.Match(
+                String::class.java.isAssignableFrom(T::class.java) -> Target.Match(MATCH, this, STRING, values.toList())
+                Number::class.java.isAssignableFrom(T::class.java) -> Target.Match(MATCH, this, NUMBER, values.toList())
+                Boolean::class.java.isAssignableFrom(T::class.java) -> Target.Match(
+                    MATCH,
+                    this,
+                    BOOLEAN,
+                    values.toList()
+                )
+
+                Version::class.java.isAssignableFrom(T::class.java) -> Target.Match(
                     MATCH,
                     this,
                     VERSION,
                     values.map { (it as Version).plainString })
+
                 else -> throw IllegalArgumentException("Unsupported type [${T::class.java.simpleName}]")
             }
             match(match)
