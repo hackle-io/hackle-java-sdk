@@ -8,6 +8,7 @@ internal data class WorkspaceDto(
     val segments: List<SegmentDto>,
     val containers: List<ContainerDto>,
     val parameterConfigurations: List<ParameterConfigurationDto>,
+    val remoteConfigParameters: List<RemoteConfigParameterDto>,
 )
 
 internal data class ExperimentDto(
@@ -120,5 +121,28 @@ internal data class ParameterConfigurationDto(
     data class ParameterDto(
         val key: String,
         val value: Any,
+    )
+}
+
+internal data class RemoteConfigParameterDto(
+    val id: Long,
+    val key: String,
+    val type: String,
+    val identifierType: String,
+    val targetRules: List<TargetRuleDto>,
+    val defaultValue: ValueDto,
+) {
+
+    data class TargetRuleDto(
+        val key: String,
+        val name: String,
+        val target: TargetDto,
+        val bucketId: Long,
+        val value: ValueDto
+    )
+
+    data class ValueDto(
+        val id: Long,
+        val value: Any
     )
 }

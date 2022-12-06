@@ -3,15 +3,12 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.target.TargetRuleDeterminer
-import io.hackle.sdk.core.model.Action
+import io.hackle.sdk.core.evaluation.target.ExperimentTargetRuleDeterminer
+import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Status.DRAFT
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.TargetRule
-import io.hackle.sdk.core.model.Variation
-import io.hackle.sdk.core.model.experiment
 import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -31,7 +28,7 @@ import strikt.assertions.startsWith
 internal class TargetRuleEvaluatorTest {
 
     @MockK
-    private lateinit var targetRuleDeterminer: TargetRuleDeterminer
+    private lateinit var targetRuleDeterminer: ExperimentTargetRuleDeterminer
 
     @MockK
     private lateinit var actionResolver: ActionResolver
@@ -93,7 +90,7 @@ internal class TargetRuleEvaluatorTest {
         // given
         val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
 
-        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any(), any()) } returns null
+        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any<Experiment>(), any()) } returns null
 
         val evaluation = mockk<Evaluation>()
         val nextFlow = mockk<EvaluationFlow> {
@@ -115,7 +112,7 @@ internal class TargetRuleEvaluatorTest {
         val action = mockk<Action>()
         val targetRule = TargetRule(mockk(), action)
 
-        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any(), any()) } returns targetRule
+        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any<Experiment>(), any()) } returns targetRule
 
         every { actionResolver.resolveOrNull(targetRule.action, any(), experiment, any()) } returns null
 

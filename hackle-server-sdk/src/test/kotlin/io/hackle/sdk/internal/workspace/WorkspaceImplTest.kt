@@ -10,7 +10,7 @@ import io.hackle.sdk.core.model.Target.Key.Type.USER_PROPERTY
 import io.hackle.sdk.core.model.Target.Match.Operator.*
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
 import io.hackle.sdk.core.model.Target.Match.Type.NOT_MATCH
-import io.hackle.sdk.core.model.Target.Match.ValueType.*
+import io.hackle.sdk.core.model.ValueType.*
 import io.hackle.sdk.internal.utils.parseJson
 import org.junit.jupiter.api.Test
 import strikt.api.Assertion

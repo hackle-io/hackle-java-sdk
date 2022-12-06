@@ -63,7 +63,10 @@ class WorkspaceDsl : BucketRegistry, Workspace {
     override fun getBucketOrNull(bucketId: Long): Bucket? = buckets[bucketId]
     override fun getSegmentOrNull(segmentKey: String): Segment? = segments[segmentKey]
     override fun getContainerOrNull(containerId: Long): Container? = containers[containerId]
-    override fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration? = parameterConfigurations[parameterConfigurationId]
+    override fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration? =
+        parameterConfigurations[parameterConfigurationId]
+
+    override fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter? = null
 
     override fun register(bucket: Bucket) {
         buckets[bucket.id] = bucket

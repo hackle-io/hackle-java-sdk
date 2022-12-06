@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.model.Target.Match.Operator.*
-import io.hackle.sdk.core.model.Target.Match.ValueType.*
+import io.hackle.sdk.core.model.ValueType.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -10,6 +10,7 @@ internal class ValueOperatorMatcherFactoryTest {
     @Test
     fun `ValueMatcherFactory`() {
         assertEquals(StringMatcher, ValueOperatorMatcherFactory().getValueMatcher(STRING))
+        assertEquals(StringMatcher, ValueOperatorMatcherFactory().getValueMatcher(JSON))
         assertEquals(NumberMatcher, ValueOperatorMatcherFactory().getValueMatcher(NUMBER))
         assertEquals(BooleanMatcher, ValueOperatorMatcherFactory().getValueMatcher(BOOLEAN))
         assertEquals(VersionMatcher, ValueOperatorMatcherFactory().getValueMatcher(VERSION))

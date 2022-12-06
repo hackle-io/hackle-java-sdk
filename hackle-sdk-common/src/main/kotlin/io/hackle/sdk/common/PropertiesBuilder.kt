@@ -3,7 +3,7 @@ package io.hackle.sdk.common
 import java.util.*
 
 
-internal class PropertiesBuilder {
+class PropertiesBuilder {
 
     private val properties = hashMapOf<String, Any>()
 

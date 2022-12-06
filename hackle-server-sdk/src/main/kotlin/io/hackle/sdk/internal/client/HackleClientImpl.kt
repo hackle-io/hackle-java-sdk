@@ -2,6 +2,7 @@ package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.HackleClient
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.HackleRemoteConfig
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
@@ -88,6 +89,10 @@ internal class HackleClientImpl(
         } catch (e: Exception) {
             log.error { "Unexpected exception while tracking event[${event.key}]: $e" }
         }
+    }
+
+    override fun remoteConfig(user: User): HackleRemoteConfig {
+        return HackleRemoteConfigImpl(user, client, userResolver)
     }
 
     override fun close() {
