@@ -9,7 +9,7 @@ import io.hackle.sdk.core.workspace.Workspace
 /**
  * @author Yong
  */
-internal class TargetRuleDeterminer(
+internal class ExperimentTargetRuleDeterminer(
     private val targetMatcher: TargetMatcher
 ) {
 

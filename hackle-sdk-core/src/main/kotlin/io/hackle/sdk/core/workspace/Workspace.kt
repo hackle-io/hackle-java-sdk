@@ -24,4 +24,6 @@ interface Workspace {
     fun getContainerOrNull(containerId: Long): Container?
 
     fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration?
+
+    fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter?
 }

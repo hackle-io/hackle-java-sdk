@@ -7,14 +7,14 @@ import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
+import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.Evaluator
+import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
-import io.hackle.sdk.core.model.EventType
-import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.ParameterConfiguration
+import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
@@ -442,6 +442,78 @@ internal class HackleInternalClientTest {
                     expectThat(it)
                         .get { eventType }
                         .isSameInstanceAs(eventType)
+                })
+            }
+        }
+    }
+
+    @Nested
+    inner class RemoteConfigTest {
+        @Test
+        fun `Workspace 를 가져오지 못하면 defaultValue 로 결정하고 이벤트는 전송하지 않는다`() {
+            // given
+            every { workspaceFetcher.fetch() } returns null
+
+
+            // when
+            val actual = sut.remoteConfig("42", HackleUser.of("test"), ValueType.STRING, "default value")
+
+            //then
+            expectThat(actual) {
+                get { reason } isEqualTo SDK_NOT_READY
+                get { value } isEqualTo "default value"
+            }
+            verify { eventProcessor wasNot Called }
+        }
+
+        @Test
+        fun `parameterKey 에 해당하는 RemoteConfigParameter 가 없으면 defaultValue 로 결정하고 이벤트는 전송하지 않는다`() {
+            // given
+            val workspace = mockk<Workspace> {
+                every { getRemoteConfigParameterOrNull(any()) } returns null
+            }
+
+            every { workspaceFetcher.fetch() } returns workspace
+
+
+            // when
+            val actual = sut.remoteConfig("42", HackleUser.of("test"), ValueType.STRING, "default value")
+
+            //then
+            expectThat(actual) {
+                get { reason } isEqualTo REMOTE_CONFIG_PARAMETER_NOT_FOUND
+                get { value } isEqualTo "default value"
+            }
+            verify { eventProcessor wasNot Called }
+        }
+
+        @Test
+        fun `평가 결과로 이벤트를 전송하고 평가된 결과로 결정한다`() {
+            // given
+            val user = HackleUser.of("TEST_USER_ID")
+            val parameter = mockk<RemoteConfigParameter>()
+            val workspace = mockk<Workspace> {
+                every { getRemoteConfigParameterOrNull(any()) } returns parameter
+            }
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val evaluation = RemoteConfigEvaluation(42, "vvv", DEFAULT_RULE)
+            every { evaluator.evaluate(workspace, parameter, user, any(), any<String>()) } returns evaluation
+
+            // when
+            val actual = sut.remoteConfig("42", user, ValueType.STRING, "default value")
+
+            // then
+            expectThat(actual) isEqualTo RemoteConfigDecision.of("vvv", DEFAULT_RULE)
+            verify(exactly = 1) {
+                eventProcessor.process(withArg {
+                    expectThat(it)
+                        .isA<UserEvent.RemoteConfig>().and {
+                            get { this.user } isSameInstanceAs user
+                            get { this.parameter } isSameInstanceAs parameter
+                            get { this.valueId } isEqualTo 42
+                            get { this.decisionReason } isEqualTo DEFAULT_RULE
+                        }
                 })
             }
         }

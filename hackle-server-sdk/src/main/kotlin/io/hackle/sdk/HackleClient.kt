@@ -1,6 +1,7 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.HackleRemoteConfig
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
@@ -172,6 +173,11 @@ interface HackleClient : AutoCloseable {
      * @param user  the user that occurred the event. MUST NOT be null.
      */
     fun track(event: Event, user: User)
+
+    /**
+     * Returns a instance of Hackle Remote Config.
+     */
+    fun remoteConfig(user: User): HackleRemoteConfig
 
     /**
      * Shutdown the background task and release the resources used for the background task.

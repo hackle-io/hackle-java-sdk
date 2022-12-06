@@ -52,6 +52,23 @@ data class FeatureFlagDecision internal constructor(
 }
 
 /**
+ * An object that contains the decided remote config parameter value and the reason for the decision.
+ */
+data class RemoteConfigDecision<T> internal constructor(
+    val value: T,
+    val reason: DecisionReason
+) {
+
+    companion object {
+
+        @JvmStatic
+        fun <T> of(value: T, reason: DecisionReason): RemoteConfigDecision<T> {
+            return RemoteConfigDecision(value, reason)
+        }
+    }
+}
+
+/**
  * Describes the reason for the [Variation] decision.
  */
 enum class DecisionReason {
@@ -137,12 +154,12 @@ enum class DecisionReason {
     FEATURE_FLAG_INACTIVE,
 
     /**
-     * Indicates that the user is matched to the individual target of the feature flag.
+     * Indicates that the user is matched to the individual target.
      */
     INDIVIDUAL_TARGET_MATCH,
 
     /**
-     * Indicates that the user is matched to the target rule of the feature flag.
+     * Indicates that the user is matched to the target rule.
      */
     TARGET_RULE_MATCH,
 
@@ -151,4 +168,13 @@ enum class DecisionReason {
      */
     DEFAULT_RULE,
 
+    /**
+     * Indicates that no remote config parameter was found for the parameter key provided by the caller.
+     */
+    REMOTE_CONFIG_PARAMETER_NOT_FOUND,
+
+    /**
+     * Indicates a mismatch between result type and request type.
+     */
+    TYPE_MISMATCH
 }
