@@ -8,6 +8,10 @@ data class HackleUser internal constructor(
     val hackleProperties: Map<String, Any>
 ) {
 
+    val userId: String? get() = identifiers[IdentifierType.USER.key]
+    val deviceId: String? get() = identifiers[IdentifierType.DEVICE.key]
+    val sessionId: String? get() = identifiers[IdentifierType.SESSION.key]
+
     companion object {
         fun of(id: String): HackleUser {
             return of(User.of(id), emptyMap())

@@ -5,5 +5,6 @@ enum class IdentifierType(
 ) {
     ID("\$id"),
     USER("\$userId"),
-    DEVICE("\$deviceId")
+    DEVICE("\$deviceId"),
+    SESSION("\$sessionId")
 }
