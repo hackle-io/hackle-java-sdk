@@ -1,5 +1,6 @@
 package io.hackle.sdk.internal.http
 
+import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.internal.workspace.Sdk
 import org.apache.http.HttpRequest
 import org.apache.http.HttpRequestInterceptor
@@ -9,14 +10,15 @@ import org.apache.http.protocol.HttpContext
  * @author Yong
  */
 internal class SdkHeaderInterceptor(
-    private val sdk: Sdk
+    private val sdk: Sdk,
+    private val clock: Clock = Clock.SYSTEM
 ) : HttpRequestInterceptor {
 
     override fun process(request: HttpRequest, context: HttpContext) {
         request.addHeader(SDK_KEY_HEADER, sdk.key)
         request.addHeader(SDK_NAME_HEADER, sdk.name)
         request.addHeader(SDK_VERSION_HEADER, sdk.version)
-        request.addHeader(SDK_TIME_HEADER_NAME, System.currentTimeMillis().toString())
+        request.addHeader(SDK_TIME_HEADER_NAME, clock.currentMillis().toString())
         request.addHeader(USER_AGENT, "${sdk.name}/${sdk.version}")
     }
 

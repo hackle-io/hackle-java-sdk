@@ -2,6 +2,9 @@ package io.hackle.sdk.internal.event
 
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.log.Logger
+import io.hackle.sdk.core.internal.metrics.Timer
+import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics
+import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics.POST_EVENTS
 import io.hackle.sdk.internal.http.isSuccessful
 import io.hackle.sdk.internal.http.statusCode
 import io.hackle.sdk.internal.utils.toJson
@@ -54,16 +57,23 @@ internal class EventDispatcher(
 
     inner class DispatchTask(private val payload: EventPayloadDto) : Runnable {
         override fun run() {
+            val sample = Timer.start()
             try {
-                val post = HttpPost(eventEndpoint).apply {
-                    entity = StringEntity(payload.toJson(), REQUEST_CONTENT_TYPE)
-                }
-
-                httpClient.execute(post).use { response ->
-                    check(response.isSuccessful) { "Http status code: ${response.statusCode}" }
-                }
+                dispatch()
+                ApiCallMetrics.record(POST_EVENTS, sample, true)
             } catch (e: Exception) {
                 log.error { "Failed to dispatch events: $e" }
+                ApiCallMetrics.record(POST_EVENTS, sample, false)
+            }
+        }
+
+        private fun dispatch() {
+            val post = HttpPost(eventEndpoint).apply {
+                entity = StringEntity(payload.toJson(), REQUEST_CONTENT_TYPE)
+            }
+
+            httpClient.execute(post).use { response ->
+                check(response.isSuccessful) { "Http status code: ${response.statusCode}" }
             }
         }
     }
