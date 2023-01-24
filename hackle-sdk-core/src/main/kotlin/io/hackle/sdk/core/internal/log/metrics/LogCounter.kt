@@ -7,7 +7,7 @@ import io.hackle.sdk.core.internal.metrics.MetricRegistry
 internal class LogCounter(registry: MetricRegistry) {
 
     private val counters: Map<LogLevel, Counter> = LogLevel.values().associateWith {
-        Counter.builder("log.events").tag("level", it.name).register(registry)
+        Counter.builder("log").tag("level", it.name).register(registry)
     }
 
     fun increment(level: LogLevel) {
