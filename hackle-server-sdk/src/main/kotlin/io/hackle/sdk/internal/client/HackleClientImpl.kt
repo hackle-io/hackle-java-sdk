@@ -11,7 +11,10 @@ import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.log.Logger
+import io.hackle.sdk.core.internal.metrics.Metrics
+import io.hackle.sdk.core.internal.metrics.Timer
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.internal.monitoring.metrics.DecisionMetrics
 import io.hackle.sdk.internal.user.HackleUserResolver
 
 /**
@@ -43,12 +46,15 @@ internal class HackleClientImpl(
     }
 
     override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
+        val sample = Timer.start()
         return try {
             val hackleUser = userResolver.resolveOrNull(user) ?: return Decision.of(defaultVariation, INVALID_INPUT)
             client.experiment(experimentKey, hackleUser, defaultVariation)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $e" }
             Decision.of(defaultVariation, EXCEPTION)
+        }.also {
+            DecisionMetrics.experiment(sample, experimentKey, it)
         }
     }
 
@@ -65,12 +71,15 @@ internal class HackleClientImpl(
     }
 
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
+        val sample = Timer.start()
         return try {
             val hackleUser = userResolver.resolveOrNull(user) ?: return FeatureFlagDecision.off(INVALID_INPUT)
             client.featureFlag(featureKey, hackleUser)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $e" }
             return FeatureFlagDecision.off(EXCEPTION)
+        }.also {
+            DecisionMetrics.featureFlag(sample, featureKey, it)
         }
     }
 
@@ -97,6 +106,7 @@ internal class HackleClientImpl(
 
     override fun close() {
         client.tryClose()
+        Metrics.globalRegistry.tryClose()
     }
 
     companion object {

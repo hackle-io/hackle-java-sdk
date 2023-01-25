@@ -4,6 +4,7 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
+import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.RemoteConfigParameter
@@ -58,12 +59,10 @@ sealed class UserEvent {
 
     companion object {
 
-        private fun generateTimestamp() = System.currentTimeMillis()
-
         internal fun exposure(experiment: Experiment, user: HackleUser, evaluation: Evaluation): UserEvent {
             return Exposure(
                 insertId = UUID.randomUUID().toString(),
-                timestamp = generateTimestamp(),
+                timestamp = Clock.SYSTEM.currentMillis(),
                 user = user,
                 experiment = experiment,
                 variationId = evaluation.variationId,
@@ -86,7 +85,7 @@ sealed class UserEvent {
         internal fun track(eventType: EventType, event: Event, user: HackleUser): UserEvent {
             return Track(
                 insertId = UUID.randomUUID().toString(),
-                timestamp = generateTimestamp(),
+                timestamp = Clock.SYSTEM.currentMillis(),
                 user = user,
                 eventType = eventType,
                 event = event
@@ -100,7 +99,7 @@ sealed class UserEvent {
         ): UserEvent {
             return RemoteConfig(
                 insertId = UUID.randomUUID().toString(),
-                timestamp = generateTimestamp(),
+                timestamp = Clock.SYSTEM.currentMillis(),
                 user = user,
                 parameter = parameter,
                 valueId = evaluation.valueId,

@@ -7,8 +7,10 @@ import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.client.HackleInternalClient
 import io.hackle.sdk.core.internal.log.Logger
+import io.hackle.sdk.core.internal.metrics.Timer
 import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.model.ValueType.*
+import io.hackle.sdk.internal.monitoring.metrics.DecisionMetrics
 import io.hackle.sdk.internal.user.HackleUserResolver
 
 internal class HackleRemoteConfigImpl(
@@ -43,6 +45,7 @@ internal class HackleRemoteConfigImpl(
         requiredType: ValueType,
         defaultValue: T
     ): RemoteConfigDecision<T> {
+        val sample = Timer.start()
         return try {
             val hackleUser = userResolver.resolveOrNull(user)
                 ?: return RemoteConfigDecision.of(defaultValue, INVALID_INPUT)
@@ -50,6 +53,8 @@ internal class HackleRemoteConfigImpl(
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding remote config parameter[$key]. Returning default value." }
             RemoteConfigDecision.of(defaultValue, EXCEPTION)
+        }.also {
+            DecisionMetrics.remoteConfig(sample, key, it)
         }
     }
 
