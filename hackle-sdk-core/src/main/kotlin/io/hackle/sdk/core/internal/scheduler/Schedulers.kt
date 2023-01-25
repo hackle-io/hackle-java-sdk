@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.internal.scheduler
 
+import io.hackle.sdk.core.internal.threads.NamedThreadFactory
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -11,6 +13,11 @@ object Schedulers {
 
     fun executor(executor: ScheduledExecutorService): Scheduler {
         return ExecutorScheduler(executor)
+    }
+
+    fun executor(namePrefix: String, corePoolSize: Int = 1, isDaemon: Boolean = true): Scheduler {
+        val executor = Executors.newScheduledThreadPool(corePoolSize, NamedThreadFactory(namePrefix, isDaemon))
+        return executor(executor)
     }
 
     private class ExecutorScheduler(private val executor: ScheduledExecutorService) : Scheduler, AutoCloseable {

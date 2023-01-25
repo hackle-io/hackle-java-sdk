@@ -10,7 +10,7 @@ internal object NoopLogger : Logger {
     override fun error(msg: () -> String) {}
     override fun error(x: Throwable, msg: () -> String) {}
 
-    object Factory : Logger.Factory {
+    class Factory : Logger.Factory {
         override fun getLogger(name: String): Logger = NoopLogger
     }
 }
