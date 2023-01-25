@@ -3,6 +3,8 @@ package io.hackle.sdk
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.client
 import io.hackle.sdk.core.internal.log.Logger
+import io.hackle.sdk.core.internal.log.metrics.MetricLoggerFactory
+import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.scheduler.Schedulers
 import io.hackle.sdk.core.internal.threads.NamedThreadFactory
 import io.hackle.sdk.core.internal.threads.PoolingExecutors
@@ -11,11 +13,13 @@ import io.hackle.sdk.internal.event.DefaultEventProcessor
 import io.hackle.sdk.internal.event.EventDispatcher
 import io.hackle.sdk.internal.http.SdkHeaderInterceptor
 import io.hackle.sdk.internal.log.Slf4jLogger
+import io.hackle.sdk.internal.monitoring.metrics.MonitoringMetricRegistry
 import io.hackle.sdk.internal.user.HackleUserResolver
 import io.hackle.sdk.internal.workspace.HttpWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.PollingWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.Sdk
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import java.util.concurrent.ArrayBlockingQueue
@@ -31,26 +35,13 @@ object HackleClients {
     @JvmStatic
     fun create(sdkKey: String, config: HackleConfig = HackleConfig.DEFAULT): HackleClient {
 
-        Logger.factory = Slf4jLogger.Factory
+        loggerConfiguration()
 
         val sdk = Sdk.load(sdkKey)
+        val httpClient = httpClient(sdk)
 
-        val cm = PoolingHttpClientConnectionManager().apply {
-            maxTotal = 20
-            defaultMaxPerRoute = 20
-        }
+        metricConfiguration(config, httpClient)
 
-        val requestConfig = RequestConfig.custom()
-            .setConnectTimeout(5 * 1000)
-            .setConnectionRequestTimeout(10 * 1000)
-            .setSocketTimeout(10 * 1000)
-            .build()
-
-        val httpClient = HttpClients.custom()
-            .setConnectionManager(cm)
-            .setDefaultRequestConfig(requestConfig)
-            .addInterceptorLast(SdkHeaderInterceptor(sdk))
-            .build()
 
         val httpWorkspaceFetcher = HttpWorkspaceFetcher(
             sdkBaseUrl = config.sdkUrl,
@@ -97,5 +88,39 @@ object HackleClients {
             client = internalClient,
             userResolver = HackleUserResolver()
         )
+    }
+
+    private fun httpClient(sdk: Sdk): CloseableHttpClient {
+        val cm = PoolingHttpClientConnectionManager().apply {
+            maxTotal = 20
+            defaultMaxPerRoute = 20
+        }
+
+        val requestConfig = RequestConfig.custom()
+            .setConnectTimeout(5 * 1000)
+            .setConnectionRequestTimeout(10 * 1000)
+            .setSocketTimeout(10 * 1000)
+            .build()
+
+        return HttpClients.custom()
+            .setConnectionManager(cm)
+            .setDefaultRequestConfig(requestConfig)
+            .addInterceptorLast(SdkHeaderInterceptor(sdk))
+            .build()
+    }
+
+    private fun loggerConfiguration() {
+        Logger.add(Slf4jLogger.Factory)
+        Logger.add(MetricLoggerFactory(Metrics.globalRegistry))
+    }
+
+    private fun metricConfiguration(config: HackleConfig, httpClient: CloseableHttpClient) {
+        val registry = MonitoringMetricRegistry(
+            monitoringBaseUrl = config.monitoringUrl,
+            scheduler = Schedulers.executor("MonitoringMetricRegistry-"),
+            flushIntervalMillis = 60 * 1000,
+            httpClient = httpClient
+        )
+        Metrics.addRegistry(registry)
     }
 }
