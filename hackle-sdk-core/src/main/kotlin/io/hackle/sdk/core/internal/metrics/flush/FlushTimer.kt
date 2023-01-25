@@ -6,7 +6,7 @@ import io.hackle.sdk.core.internal.metrics.cumulative.CumulativeTimer
 import io.hackle.sdk.core.internal.time.Clock
 import java.util.concurrent.TimeUnit
 
-internal class FlushTimer(id: Metric.Id, private val clock: Clock) : AbstractFlushMetric<Timer>(id), Timer {
+class FlushTimer(id: Metric.Id, private val clock: Clock) : AbstractFlushMetric<Timer>(id), Timer {
 
     override fun count(): Long {
         return current.count()
