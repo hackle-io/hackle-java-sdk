@@ -50,7 +50,7 @@ class LoggingMetricRegistry(
     companion object {
         private val log = Logger<LoggingMetricRegistry>()
 
-        private val COMPARATOR: Comparator<Metric> = compareBy(compareBy(Metric.Id::type, Metric.Id::name), Metric::id)
+        private val COMPARATOR: Comparator<Metric> = compareBy(compareBy(Metric.Id::name, Metric.Id::type), Metric::id)
         fun builder(scheduler: Scheduler = Schedulers.executor("LoggingMetricRegistry-")): Builder {
             return Builder(scheduler)
         }
