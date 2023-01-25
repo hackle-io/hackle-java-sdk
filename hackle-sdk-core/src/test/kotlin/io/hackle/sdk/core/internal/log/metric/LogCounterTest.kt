@@ -19,9 +19,9 @@ internal class LogCounterTest {
         repeat(3) { logCounter.increment(LogLevel.WARN) }
         repeat(4) { logCounter.increment(LogLevel.ERROR) }
 
-        expectThat(registry.counter("log.events", "level" to "DEBUG").count()).isEqualTo(1)
-        expectThat(registry.counter("log.events", "level" to "INFO").count()).isEqualTo(2)
-        expectThat(registry.counter("log.events", "level" to "WARN").count()).isEqualTo(3)
-        expectThat(registry.counter("log.events", "level" to "ERROR").count()).isEqualTo(4)
+        expectThat(registry.counter("log", "level" to "DEBUG").count()).isEqualTo(1)
+        expectThat(registry.counter("log", "level" to "INFO").count()).isEqualTo(2)
+        expectThat(registry.counter("log", "level" to "WARN").count()).isEqualTo(3)
+        expectThat(registry.counter("log", "level" to "ERROR").count()).isEqualTo(4)
     }
 }

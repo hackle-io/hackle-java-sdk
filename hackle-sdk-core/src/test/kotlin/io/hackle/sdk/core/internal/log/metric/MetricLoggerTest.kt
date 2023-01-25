@@ -20,9 +20,9 @@ internal class MetricLoggerTest {
         repeat(3) { logger.error { "text" } }
         logger.error(IllegalArgumentException()) { "text" }
 
-        expectThat(registry.counter("log.events", "level" to "debug").count()).isEqualTo(1)
-        expectThat(registry.counter("log.events", "level" to "info").count()).isEqualTo(2)
-        expectThat(registry.counter("log.events", "level" to "warn").count()).isEqualTo(3)
-        expectThat(registry.counter("log.events", "level" to "error").count()).isEqualTo(4)
+        expectThat(registry.counter("log", "level" to "DEBUG").count()).isEqualTo(1)
+        expectThat(registry.counter("log", "level" to "INFO").count()).isEqualTo(2)
+        expectThat(registry.counter("log", "level" to "WARN").count()).isEqualTo(3)
+        expectThat(registry.counter("log", "level" to "ERROR").count()).isEqualTo(4)
     }
 }
