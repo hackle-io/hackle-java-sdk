@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.internal.log
 
+import io.hackle.sdk.core.internal.log.delegate.DelegatingLoggerFactory
+
 /**
  * @author Yong
  */
@@ -13,11 +15,17 @@ interface Logger {
 
     fun interface Factory {
         fun getLogger(name: String): Logger
-        fun getLogger(clazz: Class<*>): Logger = getLogger(clazz.name)
     }
 
     companion object {
-        var factory: Factory = NoopLogger.Factory
-        inline operator fun <reified T> invoke(): Logger = factory.getLogger(T::class.java)
+
+        val factory = DelegatingLoggerFactory()
+
+        fun add(factory: Factory) {
+            this.factory.add(factory)
+        }
+
+        inline operator fun <reified T> invoke(): Logger = factory.getLogger(T::class.java.name)
+        operator fun invoke(name: String): Logger = factory.getLogger(name)
     }
 }

@@ -12,6 +12,7 @@ internal class NoopLoggerTest {
     @Test
     fun `noop`() {
         val msg = mockk<() -> String>()
+        NoopLogger.debug(msg)
         NoopLogger.info(msg)
         NoopLogger.warn(msg)
         NoopLogger.error(msg)
@@ -23,8 +24,7 @@ internal class NoopLoggerTest {
 
     @Test
     fun `factory`() {
-        expectThat(NoopLogger.Factory.getLogger("a"))
-            .isSameInstanceAs(NoopLogger.Factory.getLogger("b"))
-            .isSameInstanceAs(NoopLogger.Factory.getLogger(NoopLoggerTest::class.java))
+        expectThat(NoopLogger.Factory().getLogger("a"))
+            .isSameInstanceAs(NoopLogger.Factory().getLogger("b"))
     }
 }

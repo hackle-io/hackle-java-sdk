@@ -6,17 +6,9 @@ import org.slf4j.LoggerFactory
 /**
  * @author Yong
  */
-internal class Slf4jLogger : Logger {
+internal class Slf4jLogger(name: String) : Logger {
 
-    private val log: org.slf4j.Logger
-
-    constructor(clazz: Class<*>) {
-        this.log = LoggerFactory.getLogger(clazz)
-    }
-
-    constructor(name: String) {
-        this.log = LoggerFactory.getLogger(name)
-    }
+    private val log: org.slf4j.Logger = LoggerFactory.getLogger(name)
 
     override fun debug(msg: () -> String) = if (log.isDebugEnabled) log.debug(msg()) else Unit
     override fun info(msg: () -> String) = if (log.isInfoEnabled) log.info(msg()) else Unit
@@ -26,6 +18,5 @@ internal class Slf4jLogger : Logger {
 
     object Factory : Logger.Factory {
         override fun getLogger(name: String): Logger = Slf4jLogger(name)
-        override fun getLogger(clazz: Class<*>): Logger = Slf4jLogger(clazz)
     }
 }
