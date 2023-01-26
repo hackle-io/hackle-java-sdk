@@ -4,7 +4,14 @@ plugins {
     `maven-publish`
     signing
     jacoco
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
+
+val groupName = "io.hackle"
+val versionName = "2.10.1"
+
+group = groupName
+version = versionName
 
 allprojects {
     repositories {
@@ -14,8 +21,8 @@ allprojects {
 
 subprojects {
 
-    group = "io.hackle"
-    version = "2.10.0"
+    group = groupName
+    version = versionName
 
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
@@ -70,9 +77,16 @@ subprojects {
 }
 
 /** Configure publishing and signing */
-subprojects {
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(System.getenv("SONATYPE_USERNAME"))
+            password.set(System.getenv("SONATYPE_PASSWORD"))
+        }
+    }
+}
 
-    val project = this@subprojects
+subprojects {
 
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
@@ -82,24 +96,6 @@ subprojects {
         java {
             withJavadocJar()
             withSourcesJar()
-        }
-
-        repositories {
-            maven {
-                name = "MavenCentral"
-                val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-                val snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-
-                val snapshotRepoTags = listOf("RC", "SNAPSHOT")
-                val repoUrl =
-                    if (snapshotRepoTags.any { version.toString().contains(it) }) snapshotsRepoUrl else releasesRepoUrl
-
-                url = uri(repoUrl)
-                credentials {
-                    username = System.getenv("SONATYPE_USERNAME")
-                    password = System.getenv("SONATYPE_PASSWORD")
-                }
-            }
         }
 
         publications {

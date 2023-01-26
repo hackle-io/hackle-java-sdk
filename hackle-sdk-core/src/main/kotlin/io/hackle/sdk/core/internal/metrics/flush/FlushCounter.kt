@@ -4,7 +4,7 @@ import io.hackle.sdk.core.internal.metrics.Counter
 import io.hackle.sdk.core.internal.metrics.Metric
 import io.hackle.sdk.core.internal.metrics.cumulative.CumulativeCounter
 
-internal class FlushCounter(id: Metric.Id) : AbstractFlushMetric<Counter>(id), Counter {
+class FlushCounter(id: Metric.Id) : AbstractFlushMetric<Counter>(id), Counter {
 
     override fun count(): Long {
         return current.count()

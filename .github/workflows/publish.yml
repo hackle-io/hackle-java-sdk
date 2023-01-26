@@ -13,7 +13,7 @@ jobs:
         with:
           java-version: 1.8
       - name: Publish
-        run: gradle clean build publish --info
+        run: gradle clean build publishToSonatype --info
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
