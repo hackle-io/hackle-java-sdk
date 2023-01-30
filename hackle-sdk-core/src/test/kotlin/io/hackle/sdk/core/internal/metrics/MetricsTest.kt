@@ -43,5 +43,6 @@ internal class MetricsTest {
 
         expectThat(Metrics.timer("timer").count()).isEqualTo(1)
         expectThat(Metrics.timer("timer", mapOf("tag" to "42")).totalTime(TimeUnit.MILLISECONDS)).isEqualTo(42.0)
+
     }
 }
