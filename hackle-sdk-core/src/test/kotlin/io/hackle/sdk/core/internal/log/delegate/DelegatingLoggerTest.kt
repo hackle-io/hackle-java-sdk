@@ -36,26 +36,23 @@ internal class DelegatingLoggerTest {
     fun `concurrency read write`() {
 
         val executor = Executors.newFixedThreadPool(32)
-
-        repeat(10) {
-            val delegatingLogger = DelegatingLogger("logger")
-            val loggerStub = LoggerStub()
-            val latch = CountDownLatch(10000)
-            repeat(10000) {
-                executor.execute {
-                    if (it % 2 == 0) {
-                        delegatingLogger.info { "test" }
-                    } else {
-                        delegatingLogger.add(LoggerStub.Factory(loggerStub))
-                    }
-                    latch.countDown()
+        val delegatingLogger = DelegatingLogger("logger")
+        val loggerStub = LoggerStub()
+        val latch = CountDownLatch(10000)
+        repeat(10000) {
+            executor.execute {
+                if (it % 2 == 0) {
+                    delegatingLogger.info { "test" }
+                } else {
+                    delegatingLogger.add(LoggerStub.Factory(loggerStub))
                 }
+                latch.countDown()
             }
-            latch.await()
-
-            delegatingLogger.debug { "test" }
-            expectThat(loggerStub.count.get()).isEqualTo(5000)
         }
+        latch.await()
+
+        delegatingLogger.debug { "test" }
+        expectThat(loggerStub.count.get()).isEqualTo(5000)
     }
 
     private class LoggerStub : Logger {

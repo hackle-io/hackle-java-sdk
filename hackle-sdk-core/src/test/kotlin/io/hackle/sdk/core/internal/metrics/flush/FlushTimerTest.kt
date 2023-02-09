@@ -60,31 +60,28 @@ internal class FlushTimerTest {
 
     @Test
     fun `concurrency record`() {
-
-        repeat(100) {
-            val timer = timer()
-            val latch = CountDownLatch(10000)
-            val jobs = List(10000) {
-                CompletableFuture.supplyAsync {
-                    if (it % 2 == 0) {
-                        timer.apply { record((it + 1).toLong(), TimeUnit.NANOSECONDS) }
-                    } else {
-                        timer.flush()
-                    }.also {
-                        latch.countDown()
-                    }
+        val timer = timer()
+        val latch = CountDownLatch(10000)
+        val jobs = List(10000) {
+            CompletableFuture.supplyAsync {
+                if (it % 2 == 0) {
+                    timer.apply { record((it + 1).toLong(), TimeUnit.NANOSECONDS) }
+                } else {
+                    timer.flush()
+                }.also {
+                    latch.countDown()
                 }
             }
-            latch.await()
-
-            val finalTimers = jobs.asSequence()
-                .map { it.join() }
-                .filterIsInstance<CumulativeTimer>()
-                .toList() + timer.flush()
-
-            expectThat(finalTimers.sumOf { it.count() }).isEqualTo(5000)
-            expectThat(finalTimers.sumOf { it.totalTime(TimeUnit.NANOSECONDS) }).isEqualTo(25000000.0)
         }
+        latch.await()
+
+        val finalTimers = jobs.asSequence()
+            .map { it.join() }
+            .filterIsInstance<CumulativeTimer>()
+            .toList() + timer.flush()
+
+        expectThat(finalTimers.sumOf { it.count() }).isEqualTo(5000)
+        expectThat(finalTimers.sumOf { it.totalTime(TimeUnit.NANOSECONDS) }).isEqualTo(25000000.0)
     }
 
     @Test

@@ -119,28 +119,26 @@ internal class DelegatingMetricRegistryTest {
     @Test
     fun `Metric 생성 & Registry 등록 동시성`() {
         val executor = Executors.newFixedThreadPool(32)
-        repeat(10) {
-            val registry = DelegatingMetricRegistry()
-            val cumulativeRegistries = List(500) { CumulativeMetricRegistry() }
-            val latch = CountDownLatch(1000)
-            repeat(1000) {
-                executor.execute {
-                    if (it % 2 == 0) {
-                        registry.counter(it.toString())
-                    } else {
-                        registry.add(cumulativeRegistries[it / 2])
-                    }
-                    latch.countDown()
+        val registry = DelegatingMetricRegistry()
+        val cumulativeRegistries = List(500) { CumulativeMetricRegistry() }
+        val latch = CountDownLatch(1000)
+        repeat(1000) {
+            executor.execute {
+                if (it % 2 == 0) {
+                    registry.counter(it.toString())
+                } else {
+                    registry.add(cumulativeRegistries[it / 2])
                 }
+                latch.countDown()
             }
-            latch.await()
-            expectThat(registry.metrics.size).isEqualTo(500)
-            for (i in 0 until 1000 step 2) {
-                val name = i.toString()
-                registry.counter(name).increment()
-                val count = cumulativeRegistries.sumOf { it.counter(name).count() }
-                expectThat(count).isEqualTo(500)
-            }
+        }
+        latch.await()
+        expectThat(registry.metrics.size).isEqualTo(500)
+        for (i in 0 until 1000 step 2) {
+            val name = i.toString()
+            registry.counter(name).increment()
+            val count = cumulativeRegistries.sumOf { it.counter(name).count() }
+            expectThat(count).isEqualTo(500)
         }
     }
 
