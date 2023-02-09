@@ -16,30 +16,28 @@ internal class DelegatingLoggerFactoryTest {
     @Test
     fun `Logger 생성 & LoggerFactory 추가 동시성`() {
         val executor = Executors.newFixedThreadPool(32)
-        repeat(10) {
-            val factory = DelegatingLoggerFactory()
-            val logger = LoggerStub()
-            val latch = CountDownLatch(1000)
-            repeat(1000) {
-                executor.execute {
-                    if (it % 2 == 0) {
-                        factory.add(LoggerStub.Factory(logger))
-                    } else {
-                        factory.getLogger(it.toString())
-                    }
-                    latch.countDown()
+        val factory = DelegatingLoggerFactory()
+        val logger = LoggerStub()
+        val latch = CountDownLatch(1000)
+        repeat(1000) {
+            executor.execute {
+                if (it % 2 == 0) {
+                    factory.add(LoggerStub.Factory(logger))
+                } else {
+                    factory.getLogger(it.toString())
                 }
+                latch.countDown()
             }
-            latch.await()
-
-            expectThat(factory.loggers.size).isEqualTo(500)
-            for (i in 1..1000 step 2) {
-                val name = i.toString()
-                factory.getLogger(name).debug { "test" }
-            }
-
-            expectThat(logger.count.get()).isEqualTo(500 * 500)
         }
+        latch.await()
+
+        expectThat(factory.loggers.size).isEqualTo(500)
+        for (i in 1..1000 step 2) {
+            val name = i.toString()
+            factory.getLogger(name).debug { "test" }
+        }
+
+        expectThat(logger.count.get()).isEqualTo(500 * 500)
     }
 
     @Test

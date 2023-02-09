@@ -69,9 +69,9 @@ class HackleInternalClient internal constructor(
         }
     }
 
-    fun track(event: Event, user: HackleUser) {
+    fun track(event: Event, user: HackleUser, timestamp: Long) {
         val eventType = workspaceFetcher.fetch()?.getEventTypeOrNull(event.key) ?: EventType.Undefined(event.key)
-        eventProcessor.process(UserEvent.track(eventType, event, user))
+        eventProcessor.process(UserEvent.track(eventType, event, timestamp, user))
     }
 
     fun <T : Any> remoteConfig(

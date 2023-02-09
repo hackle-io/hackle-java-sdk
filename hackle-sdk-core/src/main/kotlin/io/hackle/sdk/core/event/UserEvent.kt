@@ -30,7 +30,7 @@ sealed class UserEvent {
         val variationId: Long?,
         val variationKey: String,
         val decisionReason: DecisionReason,
-        val properties: Map<String, Any>
+        val properties: Map<String, Any?>
     ) : UserEvent() {
         override fun with(user: HackleUser) = copy(user = user)
     }
@@ -52,7 +52,7 @@ sealed class UserEvent {
         val parameter: RemoteConfigParameter,
         val valueId: Long?,
         val decisionReason: DecisionReason,
-        val properties: Map<String, Any>,
+        val properties: Map<String, Any?>,
     ) : UserEvent() {
         override fun with(user: HackleUser) = copy(user = user)
     }
@@ -82,10 +82,10 @@ sealed class UserEvent {
             return properties
         }
 
-        internal fun track(eventType: EventType, event: Event, user: HackleUser): UserEvent {
+        internal fun track(eventType: EventType, event: Event, timestamp: Long, user: HackleUser): UserEvent {
             return Track(
                 insertId = UUID.randomUUID().toString(),
-                timestamp = Clock.SYSTEM.currentMillis(),
+                timestamp = timestamp,
                 user = user,
                 eventType = eventType,
                 event = event
