@@ -94,7 +94,7 @@ internal class HackleClientImpl(
     override fun track(event: Event, user: User) {
         try {
             val hackleUser = userResolver.resolveOrNull(user) ?: return
-            client.track(event, hackleUser)
+            client.track(event, hackleUser, System.currentTimeMillis())
         } catch (e: Exception) {
             log.error { "Unexpected exception while tracking event[${event.key}]: $e" }
         }

@@ -6,17 +6,22 @@ internal class IdentifiersBuilder {
 
     private val identifiers = hashMapOf<String, String>()
 
-    fun add(identifiers: Map<String, String>) = apply {
+    fun add(identifiers: Map<String, String>, overwrite: Boolean = true) = apply {
         for ((type, value) in identifiers) {
-            add(type, value)
+            add(type, value, overwrite)
         }
     }
 
-    fun add(type: IdentifierType, value: String?) = apply {
-        add(type.key, value)
+    fun add(type: IdentifierType, value: String?, overwrite: Boolean = true) = apply {
+        add(type.key, value, overwrite)
     }
 
-    fun add(type: String, value: String?) = apply {
+    fun add(type: String, value: String?, overwrite: Boolean = true) = apply {
+
+        if (!overwrite && identifiers.containsKey(type)) {
+            return@apply
+        }
+
         if (value != null && isValid(type, value)) {
             identifiers[type] = value
         }

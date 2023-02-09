@@ -381,7 +381,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns null
 
             // when
-            sut.track(Event.of("test_event_key"), HackleUser.of("TEST_USER_ID"))
+            sut.track(Event.of("test_event_key"), HackleUser.of("TEST_USER_ID"), 42)
 
             //then
             verify(exactly = 1) {
@@ -389,6 +389,7 @@ internal class HackleInternalClientTest {
                     expectThat(it)
                         .isA<UserEvent.Track>()
                         .and {
+                            get { timestamp } isEqualTo 42
                             get { eventType }
                                 .isA<EventType.Undefined>()
                                 .get { key }
@@ -407,7 +408,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             // when
-            sut.track(Event.of("undefined_event_key"), HackleUser.of("TEST_USER_ID"))
+            sut.track(Event.of("undefined_event_key"), HackleUser.of("TEST_USER_ID"), 42)
 
             //then
             verify(exactly = 1) {
@@ -415,6 +416,7 @@ internal class HackleInternalClientTest {
                     expectThat(it)
                         .isA<UserEvent.Track>()
                         .and {
+                            get { timestamp } isEqualTo 42
                             get { eventType }
                                 .isA<EventType.Undefined>()
                                 .get { key }
@@ -434,7 +436,7 @@ internal class HackleInternalClientTest {
             every { workspaceFetcher.fetch() } returns workspace
 
             // when
-            sut.track(Event.of("custom_event_key"), HackleUser.of("TEST_USER_ID"))
+            sut.track(Event.of("custom_event_key"), HackleUser.of("TEST_USER_ID"), 42)
 
             //then
             verify(exactly = 1) {

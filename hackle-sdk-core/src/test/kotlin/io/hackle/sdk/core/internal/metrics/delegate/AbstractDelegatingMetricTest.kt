@@ -25,28 +25,25 @@ internal class AbstractDelegatingMetricTest {
 
         @Test
         fun `concurrency read write`() {
+            val id = Metric.Id("test", emptyMap(), Metric.Type.COUNTER)
+            val noopCounter = mockk<Counter>()
+            val sut = DelegatingMetricStub(id, noopCounter)
 
-            repeat(10) {
-                val id = Metric.Id("test", emptyMap(), Metric.Type.COUNTER)
-                val noopCounter = mockk<Counter>()
-                val sut = DelegatingMetricStub(id, noopCounter)
+            val executor = Executors.newFixedThreadPool(32)
 
-                val executor = Executors.newFixedThreadPool(32)
-
-                val latch = CountDownLatch(10000)
-                repeat(10000) {
-                    executor.execute {
-                        if (it % 2 == 0) {
-                            sut.metrics()
-                        } else {
-                            sut.add(CumulativeMetricRegistry())
-                        }
-                        latch.countDown()
+            val latch = CountDownLatch(10000)
+            repeat(10000) {
+                executor.execute {
+                    if (it % 2 == 0) {
+                        sut.metrics()
+                    } else {
+                        sut.add(CumulativeMetricRegistry())
                     }
+                    latch.countDown()
                 }
-                latch.await()
-                expectThat(sut.metrics().size).isEqualTo(5000)
             }
+            latch.await()
+            expectThat(sut.metrics().size).isEqualTo(5000)
         }
 
         @Test

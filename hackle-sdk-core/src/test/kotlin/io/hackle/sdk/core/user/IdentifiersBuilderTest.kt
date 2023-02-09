@@ -56,6 +56,35 @@ internal class IdentifiersBuilderTest {
     }
 
     @Test
+    fun `overwrite`() {
+        expectThat(
+            IdentifiersBuilder()
+                .add("key", "value")
+                .add("key", "value2")
+                .build()
+        ) {
+            get { this["key"] } isEqualTo "value2"
+        }
+
+        expectThat(
+            IdentifiersBuilder()
+                .add("key", "value")
+                .add("key", "value2", overwrite = false)
+                .build()
+        ) {
+            get { this["key"] } isEqualTo "value"
+        }
+
+        expectThat(
+            IdentifiersBuilder()
+                .add("key", "value2", overwrite = false)
+                .build()
+        ) {
+            get { this["key"] } isEqualTo "value2"
+        }
+    }
+
+    @Test
     fun `build`() {
         // given
 

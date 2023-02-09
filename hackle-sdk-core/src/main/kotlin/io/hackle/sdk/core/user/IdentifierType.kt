@@ -6,5 +6,7 @@ enum class IdentifierType(
     ID("\$id"),
     USER("\$userId"),
     DEVICE("\$deviceId"),
-    SESSION("\$sessionId")
+    SESSION("\$sessionId"),
+
+    HACKLE_DEVICE_ID("\$hackleDeviceId"),
 }
