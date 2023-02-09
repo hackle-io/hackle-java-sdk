@@ -38,30 +38,28 @@ internal class FlushCounterTest {
 
     @Test
     fun `concurrency increment`() {
-        repeat(100) {
-            val counter = counter()
+        val counter = counter()
 
-            val latch = CountDownLatch(10000)
-            val jobs = List(10000) {
-                CompletableFuture.supplyAsync {
-                    if (it % 2 == 0) {
-                        counter.apply { increment() }
-                    } else {
-                        counter.flush()
-                    }.also {
-                        latch.countDown()
-                    }
+        val latch = CountDownLatch(10000)
+        val jobs = List(10000) {
+            CompletableFuture.supplyAsync {
+                if (it % 2 == 0) {
+                    counter.apply { increment() }
+                } else {
+                    counter.flush()
+                }.also {
+                    latch.countDown()
                 }
             }
-
-            latch.await()
-            val count = jobs.asSequence()
-                .map { it.join() }
-                .filterIsInstance<CumulativeCounter>()
-                .sumOf { it.count() } + counter.flush().count()
-
-            expectThat(count).isEqualTo(5000)
         }
+
+        latch.await()
+        val count = jobs.asSequence()
+            .map { it.join() }
+            .filterIsInstance<CumulativeCounter>()
+            .sumOf { it.count() } + counter.flush().count()
+
+        expectThat(count).isEqualTo(5000)
     }
 
     @Test

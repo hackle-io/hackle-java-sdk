@@ -255,7 +255,7 @@ internal class HackleClientImplTest {
         fun `key, userId`() {
             sut.track("key", "42")
             verify(exactly = 1) {
-                client.track(Event.of("key"), HackleUser.of("42"))
+                client.track(Event.of("key"), HackleUser.of("42"), any())
             }
         }
 
@@ -263,7 +263,7 @@ internal class HackleClientImplTest {
         fun `key, user`() {
             sut.track("key", User.of("42"))
             verify(exactly = 1) {
-                client.track(Event.of("key"), HackleUser.of("42"))
+                client.track(Event.of("key"), HackleUser.of("42"), any())
             }
         }
 
@@ -278,7 +278,7 @@ internal class HackleClientImplTest {
 
             //then
             verify(exactly = 1) {
-                client.track(event, HackleUser.of(user))
+                client.track(event, HackleUser.of(user), any())
             }
         }
     }

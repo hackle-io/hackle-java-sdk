@@ -32,8 +32,8 @@ internal class AnyUtilTest {
     fun `safe`() {
         val type: Experiment.Type = Experiment.Type.AB_TEST
         when (type) {
-            Experiment.Type.AB_TEST -> println("ab")
-            Experiment.Type.FEATURE_FLAG -> println("ff")
+            Experiment.Type.AB_TEST -> Unit
+            Experiment.Type.FEATURE_FLAG -> Unit
         }.safe
     }
 }

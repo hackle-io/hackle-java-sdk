@@ -27,6 +27,7 @@ internal class UserTest {
                 "double_key" to 42.0,
                 "boolean_key" to true,
                 "string_key" to "abc 123",
+                "string_null" to null,
             )
         }
     }
