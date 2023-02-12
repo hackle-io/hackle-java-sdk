@@ -1,8 +1,8 @@
-package io.hackle.sdk.core.user
+package io.hackle.sdk.common
 
 import java.util.*
 
-internal class IdentifiersBuilder {
+class IdentifiersBuilder {
 
     private val identifiers = hashMapOf<String, String>()
 
@@ -10,10 +10,6 @@ internal class IdentifiersBuilder {
         for ((type, value) in identifiers) {
             add(type, value, overwrite)
         }
-    }
-
-    fun add(type: IdentifierType, value: String?, overwrite: Boolean = true) = apply {
-        add(type.key, value, overwrite)
     }
 
     fun add(type: String, value: String?, overwrite: Boolean = true) = apply {
