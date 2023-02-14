@@ -1,7 +1,5 @@
 package io.hackle.sdk.common
 
-import java.util.*
-
 /**
  * @author Yong
  */
@@ -13,18 +11,32 @@ data class User internal constructor(
     val properties: Map<String, Any?>,
 ) {
 
+    fun toBuilder(): Builder {
+        return Builder(this)
+    }
+
     class Builder internal constructor() {
+
+        internal constructor(user: User) : this() {
+            id(user.id)
+            userId(user.userId)
+            deviceId(user.deviceId)
+            identifiers.add(user.identifiers)
+            properties.add(user.properties)
+        }
 
         private var id: String? = null
         private var userId: String? = null
         private var deviceId: String? = null
-        private val identifiers = hashMapOf<String, String>()
+        private val identifiers = IdentifiersBuilder()
         private val properties = PropertiesBuilder()
 
-        internal fun id(id: String?) = apply { this.id = id }
+        fun id(id: String?) = apply { this.id = id }
         fun userId(userId: String?) = apply { this.userId = userId }
         fun deviceId(deviceId: String?) = apply { this.deviceId = deviceId }
-        fun identifier(type: String, value: String?) = apply { value?.let { identifiers[type] = it } }
+        fun identifiers(identifiers: Map<String, String>) = apply { this.identifiers.add(identifiers) }
+        fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
+        fun properties(properties: Map<String, Any?>) = apply { this.properties.add(properties) }
         fun property(key: String, value: Int) = apply { properties.add(key, value) }
         fun property(key: String, value: Long) = apply { properties.add(key, value) }
         fun property(key: String, value: Double) = apply { properties.add(key, value) }
@@ -37,7 +49,7 @@ data class User internal constructor(
                 id = id,
                 userId = userId,
                 deviceId = deviceId,
-                identifiers = Collections.unmodifiableMap(identifiers),
+                identifiers = identifiers.build(),
                 properties = properties.build()
             )
         }
