@@ -7,6 +7,5 @@ enum class IdentifierType(
     USER("\$userId"),
     DEVICE("\$deviceId"),
     SESSION("\$sessionId"),
-
     HACKLE_DEVICE_ID("\$hackleDeviceId"),
 }
