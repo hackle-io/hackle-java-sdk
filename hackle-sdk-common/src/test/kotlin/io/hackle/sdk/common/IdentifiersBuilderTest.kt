@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.user
+package io.hackle.sdk.common
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat

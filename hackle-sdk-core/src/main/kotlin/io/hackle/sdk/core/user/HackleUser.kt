@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.user
 
+import io.hackle.sdk.common.IdentifiersBuilder
 import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.User
 
@@ -36,7 +37,7 @@ data class HackleUser internal constructor(
             apply { this.identifiers.add(type, value, overwrite) }
 
         fun identifier(type: IdentifierType, value: String?, overwrite: Boolean = true) =
-            apply { this.identifiers.add(type, value, overwrite) }
+            apply { this.identifiers.add(type.key, value, overwrite) }
 
         fun properties(properties: Map<String, Any?>) = apply { this.properties.add(properties) }
         fun property(key: String, value: Any?) = apply { this.properties.add(key, value) }
