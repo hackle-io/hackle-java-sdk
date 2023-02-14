@@ -40,7 +40,7 @@ internal data class RemoteConfigEvaluation<out T : Any>(
     val valueId: Long?,
     val value: T,
     val reason: DecisionReason,
-    val properties: Map<String, Any?> = emptyMap()
+    val properties: Map<String, Any> = emptyMap()
 ) {
 
     companion object {

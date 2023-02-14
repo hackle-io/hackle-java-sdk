@@ -6,7 +6,7 @@ package io.hackle.sdk.common
 data class Event internal constructor(
     val key: String,
     val value: Double?,
-    val properties: Map<String, Any?>
+    val properties: Map<String, Any>
 ) {
 
     class Builder(private val key: String) {
