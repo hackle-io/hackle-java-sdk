@@ -6,8 +6,8 @@ import io.hackle.sdk.common.User
 
 data class HackleUser internal constructor(
     val identifiers: Map<String, String>,
-    val properties: Map<String, Any?>,
-    val hackleProperties: Map<String, Any?>
+    val properties: Map<String, Any>,
+    val hackleProperties: Map<String, Any>
 ) {
 
     val userId: String? get() = identifiers[IdentifierType.USER.key]
@@ -39,11 +39,11 @@ data class HackleUser internal constructor(
         fun identifier(type: IdentifierType, value: String?, overwrite: Boolean = true) =
             apply { this.identifiers.add(type.key, value, overwrite) }
 
-        fun properties(properties: Map<String, Any?>) = apply { this.properties.add(properties) }
-        fun property(key: String, value: Any?) = apply { this.properties.add(key, value) }
+        fun properties(properties: Map<String, Any>) = apply { this.properties.add(properties) }
+        fun property(key: String, value: Any) = apply { this.properties.add(key, value) }
 
-        fun hackleProperties(properties: Map<String, Any?>) = apply { this.hackleProperties.add(properties) }
-        fun hackleProperty(key: String, value: Any?) = apply { this.hackleProperties.add(key, value) }
+        fun hackleProperties(properties: Map<String, Any>) = apply { this.hackleProperties.add(properties) }
+        fun hackleProperty(key: String, value: Any) = apply { this.hackleProperties.add(key, value) }
 
         fun build(): HackleUser {
             return HackleUser(
