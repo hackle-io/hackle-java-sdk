@@ -13,11 +13,8 @@ data class Event internal constructor(
         private var value: Double? = null
         private val properties = PropertiesBuilder()
         fun value(value: Double) = apply { this.value = value }
-        fun property(key: String, value: Int) = apply { properties.add(key, value) }
-        fun property(key: String, value: Long) = apply { properties.add(key, value) }
-        fun property(key: String, value: Double) = apply { properties.add(key, value) }
-        fun property(key: String, value: Boolean) = apply { properties.add(key, value) }
-        fun property(key: String, value: String?) = apply { value?.let { properties.add(key, it) } }
+        fun property(key: String, value: Any?) = apply { this.properties.add(key, value) }
+        fun properties(properties: Map<String, Any?>) = apply { this.properties.add(properties) }
         fun build() = Event(key, value, properties.build())
     }
 

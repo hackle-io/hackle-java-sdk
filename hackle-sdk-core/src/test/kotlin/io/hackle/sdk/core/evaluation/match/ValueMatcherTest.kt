@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.model.Version
 import io.mockk.Called
 import io.mockk.every
@@ -14,57 +15,19 @@ internal class ValueMatcherTest {
 
     @Nested
     inner class StringMatcherTest {
-
         @Test
-        fun `userValue, matchValue가 String타입이면 OperatorMatcher의 일치 결과로 평가한다`() {
-            // given
-            val userValue = "value1"
-            val matchValue = "value1"
-            val operatorMatcher = mockk<OperatorMatcher> {
-                every { matches(userValue, matchValue) } returns true
-            }
-
-            val sut = StringMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertTrue(actual)
+        fun `string type match`() {
+            assertTrue(StringMatcher.matches(InMatcher, "42", "42"))
         }
 
         @Test
-        fun `userValue가 String타입이 아니면 false`() {
-            // given
-            val userValue = 1
-            val matchValue = "1"
-            val operatorMatcher = mockk<OperatorMatcher>()
+        fun `string 타입이 아니면 캐스팅 후 match`() {
+            assertTrue(StringMatcher.matches(InMatcher, "42", 42))
+            assertTrue(StringMatcher.matches(InMatcher, 42, "42"))
+            assertTrue(StringMatcher.matches(InMatcher, 42, 42))
 
-            val sut = StringMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
-        }
-
-        @Test
-        fun `userValue가 String타입이지만 matchValue가 String타입이 아니면 false`() {
-            // given
-            val userValue = "1"
-            val matchValue = 1
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = StringMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
+            assertTrue(StringMatcher.matches(InMatcher, "true", true))
+            assertTrue(StringMatcher.matches(InMatcher, DecisionReason.DEFAULT_RULE, "DEFAULT_RULE"))
         }
     }
 
@@ -72,55 +35,21 @@ internal class ValueMatcherTest {
     inner class NumberMatcherTest {
 
         @Test
-        fun `userValue, matchValue가 Number타입이면 OperatorMatcher의 일치 결과로 평가한다`() {
-            // given
-            val userValue = 42
-            val matchValue = 42
-            val operatorMatcher = mockk<OperatorMatcher> {
-                every { matches(userValue, matchValue) } returns true
-            }
-
-            val sut = NumberMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertTrue(actual)
+        fun `number type match`() {
+            assertTrue(NumberMatcher.matches(InMatcher, 42, 42))
+            assertTrue(NumberMatcher.matches(InMatcher, 42.0, 42))
+            assertTrue(NumberMatcher.matches(InMatcher, 42, 42.0))
+            assertTrue(NumberMatcher.matches(InMatcher, 42L, 42))
+            assertTrue(NumberMatcher.matches(InMatcher, 42, 42L))
         }
 
         @Test
-        fun `userValue가 Number타입이 아니면 false`() {
-            // given
-            val userValue = "1"
-            val matchValue = 1
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = NumberMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
-        }
-
-        @Test
-        fun `userValue가 Number타입이지만 matchValue가 Number타입이 아니면 false`() {
-            // given
-            val userValue = 1
-            val matchValue = "1"
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = NumberMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
+        fun `number 로 캐스팅 시도후 match`() {
+            assertTrue(NumberMatcher.matches(InMatcher, "42", 42))
+            assertTrue(NumberMatcher.matches(InMatcher, "42.0", 42))
+            assertFalse(NumberMatcher.matches(InMatcher, "42a", 42))
+            assertFalse(NumberMatcher.matches(InMatcher, 0, "false"))
+            assertFalse(NumberMatcher.matches(InMatcher, 0, false))
         }
     }
 
