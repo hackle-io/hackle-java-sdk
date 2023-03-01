@@ -17,4 +17,4 @@ jobs:
         with:
           gradle-version: 6.5
       - name: Test
-        run: ./gradlew test --stacktrace --info
+        run: gradle test --stacktrace --info
