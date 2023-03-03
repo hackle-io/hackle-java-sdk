@@ -1,6 +1,5 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.model.Version
 import io.mockk.Called
 import io.mockk.every
@@ -21,13 +20,25 @@ internal class ValueMatcherTest {
         }
 
         @Test
-        fun `string 타입이 아니면 캐스팅 후 match`() {
+        fun `number 타입이면 캐스팅 후 match`() {
             assertTrue(StringMatcher.matches(InMatcher, "42", 42))
             assertTrue(StringMatcher.matches(InMatcher, 42, "42"))
             assertTrue(StringMatcher.matches(InMatcher, 42, 42))
 
-            assertTrue(StringMatcher.matches(InMatcher, "true", true))
-            assertTrue(StringMatcher.matches(InMatcher, DecisionReason.DEFAULT_RULE, "DEFAULT_RULE"))
+            assertTrue(StringMatcher.matches(InMatcher, 42.42, "42.42"))
+            assertTrue(StringMatcher.matches(InMatcher, "42.42", 42.42))
+            assertTrue(StringMatcher.matches(InMatcher, 42.42, 42.42))
+
+            assertTrue(StringMatcher.matches(InMatcher, "42.0", 42.0))
+            assertTrue(StringMatcher.matches(InMatcher, 42.0, "42.0"))
+            assertTrue(StringMatcher.matches(InMatcher, 42.0, 42.0))
+        }
+
+        @Test
+        fun `지원하지 않는 타입`() {
+            assertFalse(StringMatcher.matches(InMatcher, true, true))
+            assertFalse(StringMatcher.matches(InMatcher, true, "1"))
+            assertFalse(StringMatcher.matches(InMatcher, "1", true))
         }
     }
 
@@ -37,19 +48,36 @@ internal class ValueMatcherTest {
         @Test
         fun `number type match`() {
             assertTrue(NumberMatcher.matches(InMatcher, 42, 42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42.0, 42))
+            assertTrue(NumberMatcher.matches(InMatcher, 42.42, 42.42))
             assertTrue(NumberMatcher.matches(InMatcher, 42, 42.0))
+            assertTrue(NumberMatcher.matches(InMatcher, 42.0, 42))
             assertTrue(NumberMatcher.matches(InMatcher, 42L, 42))
             assertTrue(NumberMatcher.matches(InMatcher, 42, 42L))
+            assertTrue(NumberMatcher.matches(InMatcher, 0, 0.0))
+            assertTrue(NumberMatcher.matches(InMatcher, 0.0, 0))
         }
 
         @Test
-        fun `number 로 캐스팅 시도후 match`() {
+        fun `string 타입이면 캐스팅 후 match`() {
+            assertTrue(NumberMatcher.matches(InMatcher, "42", "42"))
             assertTrue(NumberMatcher.matches(InMatcher, "42", 42))
-            assertTrue(NumberMatcher.matches(InMatcher, "42.0", 42))
+            assertTrue(NumberMatcher.matches(InMatcher, 42, "42"))
+
+            assertTrue(NumberMatcher.matches(InMatcher, "42.42", "42.42"))
+            assertTrue(NumberMatcher.matches(InMatcher, "42.42", 42.42))
+            assertTrue(NumberMatcher.matches(InMatcher, 42.42, "42.42"))
+
+            assertTrue(NumberMatcher.matches(InMatcher, "42.0", "42.0"))
+            assertTrue(NumberMatcher.matches(InMatcher, "42.0", 42.0))
+            assertTrue(NumberMatcher.matches(InMatcher, 42.0, "42.0"))
+        }
+
+        @Test
+        fun `지원하지 않는 타입`() {
             assertFalse(NumberMatcher.matches(InMatcher, "42a", 42))
             assertFalse(NumberMatcher.matches(InMatcher, 0, "false"))
             assertFalse(NumberMatcher.matches(InMatcher, 0, false))
+            assertFalse(NumberMatcher.matches(InMatcher, true, true))
         }
     }
 

@@ -33,21 +33,21 @@ class PropertiesBuilder {
         }
 
         if (value is Collection<*>) {
-            return value.asSequence().filterNotNull().filter { isValidArrayValue(it) }.toList()
+            return value.asSequence().filterNotNull().filter { isValidElement(it) }.toList()
         }
 
         if (value is Array<*>) {
-            return value.asSequence().filterNotNull().filter { isValidArrayValue(it) }.toList()
+            return value.asSequence().filterNotNull().filter { isValidElement(it) }.toList()
         }
 
-        if (isValidRawValue(value)) {
+        if (isValidValue(value)) {
             return value
         }
 
         return null
     }
 
-    private fun isValidRawValue(value: Any): Boolean {
+    private fun isValidValue(value: Any): Boolean {
         return when (value) {
             is String -> value.length <= MAX_PROPERTY_VALUE_LENGTH
             is Number -> true
@@ -56,9 +56,9 @@ class PropertiesBuilder {
         }
     }
 
-    private fun isValidArrayValue(value: Any): Boolean {
-        return when (value) {
-            is String -> value.length <= MAX_PROPERTY_VALUE_LENGTH
+    private fun isValidElement(element: Any): Boolean {
+        return when (element) {
+            is String -> element.length <= MAX_PROPERTY_VALUE_LENGTH
             is Number -> true
             else -> false
         }

@@ -1,13 +1,12 @@
 package io.hackle.sdk.core.model
 
 internal object ValueConverter {
-
-    fun asString(value: Any): String {
-        if (value is String) {
-            return value
+    fun asStringOrNull(value: Any): String? {
+        return when (value) {
+            is String -> return value
+            is Number -> value.toString()
+            else -> null
         }
-
-        return value.toString()
     }
 
     fun asDoubleOrNull(value: Any): Double? {
@@ -26,5 +25,4 @@ internal object ValueConverter {
     fun asVersionOrNull(value: Any): Version? {
         return Version.parseOrNull(value)
     }
-
 }
