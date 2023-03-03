@@ -50,7 +50,7 @@ data class HackleUser internal constructor(
                 identifiers = identifiers.build(),
                 properties = properties.build(),
                 hackleProperties = hackleProperties.build()
-            )정
+            )
         }
     }
 
