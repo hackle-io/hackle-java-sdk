@@ -1,49 +1,47 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.core.model.Version
+import io.hackle.sdk.core.model.ValueConverter.asBooleanOrNull
+import io.hackle.sdk.core.model.ValueConverter.asDoubleOrNull
+import io.hackle.sdk.core.model.ValueConverter.asStringOrNull
+import io.hackle.sdk.core.model.ValueConverter.asVersionOrNull
 
 
 internal fun interface ValueMatcher {
     fun matches(operatorMatcher: OperatorMatcher, userValue: Any, matchValue: Any): Boolean
-
-    companion object {
-        inline fun <reified T> matches(userValue: Any, matchValue: Any, operatorMatches: (T, T) -> Boolean): Boolean {
-            return matches(userValue, matchValue, { it as? T }, operatorMatches)
-        }
-
-        inline fun <reified T> matches(
-            userValue: Any,
-            matchValue: Any,
-            transform: (Any) -> T?,
-            operatorMatches: (T, T) -> Boolean,
-        ): Boolean {
-            val typedUserValue: T = transform(userValue) ?: return false
-            val typedMatchValue: T = transform(matchValue) ?: return false
-            return operatorMatches(typedUserValue, typedMatchValue)
-        }
-    }
 }
 
 internal object StringMatcher : ValueMatcher {
     override fun matches(operatorMatcher: OperatorMatcher, userValue: Any, matchValue: Any): Boolean {
-        return ValueMatcher.matches<String>(userValue, matchValue, operatorMatcher::matches)
+        return operatorMatcher.matches(
+            userValue = asStringOrNull(userValue) ?: return false,
+            matchValue = asStringOrNull(matchValue) ?: return false
+        )
     }
 }
 
 internal object NumberMatcher : ValueMatcher {
     override fun matches(operatorMatcher: OperatorMatcher, userValue: Any, matchValue: Any): Boolean {
-        return ValueMatcher.matches<Number>(userValue, matchValue, operatorMatcher::matches)
+        return operatorMatcher.matches(
+            userValue = asDoubleOrNull(userValue) ?: return false,
+            matchValue = asDoubleOrNull(matchValue) ?: return false
+        )
     }
 }
 
 internal object BooleanMatcher : ValueMatcher {
     override fun matches(operatorMatcher: OperatorMatcher, userValue: Any, matchValue: Any): Boolean {
-        return ValueMatcher.matches<Boolean>(userValue, matchValue, operatorMatcher::matches)
+        return operatorMatcher.matches(
+            userValue = asBooleanOrNull(userValue) ?: return false,
+            matchValue = asBooleanOrNull(matchValue) ?: return false
+        )
     }
 }
 
 internal object VersionMatcher : ValueMatcher {
     override fun matches(operatorMatcher: OperatorMatcher, userValue: Any, matchValue: Any): Boolean {
-        return ValueMatcher.matches(userValue, matchValue, Version::parseOrNull, operatorMatcher::matches)
+        return operatorMatcher.matches(
+            userValue = asVersionOrNull(userValue) ?: return false,
+            matchValue = asVersionOrNull(matchValue) ?: return false
+        )
     }
 }

@@ -35,7 +35,9 @@ data class User internal constructor(
         fun userId(userId: String?) = apply { this.userId = userId }
         fun deviceId(deviceId: String?) = apply { this.deviceId = deviceId }
         fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
+        fun identifiers(identifiers: Map<String, String?>?) = apply { identifiers?.let { this.identifiers.add(it) } }
         fun property(key: String, value: Any?) = apply { properties.add(key, value) }
+        fun properties(properties: Map<String, Any?>?) = apply { properties?.let { this.properties.add(it) } }
 
         fun build(): User {
             return User(

@@ -10,8 +10,30 @@ internal class ValueOperatorMatcher(
     fun matches(userValue: Any, match: Target.Match): Boolean {
         val valueMatcher = factory.getValueMatcher(match.valueType)
         val operatorMatcher = factory.getOperatorMatcher(match.operator)
-        val isMatched = match.values.any { valueMatcher.matches(operatorMatcher, userValue, it) }
+        @Suppress("UNCHECKED_CAST")
+        val isMatched = when (userValue) {
+            is Collection<*> -> arrayMatches(userValue as Collection<Any>, match, valueMatcher, operatorMatcher)
+            else -> singleMatches(userValue, match, valueMatcher, operatorMatcher)
+        }
         return match.type.matches(isMatched)
+    }
+
+    private fun singleMatches(
+        userValue: Any,
+        match: Target.Match,
+        valueMatcher: ValueMatcher,
+        operatorMatcher: OperatorMatcher
+    ): Boolean {
+        return match.values.any { valueMatcher.matches(operatorMatcher, userValue, it) }
+    }
+
+    private fun arrayMatches(
+        userValues: Collection<Any>,
+        match: Target.Match,
+        valueMatcher: ValueMatcher,
+        operatorMatcher: OperatorMatcher
+    ): Boolean {
+        return userValues.any { singleMatches(it, match, valueMatcher, operatorMatcher) }
     }
 }
 

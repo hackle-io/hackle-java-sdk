@@ -32,6 +32,31 @@ internal class UserTest {
     }
 
     @Test
+    fun `build2`() {
+        val user = User.builder()
+            .id("id")
+            .userId("userId")
+            .deviceId("deviceId")
+            .identifier("id1", "v1")
+            .identifiers(mapOf("id2" to "v2"))
+            .identifiers(null)
+            .property("k1", "v1")
+            .properties(mapOf("k2" to 2))
+            .properties(null)
+            .build()
+
+        expectThat(user) {
+            get { id } isEqualTo "id"
+            get { userId } isEqualTo "userId"
+            get { deviceId } isEqualTo "deviceId"
+            get { identifiers } isEqualTo mapOf("id1" to "v1", "id2" to "v2")
+            get { properties } isEqualTo mapOf("k1" to "v1", "k2" to 2)
+        }
+
+        expectThat(user) isEqualTo user.toBuilder().build()
+    }
+
+    @Test
     fun `프로퍼티 갯수가 128개가 넘으면 추가하지 않는다`() {
         val user = User.builder("test")
             .apply {
@@ -79,4 +104,5 @@ internal class UserTest {
             hasSize(1)
         }
     }
+
 }

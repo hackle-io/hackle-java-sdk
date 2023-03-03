@@ -83,4 +83,61 @@ internal class ValueOperatorMatcherTest {
         // then
         assertTrue(actual)
     }
+
+    @Test
+    fun `userValue 가 collection인 경우 하나라도 매칭되면 true`() {
+        // given
+        val match = Match(
+            type = Match.Type.MATCH,
+            operator = Match.Operator.IN,
+            valueType = ValueType.NUMBER,
+            values = listOf(1, 2, 3)
+        )
+
+        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
+
+        // when
+        val actual = sut.matches(listOf(2), match)
+
+        // then
+        assertTrue(actual)
+    }
+
+    @Test
+    fun `collection userValue 중 매칭되는게 하나도 없으면 false`() {
+        // given
+        val match = Match(
+            type = Match.Type.MATCH,
+            operator = Match.Operator.IN,
+            valueType = ValueType.NUMBER,
+            values = listOf(1, 2, 3)
+        )
+
+        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
+
+        // when
+        val actual = sut.matches(listOf(4, 5, 6), match)
+
+        // then
+        assertFalse(actual)
+    }
+
+    @Test
+    fun `collection 이 비어있으면 false`() {
+        // given
+        val match = Match(
+            type = Match.Type.MATCH,
+            operator = Match.Operator.IN,
+            valueType = ValueType.NUMBER,
+            values = listOf(1, 2, 3)
+        )
+
+        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
+
+        // when
+        val actual = sut.matches(listOf<Any>(), match)
+
+        // then
+        assertFalse(actual)
+    }
 }
