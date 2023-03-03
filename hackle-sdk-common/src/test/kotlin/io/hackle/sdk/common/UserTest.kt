@@ -39,6 +39,7 @@ internal class UserTest {
             .deviceId("deviceId")
             .identifier("id1", "v1")
             .identifiers(mapOf("id2" to "v2"))
+            .identifiers(null)
             .property("k1", "v1")
             .properties(mapOf("k2" to 2))
             .properties(null)
