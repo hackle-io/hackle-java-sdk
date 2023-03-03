@@ -22,5 +22,9 @@ jobs:
         id: jacoco
         uses: madrapps/jacoco-report@v1.3
         with:
-          paths: ${{ github.workspace }}/hackle-sdk-core/build/reports/jacoco/test/jacocoTestReport.xml
+          paths: |
+            ${{ github.workspace }}/hackle-sdk-common/build/reports/jacoco/test/jacocoTestReport.xml
+            ${{ github.workspace }}/hackle-sdk-core/build/reports/jacoco/test/jacocoTestReport.xml
+            ${{ github.workspace }}/hackle-server-sdk/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
+          title: Coverage
