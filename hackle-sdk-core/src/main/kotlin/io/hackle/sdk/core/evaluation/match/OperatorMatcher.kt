@@ -39,28 +39,28 @@ internal object EndsWithMatcher : OperatorMatcher {
 }
 
 internal object GreaterThanMatcher : OperatorMatcher {
-    override fun matches(userValue: String, matchValue: String): Boolean = false
+    override fun matches(userValue: String, matchValue: String): Boolean = userValue > matchValue
     override fun matches(userValue: Number, matchValue: Number): Boolean = userValue.toDouble() > matchValue.toDouble()
     override fun matches(userValue: Boolean, matchValue: Boolean): Boolean = false
     override fun matches(userValue: Version, matchValue: Version): Boolean = userValue > matchValue
 }
 
 internal object GreaterThanOrEqualToMatcher : OperatorMatcher {
-    override fun matches(userValue: String, matchValue: String): Boolean = false
+    override fun matches(userValue: String, matchValue: String): Boolean = userValue >= matchValue
     override fun matches(userValue: Number, matchValue: Number): Boolean = userValue.toDouble() >= matchValue.toDouble()
     override fun matches(userValue: Boolean, matchValue: Boolean): Boolean = false
     override fun matches(userValue: Version, matchValue: Version): Boolean = userValue >= matchValue
 }
 
 internal object LessThanMatcher : OperatorMatcher {
-    override fun matches(userValue: String, matchValue: String): Boolean = false
+    override fun matches(userValue: String, matchValue: String): Boolean = userValue < matchValue
     override fun matches(userValue: Number, matchValue: Number): Boolean = userValue.toDouble() < matchValue.toDouble()
     override fun matches(userValue: Boolean, matchValue: Boolean): Boolean = false
     override fun matches(userValue: Version, matchValue: Version): Boolean = userValue < matchValue
 }
 
 internal object LessThanOrEqualToMatcher : OperatorMatcher {
-    override fun matches(userValue: String, matchValue: String): Boolean = false
+    override fun matches(userValue: String, matchValue: String): Boolean = userValue <= matchValue
     override fun matches(userValue: Number, matchValue: Number): Boolean = userValue.toDouble() <= matchValue.toDouble()
     override fun matches(userValue: Boolean, matchValue: Boolean): Boolean = false
     override fun matches(userValue: Version, matchValue: Version): Boolean = userValue <= matchValue
