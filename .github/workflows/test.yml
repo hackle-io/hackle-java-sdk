@@ -18,3 +18,9 @@ jobs:
           gradle-version: 6.5
       - name: Test
         run: gradle test --stacktrace --info
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.3
+        with:
+          paths: ${{ github.workspace }}/hackle-sdk-core/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
