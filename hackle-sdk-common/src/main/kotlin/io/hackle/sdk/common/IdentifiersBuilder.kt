@@ -6,7 +6,7 @@ class IdentifiersBuilder {
 
     private val identifiers = hashMapOf<String, String>()
 
-    fun add(identifiers: Map<String, String>, overwrite: Boolean = true) = apply {
+    fun add(identifiers: Map<String, String?>, overwrite: Boolean = true) = apply {
         for ((type, value) in identifiers) {
             add(type, value, overwrite)
         }
