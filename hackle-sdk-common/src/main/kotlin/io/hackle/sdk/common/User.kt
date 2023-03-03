@@ -40,6 +40,7 @@ data class User internal constructor(
         fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
         fun property(key: String, value: Any?) = apply { properties.add(key, value) }
         fun hackleProperty(key: String, value: Any?) = apply { hackleProperties.add(key, value) }
+        fun hackleProperties(hackleProperties: Map<String, Any>) = apply { this.hackleProperties.add(hackleProperties) }
 
         fun build(): User {
             return User(
