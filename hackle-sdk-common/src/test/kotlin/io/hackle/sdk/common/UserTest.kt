@@ -41,6 +41,7 @@ internal class UserTest {
             .identifiers(mapOf("id2" to "v2"))
             .property("k1", "v1")
             .properties(mapOf("k2" to 2))
+            .properties(null)
             .build()
 
         expectThat(user) {

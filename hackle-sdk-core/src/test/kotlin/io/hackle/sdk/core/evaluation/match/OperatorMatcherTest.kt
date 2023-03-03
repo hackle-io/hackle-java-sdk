@@ -166,6 +166,10 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = "20230115", matchValue = "20230115"))
             assertTrue(sut.matches(userValue = "20230116", matchValue = "20230115"))
 
+            assertFalse(sut.matches(userValue = "2023-01-14", matchValue = "2023-01-15"))
+            assertFalse(sut.matches(userValue = "2023-01-15", matchValue = "2023-01-15"))
+            assertTrue(sut.matches(userValue = "2023-01-16", matchValue = "2023-01-15"))
+
             assertFalse(sut.matches(userValue = "a", matchValue = "a"))
             assertTrue(sut.matches(userValue = "a", matchValue = "A"))
             assertFalse(sut.matches(userValue = "A", matchValue = "a"))
@@ -211,6 +215,10 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = "20230114", matchValue = "20230115"))
             assertTrue(sut.matches(userValue = "20230115", matchValue = "20230115"))
             assertTrue(sut.matches(userValue = "20230116", matchValue = "20230115"))
+
+            assertFalse(sut.matches(userValue = "2023-01-14", matchValue = "2023-01-15"))
+            assertTrue(sut.matches(userValue = "2023-01-15", matchValue = "2023-01-15"))
+            assertTrue(sut.matches(userValue = "2023-01-16", matchValue = "2023-01-15"))
 
             assertTrue(sut.matches(userValue = "a", matchValue = "a"))
             assertTrue(sut.matches(userValue = "a", matchValue = "A"))
@@ -258,6 +266,10 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(userValue = "20230115", matchValue = "20230115"))
             assertFalse(sut.matches(userValue = "20230116", matchValue = "20230115"))
 
+            assertTrue(sut.matches(userValue = "2023-01-14", matchValue = "2023-01-15"))
+            assertFalse(sut.matches(userValue = "2023-01-15", matchValue = "2023-01-15"))
+            assertFalse(sut.matches(userValue = "2023-01-16", matchValue = "2023-01-15"))
+
             assertFalse(sut.matches(userValue = "a", matchValue = "a"))
             assertFalse(sut.matches(userValue = "a", matchValue = "A"))
             assertTrue(sut.matches(userValue = "A", matchValue = "a"))
@@ -303,6 +315,10 @@ internal class OperatorMatcherTest {
             assertTrue(sut.matches(userValue = "20230114", matchValue = "20230115"))
             assertTrue(sut.matches(userValue = "20230115", matchValue = "20230115"))
             assertFalse(sut.matches(userValue = "20230116", matchValue = "20230115"))
+
+            assertTrue(sut.matches(userValue = "2023-01-14", matchValue = "2023-01-15"))
+            assertTrue(sut.matches(userValue = "2023-01-15", matchValue = "2023-01-15"))
+            assertFalse(sut.matches(userValue = "2023-01-16", matchValue = "2023-01-15"))
 
             assertTrue(sut.matches(userValue = "a", matchValue = "a"))
             assertFalse(sut.matches(userValue = "a", matchValue = "A"))

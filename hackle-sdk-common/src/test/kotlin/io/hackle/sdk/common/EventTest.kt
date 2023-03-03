@@ -13,6 +13,7 @@ internal class EventTest {
             .property("k1", "v1")
             .property("k2", 2)
             .properties(mapOf("k3" to true))
+            .properties(null)
             .build()
 
         expectThat(event) {
