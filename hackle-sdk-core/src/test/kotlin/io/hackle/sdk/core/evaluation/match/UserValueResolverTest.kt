@@ -51,8 +51,8 @@ internal class UserValueResolverTest {
         val user = HackleUser.of(
             user = User.builder("test_user_id")
                 .property("age", 42)
-                .build(),
-            hackleProperties = mapOf("os" to "test_os")
+                .hackleProperty("os", "test_os")
+                .build()
         )
         expectThat(sut.resolveOrNull(user, Target.Key(HACKLE_PROPERTY, "os")))
             .isNotNull()

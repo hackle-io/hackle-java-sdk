@@ -9,6 +9,7 @@ data class User internal constructor(
     val deviceId: String?,
     val identifiers: Map<String, String>,
     val properties: Map<String, Any>,
+    val hackleProperties: Map<String, Any>,
 ) {
 
     fun toBuilder(): Builder {
@@ -23,6 +24,7 @@ data class User internal constructor(
             deviceId(user.deviceId)
             identifiers.add(user.identifiers)
             properties.add(user.properties)
+            hackleProperties.add(user.hackleProperties)
         }
 
         private var id: String? = null
@@ -30,12 +32,14 @@ data class User internal constructor(
         private var deviceId: String? = null
         private val identifiers = IdentifiersBuilder()
         private val properties = PropertiesBuilder()
+        private val hackleProperties = PropertiesBuilder()
 
         fun id(id: String?) = apply { this.id = id }
         fun userId(userId: String?) = apply { this.userId = userId }
         fun deviceId(deviceId: String?) = apply { this.deviceId = deviceId }
         fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
         fun property(key: String, value: Any?) = apply { properties.add(key, value) }
+        fun hackleProperty(key: String, value: Any?) = apply { hackleProperties.add(key, value) }
 
         fun build(): User {
             return User(
@@ -43,7 +47,8 @@ data class User internal constructor(
                 userId = userId,
                 deviceId = deviceId,
                 identifiers = identifiers.build(),
-                properties = properties.build()
+                properties = properties.build(),
+                hackleProperties = hackleProperties.build()
             )
         }
     }

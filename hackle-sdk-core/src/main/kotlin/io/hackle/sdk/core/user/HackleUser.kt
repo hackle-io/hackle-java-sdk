@@ -50,7 +50,7 @@ data class HackleUser internal constructor(
                 identifiers = identifiers.build(),
                 properties = properties.build(),
                 hackleProperties = hackleProperties.build()
-            )
+            )정
         }
     }
 
@@ -68,14 +68,14 @@ data class HackleUser internal constructor(
         }
 
         @Deprecated("Use HackleUser.builder() instead.")
-        fun of(user: User, hackleProperties: Map<String, Any> = emptyMap()): HackleUser {
+        fun of(user: User): HackleUser {
             return builder()
                 .identifiers(user.identifiers)
                 .identifier(IdentifierType.ID, user.id)
                 .identifier(IdentifierType.USER, user.userId)
                 .identifier(IdentifierType.DEVICE, user.deviceId)
                 .properties(user.properties)
-                .hackleProperties(hackleProperties)
+                .hackleProperties(user.hackleProperties)
                 .build()
         }
     }
