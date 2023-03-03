@@ -2,6 +2,7 @@ package io.hackle.sdk.common
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.containsKeys
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
@@ -13,6 +14,12 @@ internal class PropertiesBuilderTest {
         expectThat(PropertiesBuilder().add("key1", 1).build()).isEqualTo(mapOf("key1" to 1))
         expectThat(PropertiesBuilder().add("key1", "1").build()).isEqualTo(mapOf("key1" to "1"))
         expectThat(PropertiesBuilder().add("key1", true).build()).isEqualTo(mapOf("key1" to true))
+        expectThat(PropertiesBuilder().add("key1", false).build()).isEqualTo(mapOf("key1" to false))
+    }
+
+    @Test
+    fun `raw value invalid`() {
+        expectThat(PropertiesBuilder().add("key1", User.of("id")).build()).isEqualTo(mapOf())
     }
 
     @Test
@@ -64,6 +71,26 @@ internal class PropertiesBuilderTest {
 
         builder.add("a".repeat(129), 129)
         expectThat(builder.build()).hasSize(1)
+    }
+
+    @Test
+    fun `properties`() {
+
+        val properties = mapOf(
+            "k1" to "v1",
+            "k2" to 2,
+            "k3" to true,
+            "k4" to false,
+            "k5" to listOf(1, 2, 3),
+            "k6" to arrayOf("1", "2", "3"),
+            "k7" to null
+        )
+        val actual = PropertiesBuilder().add(properties).build()
+        expectThat(actual) {
+            hasSize(6)
+            containsKeys("k1", "k2", "k3", "k4", "k5", "k6")
+        }
+
     }
 
     private fun build(builder: PropertiesBuilder.() -> Unit): Map<String, Any> {
