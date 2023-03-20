@@ -10,6 +10,7 @@ data class HackleUser internal constructor(
     val hackleProperties: Map<String, Any>
 ) {
 
+    val id: String? get() = identifiers[IdentifierType.ID.key]
     val userId: String? get() = identifiers[IdentifierType.USER.key]
     val deviceId: String? get() = identifiers[IdentifierType.DEVICE.key]
     val sessionId: String? get() = identifiers[IdentifierType.SESSION.key]

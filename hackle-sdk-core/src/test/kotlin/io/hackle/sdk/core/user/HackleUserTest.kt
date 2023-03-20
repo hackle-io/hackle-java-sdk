@@ -23,6 +23,7 @@ internal class HackleUserTest {
             .build()
 
         expectThat(user) {
+            get { id } isEqualTo "id"
             get { userId } isEqualTo "userId"
             get { deviceId } isEqualTo "deviceId"
             get { sessionId } isEqualTo "sessionId"
