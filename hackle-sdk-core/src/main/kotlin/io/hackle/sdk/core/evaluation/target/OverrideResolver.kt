@@ -8,12 +8,19 @@ import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
 internal class OverrideResolver(
+    private val manualOverrideStorage: ManualOverrideStorage,
     private val targetMatcher: TargetMatcher,
     private val actionResolver: ActionResolver
 ) {
 
     fun resolveOrNull(workspace: Workspace, experiment: Experiment, user: HackleUser): Variation? {
-        return resolveUserOverride(experiment, user) ?: resolveSegmentOverride(workspace, experiment, user)
+        return resolveManualOverride(experiment, user)
+            ?: resolveUserOverride(experiment, user)
+            ?: resolveSegmentOverride(workspace, experiment, user)
+    }
+
+    private fun resolveManualOverride(experiment: Experiment, user: HackleUser): Variation? {
+        return manualOverrideStorage[experiment, user]
     }
 
     private fun resolveUserOverride(experiment: Experiment, user: HackleUser): Variation? {

@@ -12,6 +12,7 @@ import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
+import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
@@ -39,14 +40,14 @@ class HackleInternalClient internal constructor(
         return Decision.of(variation, evaluation.reason, config)
     }
 
-    fun experiments(user: HackleUser): Map<Long, Decision> {
-        val decisions = hashMapOf<Long, Decision>()
+    fun experiments(user: HackleUser): Map<Experiment, Decision> {
+        val decisions = hashMapOf<Experiment, Decision>()
         val workspace = workspaceFetcher.fetch() ?: return decisions
         for (experiment in workspace.experiments) {
             val evaluation = evaluator.evaluate(workspace, experiment, user, Variation.CONTROL.name)
             val config = evaluation.config ?: ParameterConfig.empty()
             val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config)
-            decisions[experiment.key] = decision
+            decisions[experiment] = decision
         }
         return decisions
     }
@@ -67,6 +68,23 @@ class HackleInternalClient internal constructor(
         } else {
             FeatureFlagDecision.on(evaluation.reason, config)
         }
+    }
+
+    fun featureFlags(user: HackleUser): Map<Experiment, FeatureFlagDecision> {
+        val decisions = hashMapOf<Experiment, FeatureFlagDecision>()
+        val workspace = workspaceFetcher.fetch() ?: return decisions
+        for (featureFlag in workspace.featureFlags) {
+            val evaluation = evaluator.evaluate(workspace, featureFlag, user, Variation.CONTROL.name)
+            val variation = Variation.from(evaluation.variationKey)
+            val config = evaluation.config ?: ParameterConfig.empty()
+            val decision = if (variation.isControl) {
+                FeatureFlagDecision.off(evaluation.reason, config)
+            } else {
+                FeatureFlagDecision.on(evaluation.reason, config)
+            }
+            decisions[featureFlag] = decision
+        }
+        return decisions
     }
 
     fun track(event: Event, user: HackleUser, timestamp: Long) {

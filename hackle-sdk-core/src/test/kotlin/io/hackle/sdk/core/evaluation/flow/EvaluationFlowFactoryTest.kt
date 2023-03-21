@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.flow
 
 import io.hackle.sdk.core.model.Experiment
+import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.Assertion
 import strikt.api.expectThat
@@ -10,7 +11,7 @@ internal class EvaluationFlowFactoryTest {
 
     @Test
     fun `AB_TEST evaluationFlow`() {
-        val actual = EvaluationFlowFactory().getFlow(Experiment.Type.AB_TEST)
+        val actual = EvaluationFlowFactory(mockk()).getFlow(Experiment.Type.AB_TEST)
         expectThat(actual)
             .isDecisionWith<OverrideEvaluator>()
             .isDecisionWith<IdentifierEvaluator>()
@@ -25,7 +26,7 @@ internal class EvaluationFlowFactoryTest {
 
     @Test
     fun `FEATURE_FLAG evaluationFlow`() {
-        val actual = EvaluationFlowFactory().getFlow(Experiment.Type.FEATURE_FLAG)
+        val actual = EvaluationFlowFactory(mockk()).getFlow(Experiment.Type.FEATURE_FLAG)
         expectThat(actual)
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()

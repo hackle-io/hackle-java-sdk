@@ -5,10 +5,7 @@ import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.container.ContainerResolver
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
-import io.hackle.sdk.core.evaluation.target.ExperimentTargetRuleDeterminer
-import io.hackle.sdk.core.evaluation.target.OverrideResolver
-import io.hackle.sdk.core.evaluation.target.RemoteConfigParameterTargetRuleDeterminer
+import io.hackle.sdk.core.evaluation.target.*
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -16,7 +13,7 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 /**
  * @author Yong
  */
-internal class EvaluationFlowFactory {
+internal class EvaluationFlowFactory(manualOverrideStorage: ManualOverrideStorage) {
 
     /**
      * [EvaluationFlow] for [AB_TEST]
@@ -36,7 +33,7 @@ internal class EvaluationFlowFactory {
         val bucketer = Bucketer()
         val targetMatcher = TargetMatcher(ConditionMatcherFactory())
         val actionResolver = ActionResolver(bucketer)
-        val overrideResolver = OverrideResolver(targetMatcher, actionResolver)
+        val overrideResolver = OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
         val containerResolver = ContainerResolver(bucketer)
 
         val abTestFlow = EvaluationFlow.of(
