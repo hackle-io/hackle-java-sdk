@@ -22,12 +22,24 @@ data class Experiment(
 
     val winnerVariation: Variation? get() = if (winnerVariationId != null) getVariationOrNull(winnerVariationId) else null
 
-    internal fun getVariationOrNull(variationId: Long): Variation? {
+    fun getVariationOrNull(variationId: Long): Variation? {
         return variations.find { it.id == variationId }
     }
 
-    internal fun getVariationOrNull(variationKey: String): Variation? {
+    fun getVariationOrNull(variationKey: String): Variation? {
         return variations.find { it.key == variationKey }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when {
+            this === other -> return true
+            other !is Experiment -> return false
+            else -> this.id == other.id
+        }
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     enum class Status {

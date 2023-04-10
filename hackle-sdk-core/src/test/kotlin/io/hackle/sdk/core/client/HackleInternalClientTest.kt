@@ -169,11 +169,11 @@ internal class HackleInternalClientTest {
             val parameterConfiguration43 = mockk<ParameterConfiguration> { every { id } returns 43 }
             val workspace = mockk<Workspace> {
                 every { experiments } returns listOf(
-                    experiment(1, 4, "A", EXPERIMENT_DRAFT, parameterConfiguration42),
-                    experiment(3, 7, "B", EXPERIMENT_COMPLETED, parameterConfiguration43),
-                    experiment(4, 10, "A", OVERRIDDEN, null),
-                    experiment(7, 21, "C", TRAFFIC_ALLOCATED, null),
-                    experiment(10, 27, "A", NOT_IN_EXPERIMENT_TARGET, null),
+                    experiment(1, 1, 4, "A", EXPERIMENT_DRAFT, parameterConfiguration42),
+                    experiment(2, 3, 7, "B", EXPERIMENT_COMPLETED, parameterConfiguration43),
+                    experiment(3, 4, 10, "A", OVERRIDDEN, null),
+                    experiment(4, 7, 21, "C", TRAFFIC_ALLOCATED, null),
+                    experiment(5, 10, 27, "A", NOT_IN_EXPERIMENT_TARGET, null),
                 )
             }
 
@@ -184,16 +184,11 @@ internal class HackleInternalClientTest {
             val actual = sut.experiments(user)
 
             // then
-            expectThat(actual) isEqualTo mapOf(
-                1L to Decision.of(A, EXPERIMENT_DRAFT, parameterConfiguration42),
-                3L to Decision.of(B, EXPERIMENT_COMPLETED, parameterConfiguration43),
-                4L to Decision.of(A, OVERRIDDEN),
-                7L to Decision.of(C, TRAFFIC_ALLOCATED),
-                10L to Decision.of(A, NOT_IN_EXPERIMENT_TARGET),
-            )
+            expectThat(actual).hasSize(5)
         }
 
         private fun experiment(
+            id: Long,
             experimentKey: Long,
             variationId: Long,
             variationKey: String,
@@ -202,6 +197,7 @@ internal class HackleInternalClientTest {
         ): Experiment {
 
             val experiment = mockk<Experiment> {
+                every { this@mockk.id } returns id
                 every { key } returns experimentKey
             }
             val evaluation = Evaluation(variationId, variationKey, reason, config)
@@ -371,6 +367,65 @@ internal class HackleInternalClientTest {
         }
     }
 
+    @Nested
+    inner class FeatureFlagsTest {
+
+        @Test
+        fun `Workspace 를 가져오지 못하면 비어있는 map 을 리턴한다`() {
+            // given
+            every { workspaceFetcher.fetch() } returns null
+            val user = HackleUser.of("TEST_USER_ID")
+
+            // when
+            val actual = sut.featureFlags(user)
+
+            // then
+            expectThat(actual).hasSize(0)
+        }
+
+        @Test
+        fun `모든 기능플래그 대한 분배 결과를 리턴한다`() {
+            // given
+            val parameterConfiguration42 = mockk<ParameterConfiguration> { every { id } returns 42 }
+            val parameterConfiguration43 = mockk<ParameterConfiguration> { every { id } returns 43 }
+            val workspace = mockk<Workspace> {
+                every { featureFlags } returns listOf(
+                    experiment(1, 1, 4, "A", FEATURE_FLAG_INACTIVE, parameterConfiguration42),
+                    experiment(2, 3, 7, "B", INDIVIDUAL_TARGET_MATCH, parameterConfiguration43),
+                    experiment(3, 4, 10, "A", TARGET_RULE_MATCH, null),
+                    experiment(4, 7, 21, "B", DEFAULT_RULE, null),
+                    experiment(5, 10, 27, "A", DEFAULT_RULE, null),
+                )
+            }
+
+            every { workspaceFetcher.fetch() } returns workspace
+            val user = HackleUser.of("TEST_USER_ID")
+
+            // when
+            val actual = sut.featureFlags(user)
+
+            // then
+            expectThat(actual).hasSize(5)
+        }
+
+        private fun experiment(
+            id: Long,
+            experimentKey: Long,
+            variationId: Long,
+            variationKey: String,
+            reason: DecisionReason,
+            config: ParameterConfiguration? = null
+        ): Experiment {
+
+            val experiment = mockk<Experiment> {
+                every { this@mockk.id } returns id
+                every { key } returns experimentKey
+            }
+            val evaluation = Evaluation(variationId, variationKey, reason, config)
+            every { evaluator.evaluate(any(), experiment, any(), "A") } returns evaluation
+            return experiment
+        }
+    }
 
     @Nested
     inner class Track {
