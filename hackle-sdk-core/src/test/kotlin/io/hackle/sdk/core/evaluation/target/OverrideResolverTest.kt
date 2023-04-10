@@ -15,6 +15,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
@@ -27,6 +28,9 @@ import strikt.assertions.isSameInstanceAs
 internal class OverrideResolverTest {
 
     @MockK
+    private lateinit var manualOverrideStorage: ManualOverrideStorage
+
+    @MockK
     private lateinit var targetMatcher: TargetMatcher
 
     @MockK
@@ -34,6 +38,24 @@ internal class OverrideResolverTest {
 
     @InjectMockKs
     private lateinit var sut: OverrideResolver
+
+    @BeforeEach
+    fun beforeEach() {
+        every { manualOverrideStorage[any(), any()] } returns null
+    }
+
+    @Test
+    fun `manual override 를 가장 먼저 확인한다`() {
+        // given
+        val variation = mockk<Variation>()
+        every { manualOverrideStorage[any(), any()] } returns variation
+
+        // when
+        val actual = sut.resolveOrNull(mockk(), mockk(), HackleUser.builder().build())
+
+        // then
+        expectThat(actual) isSameInstanceAs variation
+    }
 
     @Test
     fun `Experiment identifierType에 해당하는 식별자가 없는 경우 Segement Override 를 평가한다`() {
