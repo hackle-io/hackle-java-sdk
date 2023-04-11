@@ -42,7 +42,7 @@ interface Timer : Metric {
         }
     }
 
-    private class Builder(name: String) : Metric.Builder<Timer>(name, TIMER, MetricRegistry::timer)
+    private class Builder(name: String) : Metric.Builder<Timer>(name, TIMER, { registry, id -> registry.timer(id) })
 
     companion object {
 

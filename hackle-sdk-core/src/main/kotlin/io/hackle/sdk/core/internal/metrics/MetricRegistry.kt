@@ -35,11 +35,11 @@ abstract class MetricRegistry(protected val clock: Clock) : Closeable {
     }
 
     internal fun counter(id: Metric.Id): Counter {
-        return registerMetricIfNecessary(id, this::createCounter)
+        return registerMetricIfNecessary(id) { createCounter(it) }
     }
 
     internal fun timer(id: Metric.Id): Timer {
-        return registerMetricIfNecessary(id, this::createTimer)
+        return registerMetricIfNecessary(id) { createTimer(it) }
     }
 
     private inline fun <reified M : Metric> registerMetricIfNecessary(
