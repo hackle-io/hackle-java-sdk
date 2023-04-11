@@ -31,9 +31,9 @@ internal class MonitoringMetricRegistry(
 
     override fun flushMetric(metrics: List<Metric>) {
         metrics.asSequence()
-            .filter(this::isDispatchTarget)
+            .filter { isDispatchTarget(it) }
             .chunked(500)
-            .forEach(this::dispatch)
+            .forEach { dispatch(it) }
     }
 
     // Dispatch only measured metrics

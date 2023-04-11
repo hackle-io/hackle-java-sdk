@@ -11,10 +11,11 @@ interface Counter : Metric {
     fun increment() = increment(1)
 
     override fun measure(): List<Measurement> {
-        return listOf(Measurement(MetricField.COUNT, ::count))
+        return listOf(Measurement(MetricField.COUNT) { count() })
     }
 
-    private class Builder(name: String) : Metric.Builder<Counter>(name, COUNTER, MetricRegistry::counter)
+    private class Builder(name: String) :
+        Metric.Builder<Counter>(name, COUNTER, { registry, id -> registry.counter(id) })
 
     companion object {
         fun builder(name: String): Metric.Builder<Counter> {

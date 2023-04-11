@@ -21,7 +21,7 @@ class LoggingMetricRegistry(
     override fun flushMetric(metrics: List<Metric>) {
         metrics.asSequence()
             .sortedWith(COMPARATOR)
-            .forEach(this::log)
+            .forEach { log(it) }
     }
 
     private fun log(metric: Metric) {
@@ -50,7 +50,7 @@ class LoggingMetricRegistry(
     companion object {
         private val log = Logger<LoggingMetricRegistry>()
 
-        private val COMPARATOR: Comparator<Metric> = compareBy(compareBy(Metric.Id::name, Metric.Id::type), Metric::id)
+        private val COMPARATOR: Comparator<Metric> = compareBy(compareBy({ it.name }, { it.type })) { it.id }
         fun builder(scheduler: Scheduler = Schedulers.executor("LoggingMetricRegistry-")): Builder {
             return Builder(scheduler)
         }
