@@ -25,6 +25,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Yong
@@ -91,9 +92,10 @@ object HackleClients {
     }
 
     private fun httpClient(sdk: Sdk): CloseableHttpClient {
-        val cm = PoolingHttpClientConnectionManager().apply {
+        val cm = PoolingHttpClientConnectionManager(10, TimeUnit.MINUTES).apply {
             maxTotal = 20
             defaultMaxPerRoute = 20
+            validateAfterInactivity = 2000
         }
 
         val requestConfig = RequestConfig.custom()
@@ -103,6 +105,7 @@ object HackleClients {
             .build()
 
         return HttpClients.custom()
+            .evictIdleConnections(30, TimeUnit.SECONDS)
             .setConnectionManager(cm)
             .setDefaultRequestConfig(requestConfig)
             .addInterceptorLast(SdkHeaderInterceptor(sdk))
