@@ -38,7 +38,7 @@ abstract class PushMetricRegistry(
 
             val delayMillis = pushIntervalMillis - (clock.currentMillis() % pushIntervalMillis) + 1;
             publishingJob =
-                scheduler.schedulePeriodically(delayMillis, pushIntervalMillis, MILLISECONDS, this::safePublish)
+                scheduler.schedulePeriodically(delayMillis, pushIntervalMillis, MILLISECONDS) { safePublish() }
             log.info { "${javaClass.simpleName} started. Publish metrics every ${pushIntervalMillis}ms." }
         }
     }

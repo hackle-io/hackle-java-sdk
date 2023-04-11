@@ -109,6 +109,7 @@ object HackleClients {
             .setConnectionManager(cm)
             .setDefaultRequestConfig(requestConfig)
             .addInterceptorLast(SdkHeaderInterceptor(sdk))
+            .disableCookieManagement()
             .build()
     }
 
