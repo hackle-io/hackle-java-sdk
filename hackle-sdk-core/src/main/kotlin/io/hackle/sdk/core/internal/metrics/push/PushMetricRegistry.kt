@@ -26,7 +26,7 @@ abstract class PushMetricRegistry(
         try {
             publish()
         } catch (e: Throwable) {
-            log.warn { "Unexpected exception while publishing metrics for [${javaClass.simpleName}]: $e" }
+            log.debug { "Unexpected exception while publishing metrics for [${javaClass.simpleName}]: $e" }
         }
     }
 

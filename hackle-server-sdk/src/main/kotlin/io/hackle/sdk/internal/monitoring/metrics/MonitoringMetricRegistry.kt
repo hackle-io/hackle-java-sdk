@@ -53,7 +53,7 @@ internal class MonitoringMetricRegistry(
 
         httpClient.execute(post).use { response ->
             if (!response.isSuccessful) {
-                log.warn { "Failed to flushing metrics" }
+                log.debug { "Failed to flushing metrics" }
             }
         }
     }
