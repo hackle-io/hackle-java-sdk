@@ -1,7 +1,8 @@
 package io.hackle.sdk.core
 
 import io.hackle.sdk.core.client.HackleInternalClient
-import io.hackle.sdk.core.evaluation.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.evaluation.target.DelegatingManualOverrideStorage
 import io.hackle.sdk.core.evaluation.target.ManualOverrideStorage
@@ -23,10 +24,9 @@ fun HackleCore.client(
     eventProcessor: EventProcessor,
     vararg manualOverrideStorages: ManualOverrideStorage
 ): HackleInternalClient {
-    return HackleInternalClient(
-        evaluator = Evaluator(EvaluationFlowFactory(DelegatingManualOverrideStorage(manualOverrideStorages.toList()))),
-        workspaceFetcher = workspaceFetcher,
-        eventProcessor = eventProcessor
-    )
+    val flowFactory = EvaluationFlowFactory(DelegatingManualOverrideStorage(manualOverrideStorages.toList()))
+    val experimentEvaluator = ExperimentEvaluator(flowFactory)
+    val remoteConfigEvaluator = RemoteConfigEvaluator<Any>(flowFactory.remoteConfigParameterTargetRuleDeterminer)
+    return HackleInternalClient(experimentEvaluator, remoteConfigEvaluator, workspaceFetcher, eventProcessor)
 }
 

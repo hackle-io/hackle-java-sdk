@@ -1,21 +1,22 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Segment
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
 import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
 
-interface ConditionMatcher {
-    fun matches(condition: Target.Condition, workspace: Workspace, user: HackleUser): Boolean
+internal interface ConditionMatcher {
+
+    fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean
 }
 
 internal class UserConditionMatcher(
     private val userValueResolver: UserValueResolver,
     private val valueOperatorMatcher: ValueOperatorMatcher
 ) : ConditionMatcher {
-    override fun matches(condition: Target.Condition, workspace: Workspace, user: HackleUser): Boolean {
-        val userValue = userValueResolver.resolveOrNull(user, condition.key) ?: return false
+    override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
+        val userValue = userValueResolver.resolveOrNull(request.user, condition.key) ?: return false
         return valueOperatorMatcher.matches(userValue, condition.match)
     }
 }
@@ -34,28 +35,29 @@ internal class UserValueResolver {
 internal class SegmentConditionMatcher(
     private val segmentMatcher: SegmentMatcher
 ) : ConditionMatcher {
-    override fun matches(condition: Target.Condition, workspace: Workspace, user: HackleUser): Boolean {
+
+    override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
         require(condition.key.type == SEGMENT) { "Unsupported target.key.type [${condition.key.type}]" }
-        val isMatched = condition.match.values.any { matches(it, workspace, user) }
+        val isMatched = condition.match.values.any { matches(request, context, it) }
         return condition.match.type.matches(isMatched)
     }
 
-    private fun matches(value: Any, workspace: Workspace, user: HackleUser): Boolean {
+    private fun matches(request: Evaluator.Request, context: Evaluator.Context, value: Any): Boolean {
         val segmentKey = requireNotNull(value as? String) { "SegmentKey[$value]" }
-        val segment = requireNotNull(workspace.getSegmentOrNull(segmentKey)) { "Segment[$segmentKey]" }
-        return segmentMatcher.matches(segment, workspace, user)
+        val segment = requireNotNull(request.workspace.getSegmentOrNull(segmentKey)) { "Segment[$segmentKey]" }
+        return segmentMatcher.matches(request, context, segment)
     }
 }
 
 internal class SegmentMatcher(
     private val userConditionMatcher: UserConditionMatcher
 ) {
-    fun matches(segment: Segment, workspace: Workspace, user: HackleUser): Boolean {
-        return segment.targets.any { matches(it, workspace, user) }
+    fun matches(request: Evaluator.Request, context: Evaluator.Context, segment: Segment): Boolean {
+        return segment.targets.any { matches(request, context, it) }
     }
 
-    private fun matches(target: Target, workspace: Workspace, user: HackleUser): Boolean {
-        return target.conditions.all { userConditionMatcher.matches(it, workspace, user) }
+    private fun matches(request: Evaluator.Request, context: Evaluator.Context, target: Target): Boolean {
+        return target.conditions.all { userConditionMatcher.matches(request, context, it) }
     }
 }
 

@@ -1,10 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
-import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
+import io.hackle.sdk.common.decision.DecisionReason.TRAFFIC_NOT_ALLOCATED
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 
 /**
  * @author Yong
@@ -12,14 +11,12 @@ import io.hackle.sdk.core.workspace.Workspace
 internal sealed class EvaluationFlow {
 
     fun evaluate(
-        workspace: Workspace,
-        experiment: Experiment,
-        user: HackleUser,
-        defaultVariationKey: String
-    ): Evaluation {
+        request: ExperimentRequest,
+        context: Evaluator.Context,
+    ): ExperimentEvaluation {
         return when (this) {
-            is End -> Evaluation.of(workspace, experiment, defaultVariationKey, DecisionReason.TRAFFIC_NOT_ALLOCATED)
-            is Decision -> flowEvaluator.evaluate(workspace, experiment, user, defaultVariationKey, nextFlow)
+            is End -> ExperimentEvaluation.ofDefault(request, context, TRAFFIC_NOT_ALLOCATED)
+            is Decision -> flowEvaluator.evaluate(request, context, nextFlow)
         }
     }
 

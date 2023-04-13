@@ -2,8 +2,8 @@ package io.hackle.sdk.core.event
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
-import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
@@ -59,7 +59,7 @@ sealed class UserEvent {
 
     companion object {
 
-        internal fun exposure(experiment: Experiment, user: HackleUser, evaluation: Evaluation): UserEvent {
+        internal fun exposure(experiment: Experiment, user: HackleUser, evaluation: ExperimentEvaluation): UserEvent {
             return Exposure(
                 insertId = UUID.randomUUID().toString(),
                 timestamp = Clock.SYSTEM.currentMillis(),
@@ -74,7 +74,7 @@ sealed class UserEvent {
 
         private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
 
-        private fun exposureProperties(evaluation: Evaluation): Map<String, Any> {
+        private fun exposureProperties(evaluation: ExperimentEvaluation): Map<String, Any> {
             val properties = hashMapOf<String, Any>()
             if (evaluation.config != null) {
                 properties[CONFIG_ID_PROPERTY_KEY] = evaluation.config.id
