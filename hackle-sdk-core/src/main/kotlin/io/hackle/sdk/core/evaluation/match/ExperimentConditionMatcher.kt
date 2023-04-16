@@ -37,10 +37,7 @@ internal abstract class ExperimentMatcher {
         val evaluation = context[experiment] ?: evaluate(request, context, experiment)
         require(evaluation is ExperimentEvaluation)
 
-        val resolve = resolve(request, evaluation)
-        context.add(resolve)
-
-        return matches(resolve, condition)
+        return matches(evaluation, condition)
     }
 
     private fun evaluate(
@@ -49,7 +46,9 @@ internal abstract class ExperimentMatcher {
         experiment: Experiment
     ): Evaluator.Evaluation {
         val experimentRequest = ExperimentRequest.of(requestedBy = request, experiment = experiment)
-        return evaluator.evaluate(experimentRequest, context).also {
+        val evaluation = evaluator.evaluate(experimentRequest, context)
+        require(evaluation is ExperimentEvaluation)
+        return resolve(request, evaluation).also {
             context.add(it)
         }
     }

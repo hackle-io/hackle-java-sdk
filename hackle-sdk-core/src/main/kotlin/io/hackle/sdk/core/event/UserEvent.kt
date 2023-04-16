@@ -4,7 +4,6 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
-import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.RemoteConfigParameter
@@ -60,31 +59,21 @@ sealed class UserEvent {
     companion object {
 
         internal fun exposure(
-            experiment: Experiment,
             user: HackleUser,
             evaluation: ExperimentEvaluation,
+            properties: Map<String, Any>,
             timestamp: Long
         ): UserEvent {
             return Exposure(
                 insertId = UUID.randomUUID().toString(),
                 timestamp = timestamp,
                 user = user,
-                experiment = experiment,
+                experiment = evaluation.experiment,
                 variationId = evaluation.variationId,
                 variationKey = evaluation.variationKey,
                 decisionReason = evaluation.reason,
-                properties = exposureProperties(evaluation)
+                properties = properties
             )
-        }
-
-        private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
-
-        private fun exposureProperties(evaluation: ExperimentEvaluation): Map<String, Any> {
-            val properties = hashMapOf<String, Any>()
-            if (evaluation.config != null) {
-                properties[CONFIG_ID_PROPERTY_KEY] = evaluation.config.id
-            }
-            return properties
         }
 
         internal fun track(eventType: EventType, event: Event, timestamp: Long, user: HackleUser): UserEvent {
@@ -98,19 +87,19 @@ sealed class UserEvent {
         }
 
         internal fun remoteConfig(
-            parameter: RemoteConfigParameter,
             user: HackleUser,
             evaluation: RemoteConfigEvaluation<Any>,
+            properties: Map<String, Any>,
             timestamp: Long
         ): UserEvent {
             return RemoteConfig(
                 insertId = UUID.randomUUID().toString(),
                 timestamp = timestamp,
                 user = user,
-                parameter = parameter,
+                parameter = evaluation.parameter,
                 valueId = evaluation.valueId,
                 decisionReason = evaluation.reason,
-                properties = evaluation.properties
+                properties = properties
             )
         }
     }

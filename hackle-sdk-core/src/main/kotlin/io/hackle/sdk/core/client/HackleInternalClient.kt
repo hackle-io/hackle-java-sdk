@@ -114,7 +114,7 @@ class HackleInternalClient internal constructor(
         val workspace = workspaceFetcher.fetch() ?: return RemoteConfigDecision.of(defaultValue, SDK_NOT_READY)
         val parameter = workspace.getRemoteConfigParameterOrNull(parameterKey)
             ?: return RemoteConfigDecision.of(defaultValue, REMOTE_CONFIG_PARAMETER_NOT_FOUND)
-        val request = RemoteConfigRequest(workspace, user, null, parameter, requiredType, defaultValue)
+        val request = RemoteConfigRequest(workspace, user, parameter, requiredType, defaultValue)
         val evaluation = remoteConfigEvaluator.evaluate(request, Evaluators.context())
         val events = eventFactory.create(request, evaluation)
         events.forEach { eventProcessor.process(it) }

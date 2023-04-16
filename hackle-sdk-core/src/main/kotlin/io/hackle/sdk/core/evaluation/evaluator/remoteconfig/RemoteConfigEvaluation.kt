@@ -23,7 +23,7 @@ internal class RemoteConfigEvaluation<T> private constructor(
             propertiesBuilder: PropertiesBuilder
         ): RemoteConfigEvaluation<T> {
             propertiesBuilder.add("returnValue", value)
-            return RemoteConfigEvaluation(reason, context.evaluations, request.parameter, valueId, value, propertiesBuilder.build())
+            return RemoteConfigEvaluation(reason, context.targetEvaluations, request.parameter, valueId, value, propertiesBuilder.build())
         }
 
         fun <T : Any> ofDefault(

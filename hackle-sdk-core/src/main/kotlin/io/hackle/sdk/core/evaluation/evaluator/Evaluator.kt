@@ -46,7 +46,7 @@ internal interface Evaluator {
      */
     interface Context {
         val stack: List<Request>
-        val evaluations: List<Evaluation>
+        val targetEvaluations: List<Evaluation>
 
         operator fun contains(request: Request): Boolean
         fun add(request: Request)

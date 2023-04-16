@@ -10,10 +10,12 @@ internal object Evaluators {
     }
 
     private class DefaultContext : Evaluator.Context {
+
         private val _requests = mutableListOf<Evaluator.Request>()
-        override val stack: List<Evaluator.Request> get() = _requests
         private val _evaluations = mutableListOf<Evaluator.Evaluation>()
-        override val evaluations: List<Evaluator.Evaluation> get() = _evaluations
+
+        override val stack: List<Evaluator.Request> get() = ArrayList(_requests.toList())
+        override val targetEvaluations: List<Evaluator.Evaluation> get() = ArrayList(_evaluations)
 
         override fun contains(request: Evaluator.Request): Boolean {
             return _requests.contains(request)

@@ -31,7 +31,7 @@ internal class ExperimentEvaluation private constructor(
             } else {
                 ExperimentEvaluation(
                     reason = reason,
-                    targetEvaluations = context.evaluations,
+                    targetEvaluations = context.targetEvaluations,
                     experiment = request.experiment,
                     variationId = null,
                     variationKey = request.defaultVariationKey,
@@ -53,7 +53,7 @@ internal class ExperimentEvaluation private constructor(
 
             return ExperimentEvaluation(
                 reason = reason,
-                targetEvaluations = context.evaluations,
+                targetEvaluations = context.targetEvaluations,
                 experiment = request.experiment,
                 variationId = variation.id,
                 variationKey = variation.key,

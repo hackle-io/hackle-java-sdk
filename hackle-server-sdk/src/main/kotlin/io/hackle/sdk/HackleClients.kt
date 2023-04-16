@@ -141,5 +141,5 @@ object HackleClients {
 fun main() {
     val client = HackleClients.create("Ij3eRnhYMLrv8r9jzOSr9CjmNbhuZipK")
 
-    println(client.featureFlagDetail(4, "a"))
+    println(client.featureFlagDetail(1, "a"))
 }

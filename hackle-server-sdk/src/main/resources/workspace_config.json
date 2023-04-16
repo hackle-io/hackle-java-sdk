@@ -1,561 +1,106 @@
 {
   "workspace": {
-    "id": 553,
+    "id": 1,
     "environment": {
-      "id": 1105,
+      "id": 1,
       "primary": true
     }
   },
-  "experiments": [
-    {
-      "id": 4318,
-      "key": 5,
-      "status": "DRAFT",
-      "bucketId": 6094,
-      "variations": [
-        {
-          "id": 13378,
-          "key": "A",
-          "status": "ACTIVE",
-          "parameterConfigurationId": 1
-        },
-        {
-          "id": 13379,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8630,
-        "status": "READY",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6094
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4319,
-      "key": 6,
-      "status": "DRAFT",
-      "bucketId": 6097,
-      "variations": [
-        {
-          "id": 13380,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13381,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8632,
-        "status": "READY",
-        "userOverrides": [
-          {
-            "userId": "user_1",
-            "variationId": 13380
-          },
-          {
-            "userId": "user_2",
-            "variationId": 13381
-          }
-        ],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6097
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4320,
-      "key": 7,
-      "status": "EXECUTED",
-      "bucketId": 6100,
-      "variations": [
-        {
-          "id": 13382,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13383,
-          "key": "B",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13384,
-          "key": "C",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8634,
-        "status": "RUNNING",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "age"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "GTE",
-                  "valueType": "NUMBER",
-                  "values": [
-                    20
-                  ]
-                }
-              },
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "age"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "LT",
-                  "valueType": "NUMBER",
-                  "values": [
-                    30
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "platform"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "IN",
-                  "valueType": "STRING",
-                  "values": [
-                    "android",
-                    "ios"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "membership"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "IN",
-                  "valueType": "BOOLEAN",
-                  "values": [
-                    true
-                  ]
-                }
-              }
-            ]
-          }
-        ],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6100
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4321,
-      "key": 8,
-      "status": "EXECUTED",
-      "bucketId": 6103,
-      "variations": [
-        {
-          "id": 13385,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13386,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8636,
-        "status": "RUNNING",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "address"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "CONTAINS",
-                  "valueType": "STRING",
-                  "values": [
-                    "seoul"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "name"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "STARTS_WITH",
-                  "valueType": "STRING",
-                  "values": [
-                    "kim"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "message"
-                },
-                "match": {
-                  "type": "NOT_MATCH",
-                  "operator": "ENDS_WITH",
-                  "valueType": "STRING",
-                  "values": [
-                    "!"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "conditions": [
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "point"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "GT",
-                  "valueType": "NUMBER",
-                  "values": [
-                    100
-                  ]
-                }
-              },
-              {
-                "key": {
-                  "type": "USER_PROPERTY",
-                  "name": "point"
-                },
-                "match": {
-                  "type": "MATCH",
-                  "operator": "LTE",
-                  "valueType": "NUMBER",
-                  "values": [
-                    200
-                  ]
-                }
-              }
-            ]
-          }
-        ],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6103
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4322,
-      "key": 9,
-      "status": "EXECUTED",
-      "bucketId": 6106,
-      "variations": [
-        {
-          "id": 13387,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13388,
-          "key": "B",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13389,
-          "key": "C",
-          "status": "DROPPED"
-        }
-      ],
-      "execution": {
-        "id": 8638,
-        "status": "RUNNING",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6106
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4323,
-      "key": 10,
-      "status": "EXECUTED",
-      "bucketId": 6109,
-      "variations": [
-        {
-          "id": 13390,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13391,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8640,
-        "status": "PAUSED",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6109
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4324,
-      "key": 11,
-      "status": "COMPLETED",
-      "bucketId": 6112,
-      "variations": [
-        {
-          "id": 13392,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13393,
-          "key": "B",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13394,
-          "key": "C",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13395,
-          "key": "D",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8642,
-        "status": "STOPPED",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6112
-        }
-      },
-      "winnerVariationId": 13395,
-      "identifierType": "$id",
-      "containerId": null
-    }
-  ],
+  "experiments": [],
   "featureFlags": [
     {
-      "id": 4325,
+      "id": 1,
       "key": 1,
       "status": "EXECUTED",
-      "bucketId": 6115,
+      "bucketId": 1,
       "variations": [
         {
-          "id": 13396,
+          "id": 1,
           "key": "A",
           "status": "ACTIVE"
         },
         {
-          "id": 13397,
+          "id": 2,
           "key": "B",
           "status": "ACTIVE"
         }
       ],
       "execution": {
-        "id": 8644,
-        "status": "PAUSED",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6115
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4326,
-      "key": 2,
-      "status": "EXECUTED",
-      "bucketId": 6118,
-      "variations": [
-        {
-          "id": 13398,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13399,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8646,
+        "id": 1,
         "status": "RUNNING",
         "userOverrides": [],
         "segmentOverrides": [],
         "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6118
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4327,
-      "key": 3,
-      "status": "EXECUTED",
-      "bucketId": 6121,
-      "variations": [
-        {
-          "id": 13400,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13401,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8648,
-        "status": "RUNNING",
-        "userOverrides": [],
-        "segmentOverrides": [],
-        "targetAudiences": [],
-        "targetRules": [],
-        "defaultRule": {
-          "type": "BUCKET",
-          "bucketId": 6121
-        }
-      },
-      "winnerVariationId": null,
-      "identifierType": "$id",
-      "containerId": null
-    },
-    {
-      "id": 4328,
-      "key": 4,
-      "status": "EXECUTED",
-      "bucketId": 6124,
-      "variations": [
-        {
-          "id": 13402,
-          "key": "A",
-          "status": "ACTIVE"
-        },
-        {
-          "id": 13403,
-          "key": "B",
-          "status": "ACTIVE"
-        }
-      ],
-      "execution": {
-        "id": 8650,
-        "status": "RUNNING",
-        "userOverrides": [
+        "targetRules": [
           {
-            "userId": "user1",
-            "variationId": 13402
-          },
-          {
-            "userId": "user2",
-            "variationId": 13403
+            "target": {
+              "conditions": [
+                {
+                  "key": {
+                    "type": "FEATURE_FLAG",
+                    "name": "2"
+                  },
+                  "match": {
+                    "type": "MATCH",
+                    "operator": "IN",
+                    "valueType": "BOOLEAN",
+                    "values": [
+                      true
+                    ]
+                  }
+                },
+                {
+                  "key": {
+                    "type": "FEATURE_FLAG",
+                    "name": "3"
+                  },
+                  "match": {
+                    "type": "MATCH",
+                    "operator": "IN",
+                    "valueType": "BOOLEAN",
+                    "values": [
+                      true
+                    ]
+                  }
+                }
+              ]
+            },
+            "action": {
+              "type": "BUCKET",
+              "bucketId": 1
+            }
           }
         ],
+        "defaultRule": {
+          "type": "BUCKET",
+          "bucketId": 1
+        }
+      },
+      "winnerVariationId": null,
+      "identifierType": "$id",
+      "containerId": null
+    },
+    {
+      "id": 2,
+      "key": 2,
+      "status": "EXECUTED",
+      "bucketId": 2,
+      "variations": [
+        {
+          "id": 3,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 4,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 2,
+        "status": "RUNNING",
+        "userOverrides": [],
         "segmentOverrides": [],
         "targetAudiences": [],
         "targetRules": [
@@ -580,101 +125,46 @@
             },
             "action": {
               "type": "BUCKET",
-              "bucketId": 6125
-            }
-          },
-          {
-            "target": {
-              "conditions": [
-                {
-                  "key": {
-                    "type": "USER_PROPERTY",
-                    "name": "device"
-                  },
-                  "match": {
-                    "type": "MATCH",
-                    "operator": "IN",
-                    "valueType": "STRING",
-                    "values": [
-                      "ios"
-                    ]
-                  }
-                },
-                {
-                  "key": {
-                    "type": "USER_PROPERTY",
-                    "name": "version"
-                  },
-                  "match": {
-                    "type": "MATCH",
-                    "operator": "IN",
-                    "valueType": "STRING",
-                    "values": [
-                      "2.0.0",
-                      "2.1.0"
-                    ]
-                  }
-                }
-              ]
-            },
-            "action": {
-              "type": "BUCKET",
-              "bucketId": 6126
-            }
-          },
-          {
-            "target": {
-              "conditions": [
-                {
-                  "key": {
-                    "type": "USER_PROPERTY",
-                    "name": "grade"
-                  },
-                  "match": {
-                    "type": "MATCH",
-                    "operator": "IN",
-                    "valueType": "STRING",
-                    "values": [
-                      "GOLD",
-                      "SILVER"
-                    ]
-                  }
-                }
-              ]
-            },
-            "action": {
-              "type": "VARIATION",
-              "variationId": 13403
-            }
-          },
-          {
-            "target": {
-              "conditions": [
-                {
-                  "key": {
-                    "type": "USER_PROPERTY",
-                    "name": "grade"
-                  },
-                  "match": {
-                    "type": "MATCH",
-                    "operator": "IN",
-                    "valueType": "STRING",
-                    "values": [
-                      "BRONZE"
-                    ]
-                  }
-                }
-              ]
-            },
-            "action": {
-              "type": "VARIATION",
-              "variationId": 13402
+              "bucketId": 2
             }
           }
         ],
         "defaultRule": {
           "type": "BUCKET",
-          "bucketId": 6124
+          "bucketId": 2
+        }
+      },
+      "winnerVariationId": null,
+      "identifierType": "$id",
+      "containerId": null
+    },
+    {
+      "id": 3,
+      "key": 3,
+      "status": "EXECUTED",
+      "bucketId": 3,
+      "variations": [
+        {
+          "id": 5,
+          "key": "A",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 6,
+          "key": "B",
+          "status": "ACTIVE"
+        }
+      ],
+      "execution": {
+        "id": 3,
+        "status": "RUNNING",
+        "userOverrides": [],
+        "segmentOverrides": [],
+        "targetAudiences": [],
+        "targetRules": [],
+        "defaultRule": {
+          "type": "BUCKET",
+          "bucketId": 3
         }
       },
       "winnerVariationId": null,
@@ -684,321 +174,45 @@
   ],
   "buckets": [
     {
-      "id": 5823,
-      "seed": 875758774,
-      "slotSize": 10000,
-      "slots": []
-    },
-    {
-      "id": 5826,
-      "seed": 1616382391,
-      "slotSize": 10000,
-      "slots": []
-    },
-    {
-      "id": 5829,
-      "seed": 1634243589,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 667,
-          "variationId": 12919
-        },
-        {
-          "startInclusive": 667,
-          "endExclusive": 1333,
-          "variationId": 12920
-        },
-        {
-          "startInclusive": 1333,
-          "endExclusive": 2000,
-          "variationId": 12921
-        }
-      ]
-    },
-    {
-      "id": 6094,
-      "seed": 657878848,
-      "slotSize": 10000,
-      "slots": []
-    },
-    {
-      "id": 6097,
-      "seed": 1730934769,
-      "slotSize": 10000,
-      "slots": []
-    },
-    {
-      "id": 6100,
-      "seed": 1534529362,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 1000,
-          "variationId": 13382
-        },
-        {
-          "startInclusive": 1000,
-          "endExclusive": 2000,
-          "variationId": 13383
-        },
-        {
-          "startInclusive": 2000,
-          "endExclusive": 3000,
-          "variationId": 13384
-        }
-      ]
-    },
-    {
-      "id": 6103,
-      "seed": 1248919446,
-      "slotSize": 10000,
-      "slots": []
-    },
-    {
-      "id": 6106,
-      "seed": 789801074,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 3333,
-          "variationId": 13387
-        },
-        {
-          "startInclusive": 3333,
-          "endExclusive": 6667,
-          "variationId": 13388
-        },
-        {
-          "startInclusive": 6667,
-          "endExclusive": 10000,
-          "variationId": 13389
-        }
-      ]
-    },
-    {
-      "id": 6109,
-      "seed": 1483294971,
-      "slotSize": 10000,
-      "slots": []
-    },
-    {
-      "id": 6112,
-      "seed": 2026965524,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 250,
-          "variationId": 13392
-        },
-        {
-          "startInclusive": 250,
-          "endExclusive": 500,
-          "variationId": 13393
-        },
-        {
-          "startInclusive": 500,
-          "endExclusive": 750,
-          "variationId": 13394
-        },
-        {
-          "startInclusive": 750,
-          "endExclusive": 1000,
-          "variationId": 13395
-        },
-        {
-          "startInclusive": 1000,
-          "endExclusive": 2000,
-          "variationId": 13392
-        },
-        {
-          "startInclusive": 2000,
-          "endExclusive": 3000,
-          "variationId": 13393
-        },
-        {
-          "startInclusive": 3000,
-          "endExclusive": 4000,
-          "variationId": 13394
-        },
-        {
-          "startInclusive": 4000,
-          "endExclusive": 5000,
-          "variationId": 13395
-        },
-        {
-          "startInclusive": 5000,
-          "endExclusive": 6250,
-          "variationId": 13392
-        },
-        {
-          "startInclusive": 6250,
-          "endExclusive": 7500,
-          "variationId": 13393
-        },
-        {
-          "startInclusive": 7500,
-          "endExclusive": 8750,
-          "variationId": 13394
-        },
-        {
-          "startInclusive": 8750,
-          "endExclusive": 10000,
-          "variationId": 13395
-        }
-      ]
-    },
-    {
-      "id": 6115,
-      "seed": 228721685,
+      "id": 1,
+      "seed": 1,
       "slotSize": 10000,
       "slots": [
         {
           "startInclusive": 0,
           "endExclusive": 10000,
-          "variationId": 13396
+          "variationId": 2
         }
       ]
     },
     {
-      "id": 6118,
-      "seed": 1392731944,
+      "id": 2,
+      "seed": 1,
       "slotSize": 10000,
       "slots": [
         {
           "startInclusive": 0,
           "endExclusive": 10000,
-          "variationId": 13398
+          "variationId": 4
         }
       ]
     },
     {
-      "id": 6121,
-      "seed": 1037967975,
+      "id": 3,
+      "seed": 1,
       "slotSize": 10000,
       "slots": [
         {
           "startInclusive": 0,
-          "endExclusive": 2700,
-          "variationId": 13400
-        },
-        {
-          "startInclusive": 2700,
           "endExclusive": 10000,
-          "variationId": 13401
-        }
-      ]
-    },
-    {
-      "id": 6124,
-      "seed": 915616338,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 5000,
-          "variationId": 13402
-        },
-        {
-          "startInclusive": 5000,
-          "endExclusive": 10000,
-          "variationId": 13403
-        }
-      ]
-    },
-    {
-      "id": 6125,
-      "seed": 915616338,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 9000,
-          "variationId": 13402
-        },
-        {
-          "startInclusive": 9000,
-          "endExclusive": 10000,
-          "variationId": 13403
-        }
-      ]
-    },
-    {
-      "id": 6126,
-      "seed": 915616338,
-      "slotSize": 10000,
-      "slots": [
-        {
-          "startInclusive": 0,
-          "endExclusive": 8000,
-          "variationId": 13402
-        },
-        {
-          "startInclusive": 8000,
-          "endExclusive": 10000,
-          "variationId": 13403
+          "variationId": 6
         }
       ]
     }
   ],
-  "events": [
-    {
-      "id": 3072,
-      "key": "a"
-    },
-    {
-      "id": 3073,
-      "key": "b"
-    },
-    {
-      "id": 3074,
-      "key": "c"
-    },
-    {
-      "id": 3075,
-      "key": "d"
-    }
-  ],
+  "events": [],
   "segments": [],
   "containers": [],
-  "parameterConfigurations": [
-    {
-      "id": 1,
-      "parameters": [
-        {
-          "key": "string_key_1",
-          "value": "string_value_1"
-        },
-        {
-          "key": "boolean_key_1",
-          "value": true
-        },
-        {
-          "key": "int_key_1",
-          "value": 2147483647
-        },
-        {
-          "key": "int_key_2",
-          "value": 42
-        },
-        {
-          "key": "long_key_1",
-          "value": 92147483647
-        },
-        {
-          "key": "double_key_1",
-          "value": 320.1523
-        },
-        {
-          "key": "json_key_1",
-          "value": "{\"json_key\": \"json_value\"}"
-        }
-      ]
-    }
-  ],
+  "parameterConfigurations": [],
   "remoteConfigParameters": []
 }

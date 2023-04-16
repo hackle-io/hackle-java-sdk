@@ -13,8 +13,4 @@ internal abstract class AbstractEvaluatorRequest : Evaluator.Request {
     final override fun hashCode(): Int {
         return key.hashCode()
     }
-
-    final override fun toString(): String {
-        return "EvaluatorRequest(type=${key.type}, id=${key.id})"
-    }
 }
