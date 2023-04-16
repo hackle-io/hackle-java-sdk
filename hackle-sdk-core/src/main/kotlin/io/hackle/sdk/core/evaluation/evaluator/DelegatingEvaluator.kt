@@ -8,7 +8,7 @@ internal class DelegatingEvaluator : Evaluator {
 
     fun add(evaluator: AbstractEvaluator<*, *>) {
         evaluators.add(evaluator)
-        log.info { "Evaluator added [${evaluator::class.java.simpleName}]" }
+        log.debug { "Evaluator added [${evaluator::class.java.simpleName}]" }
     }
 
     override fun evaluate(request: Evaluator.Request, context: Evaluator.Context): Evaluator.Evaluation {

@@ -2,6 +2,8 @@ package io.hackle.sdk
 
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.client
+import io.hackle.sdk.core.event.EventProcessor
+import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.log.metrics.MetricLoggerFactory
 import io.hackle.sdk.core.internal.metrics.Metrics
@@ -15,6 +17,7 @@ import io.hackle.sdk.internal.http.SdkHeaderInterceptor
 import io.hackle.sdk.internal.log.Slf4jLogger
 import io.hackle.sdk.internal.monitoring.metrics.MonitoringMetricRegistry
 import io.hackle.sdk.internal.user.HackleUserResolver
+import io.hackle.sdk.internal.workspace.FileWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.HttpWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.PollingWorkspaceFetcher
 import io.hackle.sdk.internal.workspace.Sdk
@@ -81,8 +84,14 @@ object HackleClients {
         )
 
         val internalClient = HackleCore.client(
-            workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
-            eventProcessor = defaultEventProcessor.apply { start() }
+//            workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
+            workspaceFetcher = FileWorkspaceFetcher(),
+//            eventProcessor = defaultEventProcessor.apply { start() }
+            eventProcessor = object :EventProcessor {
+                override fun process(event: UserEvent) {
+
+                }
+            }
         )
 
         return HackleClientImpl(
@@ -127,4 +136,10 @@ object HackleClients {
         )
         Metrics.addRegistry(registry)
     }
+}
+
+fun main() {
+    val client = HackleClients.create("Ij3eRnhYMLrv8r9jzOSr9CjmNbhuZipK")
+
+    println(client.featureFlagDetail(4, "a"))
 }

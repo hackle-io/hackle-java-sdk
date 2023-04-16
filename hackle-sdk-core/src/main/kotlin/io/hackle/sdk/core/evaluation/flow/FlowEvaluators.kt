@@ -25,8 +25,8 @@ internal class OverrideEvaluator(
         val overriddenVariation = overrideResolver.resolveOrNull(request, context)
         return if (overriddenVariation != null) {
             when (request.experiment.type) {
-                AB_TEST -> ExperimentEvaluation.of(request, context, overriddenVariation, OVERRIDDEN)
-                FEATURE_FLAG -> ExperimentEvaluation.of(request, context, overriddenVariation, INDIVIDUAL_TARGET_MATCH)
+                AB_TEST -> ExperimentEvaluation.of(request, overriddenVariation, OVERRIDDEN)
+                FEATURE_FLAG -> ExperimentEvaluation.of(request, overriddenVariation, INDIVIDUAL_TARGET_MATCH)
             }
         } else {
             nextFlow.evaluate(request, context)
@@ -74,7 +74,7 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
         return if (request.experiment.status == COMPLETED) {
             val winnerVariation =
                 requireNotNull(request.experiment.winnerVariation) { "winner variation [${request.experiment.id}]" }
-            ExperimentEvaluation.of(request, context, winnerVariation, EXPERIMENT_COMPLETED)
+            ExperimentEvaluation.of(request, winnerVariation, EXPERIMENT_COMPLETED)
         } else {
             nextFlow.evaluate(request, context)
         }
@@ -120,7 +120,7 @@ internal class TrafficAllocateEvaluator(
             return ExperimentEvaluation.ofDefault(request, context, VARIATION_DROPPED)
         }
 
-        return ExperimentEvaluation.of(request, context, variation, TRAFFIC_ALLOCATED)
+        return ExperimentEvaluation.of(request, variation, TRAFFIC_ALLOCATED)
     }
 
 }
@@ -148,7 +148,7 @@ internal class TargetRuleEvaluator(
             "FeatureFlag must decide the Variation [${experiment.id}]"
         }
 
-        return ExperimentEvaluation.of(request, context, variation, TARGET_RULE_MATCH)
+        return ExperimentEvaluation.of(request, variation, TARGET_RULE_MATCH)
     }
 
 }
@@ -173,7 +173,7 @@ internal class DefaultRuleEvaluator(
             "FeatureFlag must decide the Variation [${experiment.id}]"
         }
 
-        return ExperimentEvaluation.of(request, context, variation, DEFAULT_RULE)
+        return ExperimentEvaluation.of(request, variation, DEFAULT_RULE)
     }
 }
 

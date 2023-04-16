@@ -21,4 +21,16 @@ data class RemoteConfigParameter(
         val bucketId: Long,
         val value: Value
     )
+
+    override fun equals(other: Any?): Boolean {
+        return when {
+            this === other -> true
+            other !is RemoteConfigParameter -> false
+            else -> id == other.id
+        }
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }

@@ -109,6 +109,11 @@ enum class DecisionReason {
     EXPERIMENT_COMPLETED,
 
     /**
+     *
+     */
+    EXPERIMENT_TARGETED,
+
+    /**
      * Indicates that the user has been overridden as a specific variation.
      */
     OVERRIDDEN,

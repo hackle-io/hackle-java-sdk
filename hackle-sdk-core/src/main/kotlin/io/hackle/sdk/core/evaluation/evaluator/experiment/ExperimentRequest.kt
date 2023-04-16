@@ -1,13 +1,47 @@
 package io.hackle.sdk.core.evaluation.evaluator.experiment
 
+import io.hackle.sdk.common.Variation
+import io.hackle.sdk.core.evaluation.evaluator.AbstractEvaluatorRequest
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
-internal class ExperimentRequest(
+internal class ExperimentRequest private constructor(
     override val workspace: Workspace,
     override val user: HackleUser,
+    override val by: Evaluator.Request?,
     val experiment: Experiment,
     val defaultVariationKey: String
-) : Evaluator.Request
+) : AbstractEvaluatorRequest() {
+
+    override val key: Evaluator.Key = Evaluator.Key(Evaluator.Type.EXPERIMENT, experiment.id)
+
+    companion object {
+
+        fun of(
+            workspace: Workspace,
+            user: HackleUser,
+            experiment: Experiment,
+            defaultVariation: Variation
+        ): ExperimentRequest {
+            return ExperimentRequest(
+                workspace = workspace,
+                user = user,
+                by = null,
+                experiment = experiment,
+                defaultVariationKey = defaultVariation.name
+            )
+        }
+
+        fun of(requestedBy: Evaluator.Request, experiment: Experiment): ExperimentRequest {
+            return ExperimentRequest(
+                workspace = requestedBy.workspace,
+                user = requestedBy.user,
+                by = requestedBy,
+                experiment = experiment,
+                defaultVariationKey = Variation.CONTROL.name
+            )
+        }
+    }
+}

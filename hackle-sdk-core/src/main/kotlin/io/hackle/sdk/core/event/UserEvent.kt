@@ -59,10 +59,15 @@ sealed class UserEvent {
 
     companion object {
 
-        internal fun exposure(experiment: Experiment, user: HackleUser, evaluation: ExperimentEvaluation): UserEvent {
+        internal fun exposure(
+            experiment: Experiment,
+            user: HackleUser,
+            evaluation: ExperimentEvaluation,
+            timestamp: Long
+        ): UserEvent {
             return Exposure(
                 insertId = UUID.randomUUID().toString(),
-                timestamp = Clock.SYSTEM.currentMillis(),
+                timestamp = timestamp,
                 user = user,
                 experiment = experiment,
                 variationId = evaluation.variationId,
@@ -96,10 +101,11 @@ sealed class UserEvent {
             parameter: RemoteConfigParameter,
             user: HackleUser,
             evaluation: RemoteConfigEvaluation<Any>,
+            timestamp: Long
         ): UserEvent {
             return RemoteConfig(
                 insertId = UUID.randomUUID().toString(),
-                timestamp = Clock.SYSTEM.currentMillis(),
+                timestamp = timestamp,
                 user = user,
                 parameter = parameter,
                 valueId = evaluation.valueId,

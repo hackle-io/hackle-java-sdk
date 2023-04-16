@@ -3,16 +3,19 @@ package io.hackle.sdk.core.evaluation.evaluator.remoteconfig
 import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.model.RemoteConfigParameter
 
 internal class RemoteConfigEvaluation<T> private constructor(
     override val reason: DecisionReason,
-    override val context: Evaluator.Context,
+    override val targetEvaluations: List<Evaluator.Evaluation>,
+    val parameter: RemoteConfigParameter,
     val valueId: Long?,
     val value: T,
     val properties: Map<String, Any> = emptyMap()
 ) : Evaluator.Evaluation {
     companion object {
         fun <T : Any> of(
+            request: RemoteConfigRequest<T>,
             context: Evaluator.Context,
             valueId: Long?,
             value: T,
@@ -20,7 +23,7 @@ internal class RemoteConfigEvaluation<T> private constructor(
             propertiesBuilder: PropertiesBuilder
         ): RemoteConfigEvaluation<T> {
             propertiesBuilder.add("returnValue", value)
-            return RemoteConfigEvaluation(reason, context, valueId, value, propertiesBuilder.build())
+            return RemoteConfigEvaluation(reason, context.evaluations, request.parameter, valueId, value, propertiesBuilder.build())
         }
 
         fun <T : Any> ofDefault(
@@ -29,7 +32,7 @@ internal class RemoteConfigEvaluation<T> private constructor(
             reason: DecisionReason,
             parameters: PropertiesBuilder
         ): RemoteConfigEvaluation<T> {
-            return of(context, null, request.defaultValue, reason, parameters)
+            return of(request, context, null, request.defaultValue, reason, parameters)
         }
     }
 }

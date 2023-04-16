@@ -2,16 +2,22 @@ package io.hackle.sdk.core.evaluation.evaluator.experiment
 
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.Variation
 
 internal class ExperimentEvaluation private constructor(
     override val reason: DecisionReason,
-    override val context: Evaluator.Context,
+    override val targetEvaluations: List<Evaluator.Evaluation>,
+    val experiment: Experiment,
     val variationId: Long?,
     val variationKey: String,
     val config: ParameterConfiguration?
 ) : Evaluator.Evaluation {
+
+    fun with(reason: DecisionReason): ExperimentEvaluation {
+        return ExperimentEvaluation(reason, targetEvaluations, experiment, variationId, variationKey, config)
+    }
 
     companion object {
         fun ofDefault(
@@ -23,7 +29,14 @@ internal class ExperimentEvaluation private constructor(
             return if (variation != null) {
                 of(request, context, variation, reason)
             } else {
-                ExperimentEvaluation(reason, context, null, request.defaultVariationKey, null)
+                ExperimentEvaluation(
+                    reason = reason,
+                    targetEvaluations = context.evaluations,
+                    experiment = request.experiment,
+                    variationId = null,
+                    variationKey = request.defaultVariationKey,
+                    config = null
+                )
             }
         }
 
@@ -37,7 +50,15 @@ internal class ExperimentEvaluation private constructor(
             val parameterConfiguration = parameterConfigurationId?.let {
                 requireNotNull(request.workspace.getParameterConfigurationOrNull(it)) { "ParameterConfiguration[$it]" }
             }
-            return ExperimentEvaluation(reason, context, variation.id, variation.key, parameterConfiguration)
+
+            return ExperimentEvaluation(
+                reason = reason,
+                targetEvaluations = context.evaluations,
+                experiment = request.experiment,
+                variationId = variation.id,
+                variationKey = variation.key,
+                config = parameterConfiguration
+            )
         }
     }
 }
