@@ -29,10 +29,12 @@ internal abstract class ExperimentMatcher {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
 
     fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
-        val key = requireNotNull(condition.key.name.toLongOrNull()) { "Invalid key [${condition.key.type}, ${condition.key.name}]" }
+        val key =
+            requireNotNull(condition.key.name.toLongOrNull()) { "Invalid key [${condition.key.type}, ${condition.key.name}]" }
         val experiment = experiment(request, key) ?: return false
         val evaluation = context[experiment] ?: evaluate(request, context, experiment)
-        return matches(evaluation as ExperimentEvaluation, condition)
+        require(evaluation is ExperimentEvaluation) { "Unexpected evaluation [expected=ExperimentEvaluation, actual=${evaluation::class.java.simpleName}]" }
+        return matches(evaluation, condition)
     }
 
     private fun evaluate(
@@ -42,7 +44,8 @@ internal abstract class ExperimentMatcher {
     ): Evaluator.Evaluation {
         val experimentRequest = ExperimentRequest.of(requestedBy = request, experiment = experiment)
         val evaluation = evaluator.evaluate(experimentRequest, context)
-        return resolve(request, evaluation as ExperimentEvaluation)
+        require(evaluation is ExperimentEvaluation) { "Unexpected evaluation [expected=ExperimentEvaluation, actual=${evaluation::class.java.simpleName}]" }
+        return resolve(request, evaluation)
             .also { context.add(it) }
     }
 

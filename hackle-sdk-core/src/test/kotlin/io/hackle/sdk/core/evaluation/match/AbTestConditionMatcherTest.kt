@@ -6,6 +6,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.remoteConfigRequest
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target.Key.Type.AB_TEST
@@ -212,6 +213,20 @@ internal class AbTestConditionMatcherTest {
 
         assertTrue(actual)
         expectThat(context[experimentRequest.experiment]) isSameInstanceAs evaluation
+    }
+
+    @Test
+    fun `평가 결과 ExperimentEvaluation 아닌경우`() {
+        val request = request(experiment = experiment(type = Experiment.Type.AB_TEST))
+        val condition = condition {
+            key(AB_TEST, "42")
+            match(MATCH, IN, STRING, "A")
+        }
+
+        val evaluation = mockk<RemoteConfigEvaluation<Any>>()
+        every { evaluator.evaluate(any(), any()) } returns evaluation
+
+        assertThrows<IllegalArgumentException> { sut.matches(request, context, condition) }
     }
 
     private fun evaluation(request: ExperimentRequest, reason: DecisionReason): ExperimentEvaluation {
