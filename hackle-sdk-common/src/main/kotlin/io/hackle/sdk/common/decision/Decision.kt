@@ -109,11 +109,6 @@ enum class DecisionReason {
     EXPERIMENT_COMPLETED,
 
     /**
-     *
-     */
-    EXPERIMENT_TARGETED,
-
-    /**
      * Indicates that the user has been overridden as a specific variation.
      */
     OVERRIDDEN,
@@ -142,6 +137,11 @@ enum class DecisionReason {
      * Indicates that the user has been allocated to the experiment.
      */
     TRAFFIC_ALLOCATED,
+
+    /**
+     * Indicates that traffic was allocated by targeting from another experiment.
+     */
+    TRAFFIC_ALLOCATED_BY_TARGETING,
 
     /**
      * Indicates that the user is not the target of the experiment.

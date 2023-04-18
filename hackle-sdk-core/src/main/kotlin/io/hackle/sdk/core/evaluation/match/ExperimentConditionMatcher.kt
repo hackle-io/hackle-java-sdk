@@ -71,7 +71,7 @@ internal class AbTestConditionMatcher(
 
     override fun resolve(request: Evaluator.Request, evaluation: ExperimentEvaluation): ExperimentEvaluation {
         if (request is ExperimentRequest && evaluation.reason == TRAFFIC_ALLOCATED) {
-            return evaluation.with(EXPERIMENT_TARGETED)
+            return evaluation.with(TRAFFIC_ALLOCATED_BY_TARGETING)
         }
         return evaluation
     }
@@ -88,8 +88,8 @@ internal class AbTestConditionMatcher(
         private val AB_TEST_MATCHED_REASONS = setOf(
             OVERRIDDEN,
             TRAFFIC_ALLOCATED,
+            TRAFFIC_ALLOCATED_BY_TARGETING,
             EXPERIMENT_COMPLETED,
-            EXPERIMENT_TARGETED,
         )
     }
 }
