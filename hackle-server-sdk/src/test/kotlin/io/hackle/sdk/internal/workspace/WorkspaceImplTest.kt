@@ -272,12 +272,8 @@ internal class WorkspaceImplTest {
                             Target(
                                 listOf(
                                     Condition(
-                                        Key(USER_PROPERTY, "device"),
-                                        Match(MATCH, IN, STRING, listOf("android"))
-                                    ),
-                                    Condition(
-                                        Key(USER_PROPERTY, "version"),
-                                        Match(MATCH, IN, STRING, listOf("1.0.0", "1.1.0"))
+                                        Key(Key.Type.FEATURE_FLAG, "3"),
+                                        Match(MATCH, IN, BOOLEAN, listOf(true))
                                     )
                                 )
                             ),
