@@ -30,9 +30,7 @@ internal object Evaluators {
         }
 
         override fun get(experiment: Experiment): Evaluator.Evaluation? {
-            return _evaluations.asSequence()
-                .filterIsInstance<ExperimentEvaluation>()
-                .find { it.experiment == experiment }
+            return _evaluations.find { it is ExperimentEvaluation && it.experiment == experiment }
         }
 
         override fun add(evaluation: Evaluator.Evaluation) {

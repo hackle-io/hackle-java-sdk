@@ -23,16 +23,23 @@ internal class RemoteConfigEvaluation<T> private constructor(
             propertiesBuilder: PropertiesBuilder
         ): RemoteConfigEvaluation<T> {
             propertiesBuilder.add("returnValue", value)
-            return RemoteConfigEvaluation(reason, context.targetEvaluations, request.parameter, valueId, value, propertiesBuilder.build())
+            return RemoteConfigEvaluation(
+                reason,
+                context.targetEvaluations,
+                request.parameter,
+                valueId,
+                value,
+                propertiesBuilder.build()
+            )
         }
 
         fun <T : Any> ofDefault(
             request: RemoteConfigRequest<T>,
             context: Evaluator.Context,
             reason: DecisionReason,
-            parameters: PropertiesBuilder
+            properties: PropertiesBuilder
         ): RemoteConfigEvaluation<T> {
-            return of(request, context, null, request.defaultValue, reason, parameters)
+            return of(request, context, null, request.defaultValue, reason, properties)
         }
     }
 }

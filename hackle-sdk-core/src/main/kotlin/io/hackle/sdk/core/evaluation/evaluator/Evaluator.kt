@@ -11,14 +11,7 @@ import io.hackle.sdk.core.workspace.Workspace
  */
 internal interface Evaluator {
 
-    /**
-     * @param request
-     * @param context Mutable context that Evaluator may need during an evaluation.
-     *
-     * @return results of an evaluation
-     */
     fun evaluate(request: Request, context: Context): Evaluation
-
 
     enum class Type {
         EXPERIMENT,
@@ -41,9 +34,6 @@ internal interface Evaluator {
         val targetEvaluations: List<Evaluation>
     }
 
-    /**
-     * Mutable context that [Evaluator] may need during an evaluation.
-     */
     interface Context {
         val stack: List<Request>
         val targetEvaluations: List<Evaluation>

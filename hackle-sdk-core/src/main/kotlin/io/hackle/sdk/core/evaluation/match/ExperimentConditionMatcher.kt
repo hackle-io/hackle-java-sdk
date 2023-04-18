@@ -77,13 +77,9 @@ internal class AbTestConditionMatcher(
     }
 
     override fun matches(evaluation: ExperimentEvaluation, condition: Target.Condition): Boolean {
-
-        require(condition.match.valueType == ValueType.STRING)
-
         if (evaluation.reason !in AB_TEST_MATCHED_REASONS) {
             return false
         }
-
         return valueOperatorMatcher.matches(evaluation.variationKey, condition.match)
     }
 
