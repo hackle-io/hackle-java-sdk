@@ -58,7 +58,7 @@ internal class RemoteConfigEvaluator<T : Any>(
         return if (value != null) {
             RemoteConfigEvaluation.of(request, context, parameterValue.id, value, reason, propertiesBuilder)
         } else {
-            RemoteConfigEvaluation.ofDefault(request, context, reason, propertiesBuilder)
+            RemoteConfigEvaluation.ofDefault(request, context, TYPE_MISMATCH, propertiesBuilder)
         }
     }
 }

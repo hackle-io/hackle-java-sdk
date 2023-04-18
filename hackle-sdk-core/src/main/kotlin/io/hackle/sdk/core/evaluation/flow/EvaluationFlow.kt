@@ -10,10 +10,7 @@ import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
  */
 internal sealed class EvaluationFlow {
 
-    fun evaluate(
-        request: ExperimentRequest,
-        context: Evaluator.Context,
-    ): ExperimentEvaluation {
+    fun evaluate(request: ExperimentRequest, context: Evaluator.Context): ExperimentEvaluation {
         return when (this) {
             is End -> ExperimentEvaluation.ofDefault(request, context, TRAFFIC_NOT_ALLOCATED)
             is Decision -> flowEvaluator.evaluate(request, context, nextFlow)

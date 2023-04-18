@@ -88,7 +88,7 @@ sealed class UserEvent {
 
         internal fun remoteConfig(
             user: HackleUser,
-            evaluation: RemoteConfigEvaluation<Any>,
+            evaluation: RemoteConfigEvaluation<*>,
             properties: Map<String, Any>,
             timestamp: Long
         ): UserEvent {

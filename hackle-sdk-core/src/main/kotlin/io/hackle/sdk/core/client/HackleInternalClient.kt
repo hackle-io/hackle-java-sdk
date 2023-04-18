@@ -8,6 +8,7 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
@@ -15,6 +16,7 @@ import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.event.UserEventFactory
+import io.hackle.sdk.core.event.process
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.Experiment
@@ -34,19 +36,17 @@ class HackleInternalClient internal constructor(
 ) : AutoCloseable {
 
     fun experiment(experimentKey: Long, user: HackleUser, defaultVariation: Variation): Decision {
-
         val workspace = workspaceFetcher.fetch() ?: return Decision.of(defaultVariation, SDK_NOT_READY)
-        val experiment =
-            workspace.getExperimentOrNull(experimentKey) ?: return Decision.of(defaultVariation, EXPERIMENT_NOT_FOUND)
+        val experiment = workspace.getExperimentOrNull(experimentKey)
+            ?: return Decision.of(defaultVariation, EXPERIMENT_NOT_FOUND)
 
         val request = ExperimentRequest.of(workspace, user, experiment, defaultVariation)
-        val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
-        val events = eventFactory.create(request, evaluation)
-        events.forEach { eventProcessor.process(it) }
+        val (evaluation, decision) = experiment(request)
 
-        val variation = Variation.from(evaluation.variationKey)
-        val config = evaluation.config ?: ParameterConfig.empty()
-        return Decision.of(variation, evaluation.reason, config)
+        val events = eventFactory.create(request, evaluation)
+        eventProcessor.process(events)
+
+        return decision
     }
 
     fun experiments(user: HackleUser): Map<Experiment, Decision> {
@@ -54,32 +54,31 @@ class HackleInternalClient internal constructor(
         val workspace = workspaceFetcher.fetch() ?: return decisions
         for (experiment in workspace.experiments) {
             val request = ExperimentRequest.of(workspace, user, experiment, Variation.CONTROL)
-            val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
-            val config = evaluation.config ?: ParameterConfig.empty()
-            val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config)
+            val (_, decision) = experiment(request)
             decisions[experiment] = decision
         }
         return decisions
     }
 
-    fun featureFlag(featureKey: Long, user: HackleUser): FeatureFlagDecision {
+    private fun experiment(request: ExperimentRequest): Pair<ExperimentEvaluation, Decision> {
+        val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
+        val config = evaluation.config ?: ParameterConfig.empty()
+        val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config)
+        return Pair(evaluation, decision)
+    }
 
+    fun featureFlag(featureKey: Long, user: HackleUser): FeatureFlagDecision {
         val workspace = workspaceFetcher.fetch() ?: return FeatureFlagDecision.off(SDK_NOT_READY)
         val featureFlag =
             workspace.getFeatureFlagOrNull(featureKey) ?: return FeatureFlagDecision.off(FEATURE_FLAG_NOT_FOUND)
 
         val request = ExperimentRequest.of(workspace, user, featureFlag, Variation.CONTROL)
-        val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
-        val events = eventFactory.create(request, evaluation)
-        events.forEach { eventProcessor.process(it) }
+        val (evaluation, decision) = featureFlag(request)
 
-        val variation = Variation.from(evaluation.variationKey)
-        val config = evaluation.config ?: ParameterConfig.empty()
-        return if (variation.isControl) {
-            FeatureFlagDecision.off(evaluation.reason, config)
-        } else {
-            FeatureFlagDecision.on(evaluation.reason, config)
-        }
+        val events = eventFactory.create(request, evaluation)
+        eventProcessor.process(events)
+
+        return decision
     }
 
     fun featureFlags(user: HackleUser): Map<Experiment, FeatureFlagDecision> {
@@ -87,18 +86,23 @@ class HackleInternalClient internal constructor(
         val workspace = workspaceFetcher.fetch() ?: return decisions
         for (featureFlag in workspace.featureFlags) {
             val request = ExperimentRequest.of(workspace, user, featureFlag, Variation.CONTROL)
-            val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
-            val variation = Variation.from(evaluation.variationKey)
-            val config = evaluation.config ?: ParameterConfig.empty()
-            val decision = if (variation.isControl) {
-                FeatureFlagDecision.off(evaluation.reason, config)
-            } else {
-                FeatureFlagDecision.on(evaluation.reason, config)
-            }
+            val (_, decision) = featureFlag(request)
             decisions[featureFlag] = decision
         }
         return decisions
     }
+
+    private fun featureFlag(request: ExperimentRequest): Pair<ExperimentEvaluation, FeatureFlagDecision> {
+        val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
+        val config = evaluation.config ?: ParameterConfig.empty()
+        val decision = if (Variation.from(evaluation.variationKey).isControl) {
+            FeatureFlagDecision.off(evaluation.reason, config)
+        } else {
+            FeatureFlagDecision.on(evaluation.reason, config)
+        }
+        return Pair(evaluation, decision)
+    }
+
 
     fun track(event: Event, user: HackleUser, timestamp: Long) {
         val eventType = workspaceFetcher.fetch()?.getEventTypeOrNull(event.key) ?: EventType.Undefined(event.key)
@@ -114,10 +118,13 @@ class HackleInternalClient internal constructor(
         val workspace = workspaceFetcher.fetch() ?: return RemoteConfigDecision.of(defaultValue, SDK_NOT_READY)
         val parameter = workspace.getRemoteConfigParameterOrNull(parameterKey)
             ?: return RemoteConfigDecision.of(defaultValue, REMOTE_CONFIG_PARAMETER_NOT_FOUND)
+
         val request = RemoteConfigRequest(workspace, user, parameter, requiredType, defaultValue)
         val evaluation = remoteConfigEvaluator.evaluate(request, Evaluators.context())
+
         val events = eventFactory.create(request, evaluation)
-        events.forEach { eventProcessor.process(it) }
+        eventProcessor.process(events)
+
         @Suppress("UNCHECKED_CAST")
         return RemoteConfigDecision.of(evaluation.value, evaluation.reason) as RemoteConfigDecision<T>
     }

@@ -1,9 +1,10 @@
 package io.hackle.sdk.core.evaluation.container
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.user.IdentifierType
+import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -13,13 +14,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
-import strikt.assertions.isFalse
-import strikt.assertions.isNotNull
-import strikt.assertions.isTrue
-import strikt.assertions.startsWith
+import strikt.assertions.*
 
 @ExtendWith(MockKExtension::class)
-internal class ContainerResolverTest{
+internal class ContainerResolverTest {
 
     @MockK
     private lateinit var bucketer: Bucketer
@@ -37,26 +35,49 @@ internal class ContainerResolverTest{
             every { identifierType } returns "customId"
         }
 
-        val actual = sut.isUserInContainerGroup(mockk(), mockk(), experiment, user)
+        val request = experimentRequest(experiment = experiment, user = user)
+
+        val actual = sut.isUserInContainerGroup(request, mockk())
 
         expectThat(actual).isFalse()
     }
 
     @Test
-    fun `bucketing 결과 slot 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
-        val bucket = mockk<Bucket>()
+    fun `Bucket 없으면 에러`() {
+        // given
+        val workspace = mockk<Workspace> {
+            every { getBucketOrNull(any()) } returns null
+        }
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
         }
-        val experiment = mockk<Experiment> {
+        val request = experimentRequest(workspace = workspace, user = user)
+
+        // when
+        val exception = assertThrows<IllegalArgumentException> {
+            sut.isUserInContainerGroup(request, container)
+        }
+
+        // then
+        expectThat(exception.message) isEqualTo "Bucket[1]"
+    }
+
+    @Test
+    fun `bucketing 결과 slot 정보를 가져오지 못한경우 Next Flow 진행시키지 않는다`() {
+        val bucket = mockk<Bucket>()
+        val workspace = mockk<Workspace> {
+            every { getBucketOrNull(any()) } returns bucket
+        }
+        val container = mockk<Container> {
             every { id } returns 1
-            every { containerId } returns 1
-            every { identifierType } returns IdentifierType.ID.key
+            every { bucketId } returns 1
         }
         every { bucketer.bucketing(bucket, any()) } returns null
+        val experiment = experiment(containerId = 1)
+        val request = experimentRequest(workspace, user, experiment)
 
-        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
+        val actual = sut.isUserInContainerGroup(request, container)
 
         expectThat(actual).isFalse()
     }
@@ -65,65 +86,67 @@ internal class ContainerResolverTest{
     fun `bucketing 결과에 해당하는 container group 정보를 못찾는 경우 Next Flow 진행시키지 않는다`() {
         val slot = Slot(0, 100, 320)
         val bucket = mockk<Bucket>()
+        val workspace = mockk<Workspace> {
+            every { getBucketOrNull(any()) } returns bucket
+        }
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
             every { getGroupOrNull(any()) } returns null
         }
-        val experiment = mockk<Experiment> {
-            every { id } returns 1
-            every { containerId } returns 1
-            every { identifierType } returns IdentifierType.ID.key
-        }
+        val experiment = experiment(containerId = 1L)
         every { bucketer.bucketing(bucket, any()) } returns slot
 
+        val request = experimentRequest(workspace, user, experiment)
+
         val actual = assertThrows<IllegalArgumentException> {
-            sut.isUserInContainerGroup(container, bucket, experiment, user)
+            sut.isUserInContainerGroup(request, container)
         }
 
-        expectThat(actual.message).isNotNull().startsWith("container group not found.")
+        expectThat(actual.message).isNotNull().startsWith("ContainerGroup[320]")
     }
 
     @Test
     fun `실험이 bucketing 결과에 해당하지 않으면 Next Flow를 진행시키지 않는다`() {
-        val experimentId = 22L
         val slot = Slot(0, 100, 22)
         val bucket = mockk<Bucket>()
+        val workspace = mockk<Workspace> {
+            every { getBucketOrNull(any()) } returns bucket
+        }
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
             every { getGroupOrNull(any()) } returns ContainerGroup(22, listOf(23L))
         }
-        val experiment = mockk<Experiment> {
-            every { id } returns 1
-            every { containerId } returns 1
-            every { identifierType } returns IdentifierType.ID.key
-        }
+        val experiment = experiment(containerId = 1)
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
+        val request = experimentRequest(workspace, user, experiment)
+
+        val actual = sut.isUserInContainerGroup(request, container)
 
         expectThat(actual).isFalse()
     }
 
     @Test
-    fun `실험이 bucketing 결과에 해당하면 Next Flow를 진행한다 `() {
+    fun `실험이 bucketing 결과에 해당하면 Next Flow를 진행한다`() {
         val experimentId = 22L
         val slot = Slot(0, 100, 22)
         val bucket = mockk<Bucket>()
+        val workspace = mockk<Workspace> {
+            every { getBucketOrNull(any()) } returns bucket
+        }
         val container = mockk<Container> {
             every { id } returns 1
             every { bucketId } returns 1
             every { getGroupOrNull(slot.variationId) } returns ContainerGroup(22, listOf(experimentId))
         }
-        val experiment = mockk<Experiment> {
-            every { id } returns experimentId
-            every { containerId } returns 1
-            every { identifierType } returns IdentifierType.ID.key
-        }
+        val experiment = experiment(id = experimentId, containerId = 1)
         every { bucketer.bucketing(bucket, any()) } returns slot
 
-        val actual = sut.isUserInContainerGroup(container, bucket, experiment, user)
+        val request = experimentRequest(workspace, user, experiment)
+
+        val actual = sut.isUserInContainerGroup(request, container)
 
         expectThat(actual).isTrue()
     }

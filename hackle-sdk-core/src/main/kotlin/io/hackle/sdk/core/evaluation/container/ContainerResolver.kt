@@ -10,11 +10,9 @@ internal class ContainerResolver(
 ) {
     fun isUserInContainerGroup(request: ExperimentRequest, container: Container): Boolean {
         val identifier = request.user.identifiers[request.experiment.identifierType] ?: return false
-        val bucket =
-            requireNotNull(request.workspace.getBucketOrNull(container.bucketId)) { "Bucket[${container.bucketId}]" }
+        val bucket = requireNotNull(request.workspace.getBucketOrNull(container.bucketId)) { "Bucket[${container.bucketId}]" }
         val slot = bucketer.bucketing(bucket, identifier) ?: return false
-        val containerGroup =
-            requireNotNull(container.getGroupOrNull(slot.containerGroupId)) { "ContainerGroup[${slot.containerGroupId}]" }
+        val containerGroup = requireNotNull(container.getGroupOrNull(slot.containerGroupId)) { "ContainerGroup[${slot.containerGroupId}]" }
         return containerGroup.experiments.contains(request.experiment.id)
     }
 }

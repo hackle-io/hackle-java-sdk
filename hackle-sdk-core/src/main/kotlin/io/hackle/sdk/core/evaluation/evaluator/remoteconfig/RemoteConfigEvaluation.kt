@@ -5,13 +5,13 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.RemoteConfigParameter
 
-internal class RemoteConfigEvaluation<T> private constructor(
+internal class RemoteConfigEvaluation<T> internal constructor(
     override val reason: DecisionReason,
     override val targetEvaluations: List<Evaluator.Evaluation>,
     val parameter: RemoteConfigParameter,
     val valueId: Long?,
     val value: T,
-    val properties: Map<String, Any> = emptyMap()
+    val properties: Map<String, Any>
 ) : Evaluator.Evaluation {
     companion object {
         fun <T : Any> of(

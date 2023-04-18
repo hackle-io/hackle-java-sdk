@@ -34,7 +34,6 @@ internal class UserEventFactory(
         timestamp: Long,
         properties: PropertiesBuilder
     ): UserEvent {
-        @Suppress("UNCHECKED_CAST")
         return when (evaluation) {
             is ExperimentEvaluation -> {
                 properties.add(CONFIG_ID_PROPERTY_KEY, evaluation.config?.id)
@@ -50,7 +49,7 @@ internal class UserEventFactory(
                 properties.add(evaluation.properties)
                 UserEvent.remoteConfig(
                     user = request.user,
-                    evaluation = evaluation as RemoteConfigEvaluation<Any>,
+                    evaluation = evaluation,
                     properties = properties.build(),
                     timestamp = timestamp
                 )
@@ -61,8 +60,8 @@ internal class UserEventFactory(
     }
 
     companion object {
-        private const val ROOT_TYPE = "\$evaluatedType"
-        private const val ROOT_ID = "\$evaluatedId"
+        private const val ROOT_TYPE = "\$targetingRootType"
+        private const val ROOT_ID = "\$targetingRootId"
 
         private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
     }

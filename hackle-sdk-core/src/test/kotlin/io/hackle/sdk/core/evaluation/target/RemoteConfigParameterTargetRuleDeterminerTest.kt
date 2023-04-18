@@ -1,6 +1,8 @@
 package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Bucket
 import io.hackle.sdk.core.model.RemoteConfigParameter
@@ -36,6 +38,7 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
         // given
         val matchedTargetRule = targetRule(true)
         val parameter = mockk<RemoteConfigParameter> {
+            every { id } returns 42
             every { targetRules } returns listOf(
                 targetRule(false),
                 targetRule(false),
@@ -46,17 +49,20 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             )
         }
 
+        val request = RemoteConfigRequest(mockk(), mockk(), parameter, mockk(), mockk())
+
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), parameter, mockk())
+        val actual = sut.determineTargetRuleOrNull(request, Evaluators.context())
 
         // then
         expectThat(actual) isSameInstanceAs matchedTargetRule
-        verify(exactly = 4) { matcher.matches(any(), any(), any(), any()) }
+        verify(exactly = 4) { matcher.matches(any(), any(), any()) }
     }
 
     @Test
     fun `매치되는 룰이 없으면 null 리턴`() {
         val parameter = mockk<RemoteConfigParameter> {
+            every { id } returns 42
             every { targetRules } returns listOf(
                 targetRule(false),
                 targetRule(false),
@@ -66,22 +72,27 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             )
         }
 
+        val request = RemoteConfigRequest(mockk(), mockk(), parameter, mockk(), mockk())
+
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), parameter, mockk())
+        val actual = sut.determineTargetRuleOrNull(request, Evaluators.context())
 
         // then
         expectThat(actual).isNull()
-        verify(exactly = 5) { matcher.matches(any(), any(), any(), any()) }
+        verify(exactly = 5) { matcher.matches(any(), any(), any()) }
     }
 
     @Test
     fun `TargetRule 이 없으면 null 리턴`() {
         val parameter = mockk<RemoteConfigParameter> {
+            every { id } returns 42
             every { targetRules } returns listOf()
         }
 
+        val request = RemoteConfigRequest(mockk(), mockk(), parameter, mockk(), mockk())
+
         // when
-        val actual = sut.determineTargetRuleOrNull(mockk(), parameter, mockk())
+        val actual = sut.determineTargetRuleOrNull(request, Evaluators.context())
 
         // then
         expectThat(actual).isNull()
@@ -90,7 +101,7 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
 
     private fun targetRule(isMatch: Boolean): RemoteConfigParameter.TargetRule {
         val targetRule = mockk<RemoteConfigParameter.TargetRule>()
-        every { matcher.matches(targetRule, any(), any(), any()) } returns isMatch
+        every { matcher.matches(any(), any(), targetRule) } returns isMatch
         return targetRule
     }
 
@@ -113,11 +124,14 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule>()
             val target = mockk<Target>()
-            every { targetMatcher.matches(target, any(), any()) } returns false
+            every { targetMatcher.matches(any(), any(), target) } returns false
             every { targetRule.target } returns target
 
+            val request = mockk<RemoteConfigRequest<Any>>()
+
+
             // when
-            val actual = sut.matches(targetRule, mockk(), mockk(), mockk())
+            val actual = sut.matches(request, Evaluators.context(), targetRule)
 
             // then
             expectThat(actual).isFalse()
@@ -129,15 +143,18 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule>()
             val target = mockk<Target>()
-            every { targetMatcher.matches(target, any(), any()) } returns true
+            every { targetMatcher.matches(any(), any(), target) } returns true
             every { targetRule.target } returns target
 
             val parameter = mockk<RemoteConfigParameter> {
+                every { id } returns 42
                 every { identifierType } returns "customId"
             }
 
+            val request = RemoteConfigRequest(mockk(), HackleUser.of("a"), parameter, mockk(), mockk())
+
             // when
-            val actual = sut.matches(targetRule, mockk(), parameter, HackleUser.of("a"))
+            val actual = sut.matches(request, Evaluators.context(), targetRule)
 
             // then
             expectThat(actual).isFalse()
@@ -148,10 +165,11 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule>()
             val target = mockk<Target>()
-            every { targetMatcher.matches(target, any(), any()) } returns true
+            every { targetMatcher.matches(any(), any(), target) } returns true
             every { targetRule.target } returns target
 
             val parameter = mockk<RemoteConfigParameter> {
+                every { id } returns 42
                 every { identifierType } returns "\$id"
             }
 
@@ -161,9 +179,11 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             val workspace = mockk<Workspace>()
             every { workspace.getBucketOrNull(bucketId) } returns null
 
+            val request = RemoteConfigRequest(workspace, HackleUser.of("a"), parameter, mockk(), mockk())
+
             // when
             val exception = assertThrows<IllegalArgumentException> {
-                sut.matches(targetRule, workspace, parameter, HackleUser.of("a"))
+                sut.matches(request, Evaluators.context(), targetRule)
             }
 
             // then
@@ -175,10 +195,11 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule>()
             val target = mockk<Target>()
-            every { targetMatcher.matches(target, any(), any()) } returns true
+            every { targetMatcher.matches(any(), any(), target) } returns true
             every { targetRule.target } returns target
 
             val parameter = mockk<RemoteConfigParameter> {
+                every { id } returns 42
                 every { identifierType } returns "\$id"
             }
 
@@ -191,8 +212,10 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             val workspace = mockk<Workspace>()
             every { workspace.getBucketOrNull(bucketId) } returns bucket
 
+            val request = RemoteConfigRequest(workspace, HackleUser.of("a"), parameter, mockk(), mockk())
+
             // when
-            val actual = sut.matches(targetRule, workspace, parameter, HackleUser.of("a"))
+            val actual = sut.matches(request, Evaluators.context(), targetRule)
 
             // then
             expectThat(actual).isFalse()
@@ -203,10 +226,11 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule>()
             val target = mockk<Target>()
-            every { targetMatcher.matches(target, any(), any()) } returns true
+            every { targetMatcher.matches(any(), any(), target) } returns true
             every { targetRule.target } returns target
 
             val parameter = mockk<RemoteConfigParameter> {
+                every { id } returns 42
                 every { identifierType } returns "\$id"
             }
 
@@ -219,8 +243,10 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
             val workspace = mockk<Workspace>()
             every { workspace.getBucketOrNull(bucketId) } returns bucket
 
+            val request = RemoteConfigRequest(workspace, HackleUser.of("a"), parameter, mockk(), mockk())
+
             // when
-            val actual = sut.matches(targetRule, workspace, parameter, HackleUser.of("a"))
+            val actual = sut.matches(request, Evaluators.context(), targetRule)
 
             // then
             expectThat(actual).isTrue()

@@ -2,19 +2,17 @@ package io.hackle.sdk.core.evaluation.flow
 
 import io.hackle.sdk.common.Variation.*
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.Experiment.Status.DRAFT
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 import io.hackle.sdk.core.model.experiment
-import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,7 +22,7 @@ import strikt.assertions.isNotNull
 import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
-internal class TrafficAllocateEvaluatorTest {
+internal class TrafficAllocateEvaluatorTest : FlowEvaluatorTest() {
 
     @MockK
     private lateinit var actionResolver: ActionResolver
@@ -36,10 +34,11 @@ internal class TrafficAllocateEvaluatorTest {
     fun `실행중이 아니면 예외 발생`() {
         // given
         val experiment = experiment(type = AB_TEST, status = DRAFT)
+        val request = experimentRequest(experiment = experiment)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, mockk(), "E", mockk())
+            sut.evaluate(request, context, nextFlow)
         }
 
         // then
@@ -52,10 +51,11 @@ internal class TrafficAllocateEvaluatorTest {
     fun `AB_TEST 타입이 아니면 예외 발생`() {
         // given
         val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
+        val request = experimentRequest(experiment = experiment)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, mockk(), "E", mockk())
+            sut.evaluate(request, context, nextFlow)
         }
 
         // then
@@ -67,19 +67,17 @@ internal class TrafficAllocateEvaluatorTest {
     @Test
     fun `기본룰에 해당하는 Variation이 없으면 기본그룹으로 평가한다`() {
         // given
-        val experiment = experiment(type = AB_TEST, status = RUNNING) {
-            variations {
-                G(42)
-            }
-        }
+        val experiment = experiment(type = AB_TEST, status = RUNNING)
+        val request = experimentRequest(experiment = experiment)
 
-        every { actionResolver.resolveOrNull(any(), any(), experiment, any()) } returns null
+        every { actionResolver.resolveOrNull(any(), any()) } returns null
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "G", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "G", DecisionReason.TRAFFIC_NOT_ALLOCATED, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.TRAFFIC_NOT_ALLOCATED
+        expectThat(actual.variationKey) isEqualTo "A"
     }
 
     @Test
@@ -92,14 +90,16 @@ internal class TrafficAllocateEvaluatorTest {
                 C(43, true)
             }
         }
+        val request = experimentRequest(experiment = experiment)
 
-        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns experiment.getVariationOrNull("C")
+        every { actionResolver.resolveOrNull(any(), any()) } returns experiment.getVariationOrNull("C")
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "B", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.VARIATION_DROPPED, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.VARIATION_DROPPED
+        expectThat(actual.variationKey) isEqualTo "A"
     }
 
     @Test
@@ -111,13 +111,15 @@ internal class TrafficAllocateEvaluatorTest {
                 B(42, false)
             }
         }
+        val request = experimentRequest(experiment = experiment)
 
-        every { actionResolver.resolveOrNull(any(), any(), any(), any()) } returns experiment.getVariationOrNull("B")
+        every { actionResolver.resolveOrNull(any(), any()) } returns experiment.getVariationOrNull("B")
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("123"), "A", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.TRAFFIC_ALLOCATED, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.TRAFFIC_ALLOCATED
+        expectThat(actual.variationId) isEqualTo 42
     }
 }

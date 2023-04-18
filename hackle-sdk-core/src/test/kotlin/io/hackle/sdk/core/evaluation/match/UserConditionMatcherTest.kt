@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.Target.Key.Type.USER_PROPERTY
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.condition
@@ -8,7 +10,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,9 +37,10 @@ internal class UserConditionMatcherTest {
             IN("gold")
         }
         val user = HackleUser.of("1")
+        val request = experimentRequest(user = user)
 
         // when
-        val actual = sut.matches(condition, mockk(), user)
+        val actual = sut.matches(request, Evaluators.context(), condition)
 
         // then
         assertFalse(actual)
@@ -55,10 +57,10 @@ internal class UserConditionMatcherTest {
             USER_PROPERTY("grade")
             IN("gold")
         }
-        val user = HackleUser.of("1")
+        val request = experimentRequest()
 
         // when
-        val actual = sut.matches(condition, mockk(), user)
+        val actual = sut.matches(request, Evaluators.context(), condition)
 
         // then
         assertTrue(actual)

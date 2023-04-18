@@ -2,17 +2,21 @@ package io.hackle.sdk.core.client
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.ParameterConfig
-import io.hackle.sdk.common.Variation.*
+import io.hackle.sdk.common.Variation.B
+import io.hackle.sdk.common.Variation.J
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
-import io.hackle.sdk.core.evaluation.Evaluation
-import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.RemoteConfigEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
+import io.hackle.sdk.core.event.UserEventFactory
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.user.HackleUser
@@ -23,6 +27,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -36,16 +41,27 @@ import strikt.assertions.*
 internal class HackleInternalClientTest {
 
     @MockK
-    private lateinit var evaluator: Evaluator
+    private lateinit var experimentEvaluator: ExperimentEvaluator
+
+    @MockK
+    private lateinit var remoteConfigEvaluator: RemoteConfigEvaluator<*>
 
     @MockK
     private lateinit var workspaceFetcher: WorkspaceFetcher
+
+    @MockK
+    private lateinit var eventFactory: UserEventFactory
 
     @RelaxedMockK
     private lateinit var eventProcessor: EventProcessor
 
     @InjectMockKs
     private lateinit var sut: HackleInternalClient
+
+    @BeforeEach
+    fun beforeEach() {
+        every { eventFactory.create(any(), any()) } returns listOf(mockk())
+    }
 
     @Nested
     inner class ExperimentTest {
@@ -94,7 +110,7 @@ internal class HackleInternalClientTest {
         fun `평가 결과로 노출 이벤트를 전송하고 평가된 결과로 결정한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val experiment = mockk<Experiment>()
+            val experiment = experiment()
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns experiment
             }
@@ -102,26 +118,25 @@ internal class HackleInternalClientTest {
 
             val defaultVariation = J
             val config = mockk<ParameterConfiguration> { every { id } returns 420 }
-            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED, config)
-            every { evaluator.evaluate(workspace, experiment, user, defaultVariation.name) } returns evaluation
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment,
+                320,
+                "B",
+                config
+            )
+
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
+            every { eventFactory.create(any(), evaluation) } returns listOf(mockk(), mockk())
 
             // when
             val actual = sut.experiment(42, user, defaultVariation)
 
             // then
-            expectThat(actual) isEqualTo Decision.of(H, TRAFFIC_ALLOCATED, config)
-            verify(exactly = 1) {
-                eventProcessor.process(withArg {
-                    expectThat(it)
-                        .isA<UserEvent.Exposure>().and {
-                            get { this.user } isSameInstanceAs user
-                            get { this.experiment } isSameInstanceAs experiment
-                            get { this.variationId } isEqualTo 320
-                            get { this.variationKey } isEqualTo "H"
-                            get { this.decisionReason } isEqualTo TRAFFIC_ALLOCATED
-                            get { this.properties } isEqualTo hashMapOf("\$parameterConfigurationId" to 420L)
-                        }
-                })
+            expectThat(actual) isEqualTo Decision.of(B, TRAFFIC_ALLOCATED, config)
+            verify(exactly = 2) {
+                eventProcessor.process(any())
             }
         }
 
@@ -129,21 +144,29 @@ internal class HackleInternalClientTest {
         fun `평가결과 Config 가 없으면 empty config 를 리턴한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val experiment = mockk<Experiment>()
+            val experiment = experiment()
             val workspace = mockk<Workspace> {
                 every { getExperimentOrNull(any()) } returns experiment
             }
             every { workspaceFetcher.fetch() } returns workspace
 
             val defaultVariation = J
-            val evaluation = Evaluation(320, H.name, TRAFFIC_ALLOCATED, null)
-            every { evaluator.evaluate(workspace, experiment, user, defaultVariation.name) } returns evaluation
+
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment,
+                320,
+                "B",
+                null
+            )
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
 
             // when
             val actual = sut.experiment(42, user, defaultVariation)
 
             // then
-            expectThat(actual) isEqualTo Decision.of(H, TRAFFIC_ALLOCATED, ParameterConfig.empty())
+            expectThat(actual) isEqualTo Decision.of(B, TRAFFIC_ALLOCATED, ParameterConfig.empty())
         }
     }
 
@@ -200,8 +223,17 @@ internal class HackleInternalClientTest {
                 every { this@mockk.id } returns id
                 every { key } returns experimentKey
             }
-            val evaluation = Evaluation(variationId, variationKey, reason, config)
-            every { evaluator.evaluate(any(), experiment, any(), "A") } returns evaluation
+
+            val evaluation = ExperimentEvaluation(
+                reason,
+                emptyList(),
+                experiment,
+                variationId,
+                variationKey,
+                config
+            )
+            val request = experimentRequest(experiment = experiment)
+            every { experimentEvaluator.evaluate(eq(request), any()) } returns evaluation
             return experiment
         }
     }
@@ -249,33 +281,31 @@ internal class HackleInternalClientTest {
         fun `평가 결과 이벤트를 전송한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val featureFlag = mockk<Experiment>()
+            val featureFlag = experiment()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
             every { workspaceFetcher.fetch() } returns workspace
 
             val config = mockk<ParameterConfiguration> { every { id } returns 420 }
-            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED, config)
-            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment(),
+                320,
+                "A",
+                config
+            )
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
+            every { eventFactory.create(any(), evaluation) } returns listOf(mockk(), mockk())
 
             // when
             sut.featureFlag(42, user)
 
             // then
-            verify {
-                eventProcessor.process(withArg {
-                    expectThat(it)
-                        .isA<UserEvent.Exposure>()
-                        .and {
-                            get { this.user } isSameInstanceAs user
-                            get { this.experiment } isSameInstanceAs featureFlag
-                            get { this.variationId } isEqualTo 320
-                            get { this.variationKey } isEqualTo "A"
-                            get { this.decisionReason } isEqualTo TRAFFIC_ALLOCATED
-                            get { this.properties } isEqualTo hashMapOf("\$parameterConfigurationId" to 420L)
-                        }
-                })
+            verify(exactly = 2) {
+                eventProcessor.process(any())
             }
         }
 
@@ -283,14 +313,21 @@ internal class HackleInternalClientTest {
         fun `평가 결과 Control 그룹이면 off로 결정한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val featureFlag = mockk<Experiment>()
+            val featureFlag = experiment()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, A.name, TRAFFIC_ALLOCATED, null)
-            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment(),
+                320,
+                "A",
+                null
+            )
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
 
             // when
             val actual = sut.featureFlag(42, user)
@@ -306,14 +343,22 @@ internal class HackleInternalClientTest {
         fun `평가 결과가 Control 그룹이 아니면 on으로 결정한다 `() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val featureFlag = mockk<Experiment>()
+            val featureFlag = experiment()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, null)
-            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment(),
+                320,
+                "B",
+                null
+            )
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
+
 
             // when
             val actual = sut.featureFlag(42, user)
@@ -329,15 +374,23 @@ internal class HackleInternalClientTest {
         fun `평가된 config를 사용한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val featureFlag = mockk<Experiment>()
+            val featureFlag = experiment()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
             every { workspaceFetcher.fetch() } returns workspace
 
             val config = mockk<ParameterConfiguration> { every { id } returns 420 }
-            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, config)
-            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment(),
+                320,
+                "B",
+                config
+            )
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
 
             // when
             val actual = sut.featureFlag(42, user)
@@ -350,14 +403,21 @@ internal class HackleInternalClientTest {
         fun `평가된 config 가 없으면 empty config 를 사용한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val featureFlag = mockk<Experiment>()
+            val featureFlag = experiment()
             val workspace = mockk<Workspace> {
                 every { getFeatureFlagOrNull(any()) } returns featureFlag
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = Evaluation(320, B.name, TRAFFIC_ALLOCATED, null)
-            every { evaluator.evaluate(workspace, featureFlag, user, A.name) } returns evaluation
+            val evaluation = ExperimentEvaluation(
+                TRAFFIC_ALLOCATED,
+                emptyList(),
+                experiment(),
+                320,
+                "B",
+                null
+            )
+            every { experimentEvaluator.evaluate(any(), any()) } returns evaluation
 
             // when
             val actual = sut.featureFlag(42, user)
@@ -421,8 +481,16 @@ internal class HackleInternalClientTest {
                 every { this@mockk.id } returns id
                 every { key } returns experimentKey
             }
-            val evaluation = Evaluation(variationId, variationKey, reason, config)
-            every { evaluator.evaluate(any(), experiment, any(), "A") } returns evaluation
+            val evaluation = ExperimentEvaluation(
+                reason,
+                emptyList(),
+                experiment,
+                variationId,
+                variationKey,
+                config
+            )
+            val request = experimentRequest(experiment = experiment)
+            every { experimentEvaluator.evaluate(eq(request), any()) } returns evaluation
             return experiment
         }
     }
@@ -548,30 +616,33 @@ internal class HackleInternalClientTest {
         fun `평가 결과로 이벤트를 전송하고 평가된 결과로 결정한다`() {
             // given
             val user = HackleUser.of("TEST_USER_ID")
-            val parameter = mockk<RemoteConfigParameter>()
+            val parameter = mockk<RemoteConfigParameter> {
+                every { id } returns 42
+            }
             val workspace = mockk<Workspace> {
                 every { getRemoteConfigParameterOrNull(any()) } returns parameter
             }
             every { workspaceFetcher.fetch() } returns workspace
 
-            val evaluation = RemoteConfigEvaluation(42, "vvv", DEFAULT_RULE)
-            every { evaluator.evaluate(workspace, parameter, user, any(), any<String>()) } returns evaluation
+
+            val evaluation: RemoteConfigEvaluation<Any> = RemoteConfigEvaluation(
+                DEFAULT_RULE,
+                emptyList(),
+                parameter,
+                42,
+                "vvv",
+                emptyMap()
+            )
+            every { remoteConfigEvaluator.evaluate(any(), any()) } returns evaluation
+            every { eventFactory.create(any(), evaluation) } returns listOf(mockk(), mockk())
 
             // when
             val actual = sut.remoteConfig("42", user, ValueType.STRING, "default value")
 
             // then
             expectThat(actual) isEqualTo RemoteConfigDecision.of("vvv", DEFAULT_RULE)
-            verify(exactly = 1) {
-                eventProcessor.process(withArg {
-                    expectThat(it)
-                        .isA<UserEvent.RemoteConfig>().and {
-                            get { this.user } isSameInstanceAs user
-                            get { this.parameter } isSameInstanceAs parameter
-                            get { this.valueId } isEqualTo 42
-                            get { this.decisionReason } isEqualTo DEFAULT_RULE
-                        }
-                })
+            verify(exactly = 2) {
+                eventProcessor.process(any())
             }
         }
     }

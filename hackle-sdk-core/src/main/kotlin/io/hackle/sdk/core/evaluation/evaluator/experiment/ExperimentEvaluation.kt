@@ -6,7 +6,7 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.Variation
 
-internal class ExperimentEvaluation private constructor(
+internal class ExperimentEvaluation internal constructor(
     override val reason: DecisionReason,
     override val targetEvaluations: List<Evaluator.Evaluation>,
     val experiment: Experiment,
@@ -20,25 +20,6 @@ internal class ExperimentEvaluation private constructor(
     }
 
     companion object {
-        fun ofDefault(
-            request: ExperimentRequest,
-            context: Evaluator.Context,
-            reason: DecisionReason
-        ): ExperimentEvaluation {
-            val variation = request.experiment.getVariationOrNull(request.defaultVariationKey)
-            return if (variation != null) {
-                of(request, context, variation, reason)
-            } else {
-                ExperimentEvaluation(
-                    reason = reason,
-                    targetEvaluations = context.targetEvaluations,
-                    experiment = request.experiment,
-                    variationId = null,
-                    variationKey = request.defaultVariationKey,
-                    config = null
-                )
-            }
-        }
 
         fun of(
             request: ExperimentRequest,
@@ -59,6 +40,26 @@ internal class ExperimentEvaluation private constructor(
                 variationKey = variation.key,
                 config = parameterConfiguration
             )
+        }
+
+        fun ofDefault(
+            request: ExperimentRequest,
+            context: Evaluator.Context,
+            reason: DecisionReason
+        ): ExperimentEvaluation {
+            val variation = request.experiment.getVariationOrNull(request.defaultVariationKey)
+            return if (variation != null) {
+                of(request, context, variation, reason)
+            } else {
+                ExperimentEvaluation(
+                    reason = reason,
+                    targetEvaluations = context.targetEvaluations,
+                    experiment = request.experiment,
+                    variationId = null,
+                    variationKey = request.defaultVariationKey,
+                    config = null
+                )
+            }
         }
     }
 }

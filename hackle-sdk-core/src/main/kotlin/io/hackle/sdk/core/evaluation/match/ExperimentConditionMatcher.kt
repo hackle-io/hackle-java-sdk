@@ -8,7 +8,6 @@ import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
-import io.hackle.sdk.core.model.ValueType
 
 internal class ExperimentConditionMatcher(
     private val abTestMatcher: AbTestConditionMatcher,
@@ -30,14 +29,10 @@ internal abstract class ExperimentMatcher {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
 
     fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
-
-        val key = requireNotNull(condition.key.name.toLongOrNull()) { "${condition.key.type}[${condition.key.name}]" }
+        val key = requireNotNull(condition.key.name.toLongOrNull()) { "Invalid key [${condition.key.type}, ${condition.key.name}]" }
         val experiment = experiment(request, key) ?: return false
-
         val evaluation = context[experiment] ?: evaluate(request, context, experiment)
-        require(evaluation is ExperimentEvaluation)
-
-        return matches(evaluation, condition)
+        return matches(evaluation as ExperimentEvaluation, condition)
     }
 
     private fun evaluate(
@@ -47,10 +42,8 @@ internal abstract class ExperimentMatcher {
     ): Evaluator.Evaluation {
         val experimentRequest = ExperimentRequest.of(requestedBy = request, experiment = experiment)
         val evaluation = evaluator.evaluate(experimentRequest, context)
-        require(evaluation is ExperimentEvaluation)
-        return resolve(request, evaluation).also {
-            context.add(it)
-        }
+        return resolve(request, evaluation as ExperimentEvaluation)
+            .also { context.add(it) }
     }
 
     protected abstract fun experiment(request: Evaluator.Request, key: Long): Experiment?
@@ -107,7 +100,6 @@ internal class FeatureFlagConditionMatcher(
     }
 
     override fun matches(evaluation: ExperimentEvaluation, condition: Target.Condition): Boolean {
-        require(condition.match.valueType == ValueType.BOOLEAN)
         val on = Variation.from(evaluation.variationKey).isOn
         return valueOperatorMatcher.matches(on, condition.match)
     }
