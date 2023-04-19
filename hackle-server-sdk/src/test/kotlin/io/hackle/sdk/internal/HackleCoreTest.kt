@@ -1,5 +1,6 @@
 package io.hackle.sdk.internal
 
+import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.RemoteConfigDecision
@@ -9,6 +10,8 @@ import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.user.IdentifierType
 import io.hackle.sdk.internal.event.InMemoryEventProcessor
+import io.hackle.sdk.internal.event.toPayload
+import io.hackle.sdk.internal.utils.toJson
 import io.hackle.sdk.internal.workspace.ResourcesWorkspaceFetcher
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -114,5 +117,33 @@ internal class HackleCoreTest {
 
         expectThat(decision.count { it.reason == DecisionReason.NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT })
             .isIn(7300..7700)
+    }
+
+    @Test
+    fun `dto`() {
+        val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment.json")
+        val eventProcessor = InMemoryEventProcessor()
+        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+
+        val user = HackleUser.builder()
+            .identifier(IdentifierType.ID, "user")
+            .identifier("custom", "value")
+            .property("age", 30)
+            .build()
+        core.remoteConfig("rc", user, ValueType.STRING, "42")
+
+        val event = Event.builder("purchase")
+            .value(320.0)
+            .property("amount", 320)
+            .build()
+
+        core.track(event, user, 42)
+
+        val payload = eventProcessor.processedEvents.toPayload()
+        expectThat(payload.exposureEvents).hasSize(5)
+        expectThat(payload.remoteConfigEvents).hasSize(1)
+        expectThat(payload.trackEvents).hasSize(1)
+
+        expectThat(payload.toJson().length).isGreaterThan(2000)
     }
 }
