@@ -92,11 +92,13 @@ internal class RemoteConfigEvaluatorTest {
         @Test
         fun `TargetRule 에 해당하는 경우`() {
             // given
-            val targetRule = mockk<RemoteConfigParameter.TargetRule> {
-                every { key } returns "target_rule_key"
-                every { name } returns "target_rule_name"
-                every { value } returns RemoteConfigParameter.Value(320, "targetRuleValue")
-            }
+            val targetRule = RemoteConfigParameter.TargetRule(
+                "target_rule_key",
+                "target_rule_name",
+                mockk(),
+                42,
+                RemoteConfigParameter.Value(320, "targetRuleValue")
+            )
             val parameter = parameter(
                 type = STRING,
                 targetRules = listOf(targetRule),

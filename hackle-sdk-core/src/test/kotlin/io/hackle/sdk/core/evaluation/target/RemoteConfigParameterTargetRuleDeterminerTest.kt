@@ -222,26 +222,29 @@ internal class RemoteConfigParameterTargetRuleDeterminerTest {
         }
 
         @Test
-        fun `Slot 에 할당되어 있으면 않으면 true`() {
+        fun `Slot 에 할당되어 있으면 true`() {
             // given
-            val targetRule = mockk<RemoteConfigParameter.TargetRule>()
-            val target = mockk<Target>()
+            val target = io.hackle.sdk.core.model.Target(emptyList())
+            val targetRule = RemoteConfigParameter.TargetRule(
+                "target_rule_key",
+                "target_rule_name",
+                target,
+                42,
+                RemoteConfigParameter.Value(320, "targetRuleValue")
+            )
+
             every { targetMatcher.matches(any(), any(), target) } returns true
-            every { targetRule.target } returns target
 
             val parameter = mockk<RemoteConfigParameter> {
                 every { id } returns 42
                 every { identifierType } returns "\$id"
             }
 
-            val bucketId = 42L
-            every { targetRule.bucketId } returns bucketId
-
             val bucket = mockk<Bucket>()
             every { bucketer.bucketing(bucket, any()) } returns mockk()
 
             val workspace = mockk<Workspace>()
-            every { workspace.getBucketOrNull(bucketId) } returns bucket
+            every { workspace.getBucketOrNull(42) } returns bucket
 
             val request = RemoteConfigRequest(workspace, HackleUser.of("a"), parameter, mockk(), mockk())
 

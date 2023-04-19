@@ -2,6 +2,7 @@ package io.hackle.sdk.internal
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.HackleCore
@@ -145,5 +146,21 @@ internal class HackleCoreTest {
         expectThat(payload.trackEvents).hasSize(1)
 
         expectThat(payload.toJson().length).isGreaterThan(2000)
+    }
+
+    @Test
+    fun `segment_match`() {
+        val workspaceFetcher = ResourcesWorkspaceFetcher("segment_match.json")
+        val eventProcessor = InMemoryEventProcessor()
+        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+
+
+        val user1 = HackleUser.builder().identifier(IdentifierType.ID, "matched_id").build()
+        val decision1 = core.experiment(1, user1, Variation.A)
+        expectThat(decision1) isEqualTo Decision.of(Variation.A, DecisionReason.OVERRIDDEN)
+
+        val user2 = HackleUser.builder().identifier(IdentifierType.ID, "not_matched_id").build()
+        val decision2 = core.experiment(1, user2, Variation.A)
+        expectThat(decision2) isEqualTo Decision.of(Variation.A, DecisionReason.TRAFFIC_ALLOCATED)
     }
 }
