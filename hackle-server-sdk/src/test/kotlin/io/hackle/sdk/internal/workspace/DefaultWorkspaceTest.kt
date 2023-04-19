@@ -19,14 +19,12 @@ import strikt.assertions.*
 import java.nio.file.Files
 import java.nio.file.Paths
 
-internal class WorkspaceImplTest {
+internal class DefaultWorkspaceTest {
 
     @Test
     fun `workspace config test`() {
-        val dto =
-            String(Files.readAllBytes(Paths.get("src/test/resources/workspace_config.json"))).parseJson<WorkspaceDto>()
-        val workspace = WorkspaceImpl.from(dto)
 
+        val workspace = ResourcesWorkspaceFetcher("workspace_config.json").fetch()
 
         expectThat(workspace.getExperimentOrNull(4)).isNull()
 
@@ -430,9 +428,7 @@ internal class WorkspaceImplTest {
 
     @Test
     fun `Unsupported Type Test`() {
-        val dto =
-            String(Files.readAllBytes(Paths.get("src/test/resources/unsupported_type_workspace_config.json"))).parseJson<WorkspaceDto>()
-        val workspace = WorkspaceImpl.from(dto)
+        val workspace = ResourcesWorkspaceFetcher("unsupported_type_workspace_config.json").fetch()
 
         expectThat(workspace.getExperimentOrNull(1))
             .isNotNull()

@@ -1,7 +1,6 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.core.HackleCore
-import io.hackle.sdk.core.client
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.log.metrics.MetricLoggerFactory
 import io.hackle.sdk.core.internal.metrics.Metrics
@@ -80,13 +79,13 @@ object HackleClients {
             shutdownTimeoutMillis = 10 * 1000
         )
 
-        val internalClient = HackleCore.client(
+        val core = HackleCore.create(
             workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
             eventProcessor = defaultEventProcessor.apply { start() }
         )
 
         return HackleClientImpl(
-            client = internalClient,
+            core = core,
             userResolver = HackleUserResolver()
         )
     }
