@@ -4,6 +4,7 @@ import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.model.Experiment.Status.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -80,5 +81,21 @@ internal class ExperimentTest {
         expectThat(Experiment.Status.fromExecutionStatusOrNull("RUNNING")) isEqualTo RUNNING
         expectThat(Experiment.Status.fromExecutionStatusOrNull("PAUSED")) isEqualTo PAUSED
         expectThat(Experiment.Status.fromExecutionStatusOrNull("STOPPED")) isEqualTo COMPLETED
+    }
+
+    @Test
+    fun `equalsAndHashCode`() {
+        val e1 = experiment(1)
+        val e11 = experiment(1)
+        val e2 = experiment(2)
+
+        assertTrue(e1 == e1)
+        assertTrue(e1 == e11)
+        assertTrue(e1 != e2)
+        assertTrue(!e1.equals("e1"))
+
+        assertTrue(e1.hashCode() == e1.hashCode())
+        assertTrue(e1.hashCode() == e11.hashCode())
+        assertTrue(e1.hashCode() != e2.hashCode())
     }
 }

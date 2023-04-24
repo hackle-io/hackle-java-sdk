@@ -9,7 +9,7 @@ import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
 import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
 import io.hackle.sdk.common.decision.FeatureFlagDecision
-import io.hackle.sdk.core.client.HackleInternalClient
+import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.metrics.Timer
@@ -21,7 +21,7 @@ import io.hackle.sdk.internal.user.HackleUserResolver
  * @author Yong
  */
 internal class HackleClientImpl(
-    private val client: HackleInternalClient,
+    private val core: HackleCore,
     private val userResolver: HackleUserResolver,
 ) : HackleClient {
 
@@ -49,7 +49,7 @@ internal class HackleClientImpl(
         val sample = Timer.start()
         return try {
             val hackleUser = userResolver.resolveOrNull(user) ?: return Decision.of(defaultVariation, INVALID_INPUT)
-            client.experiment(experimentKey, hackleUser, defaultVariation)
+            core.experiment(experimentKey, hackleUser, defaultVariation)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $e" }
             Decision.of(defaultVariation, EXCEPTION)
@@ -74,7 +74,7 @@ internal class HackleClientImpl(
         val sample = Timer.start()
         return try {
             val hackleUser = userResolver.resolveOrNull(user) ?: return FeatureFlagDecision.off(INVALID_INPUT)
-            client.featureFlag(featureKey, hackleUser)
+            core.featureFlag(featureKey, hackleUser)
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $e" }
             return FeatureFlagDecision.off(EXCEPTION)
@@ -94,18 +94,18 @@ internal class HackleClientImpl(
     override fun track(event: Event, user: User) {
         try {
             val hackleUser = userResolver.resolveOrNull(user) ?: return
-            client.track(event, hackleUser, System.currentTimeMillis())
+            core.track(event, hackleUser, System.currentTimeMillis())
         } catch (e: Exception) {
             log.error { "Unexpected exception while tracking event[${event.key}]: $e" }
         }
     }
 
     override fun remoteConfig(user: User): HackleRemoteConfig {
-        return HackleRemoteConfigImpl(user, client, userResolver)
+        return HackleRemoteConfigImpl(user, core, userResolver)
     }
 
     override fun close() {
-        client.tryClose()
+        core.tryClose()
         Metrics.globalRegistry.tryClose()
     }
 

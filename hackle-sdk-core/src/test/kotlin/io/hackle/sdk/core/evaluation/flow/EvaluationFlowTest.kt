@@ -1,11 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
-import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.Variation
-import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -22,35 +20,31 @@ internal class EvaluationFlowTest {
     inner class EvaluateTest {
         @Test
         fun `End는 TRAFFIC_NOT_ALLOCATED + 기본그룹으로 평가됨`() {
-            val experiment = mockk<Experiment> {
-                every { getVariationOrNull(any<String>()) } returns Variation(42, "F", false, null)
-            }
-            val evaluation = EvaluationFlow.End.evaluate(mockk(), experiment, mockk(), "F")
-            expectThat(evaluation) isEqualTo Evaluation(42, "F", DecisionReason.TRAFFIC_NOT_ALLOCATED, null)
+            val request = experimentRequest()
+            val evaluation = EvaluationFlow.End.evaluate(request, Evaluators.context())
+            expectThat(evaluation.reason) isEqualTo DecisionReason.TRAFFIC_NOT_ALLOCATED
+            expectThat(evaluation.variationKey) isEqualTo "A"
         }
 
         @Test
         fun `Decision인 경우 flowEvaluator를 호출한다`() {
             // given
-            val workspace = mockk<Workspace>()
-            val experiment = mockk<Experiment>()
-            val user = mockk<HackleUser>()
-
-            val evaluation = mockk<Evaluation>()
+            val evaluation = mockk<ExperimentEvaluation>()
             val nextFlow = mockk<EvaluationFlow>()
             val flowEvaluator = mockk<FlowEvaluator> {
-                every { evaluate(any(), any(), any(), any(), any()) } returns evaluation
+                every { evaluate(any(), any(), any()) } returns evaluation
             }
+            val request = experimentRequest()
 
             val sut = EvaluationFlow.Decision(flowEvaluator, nextFlow)
 
             // when
-            val actual = sut.evaluate(workspace, experiment, user, "C")
+            val actual = sut.evaluate(request, Evaluators.context())
 
             // then
             expectThat(actual) isSameInstanceAs evaluation
             verify {
-                flowEvaluator.evaluate(workspace, experiment, user, "C", nextFlow)
+                flowEvaluator.evaluate(request, any(), nextFlow)
             }
         }
 

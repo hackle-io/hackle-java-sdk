@@ -1,9 +1,9 @@
 package io.hackle.sdk.core.internal.utils
 
-import io.hackle.sdk.core.client.HackleInternalClient
+import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.log.Logger
 
-private val log = Logger<HackleInternalClient>()
+private val log = Logger<HackleCore>()
 
 fun Any.tryClose() {
     if (this is AutoCloseable) {

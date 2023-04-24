@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.Segment
 import io.hackle.sdk.core.model.Target.Key.Type.SEGMENT
 import io.hackle.sdk.core.model.Target.Key.Type.USER_PROPERTY
@@ -43,7 +45,7 @@ internal class SegmentConditionMatcherTest {
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.matches(condition, mockk(), mockk())
+            sut.matches(mockk(), mockk(), condition)
         }
 
         // then
@@ -62,7 +64,7 @@ internal class SegmentConditionMatcherTest {
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.matches(condition, mockk(), mockk())
+            sut.matches(mockk(), mockk(), condition)
         }
 
         // then
@@ -80,10 +82,11 @@ internal class SegmentConditionMatcherTest {
         }
 
         val workspace = workspace()
+        val request = experimentRequest(workspace)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.matches(condition, workspace, mockk())
+            sut.matches(request, Evaluators.context(), condition)
         }
 
         // then
@@ -105,8 +108,10 @@ internal class SegmentConditionMatcherTest {
         segment(workspace, "seg2", true)
         segment(workspace, "seg3", false)
 
+        val request = experimentRequest(workspace)
+
         // when
-        val actual = sut.matches(condition, workspace, mockk())
+        val actual = sut.matches(request, Evaluators.context(), condition)
 
         // then
         assertTrue(actual)
@@ -128,8 +133,10 @@ internal class SegmentConditionMatcherTest {
         segment(workspace, "seg2", true)
         segment(workspace, "seg3", false)
 
+        val request = experimentRequest(workspace)
+
         // when
-        val actual = sut.matches(condition, workspace, mockk())
+        val actual = sut.matches(request, Evaluators.context(), condition)
 
         // then
         assertFalse(actual)
@@ -140,7 +147,7 @@ internal class SegmentConditionMatcherTest {
 
     private fun segment(workspace: Workspace, key: String, isMatch: Boolean): Segment {
         val segment = mockk<Segment>()
-        every { segmentMatcher.matches(segment, any(), any()) } returns isMatch
+        every { segmentMatcher.matches(any(), any(), segment) } returns isMatch
         every { workspace.getSegmentOrNull(key) } returns segment
         return segment
     }

@@ -3,6 +3,9 @@ package io.hackle.sdk.core.evaluation.target
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.core.evaluation.action.ActionResolver
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Segment
@@ -39,9 +42,12 @@ internal class OverrideResolverTest {
     @InjectMockKs
     private lateinit var sut: OverrideResolver
 
+    private lateinit var context: Evaluator.Context
+
     @BeforeEach
     fun beforeEach() {
         every { manualOverrideStorage[any(), any()] } returns null
+        context = Evaluators.context()
     }
 
     @Test
@@ -49,9 +55,10 @@ internal class OverrideResolverTest {
         // given
         val variation = mockk<Variation>()
         every { manualOverrideStorage[any(), any()] } returns variation
+        val request = experimentRequest()
 
         // when
-        val actual = sut.resolveOrNull(mockk(), mockk(), HackleUser.builder().build())
+        val actual = sut.resolveOrNull(request, context)
 
         // then
         expectThat(actual) isSameInstanceAs variation
@@ -85,12 +92,13 @@ internal class OverrideResolverTest {
         every { targetMatcher.matches(any(), any(), any()) } returns true
 
         val variation = mockk<Variation>()
-        every { actionResolver.resolveOrNull(any(), workspace, experiment!!, any()) } returns variation
+        every { actionResolver.resolveOrNull(any(), any()) } returns variation
 
         val user = HackleUser.of("user_01")
+        val request = experimentRequest(workspace, user, experiment!!)
 
         // when
-        val actual = sut.resolveOrNull(workspace, experiment!!, user)
+        val actual = sut.resolveOrNull(request, context)
 
         // then
         expectThat(actual) isSameInstanceAs variation
@@ -124,12 +132,14 @@ internal class OverrideResolverTest {
         every { targetMatcher.matches(any(), any(), any()) } returns true
 
         val variation = mockk<Variation>()
-        every { actionResolver.resolveOrNull(any(), workspace, experiment!!, any()) } returns variation
+        every { actionResolver.resolveOrNull(any(), any()) } returns variation
 
         val user = HackleUser.of("user_01")
 
+        val request = experimentRequest(workspace, user, experiment!!)
+
         // when
-        val actual = sut.resolveOrNull(workspace, experiment!!, user)
+        val actual = sut.resolveOrNull(request, context)
 
         // then
         expectThat(actual) isSameInstanceAs variation
@@ -139,7 +149,7 @@ internal class OverrideResolverTest {
     fun `직접 입력한 override 를 먼저 평가한다`() {
         // given
         var experiment: Experiment? = null
-        workspace {
+        val workspace = workspace {
             experiment = experiment(status = Experiment.Status.DRAFT) {
                 variations(A, B)
                 overrides {
@@ -163,8 +173,10 @@ internal class OverrideResolverTest {
 
         val user = HackleUser.of("user_01")
 
+        val request = experimentRequest(workspace, user, experiment!!)
+
         // when
-        val actual = sut.resolveOrNull(mockk(), experiment!!, user)
+        val actual = sut.resolveOrNull(request, context)
 
         // then
         expectThat(actual)
@@ -204,8 +216,10 @@ internal class OverrideResolverTest {
 
         val user = HackleUser.of("user_01")
 
+        val request = experimentRequest(workspace, user, experiment!!)
+
         // when
-        val actual = sut.resolveOrNull(mockk(), experiment!!, user)
+        val actual = sut.resolveOrNull(request, context)
 
         // then
         expectThat(actual).isNull()

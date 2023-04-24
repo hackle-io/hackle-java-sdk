@@ -1,16 +1,15 @@
 package io.hackle.sdk.core.evaluation.flow
 
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
 import io.hackle.sdk.core.model.Experiment
-import io.hackle.sdk.core.model.Variation
-import io.hackle.sdk.core.user.HackleUser
+import io.hackle.sdk.core.model.experiment
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -19,7 +18,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
 
 @ExtendWith(MockKExtension::class)
-internal class OverrideEvaluatorTest {
+internal class OverrideEvaluatorTest : FlowEvaluatorTest() {
 
     @MockK
     private lateinit var overrideResolver: OverrideResolver
@@ -27,59 +26,54 @@ internal class OverrideEvaluatorTest {
     @InjectMockKs
     private lateinit var sut: OverrideEvaluator
 
+
     @Test
     fun `AbTest 인 경우 override된 사용자인 경우 overriddenVariation, OVERRIDDEN 으로 평가한다`() {
         // given
-        val user = HackleUser.of("test_id")
-        val variation = Variation(320, "B", false, null)
-        val experiment = mockk<Experiment> {
-            every { type } returns Experiment.Type.AB_TEST
-        }
-        every { overrideResolver.resolveOrNull(any(), any(), any()) } returns variation
+        val experiment = experiment(type = Experiment.Type.AB_TEST)
+        val variation = experiment.variations.first()
+        every { overrideResolver.resolveOrNull(any(), any()) } returns variation
+
+        val request = experimentRequest(experiment = experiment)
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, user, "C", mockk())
+        val actual = sut.evaluate(request, Evaluators.context(), nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.OVERRIDDEN, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.OVERRIDDEN
+        expectThat(actual.variationId) isEqualTo variation.id
     }
 
     @Test
     fun `FeatureFlag 인 경우override된 사용자인 경우 overriddenVariation, INDIVIDUAL_TARGET_MATCH 으로 평가한다`() {
         // given
-        val user = HackleUser.of("test_id")
-        val variation = Variation(320, "B", false, null)
-        val experiment = mockk<Experiment> {
-            every { type } returns Experiment.Type.FEATURE_FLAG
-        }
-        every { overrideResolver.resolveOrNull(any(), any(), any()) } returns variation
+        val experiment = experiment(type = Experiment.Type.FEATURE_FLAG)
+        val variation = experiment.variations.first()
+        every { overrideResolver.resolveOrNull(any(), any()) } returns variation
+
+        val request = experimentRequest(experiment = experiment)
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, user, "C", mockk())
+        val actual = sut.evaluate(request, Evaluators.context(), nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(320, "B", DecisionReason.INDIVIDUAL_TARGET_MATCH, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.INDIVIDUAL_TARGET_MATCH
+        expectThat(actual.variationId) isEqualTo variation.id
     }
 
     @Test
     fun `override된 사용자가 아닌경우 다음 Flow로 평가한다`() {
         // given
-        val user = HackleUser.of("test_id")
-        val experiment = mockk<Experiment>()
-        every { overrideResolver.resolveOrNull(any(), any(), any()) } returns null
+        every { overrideResolver.resolveOrNull(any(), any()) } returns null
 
-        val evaluation = mockk<Evaluation>()
-        val nextFlow = mockk<EvaluationFlow> {
-            every { evaluate(any(), experiment, user, any()) } returns evaluation
-        }
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, user, "C", nextFlow)
+        val actual = sut.evaluate(experimentRequest(), Evaluators.context(), nextFlow)
 
         // then
         expectThat(actual) isSameInstanceAs evaluation
         verify(exactly = 1) {
-            nextFlow.evaluate(any(), experiment, user, any())
+            nextFlow.evaluate(any(), any())
         }
     }
 }

@@ -11,7 +11,7 @@ internal class EvaluationFlowFactoryTest {
 
     @Test
     fun `AB_TEST evaluationFlow`() {
-        val actual = EvaluationFlowFactory(mockk()).getFlow(Experiment.Type.AB_TEST)
+        val actual = EvaluationFlowFactory(mockk(), mockk()).getFlow(Experiment.Type.AB_TEST)
         expectThat(actual)
             .isDecisionWith<OverrideEvaluator>()
             .isDecisionWith<IdentifierEvaluator>()
@@ -26,7 +26,7 @@ internal class EvaluationFlowFactoryTest {
 
     @Test
     fun `FEATURE_FLAG evaluationFlow`() {
-        val actual = EvaluationFlowFactory(mockk()).getFlow(Experiment.Type.FEATURE_FLAG)
+        val actual = EvaluationFlowFactory(mockk(), mockk()).getFlow(Experiment.Type.FEATURE_FLAG)
         expectThat(actual)
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()

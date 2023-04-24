@@ -1,6 +1,6 @@
 package io.hackle.sdk.core.model
 
-class Container (
+class Container(
     val id: Long,
     val bucketId: Long,
     val groups: List<ContainerGroup>
@@ -10,3 +10,5 @@ class Container (
         return groups.firstOrNull { it.id == containerGroupId }
     }
 }
+
+internal val Slot.containerGroupId: Long get() = variationId

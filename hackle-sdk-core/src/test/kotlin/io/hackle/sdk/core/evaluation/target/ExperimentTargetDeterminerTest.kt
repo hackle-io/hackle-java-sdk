@@ -1,9 +1,10 @@
 package io.hackle.sdk.core.evaluation.target
 
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target
-import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -27,12 +28,10 @@ internal class ExperimentTargetDeterminerTest {
     @Test
     fun `참여대상이 비어있으면 항상 true`() {
         // given
-        val experiment = mockk<Experiment> {
-            every { targetAudiences } returns emptyList()
-        }
+        val request = experimentRequest()
 
         // when
-        val actual = sut.isUserInExperimentTarget(mockk(), experiment, HackleUser.of("test"))
+        val actual = sut.isUserInExperimentTarget(request, Evaluators.context())
 
         // then
         assertTrue(actual)
@@ -42,6 +41,7 @@ internal class ExperimentTargetDeterminerTest {
     fun `실험 참여대상중 하나라도 일치하는게 있으면 match true`() {
         // given
         val experiment = mockk<Experiment> {
+            every { id } returns 42
             every { targetAudiences } returns listOf(
                 audience(false),
                 audience(false),
@@ -50,8 +50,10 @@ internal class ExperimentTargetDeterminerTest {
             )
         }
 
+        val request = experimentRequest(experiment = experiment)
+
         // when
-        val actual = sut.isUserInExperimentTarget(mockk(), experiment, HackleUser.of("test"))
+        val actual = sut.isUserInExperimentTarget(request, Evaluators.context())
 
         // then
         assertTrue(actual)
@@ -65,6 +67,7 @@ internal class ExperimentTargetDeterminerTest {
     fun `실험 참여대상중 일치하는게 하나도 없으면 false`() {
         // given
         val experiment = mockk<Experiment> {
+            every { id } returns 42
             every { targetAudiences } returns listOf(
                 audience(false),
                 audience(false),
@@ -73,8 +76,10 @@ internal class ExperimentTargetDeterminerTest {
             )
         }
 
+        val request = experimentRequest(experiment = experiment)
+
         // when
-        val actual = sut.isUserInExperimentTarget(mockk(), experiment, HackleUser.of("test"))
+        val actual = sut.isUserInExperimentTarget(request, Evaluators.context())
 
         // then
         assertFalse(actual)
@@ -86,7 +91,7 @@ internal class ExperimentTargetDeterminerTest {
 
     private fun audience(isMatch: Boolean): Target {
         return mockk<Target>().also {
-            every { targetMatcher.matches(it, any(), any()) } returns isMatch
+            every { targetMatcher.matches(any(), any(), it) } returns isMatch
         }
     }
 }
