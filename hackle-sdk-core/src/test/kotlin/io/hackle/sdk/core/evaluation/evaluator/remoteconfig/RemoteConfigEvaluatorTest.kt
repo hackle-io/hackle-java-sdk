@@ -1,88 +1,66 @@
-package io.hackle.sdk.core.evaluation
+package io.hackle.sdk.core.evaluation.evaluator.remoteconfig
 
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.common.decision.DecisionReason.*
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 import io.hackle.sdk.core.evaluation.target.RemoteConfigParameterTargetRuleDeterminer
-import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.RemoteConfigParameter
-import io.hackle.sdk.core.model.RemoteConfigParameter.Value
 import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.model.ValueType.*
-import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotNull
 import strikt.assertions.isNull
-
+import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
-internal class EvaluatorTest {
+internal class RemoteConfigEvaluatorTest {
 
     @MockK
-    private lateinit var evaluationFlowFactory: EvaluationFlowFactory
+    private lateinit var targetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
 
     @InjectMockKs
-    private lateinit var sut: Evaluator
+    private lateinit var sut: RemoteConfigEvaluator<Any>
 
-    @Nested
-    inner class ExperimentEvaluateTest {
+    @BeforeEach
+    fun beforeEach() {
+        every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any()) } returns null
+    }
 
-        @Test
-        fun `evaluationFlowFactory에서 ExperimentType으로 Flow를 가져와서 평가한다`() {
-            // given
-
-            val evaluation = Evaluation(430, "B", DecisionReason.TRAFFIC_ALLOCATED, null)
-
-            val evaluationFlow = mockk<EvaluationFlow> {
-                every { evaluate(any(), any(), any(), any()) } returns evaluation
-            }
-
-            every { evaluationFlowFactory.getFlow(any()) } returns evaluationFlow
-
-            val workspace = mockk<Workspace>()
-            val experiment = mockk<Experiment> { every { type } returns Experiment.Type.AB_TEST }
-            val user = HackleUser.of("test_id")
-
-            // when
-            val actual = sut.evaluate(workspace, experiment, user, "J")
-
-            // then
-            expectThat(actual) isEqualTo evaluation
-            verify(exactly = 1) {
-                evaluationFlow.evaluate(workspace, experiment, user, "J")
-            }
-        }
-
+    @Test
+    fun `supports`() {
+        assertTrue(sut.supports(mockk<RemoteConfigRequest<Any>>()))
+        assertFalse(sut.supports(mockk<ExperimentRequest>()))
     }
 
     @Nested
-    inner class RemoteConfigEvaluateTest {
+    inner class EvaluateTest {
 
-        @MockK
-        private lateinit var remoteConfigParameterTargetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
+        @Test
+        fun `순환 호출`() {
+            val request = remoteConfigRequest<Any>()
+            val context = Evaluators.context()
+            context.add(request)
 
-        @BeforeEach
-        fun beforeEach() {
-            every { evaluationFlowFactory.remoteConfigParameterTargetRuleDeterminer } returns remoteConfigParameterTargetRuleDeterminer
-            every {
-                remoteConfigParameterTargetRuleDeterminer.determineTargetRuleOrNull(
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns null
+            val exception = assertThrows<IllegalArgumentException> {
+                sut.evaluate(request, context)
+            }
+
+            expectThat(exception.message)
+                .isNotNull()
+                .startsWith("Circular evaluation has occurred")
         }
 
         @Test
@@ -91,78 +69,92 @@ internal class EvaluatorTest {
             val parameter = parameter(
                 type = STRING,
                 identifierType = "customId",
-                defaultValue = Value(43, "hello value")
+                defaultValue = RemoteConfigParameter.Value(43, "hello value")
             )
 
+            val request = remoteConfigRequest<Any>(parameter = parameter, defaultValue = "default")
+
             // when
-            val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), STRING, "default")
+            val actual = sut.evaluate(request, Evaluators.context())
 
             // then
-            expectThat(actual) isEqualTo RemoteConfigEvaluation(
-                null, "default", IDENTIFIER_NOT_FOUND, mapOf(
+            expectThat(actual) {
+                get { reason } isEqualTo DecisionReason.IDENTIFIER_NOT_FOUND
+                get { value } isEqualTo "default"
+                get { properties } isEqualTo mapOf(
                     "requestValueType" to "STRING",
                     "requestDefaultValue" to "default",
                     "returnValue" to "default",
                 )
-            )
+            }
         }
 
         @Test
         fun `TargetRule 에 해당하는 경우`() {
             // given
-            val targetRule = mockk<RemoteConfigParameter.TargetRule> {
-                every { key } returns "target_rule_key"
-                every { name } returns "target_rule_name"
-                every { value } returns Value(320, "targetRuleValue")
-            }
+            val targetRule = RemoteConfigParameter.TargetRule(
+                "target_rule_key",
+                "target_rule_name",
+                mockk(),
+                42,
+                RemoteConfigParameter.Value(320, "targetRuleValue")
+            )
             val parameter = parameter(
                 type = STRING,
                 targetRules = listOf(targetRule),
-                defaultValue = Value(43, "hello value")
+                defaultValue = RemoteConfigParameter.Value(43, "hello value")
             )
 
-            every {
-                remoteConfigParameterTargetRuleDeterminer.determineTargetRuleOrNull(any(), parameter, any())
-            } returns targetRule
+            every { targetRuleDeterminer.determineTargetRuleOrNull(any(), any()) } returns targetRule
+
+            val request = remoteConfigRequest(parameter = parameter, defaultValue = "default")
 
             // when
-            val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), STRING, "default")
+            val actual = sut.evaluate(request, Evaluators.context())
 
             // then
-            expectThat(actual) isEqualTo RemoteConfigEvaluation(
-                320, "targetRuleValue", TARGET_RULE_MATCH, mapOf(
+            expectThat(actual) {
+                get { reason } isEqualTo DecisionReason.TARGET_RULE_MATCH
+                get { valueId } isEqualTo 320
+                get { value } isEqualTo "targetRuleValue"
+                get { properties } isEqualTo mapOf(
                     "requestValueType" to "STRING",
                     "requestDefaultValue" to "default",
                     "returnValue" to "targetRuleValue",
                     "targetRuleKey" to "target_rule_key",
                     "targetRuleName" to "target_rule_name",
                 )
-            )
+            }
         }
 
         @Test
         fun `TargetRule 에 매치되지 않는경우`() {
             // given
             val targetRule = mockk<RemoteConfigParameter.TargetRule> {
-                every { value } returns Value(320, "targetRuleValue")
+                every { value } returns RemoteConfigParameter.Value(320, "targetRuleValue")
             }
             val parameter = parameter(
                 type = STRING,
                 targetRules = listOf(targetRule),
-                defaultValue = Value(43, "hello value")
+                defaultValue = RemoteConfigParameter.Value(43, "hello value")
             )
 
+            val request = remoteConfigRequest(parameter = parameter, defaultValue = "default")
+
             // when
-            val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), STRING, "default")
+            val actual = sut.evaluate(request, Evaluators.context())
 
             // then
-            expectThat(actual) isEqualTo RemoteConfigEvaluation(
-                43, "hello value", DEFAULT_RULE, mapOf(
+            expectThat(actual) {
+                get { reason } isEqualTo DecisionReason.DEFAULT_RULE
+                get { valueId } isEqualTo 43
+                get { value } isEqualTo "hello value"
+                get { properties } isEqualTo mapOf(
                     "requestValueType" to "STRING",
                     "requestDefaultValue" to "default",
                     "returnValue" to "hello value",
                 )
-            )
+            }
         }
 
         @Test
@@ -201,22 +193,26 @@ internal class EvaluatorTest {
         private fun verityTypeMatch(requiredType: ValueType, matchValue: Any, defaultValue: Any, isMatch: Boolean) {
             val parameter = parameter(
                 type = STRING,
-                defaultValue = Value(43, matchValue)
+                defaultValue = RemoteConfigParameter.Value(43, matchValue)
             )
 
-            val actual = sut.evaluate(mockk(), parameter, HackleUser.of("test"), requiredType, defaultValue)
+
+            val request =
+                remoteConfigRequest(parameter = parameter, requiredType = requiredType, defaultValue = defaultValue)
+
+            val actual = sut.evaluate(request, Evaluators.context())
 
             if (isMatch) {
                 expectThat(actual) {
                     get { valueId } isEqualTo 43
                     get { value } isEqualTo matchValue
-                    get { reason } isEqualTo DEFAULT_RULE
+                    get { reason } isEqualTo DecisionReason.DEFAULT_RULE
                 }
             } else {
                 expectThat(actual) {
                     get { valueId }.isNull()
                     get { value } isEqualTo defaultValue
-                    get { reason } isEqualTo TYPE_MISMATCH
+                    get { reason } isEqualTo DecisionReason.TYPE_MISMATCH
                 }
             }
         }
@@ -227,9 +223,11 @@ internal class EvaluatorTest {
             type: ValueType,
             identifierType: String = "\$id",
             targetRules: List<RemoteConfigParameter.TargetRule> = emptyList(),
-            defaultValue: Value
+            defaultValue: RemoteConfigParameter.Value
         ): RemoteConfigParameter {
             return RemoteConfigParameter(id, key, type, identifierType, targetRules, defaultValue)
         }
     }
+
+
 }

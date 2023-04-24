@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.action
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -39,11 +40,14 @@ internal class ActionResolverTest {
 
             val variation = mockk<Variation>()
             val experiment = mockk<Experiment> {
+                every { id } returns 42
                 every { getVariationOrNull(420) } returns variation
             }
 
+            val request = experimentRequest(experiment = experiment)
+
             // when
-            val actual = sut.resolveOrNull(action, mockk(), experiment, mockk())
+            val actual = sut.resolveOrNull(request, action)
 
             // then
             expectThat(actual)
@@ -56,14 +60,16 @@ internal class ActionResolverTest {
             // given
             val action = Action.Variation(420)
 
-            val variation = mockk<Variation>()
             val experiment = mockk<Experiment> {
+                every { id } returns 42
                 every { getVariationOrNull(420) } returns null
             }
 
+            val request = experimentRequest(experiment = experiment)
+
             // when
             val exception = assertThrows<IllegalArgumentException> {
-                sut.resolveOrNull(action, mockk(), experiment, mockk())
+                sut.resolveOrNull(request, action)
             }
 
             // then
@@ -86,9 +92,11 @@ internal class ActionResolverTest {
                 every { getBucketOrNull(any()) } returns null
             }
 
+            val request = experimentRequest(workspace = workspace)
+
             // when
             val exception = assertThrows<IllegalArgumentException> {
-                sut.resolveOrNull(action, workspace, mockk(), HackleUser.of("test_id"))
+                sut.resolveOrNull(request, action)
             }
 
             // then
@@ -108,8 +116,10 @@ internal class ActionResolverTest {
                 every { getBucketOrNull(any()) } returns bucket
             }
 
+            val request = experimentRequest(workspace, user, experiment)
+
             // when
-            val actual = sut.resolveOrNull(action, workspace, experiment, user)
+            val actual = sut.resolveOrNull(request, action)
 
             // then
             expectThat(actual).isNull()
@@ -127,8 +137,10 @@ internal class ActionResolverTest {
             }
             every { bucketer.bucketing(bucket, any()) } returns null
 
+            val request = experimentRequest(workspace, user, experiment)
+
             // when
-            val actual = sut.resolveOrNull(action, workspace, experiment, user)
+            val actual = sut.resolveOrNull(request, action)
 
             // then
             expectThat(actual).isNull()
@@ -146,12 +158,15 @@ internal class ActionResolverTest {
             val slot = Slot(0, 100, 320)
             every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
+                every { id } returns 42
                 every { identifierType } returns "\$id"
                 every { getVariationOrNull(320) } returns null
             }
 
+            val request = experimentRequest(workspace, user, experiment)
+
             // when
-            val actual = sut.resolveOrNull(action, workspace, experiment, user)
+            val actual = sut.resolveOrNull(request, action)
 
             // then
             expectThat(actual).isNull()
@@ -169,12 +184,15 @@ internal class ActionResolverTest {
             val slot = Slot(0, 100, 320)
             every { bucketer.bucketing(bucket, any()) } returns slot
             val experiment = mockk<Experiment> {
+                every { id } returns 42
                 every { identifierType } returns "\$id"
                 every { getVariationOrNull(320) } returns Variation(320, "C", false, null)
             }
 
+            val request = experimentRequest(workspace, user, experiment)
+
             // when
-            val actual = sut.resolveOrNull(action, workspace, experiment, user)
+            val actual = sut.resolveOrNull(request, action)
 
             // then
             expectThat(actual)

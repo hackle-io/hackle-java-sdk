@@ -3,15 +3,13 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.action.ActionResolver
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Status.RUNNING
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
-import io.hackle.sdk.core.model.Variation
 import io.hackle.sdk.core.model.experiment
-import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -26,7 +24,7 @@ import strikt.assertions.isNotNull
 import strikt.assertions.startsWith
 
 @ExtendWith(MockKExtension::class)
-internal class DefaultRuleEvaluatorTest {
+internal class DefaultRuleEvaluatorTest : FlowEvaluatorTest() {
 
     @MockK
     private lateinit var actionResolver: ActionResolver
@@ -38,10 +36,11 @@ internal class DefaultRuleEvaluatorTest {
     fun `실행중이 아니면 예외 발생`() {
         // given
         val experiment = mockk<Experiment>(relaxed = true)
+        val request = experimentRequest(experiment = experiment)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, mockk(), "E", mockk())
+            sut.evaluate(request, context, nextFlow)
         }
 
         // then
@@ -54,10 +53,11 @@ internal class DefaultRuleEvaluatorTest {
     fun `FEATURE_FLAG 타입이 아니면 예외 발생`() {
         // given
         val experiment = experiment(type = AB_TEST, status = RUNNING)
+        val request = experimentRequest(experiment = experiment)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, mockk(), "E", mockk())
+            sut.evaluate(request, context, nextFlow)
         }
 
         // then
@@ -71,11 +71,12 @@ internal class DefaultRuleEvaluatorTest {
     fun `기본룰에 해당하는 Variation을 결정하지 못하면 예외 발생`() {
         // given
         val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
-        every { actionResolver.resolveOrNull(experiment.defaultRule, any(), experiment, any()) } returns null
+        val request = experimentRequest(experiment = experiment)
+        every { actionResolver.resolveOrNull(any(), any()) } returns null
 
         // when
         val exception = assertThrows<IllegalArgumentException> {
-            sut.evaluate(mockk(), experiment, HackleUser.of("123"), "E", mockk())
+            sut.evaluate(request, context, nextFlow)
         }
 
         // then
@@ -93,26 +94,29 @@ internal class DefaultRuleEvaluatorTest {
                 B(42, false)
             }
         }
+        val request = experimentRequest(experiment = experiment)
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(41, "A", DecisionReason.DEFAULT_RULE, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.DEFAULT_RULE
+        expectThat(actual.variationId) isEqualTo 41
     }
 
     @Test
     fun `기본룰에 해당하는 Variation으로 평가한다`() {
         // given
         val experiment = experiment(type = FEATURE_FLAG, status = RUNNING)
-        val variation = Variation(513, "H", false, null)
+        val request = experimentRequest(experiment = experiment)
 
-        every { actionResolver.resolveOrNull(experiment.defaultRule, any(), experiment, any()) } returns variation
+        every { actionResolver.resolveOrNull(any(), any()) } returns experiment.variations.first()
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("15"), "A", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(513, "H", DecisionReason.DEFAULT_RULE, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.DEFAULT_RULE
+        expectThat(actual.variationId) isEqualTo experiment.variations.first().id
     }
 }

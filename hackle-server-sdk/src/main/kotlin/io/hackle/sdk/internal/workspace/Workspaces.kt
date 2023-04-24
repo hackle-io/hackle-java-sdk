@@ -6,7 +6,7 @@ import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 
 
-private val log = Logger<WorkspaceImpl>()
+private val log = Logger<DefaultWorkspace>()
 
 // Experiment
 internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment? {

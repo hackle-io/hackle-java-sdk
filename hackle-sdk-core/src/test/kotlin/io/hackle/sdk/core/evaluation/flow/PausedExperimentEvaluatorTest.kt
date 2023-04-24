@@ -3,18 +3,15 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.experiment
-import io.hackle.sdk.core.user.HackleUser
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
 
-internal class PausedExperimentEvaluatorTest {
+internal class PausedExperimentEvaluatorTest : FlowEvaluatorTest() {
 
 
     @Test
@@ -26,14 +23,15 @@ internal class PausedExperimentEvaluatorTest {
                 B(42)
             }
         }
-
+        val request = experimentRequest(experiment = experiment)
         val sut = PausedExperimentEvaluator()
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, mockk(), "B", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "B", DecisionReason.EXPERIMENT_PAUSED, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.EXPERIMENT_PAUSED
+        expectThat(actual.variationId) isEqualTo 41
     }
 
     @Test
@@ -45,29 +43,26 @@ internal class PausedExperimentEvaluatorTest {
                 B(43)
             }
         }
-
+        val request = experimentRequest(experiment = experiment)
         val sut = PausedExperimentEvaluator()
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, mockk(), "A", mockk())
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
-        expectThat(actual) isEqualTo Evaluation(42, "A", DecisionReason.FEATURE_FLAG_INACTIVE, null)
+        expectThat(actual.reason) isEqualTo DecisionReason.FEATURE_FLAG_INACTIVE
+        expectThat(actual.variationId) isEqualTo 42
     }
 
     @Test
     fun `PAUSED 상태가 아니면 다음 플로우를 실행한다`() {
         // given
         val experiment = experiment(type = Experiment.Type.FEATURE_FLAG, status = Experiment.Status.COMPLETED)
-        val evaluation = mockk<Evaluation>()
-        val nextFlow = mockk<EvaluationFlow> {
-            every { evaluate(any(), any(), any(), any()) } returns evaluation
-        }
-
+        val request = experimentRequest(experiment = experiment)
         val sut = PausedExperimentEvaluator()
 
         // when
-        val actual = sut.evaluate(mockk(), experiment, HackleUser.of("test_id"), "D", nextFlow)
+        val actual = sut.evaluate(request, context, nextFlow)
 
         // then
         expectThat(actual) isSameInstanceAs evaluation

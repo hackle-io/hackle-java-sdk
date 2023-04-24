@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.model.Target
-import io.hackle.sdk.core.user.HackleUser
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -46,7 +45,7 @@ internal class TargetMatcherTest {
         )
 
         // when
-        val actual = sut.matches(target, mockk(), HackleUser.of("ba"))
+        val actual = sut.matches(mockk(), mockk(), target)
 
         // then
         assertTrue(actual)
@@ -72,7 +71,7 @@ internal class TargetMatcherTest {
         )
 
         // when
-        val actual = sut.matches(target, mockk(), HackleUser.of("ba"))
+        val actual = sut.matches(mockk(), mockk(), target)
 
         // then
         assertFalse(actual)
@@ -87,7 +86,7 @@ internal class TargetMatcherTest {
                 every { type } returns mockk()
             }
         }
-        every { conditionMatcher.matches(condition, any(), any()) } returns isMatch
+        every { conditionMatcher.matches(any(), any(), condition) } returns isMatch
         return condition
     }
 }

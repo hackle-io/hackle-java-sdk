@@ -3,6 +3,7 @@ package io.hackle.sdk.core.evaluation.flow
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.container.ContainerResolver
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.*
@@ -13,7 +14,10 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 /**
  * @author Yong
  */
-internal class EvaluationFlowFactory(manualOverrideStorage: ManualOverrideStorage) {
+internal class EvaluationFlowFactory(
+    evaluator: Evaluator,
+    manualOverrideStorage: ManualOverrideStorage
+) {
 
     /**
      * [EvaluationFlow] for [AB_TEST]
@@ -31,7 +35,7 @@ internal class EvaluationFlowFactory(manualOverrideStorage: ManualOverrideStorag
     init {
 
         val bucketer = Bucketer()
-        val targetMatcher = TargetMatcher(ConditionMatcherFactory())
+        val targetMatcher = TargetMatcher(ConditionMatcherFactory(evaluator))
         val actionResolver = ActionResolver(bucketer)
         val overrideResolver = OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
         val containerResolver = ContainerResolver(bucketer)

@@ -139,6 +139,11 @@ enum class DecisionReason {
     TRAFFIC_ALLOCATED,
 
     /**
+     * Indicates that traffic was allocated by targeting from another experiment.
+     */
+    TRAFFIC_ALLOCATED_BY_TARGETING,
+
+    /**
      * Indicates that the user is not the target of the experiment.
      */
     NOT_IN_EXPERIMENT_TARGET,
