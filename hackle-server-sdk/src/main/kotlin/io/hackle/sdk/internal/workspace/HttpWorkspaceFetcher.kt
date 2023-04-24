@@ -1,12 +1,12 @@
 package io.hackle.sdk.internal.workspace
 
 import io.hackle.sdk.core.internal.metrics.Timer
-import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics
-import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics.GET_WORKSPACE
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.internal.http.body
 import io.hackle.sdk.internal.http.isSuccessful
 import io.hackle.sdk.internal.http.statusCode
+import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics
+import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics.GET_WORKSPACE
 import io.hackle.sdk.internal.utils.parseJson
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.CloseableHttpClient
@@ -38,7 +38,7 @@ internal class HttpWorkspaceFetcher(
             check(response.isSuccessful) { "Http status code: ${response.statusCode}" }
             val body = response.body()
             val dto = body.parseJson<WorkspaceDto>()
-            WorkspaceImpl.from(dto)
+            DefaultWorkspace.from(dto)
         }
     }
 }

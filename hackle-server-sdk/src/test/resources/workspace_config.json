@@ -564,30 +564,15 @@
               "conditions": [
                 {
                   "key": {
-                    "type": "USER_PROPERTY",
-                    "name": "device"
+                    "type": "FEATURE_FLAG",
+                    "name": "3"
                   },
                   "match": {
                     "type": "MATCH",
                     "operator": "IN",
-                    "valueType": "STRING",
+                    "valueType": "BOOLEAN",
                     "values": [
-                      "android"
-                    ]
-                  }
-                },
-                {
-                  "key": {
-                    "type": "USER_PROPERTY",
-                    "name": "version"
-                  },
-                  "match": {
-                    "type": "MATCH",
-                    "operator": "IN",
-                    "valueType": "STRING",
-                    "values": [
-                      "1.0.0",
-                      "1.1.0"
+                      true
                     ]
                   }
                 }

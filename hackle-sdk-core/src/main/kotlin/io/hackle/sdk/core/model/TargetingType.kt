@@ -12,6 +12,8 @@ enum class TargetingType(
         Target.Key.Type.SEGMENT,
         Target.Key.Type.USER_PROPERTY,
         Target.Key.Type.HACKLE_PROPERTY,
+        Target.Key.Type.AB_TEST,
+        Target.Key.Type.FEATURE_FLAG
     ),
 
     SEGMENT(

@@ -1,10 +1,10 @@
 package io.hackle.sdk.core.evaluation.target
 
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
+import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.RemoteConfigParameter
-import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
 
 internal class RemoteConfigParameterTargetRuleDeterminer(
     private val matcher: Matcher
@@ -13,11 +13,10 @@ internal class RemoteConfigParameterTargetRuleDeterminer(
     constructor(targetMatcher: TargetMatcher, bucketer: Bucketer) : this(Matcher(targetMatcher, bucketer))
 
     fun determineTargetRuleOrNull(
-        workspace: Workspace,
-        parameter: RemoteConfigParameter,
-        user: HackleUser
+        request: RemoteConfigRequest<*>,
+        context: Evaluator.Context
     ): RemoteConfigParameter.TargetRule? {
-        return parameter.targetRules.find { matcher.matches(it, workspace, parameter, user) }
+        return request.parameter.targetRules.find { matcher.matches(request, context, it) }
     }
 
     class Matcher(
@@ -26,17 +25,16 @@ internal class RemoteConfigParameterTargetRuleDeterminer(
     ) {
 
         fun matches(
+            request: RemoteConfigRequest<*>,
+            context: Evaluator.Context,
             targetRule: RemoteConfigParameter.TargetRule,
-            workspace: Workspace,
-            parameter: RemoteConfigParameter,
-            user: HackleUser
         ): Boolean {
-            if (!targetMatcher.matches(targetRule.target, workspace, user)) {
+            if (!targetMatcher.matches(request, context, targetRule.target)) {
                 return false
             }
-            val identifiers = user.identifiers[parameter.identifierType] ?: return false
+            val identifiers = request.user.identifiers[request.parameter.identifierType] ?: return false
             val bucket =
-                requireNotNull(workspace.getBucketOrNull(targetRule.bucketId)) { "Bucket[${targetRule.bucketId}]" }
+                requireNotNull(request.workspace.getBucketOrNull(targetRule.bucketId)) { "Bucket[${targetRule.bucketId}]" }
             return bucketer.bucketing(bucket, identifiers) != null
         }
     }

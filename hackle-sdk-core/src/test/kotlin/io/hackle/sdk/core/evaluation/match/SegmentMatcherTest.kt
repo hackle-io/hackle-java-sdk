@@ -27,7 +27,7 @@ internal class SegmentMatcherTest {
         val segment = Segment(1, "seg1", type = Segment.Type.USER_PROPERTY, targets = emptyList())
 
         // when
-        val actual = sut.matches(segment, mockk(), mockk())
+        val actual = sut.matches(mockk(), mockk(), segment)
 
         // then
         assertFalse(actual)
@@ -43,7 +43,7 @@ internal class SegmentMatcherTest {
         )
 
         // when
-        val actual = sut.matches(segment, mockk(), mockk())
+        val actual = sut.matches(mockk(), mockk(), segment)
 
         // then
         assertTrue(actual)
@@ -59,7 +59,7 @@ internal class SegmentMatcherTest {
         )
 
         // when
-        val actual = sut.matches(segment, mockk(), mockk())
+        val actual = sut.matches(mockk(), mockk(), segment)
 
         // then
         assertFalse(actual)
@@ -71,7 +71,7 @@ internal class SegmentMatcherTest {
             val conditions = mutableListOf<Target.Condition>()
             for (conditionMatch in targetMatches) {
                 val condition = mockk<Target.Condition>()
-                every { userConditionMatcher.matches(condition, any(), any()) } returns conditionMatch
+                every { userConditionMatcher.matches(any(), any(), condition) } returns conditionMatch
                 conditions += condition
             }
             targets += Target(conditions)

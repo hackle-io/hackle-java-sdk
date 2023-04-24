@@ -1,19 +1,18 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Target
-import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.workspace.Workspace
 
 internal class TargetMatcher(
     private val conditionMatcherFactory: ConditionMatcherFactory
 ) {
 
-    fun matches(target: Target, workspace: Workspace, user: HackleUser): Boolean {
-        return target.conditions.all { matches(it, workspace, user) }
+    fun matches(request: Evaluator.Request, context: Evaluator.Context, target: Target): Boolean {
+        return target.conditions.all { matches(request, context, it) }
     }
 
-    private fun matches(condition: Target.Condition, workspace: Workspace, user: HackleUser): Boolean {
+    private fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
         val conditionMatcher = conditionMatcherFactory.getMatcher(condition.key.type)
-        return conditionMatcher.matches(condition, workspace, user)
+        return conditionMatcher.matches(request, context, condition)
     }
 }

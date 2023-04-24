@@ -8,7 +8,7 @@ import io.hackle.sdk.core.workspace.Workspace
 /**
  * @author Yong
  */
-internal class WorkspaceImpl(
+internal class DefaultWorkspace(
     override val experiments: List<Experiment>,
     override val featureFlags: List<Experiment>,
     private val eventTypes: Map<String, EventType>,
@@ -85,7 +85,7 @@ internal class WorkspaceImpl(
                 .associateBy { it.key }
 
 
-            return WorkspaceImpl(
+            return DefaultWorkspace(
                 experiments = experiments,
                 featureFlags = featureFlags,
                 eventTypes = eventTypes,

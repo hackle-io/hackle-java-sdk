@@ -15,7 +15,9 @@ data class Target(
             USER_ID,
             USER_PROPERTY,
             HACKLE_PROPERTY,
-            SEGMENT
+            SEGMENT,
+            AB_TEST,
+            FEATURE_FLAG
         }
     }
 
