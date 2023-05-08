@@ -1,6 +1,7 @@
 package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.PropertyOperations
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
@@ -14,6 +15,7 @@ import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
@@ -278,6 +280,41 @@ internal class HackleClientImplTest {
             //then
             verify(exactly = 1) {
                 core.track(event, HackleUser.of(user), any())
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateUserProperties {
+
+        @Test
+        fun `track 이벤트로 전송한다`() {
+            val operations = PropertyOperations.builder()
+                .set("age", 42)
+                .build()
+            val user = User.of("42")
+
+            sut.updateUserProperties(user, operations)
+
+            verify(exactly = 1) {
+                core.track(withArg { expectThat(it.key) isEqualTo "\$properties" }, any(), any())
+            }
+        }
+
+
+        @Test
+        fun `예외 발생해도 무시한다`() {
+            val operations = PropertyOperations.builder()
+                .set("age", 42)
+                .build()
+            val user = User.of("42")
+
+            every { core.track(any(), any(), any()) } throws IllegalArgumentException("fail")
+
+            try {
+                sut.updateUserProperties(user, operations)
+            } catch (e: Throwable) {
+                fail("fail")
             }
         }
     }
