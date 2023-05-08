@@ -176,7 +176,13 @@ interface HackleClient : AutoCloseable {
      */
     fun remoteConfig(user: User): HackleRemoteConfig
 
-    fun updateUserProperties(user: User, operations: PropertyOperations)
+    /**
+     * Updates the user's properties.
+     *
+     * @param operations Property operations to update user properties.
+     * @param user the user whose properties will be updated
+     */
+    fun updateUserProperties(operations: PropertyOperations, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.

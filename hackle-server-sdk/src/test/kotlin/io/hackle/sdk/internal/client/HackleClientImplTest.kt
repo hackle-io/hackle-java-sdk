@@ -9,6 +9,7 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.core.model.toEvent
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.internal.user.HackleUserResolver
 import io.mockk.*
@@ -294,7 +295,7 @@ internal class HackleClientImplTest {
                 .build()
             val user = User.of("42")
 
-            sut.updateUserProperties(user, operations)
+            sut.updateUserProperties(operations, user)
 
             verify(exactly = 1) {
                 core.track(withArg { expectThat(it.key) isEqualTo "\$properties" }, any(), any())
@@ -304,15 +305,16 @@ internal class HackleClientImplTest {
 
         @Test
         fun `예외 발생해도 무시한다`() {
-            val operations = PropertyOperations.builder()
-                .set("age", 42)
-                .build()
+            val operations = spyk(
+                PropertyOperations.builder()
+                    .set("age", 42)
+                    .build()
+            )
+            every { operations.toEvent() } throws IllegalArgumentException("fail")
             val user = User.of("42")
 
-            every { core.track(any(), any(), any()) } throws IllegalArgumentException("fail")
-
             try {
-                sut.updateUserProperties(user, operations)
+                sut.updateUserProperties(operations, user)
             } catch (e: Throwable) {
                 fail("fail")
             }

@@ -102,7 +102,7 @@ internal class HackleClientImpl(
         return HackleRemoteConfigImpl(user, core, userResolver)
     }
 
-    override fun updateUserProperties(user: User, operations: PropertyOperations) {
+    override fun updateUserProperties(operations: PropertyOperations, user: User) {
         try {
             val event = operations.toEvent()
             track(event, user)

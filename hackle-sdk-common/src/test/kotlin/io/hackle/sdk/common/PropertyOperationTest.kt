@@ -2,6 +2,7 @@ package io.hackle.sdk.common
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
@@ -36,5 +37,9 @@ internal class PropertyOperationTest {
         check("\$prependOnce", PropertyOperation.PREPEND_ONCE)
         check("\$remove", PropertyOperation.REMOVE)
         check("\$clearAll", PropertyOperation.CLEAR_ALL)
+
+        assertThrows<IllegalArgumentException> {
+            PropertyOperation.from("invalid_operation")
+        }
     }
 }
