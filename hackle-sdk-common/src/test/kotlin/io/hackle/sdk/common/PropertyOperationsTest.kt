@@ -5,19 +5,22 @@ import strikt.api.expectThat
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isTrue
 
 internal class PropertyOperationsTest {
 
     @Test
     fun `empty`() {
-        expectThat(PropertyOperations.empty()).hasSize(0)
+        expectThat(PropertyOperations.empty()) {
+            get { size } isEqualTo 0
+        }
     }
 
     @Test
     fun `clearAll`() {
         expectThat(PropertyOperations.clearAll()) {
-            hasSize(1)
-            containsKey(PropertyOperation.CLEAR_ALL)
+            get { size } isEqualTo 1
+            get { contains(PropertyOperation.CLEAR_ALL) }.isTrue()
         }
     }
 
@@ -40,7 +43,7 @@ internal class PropertyOperationsTest {
             .build()
 
         expectThat(operations) {
-            hasSize(10)
+            get { size } isEqualTo 10
             get { this[PropertyOperation.SET] } isEqualTo mapOf("set1" to 42, "set2" to listOf("a", "b"))
             get { this[PropertyOperation.SET_ONCE] } isEqualTo mapOf("setOnce" to 43)
             get { this[PropertyOperation.UNSET] } isEqualTo mapOf("unset" to "-")

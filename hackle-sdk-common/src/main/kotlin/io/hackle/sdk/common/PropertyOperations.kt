@@ -4,7 +4,25 @@ import java.util.*
 
 class PropertyOperations private constructor(
     private val operations: Map<PropertyOperation, Map<String, Any>>
-) : Map<PropertyOperation, Map<String, Any>> by operations {
+) {
+
+    val size: Int get() = operations.size
+
+    operator fun get(operation: PropertyOperation): Map<String, Any>? {
+        return operations[operation]
+    }
+
+    operator fun contains(operation: PropertyOperation): Boolean {
+        return operations.containsKey(operation)
+    }
+
+    fun toEvent(): Event {
+        val builder = Event.builder("\$properties")
+        for ((operation, properties) in operations) {
+            builder.property(operation.key, properties)
+        }
+        return builder.build()
+    }
 
     class Builder {
 
