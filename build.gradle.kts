@@ -8,7 +8,7 @@ plugins {
 }
 
 val groupName = "io.hackle"
-val versionName = "2.14.0"
+val versionName = "2.15.0"
 
 group = groupName
 version = versionName
