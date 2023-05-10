@@ -1,9 +1,6 @@
 package io.hackle.sdk
 
-import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.HackleRemoteConfig
-import io.hackle.sdk.common.User
-import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.*
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 
@@ -178,6 +175,14 @@ interface HackleClient : AutoCloseable {
      * Returns a instance of Hackle Remote Config.
      */
     fun remoteConfig(user: User): HackleRemoteConfig
+
+    /**
+     * Updates the user's properties.
+     *
+     * @param operations Property operations to update user properties.
+     * @param user the user whose properties will be updated
+     */
+    fun updateUserProperties(operations: PropertyOperations, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.

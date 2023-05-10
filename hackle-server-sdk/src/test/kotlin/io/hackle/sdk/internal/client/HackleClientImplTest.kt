@@ -1,6 +1,7 @@
 package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.PropertyOperations
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
@@ -8,12 +9,14 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.core.model.toEvent
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.internal.user.HackleUserResolver
 import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
@@ -278,6 +281,42 @@ internal class HackleClientImplTest {
             //then
             verify(exactly = 1) {
                 core.track(event, HackleUser.of(user), any())
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateUserProperties {
+
+        @Test
+        fun `track 이벤트로 전송한다`() {
+            val operations = PropertyOperations.builder()
+                .set("age", 42)
+                .build()
+            val user = User.of("42")
+
+            sut.updateUserProperties(operations, user)
+
+            verify(exactly = 1) {
+                core.track(withArg { expectThat(it.key) isEqualTo "\$properties" }, any(), any())
+            }
+        }
+
+
+        @Test
+        fun `예외 발생해도 무시한다`() {
+            val operations = spyk(
+                PropertyOperations.builder()
+                    .set("age", 42)
+                    .build()
+            )
+            every { operations.toEvent() } throws IllegalArgumentException("fail")
+            val user = User.of("42")
+
+            try {
+                sut.updateUserProperties(operations, user)
+            } catch (e: Throwable) {
+                fail("fail")
             }
         }
     }

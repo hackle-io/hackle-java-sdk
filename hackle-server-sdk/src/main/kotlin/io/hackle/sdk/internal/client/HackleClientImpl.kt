@@ -1,10 +1,7 @@
 package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.HackleClient
-import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.HackleRemoteConfig
-import io.hackle.sdk.common.User
-import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.*
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
 import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
@@ -14,6 +11,7 @@ import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.metrics.Timer
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.core.model.toEvent
 import io.hackle.sdk.internal.monitoring.metrics.DecisionMetrics
 import io.hackle.sdk.internal.user.HackleUserResolver
 
@@ -102,6 +100,15 @@ internal class HackleClientImpl(
 
     override fun remoteConfig(user: User): HackleRemoteConfig {
         return HackleRemoteConfigImpl(user, core, userResolver)
+    }
+
+    override fun updateUserProperties(operations: PropertyOperations, user: User) {
+        try {
+            val event = operations.toEvent()
+            track(event, user)
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update user properties: $e" }
+        }
     }
 
     override fun close() {
