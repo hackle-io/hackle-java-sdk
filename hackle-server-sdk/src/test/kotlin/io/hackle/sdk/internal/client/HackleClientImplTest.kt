@@ -9,6 +9,7 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.core.model.toEvent
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.internal.user.HackleUserResolver
 import io.mockk.*
