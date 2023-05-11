@@ -16,12 +16,8 @@ class PropertyOperations private constructor(
         return operations.containsKey(operation)
     }
 
-    fun toEvent(): Event {
-        val builder = Event.builder("\$properties")
-        for ((operation, properties) in operations) {
-            builder.property(operation.key, properties)
-        }
-        return builder.build()
+    fun asMap(): Map<PropertyOperation, Map<String, Any>> {
+        return operations
     }
 
     class Builder {

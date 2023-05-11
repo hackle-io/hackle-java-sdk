@@ -11,6 +11,7 @@ import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.metrics.Timer
 import io.hackle.sdk.core.internal.utils.tryClose
+import io.hackle.sdk.core.model.toEvent
 import io.hackle.sdk.internal.monitoring.metrics.DecisionMetrics
 import io.hackle.sdk.internal.user.HackleUserResolver
 
