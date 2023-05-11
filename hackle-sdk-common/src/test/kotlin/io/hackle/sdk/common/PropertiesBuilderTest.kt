@@ -75,7 +75,6 @@ internal class PropertiesBuilderTest {
 
     @Test
     fun `properties`() {
-
         val properties = mapOf(
             "k1" to "v1",
             "k2" to 2,
@@ -90,7 +89,96 @@ internal class PropertiesBuilderTest {
             hasSize(6)
             containsKeys("k1", "k2", "k3", "k4", "k5", "k6")
         }
+    }
 
+    @Test
+    fun `setOnce`() {
+        val properties = PropertiesBuilder()
+            .add("a", 1)
+            .add("a", 2)
+            .add("b", 3)
+            .add("b", 4, setOnce = true)
+            .build()
+
+        expectThat(properties) isEqualTo mapOf("a" to 2, "b" to 3)
+    }
+
+    @Test
+    fun `setOnce 2`() {
+        val p1 = mapOf(
+            "k1" to 1,
+            "k2" to 1,
+        )
+
+        val p2 = mapOf(
+            "k1" to 2,
+            "k2" to 2,
+        )
+
+        expectThat(
+            PropertiesBuilder()
+                .add(p1)
+                .add(p2)
+                .build()
+        ) isEqualTo mapOf(
+            "k1" to 2,
+            "k2" to 2,
+        )
+
+        expectThat(
+            PropertiesBuilder()
+                .add(p1)
+                .add(p2, setOnce = true)
+                .build()
+        ) isEqualTo mapOf(
+            "k1" to 1,
+            "k2" to 1,
+        )
+    }
+
+    @Test
+    fun `add system properties`() {
+        val properties = PropertiesBuilder()
+            .add("\$set", mapOf("age" to 30))
+            .add("set", mapOf("age" to 32))
+            .build()
+
+        expectThat(properties) isEqualTo mapOf("\$set" to mapOf("age" to 30))
+    }
+
+    @Test
+    fun `remove`() {
+        val properties = PropertiesBuilder()
+            .add("age", 42)
+            .remove("age")
+            .build()
+        expectThat(properties) isEqualTo emptyMap()
+    }
+
+    @Test
+    fun `remove properties`() {
+        val properties = PropertiesBuilder()
+            .add("age", 42)
+            .add("grade", "GOLD")
+            .remove(mapOf("grade" to "SILVER", "location" to "Seoul"))
+            .build()
+
+        expectThat(properties) isEqualTo mapOf("age" to 42)
+    }
+
+    @Test
+    fun `compute`() {
+
+        val properties = PropertiesBuilder()
+            .add("age", 42)
+            .add("grade", "GOLD")
+            .compute("age") { (it as? Int)?.plus(42) }
+            .compute("grade") { null }
+            .compute("location") { "Seoul" }
+            .compute("name") { null }
+            .build()
+
+        expectThat(properties) isEqualTo mapOf("age" to 84, "location" to "Seoul")
     }
 
     private fun build(builder: PropertiesBuilder.() -> Unit): Map<String, Any> {
