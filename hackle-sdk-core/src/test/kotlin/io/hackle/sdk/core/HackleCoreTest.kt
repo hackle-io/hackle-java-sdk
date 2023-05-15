@@ -14,6 +14,8 @@ import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.event.EventProcessor
@@ -23,6 +25,7 @@ import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.user.HackleUser
+import io.hackle.sdk.core.user.IdentifierType
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceDsl
 import io.hackle.sdk.core.workspace.WorkspaceFetcher
@@ -50,6 +53,12 @@ internal class HackleCoreTest {
 
     @MockK
     private lateinit var remoteConfigEvaluator: RemoteConfigEvaluator<*>
+
+    @MockK
+    private lateinit var inAppMessageEvaluator: InAppMessageEvaluator
+
+    @MockK
+    private lateinit var hackleCoreContext: HackleCoreContext
 
     @MockK
     private lateinit var workspaceFetcher: WorkspaceFetcher
@@ -650,6 +659,78 @@ internal class HackleCoreTest {
                 eventProcessor.process(any())
             }
         }
+    }
+
+    @Nested
+    inner class InAppMessageTest {
+        @BeforeEach
+        fun `setup`() {
+            mockkObject(HackleCoreContext)
+        }
+
+        @Test
+        fun `Workspace 를 가져오지 못하면 인앱 메시지를 보여주지 않는다`() {
+
+            every { workspaceFetcher.fetch() } returns null
+
+            val actual = sut.inAppMessage(
+                123L,
+                hackleUser("test")
+            )
+
+            expectThat(actual) {
+                get { reason } isEqualTo SDK_NOT_READY
+            }
+        }
+
+
+        @Test
+        fun `인앱 메시지를 Workspace 에서 가져오지 못하면 인앱 메시지를 보여주지 않는다`() {
+            val workspace = mockk<Workspace>()
+            every { workspaceFetcher.fetch() } returns workspace
+            every { workspace.getInAppMessageOrNull(any()) } returns null
+
+            val actual = sut.inAppMessage(
+                123L,
+                hackleUser("test")
+            )
+
+            expectThat(actual) {
+                get { reason } isEqualTo IN_APP_MESSAGE_NOT_FOUND
+            }
+        }
+
+        @Test
+        fun `인앱 메시지 evaluation 결과로 InAppMessageDecision 을 반환한다`() {
+
+            val workspace = mockk<Workspace>()
+            val inAppMessage = mockk<InAppMessage>()
+            val evaluation = mockk<InAppMessageEvaluation>()
+            val message = mockk<InAppMessage.MessageContext.Message>()
+            every { evaluation.message } returns message
+            every { evaluation.reason } returns TARGET_RULE_MATCH
+            every { evaluation.isShow } returns true
+            every { workspaceFetcher.fetch() } returns workspace
+            every { workspace.getInAppMessageOrNull(any()) } returns inAppMessage
+            every { inAppMessageEvaluator.evaluate(any(), any()) } returns evaluation
+
+            val actual = sut.inAppMessage(123L, hackleUser("test"))
+
+            expectThat(actual) {
+                get { reason } isEqualTo TARGET_RULE_MATCH
+                get { this.inAppMessage } isEqualTo inAppMessage
+                get { message } isEqualTo message
+                get { isShow } isEqualTo true
+            }
+
+        }
+
+        private fun hackleUser(
+            id: String
+        ): HackleUser {
+            return HackleUser.builder().identifier(IdentifierType.ID, id).build()
+        }
+
     }
 
     @Nested

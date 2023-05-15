@@ -181,5 +181,31 @@ enum class DecisionReason {
     /**
      * Indicates a mismatch between result type and request type.
      */
-    TYPE_MISMATCH
+    TYPE_MISMATCH,
+
+    /**
+     * Indicates that there is no In App Message matched with
+     */
+    IN_APP_MESSAGE_NOT_FOUND,
+
+
+    UNSUPPORTED_PLATFORM,
+
+
+    IN_APP_MESSAGE_DRAFT,
+
+
+    IN_APP_MESSAGE_PAUSED,
+
+
+    IN_APP_MESSAGE_HIDDEN,
+
+
+    IN_APP_MESSAGE_TARGET,
+
+
+    NOT_IN_IN_APP_MESSAGE_PERIOD,
+
+
+    NOT_IN_IN_APP_MESSAGE_TARGET
 }

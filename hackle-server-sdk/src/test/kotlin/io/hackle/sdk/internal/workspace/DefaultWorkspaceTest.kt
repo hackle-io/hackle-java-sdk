@@ -438,6 +438,7 @@ internal class DefaultWorkspaceTest {
                 get { targetRules }.hasSize(0)
             }
 
+
         expectThat(workspace.getExperimentOrNull(22))
             .isNull()
 

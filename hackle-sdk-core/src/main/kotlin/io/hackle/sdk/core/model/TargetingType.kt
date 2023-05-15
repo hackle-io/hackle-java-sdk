@@ -20,6 +20,12 @@ enum class TargetingType(
         Target.Key.Type.USER_ID,
         Target.Key.Type.USER_PROPERTY,
         Target.Key.Type.HACKLE_PROPERTY,
+    ),
+
+    IN_APP_MESSAGE(
+        Target.Key.Type.EVENT_PROPERTY,
+        Target.Key.Type.HACKLE_PROPERTY,
+        Target.Key.Type.USER_PROPERTY,
     );
 
     constructor(vararg keyTypes: Target.Key.Type) : this(keyTypes.toSet())

@@ -21,7 +21,7 @@ internal class UserValueResolver {
             USER_ID -> user.identifiers[key.name]
             USER_PROPERTY -> user.properties[key.name]
             HACKLE_PROPERTY -> user.hackleProperties[key.name]
-            SEGMENT, AB_TEST, FEATURE_FLAG -> throw IllegalArgumentException("Unsupported target.key.type [${key.type}]")
+            SEGMENT, AB_TEST, FEATURE_FLAG, EVENT_PROPERTY -> throw IllegalArgumentException("Unsupported target.key.type [${key.type}]")
         }
     }
 }

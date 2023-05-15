@@ -11,6 +11,7 @@ import io.hackle.sdk.core.workspace.Workspace
 internal class DefaultWorkspace(
     override val experiments: List<Experiment>,
     override val featureFlags: List<Experiment>,
+    override val inAppMessages: List<InAppMessage> = emptyList(),
     private val eventTypes: Map<String, EventType>,
     private val buckets: Map<Long, Bucket>,
     private val segments: Map<String, Segment>,
@@ -54,6 +55,10 @@ internal class DefaultWorkspace(
         return remoteConfigParameters[parameterKey]
     }
 
+    override fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessage? {
+        return null
+    }
+
     companion object {
         fun from(dto: WorkspaceDto): Workspace {
 
@@ -84,7 +89,6 @@ internal class DefaultWorkspace(
                 .mapNotNull { it.toRemoteConfigParameterOrNull() }
                 .associateBy { it.key }
 
-
             return DefaultWorkspace(
                 experiments = experiments,
                 featureFlags = featureFlags,
@@ -93,7 +97,7 @@ internal class DefaultWorkspace(
                 segments = segments,
                 containers = containers,
                 parameterConfigurations = parameterConfigurations,
-                remoteConfigParameters = remoteConfigParameters,
+                remoteConfigParameters = remoteConfigParameters
             )
         }
     }

@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.core.HackleCoreContext
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.container.ContainerResolver
@@ -19,6 +20,7 @@ internal class EvaluationFlowFactory(
     manualOverrideStorage: ManualOverrideStorage
 ) {
 
+    val targetMatcher: TargetMatcher
     /**
      * [EvaluationFlow] for [AB_TEST]
      */
@@ -30,14 +32,15 @@ internal class EvaluationFlowFactory(
     private val featureFlagFlow: EvaluationFlow
 
 
-    val remoteConfigParameterTargetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
-
     init {
 
         val bucketer = Bucketer()
-        val targetMatcher = TargetMatcher(ConditionMatcherFactory(evaluator))
+        this.targetMatcher = TargetMatcher(ConditionMatcherFactory(evaluator))
+        HackleCoreContext.registerInstance(targetMatcher)
+
         val actionResolver = ActionResolver(bucketer)
-        val overrideResolver = OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
+        val overrideResolver =
+            OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
         val containerResolver = ContainerResolver(bucketer)
 
         val abTestFlow = EvaluationFlow.of(
@@ -61,10 +64,14 @@ internal class EvaluationFlowFactory(
             DefaultRuleEvaluator(actionResolver)
         )
 
+
         this.abTestFlow = abTestFlow
         this.featureFlagFlow = featureFlagFlow
-        this.remoteConfigParameterTargetRuleDeterminer =
-            RemoteConfigParameterTargetRuleDeterminer(targetMatcher, bucketer)
+
+
+        HackleCoreContext.registerInstance(InAppMessageTargetDeterminer(targetMatcher))
+        HackleCoreContext.registerInstance(InAppMessageUserOverrideDeterminer())
+        HackleCoreContext.registerInstance(RemoteConfigParameterTargetRuleDeterminer(targetMatcher, bucketer))
     }
 
     fun getFlow(experimentType: Experiment.Type): EvaluationFlow {

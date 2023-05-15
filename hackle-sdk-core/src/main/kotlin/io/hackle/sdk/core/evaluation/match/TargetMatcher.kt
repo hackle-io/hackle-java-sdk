@@ -3,7 +3,8 @@ package io.hackle.sdk.core.evaluation.match
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Target
 
-internal class TargetMatcher(
+
+class TargetMatcher(
     private val conditionMatcherFactory: ConditionMatcherFactory
 ) {
 
