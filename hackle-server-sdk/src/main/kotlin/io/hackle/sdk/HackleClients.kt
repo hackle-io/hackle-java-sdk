@@ -31,10 +31,18 @@ import java.util.concurrent.TimeUnit
  */
 object HackleClients {
 
+    private val CLIENTS = hashMapOf<String, HackleClient>()
+
     @JvmOverloads
     @JvmStatic
     fun create(sdkKey: String, config: HackleConfig = HackleConfig.DEFAULT): HackleClient {
+        return synchronized(this) {
+            // Do NOT use computeIfAbsent to support below JDK 1.8
+            CLIENTS.getOrPut(sdkKey) { createHackleClient(sdkKey, config) }
+        }
+    }
 
+    private fun createHackleClient(sdkKey: String, config: HackleConfig): HackleClient {
         loggerConfiguration()
 
         val sdk = Sdk.load(sdkKey)
