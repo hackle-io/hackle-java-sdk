@@ -10,7 +10,7 @@ internal class InAppMessageRequest(
     override val workspace: Workspace,
     override val user: HackleUser,
     val inAppMessage: InAppMessage,
-    val currentMillis: Long
+    val nowTimeMillis: Long
 ) : AbstractEvaluatorRequest() {
     override val key: Evaluator.Key
         get() = Evaluator.Key(Evaluator.Type.IN_APP_MESSAGE, inAppMessage.key)

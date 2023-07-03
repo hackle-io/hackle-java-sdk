@@ -155,7 +155,7 @@ internal class InAppMessageEvaluatorTest {
         every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
         every { inAppMessage.withInDisplayTimeRange(any()) } returns true
-        every { hackleInAppMessageStorage.getInvisibleUntil(any()) } returns NOW + 1L
+        every { hackleInAppMessageStorage.exist(any(),any()) } returns false
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 
@@ -173,7 +173,7 @@ internal class InAppMessageEvaluatorTest {
         every { inAppMessageTargetDeterminer.determine(any(), any()) } returns true
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
         every { inAppMessage.withInDisplayTimeRange(any()) } returns true
-        every { hackleInAppMessageStorage.getInvisibleUntil(any()) } returns NOW - 1
+        every { hackleInAppMessageStorage.exist(any(),any()) } returns false
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 
@@ -191,7 +191,7 @@ internal class InAppMessageEvaluatorTest {
         every { inAppMessageTargetDeterminer.determine(any(), any()) } returns false
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
         every { inAppMessage.withInDisplayTimeRange(any()) } returns true
-        every { hackleInAppMessageStorage.getInvisibleUntil(any()) } returns NOW - 1
+        every { hackleInAppMessageStorage.exist(any(),any()) } returns false
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 

@@ -150,7 +150,7 @@ class HackleCore internal constructor(
         val inAppMessage = workspace.getInAppMessageOrNull(inAppMessageKey)
             ?: return InAppMessageDecision(IN_APP_MESSAGE_NOT_FOUND, false)
 
-        val request = InAppMessageRequest(workspace, user, inAppMessage, Clock.SYSTEM.currentMillis())
+        val request = InAppMessageRequest(workspace, user, inAppMessage, nowTimeMillis = Clock.SYSTEM.currentMillis())
 
         val evaluation = inAppMessageEvaluator.evaluate(request, Evaluators.context())
         return InAppMessageDecision(evaluation.reason, evaluation.isShow, inAppMessage, evaluation.message)

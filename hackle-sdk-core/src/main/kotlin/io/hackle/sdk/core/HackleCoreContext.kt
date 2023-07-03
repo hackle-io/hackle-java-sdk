@@ -17,7 +17,7 @@ object HackleCoreContext {
     }
 
     fun registerInstance(instance: Any) {
-        val name = instance::class.simpleName ?: ""
+        val name = instance::class.simpleName ?: return
         if (!instanceMap.contains(name)) {
             this.instanceMap[name] = instance
         }

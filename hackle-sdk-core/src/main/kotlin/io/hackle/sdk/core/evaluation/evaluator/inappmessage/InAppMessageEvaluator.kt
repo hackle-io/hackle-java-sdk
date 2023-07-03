@@ -41,11 +41,11 @@ internal class InAppMessageEvaluator(
             return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_DRAFT, context, false)
         }
 
-        if (!isWithInTimeRange(inAppMessage, request.currentMillis)) {
+        if (!isWithInTimeRange(inAppMessage, request.nowTimeMillis)) {
             return InAppMessageEvaluation.of(DecisionReason.NOT_IN_IN_APP_MESSAGE_PERIOD, context, false)
         }
 
-        if (!isHidden(inAppMessage, request.currentMillis)) {
+        if (isHidden(inAppMessage, request.nowTimeMillis)) {
             return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_HIDDEN, context, false)
         }
 
@@ -57,15 +57,15 @@ internal class InAppMessageEvaluator(
     }
 
 
-    private fun isWithInTimeRange(inAppMessage: InAppMessage, current: Long): Boolean {
-        if (!inAppMessage.withInDisplayTimeRange(current)) {
+    private fun isWithInTimeRange(inAppMessage: InAppMessage, nowTimeMillis: Long): Boolean {
+        if (!inAppMessage.withInDisplayTimeRange(nowTimeMillis)) {
             return false
         }
         return true
     }
 
-    private fun isHidden(inAppMessage: InAppMessage, current: Long): Boolean {
-        return inAppMessageStorage.getInvisibleUntil(inAppMessage.key) < current
+    private fun isHidden(inAppMessage: InAppMessage, nowTimeMillis: Long): Boolean {
+        return inAppMessageStorage.exist(inAppMessage, nowTimeMillis)
     }
 
     private fun evaluation(

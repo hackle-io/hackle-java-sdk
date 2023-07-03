@@ -1,31 +1,22 @@
 package io.hackle.sdk.core.evaluation.evaluator.inappmessage.storage
 
+import io.hackle.sdk.core.model.InAppMessage
+
 interface HackleInAppMessageStorage {
 
-    fun getAll(): Map<Long, Long>
+    fun exist(inAppMessage: InAppMessage, nowTimeMillis: Long): Boolean
 
-    fun getInvisibleUntil(inAppMessageKey: Long): Long
-
-    fun setInvisibleUntil(inAppMessageKey: Long, until: Long)
-
-    fun remove(inAppMessageKey: Long)
-
-    fun clear()
+    fun put(inAppMessage: InAppMessage, expiredAtMillis: Long)
 
 }
 
 class DefaultHackleInAppMessageStorage : HackleInAppMessageStorage {
-    override fun getAll(): Map<Long, Long> {
-        return emptyMap()
+
+    override fun exist(inAppMessage: InAppMessage, nowTimeMillis: Long): Boolean {
+        return false
     }
 
-    override fun getInvisibleUntil(inAppMessageKey: Long): Long {
-       return -1L
+    override fun put(inAppMessage: InAppMessage, expiredAtMillis: Long) {
+        //Do Nothing
     }
-
-    override fun setInvisibleUntil(inAppMessageKey: Long, until: Long) {}
-
-    override fun remove(inAppMessageKey: Long) {}
-
-    override fun clear() {}
 }
