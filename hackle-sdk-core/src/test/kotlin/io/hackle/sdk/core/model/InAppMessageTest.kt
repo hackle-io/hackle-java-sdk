@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.model
 
+import io.hackle.sdk.core.model.InAppMessage.MessageContext.Action.Type
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.Orientation.HORIZONTAL
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.Orientation.VERTICAL
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.PlatformType.ANDROID
@@ -61,7 +62,7 @@ class InAppMessageTest {
                             style = InAppMessage.MessageContext.Message.Button.Style("#FFFFFF", "#FFFFFF", "#FFFFFF"),
                             action = InAppMessage.MessageContext.Action(
                                 behavior = InAppMessage.MessageContext.Action.Behavior.CLICK,
-                                type = InAppMessage.MessageContext.Action.Type.CLOSE,
+                                type = Type.CLOSE,
                                 value = null
                             )
                         ),
@@ -70,7 +71,7 @@ class InAppMessageTest {
                             style = InAppMessage.MessageContext.Message.Button.Style("#FFFFFF", "#FFFFFF", "#FFFFFF"),
                             action = InAppMessage.MessageContext.Action(
                                 behavior = InAppMessage.MessageContext.Action.Behavior.CLICK,
-                                type = InAppMessage.MessageContext.Action.Type.CLOSE,
+                                type = Type.CLOSE,
                                 value = null
                             )
                         )
@@ -82,7 +83,7 @@ class InAppMessageTest {
                         ),
                         action = InAppMessage.MessageContext.Action(
                             behavior = InAppMessage.MessageContext.Action.Behavior.CLICK,
-                            type = InAppMessage.MessageContext.Action.Type.CLOSE,
+                            type = Type.CLOSE,
                             value = null
                         )
                     )
@@ -97,7 +98,7 @@ class InAppMessageTest {
         )
 
         val actual = inAppMessage(
-            displayTimeRange = InAppMessage.DisplayTimeRange.from(InAppMessage.TimeUnitType.IMMEDIATE, null, null),
+            displayTimeRange = InAppMessage.Range.Immediate,
             targetContext = targetContext,
             eventTriggerRules = listOf(eventTriggerRule),
             messageContext = messageContext
@@ -107,15 +108,14 @@ class InAppMessageTest {
             get { id } isEqualTo 1L
             get { status } isEqualTo InAppMessage.Status.DRAFT
             get { key } isEqualTo 1L
-            get { displayTimeRange.timeUnit } isEqualTo InAppMessage.TimeUnitType.IMMEDIATE
-            get { displayTimeRange.startEpochTimeMillis } isEqualTo -1L
-            get { displayTimeRange.endEpochTimeMillis } isEqualTo -1L
+            get { displayTimeRange } isEqualTo InAppMessage.Range.Immediate
             get { targetContext.targets } isEqualTo emptyList()
             get { targetContext.overrides } isEqualTo emptyList()
             get { messageContext }.and {
                 get { defaultLang } isEqualTo "ko"
                 get { platformTypes } hasSize 2
                 get { platformTypes.contains(ANDROID) } isEqualTo true
+                get { orientations.contains(VERTICAL) } isEqualTo true
                 get { exposure.type } isEqualTo InAppMessage.MessageContext.Exposure.Type.DEFAULT
                 get { exposure.key } isEqualTo 123L
                 get { messages }.and {
@@ -133,14 +133,15 @@ class InAppMessageTest {
                             }
                         }
                         get { text }.isNotNull().and {
-                            get { title } isEqualTo InAppMessage.MessageContext.Message.Text.TextAttribute(
-                                text = "title",
-                                style = InAppMessage.MessageContext.Message.Text.Style("#FFFFFF")
-                            )
-                            get { body } isEqualTo InAppMessage.MessageContext.Message.Text.TextAttribute(
-                                text = "body",
-                                style = InAppMessage.MessageContext.Message.Text.Style("#FFFFFF")
-                            )
+                            get { title }.and {
+                                get { text } isEqualTo "title"
+                                get { style.textColor } isEqualTo "#FFFFFF"
+                            }
+                            get { body }.and {
+                                get { text } isEqualTo "body"
+                                get { style.textColor } isEqualTo "#FFFFFF"
+                            }
+
                         }
                         get { buttons }.and {
                             hasSize(2)
@@ -153,7 +154,7 @@ class InAppMessageTest {
                                 }
                                 get { action }.and {
                                     get { behavior } isEqualTo InAppMessage.MessageContext.Action.Behavior.CLICK
-                                    get { type } isEqualTo InAppMessage.MessageContext.Action.Type.CLOSE
+                                    get { type } isEqualTo Type.CLOSE
                                     get { value }.isNull()
                                 }
                             }
@@ -166,7 +167,7 @@ class InAppMessageTest {
                                 }
                                 get { action }.and {
                                     get { behavior } isEqualTo InAppMessage.MessageContext.Action.Behavior.CLICK
-                                    get { type } isEqualTo InAppMessage.MessageContext.Action.Type.CLOSE
+                                    get { type } isEqualTo Type.CLOSE
                                     get { value }.isNull()
                                 }
                             }
@@ -175,6 +176,11 @@ class InAppMessageTest {
                         get { closeButton }.and {
                             isNotNull()
                             get { this!!.style.color } isEqualTo "#FFFFFF"
+                            get { this!!.action }.and {
+                                get { behavior } isEqualTo InAppMessage.MessageContext.Action.Behavior.CLICK
+                                get { type } isEqualTo Type.CLOSE
+                                get { value } isEqualTo null
+                            }
                         }
                     }
                 }
@@ -195,12 +201,28 @@ class InAppMessageTest {
     fun `action`() {
         val action = InAppMessage.MessageContext.Action(
             behavior = InAppMessage.MessageContext.Action.Behavior.CLICK,
-            type = InAppMessage.MessageContext.Action.Type.WEB_LINK,
+            type = Type.WEB_LINK,
             value = "test://activity"
         )
         expectThat(action.behavior) isEqualTo InAppMessage.MessageContext.Action.Behavior.CLICK
-        expectThat(InAppMessage.MessageContext.Action.Type.from("WEB_LINK")) isEqualTo InAppMessage.MessageContext.Action.Type.WEB_LINK
+        expectThat(InAppMessage.MessageContext.Action.Type.from("WEB_LINK")) isEqualTo Type.WEB_LINK
         expectThat(action.value) { isNotNull() }
+    }
+
+    @Test
+    fun `platform type`() {
+        expectThat(InAppMessage.MessageContext.PlatformType.from("IOS")) isEqualTo InAppMessage.MessageContext.PlatformType.IOS
+        expectThat(InAppMessage.MessageContext.PlatformType.from("WEB")) isEqualTo InAppMessage.MessageContext.PlatformType.WEB
+        expectThat(InAppMessage.MessageContext.PlatformType.from("ANDROID")) isEqualTo InAppMessage.MessageContext.PlatformType.ANDROID
+        expectThat(InAppMessage.MessageContext.PlatformType.from("INVALID")) isEqualTo null
+    }
+
+    @Test
+    fun `timeUnit type`() {
+        expectThat(InAppMessage.TimeUnitType.from("IMMEDIATE")) isEqualTo InAppMessage.TimeUnitType.IMMEDIATE
+        expectThat(InAppMessage.TimeUnitType.from("CUSTOM")) isEqualTo InAppMessage.TimeUnitType.CUSTOM
+        expectThat(InAppMessage.TimeUnitType.from("NOT_SUPPORT_TYPE")).isNull()
+
     }
 
     @Test
@@ -211,7 +233,6 @@ class InAppMessageTest {
         expectThat(InAppMessage.MessageContext.Orientation.from("horizontal")) isEqualTo HORIZONTAL
         expectThat(InAppMessage.MessageContext.Orientation.from("Unsupported")).isNull()
     }
-
 
     @Test
     fun `status`() {
@@ -225,23 +246,13 @@ class InAppMessageTest {
     }
 
     @Test
-    fun `timeUnit type`() {
-        expectThat(InAppMessage.TimeUnitType.from("IMMEDIATE")) isEqualTo InAppMessage.TimeUnitType.IMMEDIATE
-        expectThat(InAppMessage.TimeUnitType.from("CUSTOM")) isEqualTo InAppMessage.TimeUnitType.CUSTOM
-
-        expectThat(InAppMessage.TimeUnitType.from("NOT_SUPPORT_TYPE")).isNull()
-    }
-
-    @Test
     fun `displayTimeRange 가 IMMEDIATE 인 경우 withInTimeRange 는 항상 true 를 반환한다 `() {
         val inAppMessage = mockk<InAppMessage>()
-        val displayTimeRange = InAppMessage.DisplayTimeRange(
-            timeUnit = InAppMessage.TimeUnitType.IMMEDIATE
-        )
+        val displayTimeRange = InAppMessage.Range.Immediate
         every { inAppMessage.displayTimeRange } returns displayTimeRange
 
 
-        val actual = inAppMessage.withInDisplayTimeRange(anyLong())
+        val actual = inAppMessage.displayTimeRange.within(anyLong())
 
         expectThat(actual) isEqualTo true
     }
@@ -250,16 +261,15 @@ class InAppMessageTest {
     @Test
     fun `displayTimeRange 가 CUSTOME 인 경우 currentTime 이 범위에 있어야 withInTimeRange 가 true 를 리턴한다 `() {
         val inAppMessage = mockk<InAppMessage>()
-        val displayTimeRange = InAppMessage.DisplayTimeRange(
-            timeUnit = InAppMessage.TimeUnitType.CUSTOM,
+
+        val displayTimeRange = InAppMessage.Range.Custom(
             startEpochTimeMillis = 0L,
             endEpochTimeMillis = 120L
         )
-
         every { inAppMessage.displayTimeRange } returns displayTimeRange
 
 
-        val actual = inAppMessage.withInDisplayTimeRange(20L)
+        val actual = inAppMessage.displayTimeRange.within(20L)
 
         expectThat(actual) isEqualTo true
     }
@@ -267,8 +277,7 @@ class InAppMessageTest {
     @Test
     fun `displayTimeRange 가 CUSTOME 인 경우 currentTime 이 범위에 있지 않으면 withInTimeRange 가 false 를 리턴한다 `() {
         val inAppMessage = mockk<InAppMessage>()
-        val displayTimeRange = InAppMessage.DisplayTimeRange(
-            timeUnit = InAppMessage.TimeUnitType.CUSTOM,
+        val displayTimeRange = InAppMessage.Range.Custom(
             startEpochTimeMillis = 0L,
             endEpochTimeMillis = 120L
         )
@@ -276,7 +285,7 @@ class InAppMessageTest {
         every { inAppMessage.displayTimeRange } returns displayTimeRange
 
 
-        val actual = inAppMessage.withInDisplayTimeRange(240L)
+        val actual = inAppMessage.displayTimeRange.within(240L)
 
         expectThat(actual) isEqualTo false
     }
@@ -289,105 +298,26 @@ class InAppMessageTest {
             startEpochTimeMills = 1000L,
             endEpochTimeMills = 2000L
         )
-
-        val displayTimeRange = InAppMessage.DisplayTimeRange.from(
-            InAppMessage.TimeUnitType.CUSTOM,
-            mockInAppMessageDto.startEpochTimeMills,
-            mockInAppMessageDto.endEpochTimeMills
+        val displayTimeRange = InAppMessage.Range.Custom(
+            mockInAppMessageDto.startEpochTimeMills!!,
+            mockInAppMessageDto.endEpochTimeMills!!
         )
 
         expectThat(displayTimeRange) {
-            get { timeUnit } isEqualTo InAppMessage.TimeUnitType.CUSTOM
+            isA<InAppMessage.Range.Custom>()
             get { startEpochTimeMillis } isEqualTo 1000L
             get { endEpochTimeMillis } isEqualTo 2000L
         }
     }
 
-    @Test
-    fun `timeUnit 이 IMMEDEATE 인 경우 epochTime 은 모두 NONE 이다`() {
-        val mockInAppMessageDto = MockInAppMessageDto(
-            key = 123L,
-            timeUnit = "IMMEDIATE",
-            startEpochTimeMills = null,
-            endEpochTimeMills = null
-        )
-
-        val displayTimeRange = InAppMessage.DisplayTimeRange.from(
-            InAppMessage.TimeUnitType.from(mockInAppMessageDto.timeUnit)!!,
-            mockInAppMessageDto.startEpochTimeMills,
-            mockInAppMessageDto.endEpochTimeMills
-        )
-
-        expectThat(displayTimeRange) {
-            get { timeUnit } isEqualTo InAppMessage.TimeUnitType.IMMEDIATE
-            get { startEpochTimeMillis } isEqualTo InAppMessage.DisplayTimeRange.NONE
-            get { endEpochTimeMillis } isEqualTo InAppMessage.DisplayTimeRange.NONE
-        }
-    }
-
-    @Test
-    fun `timeUnit 이 CUSTOM 인데 start, end epoch time 이 null 인 경우 NONE 로 바꿔서 넣어준다 `() {
-        val mockInAppMessageDto = MockInAppMessageDto(
-            key = 123L,
-            timeUnit = "CUSTOM",
-            startEpochTimeMills = null,
-            endEpochTimeMills = 12345L
-        )
-
-        val displayTimeRange = InAppMessage.DisplayTimeRange.from(
-            InAppMessage.TimeUnitType.from(mockInAppMessageDto.timeUnit)!!,
-            mockInAppMessageDto.startEpochTimeMills,
-            mockInAppMessageDto.endEpochTimeMills
-        )
-
-        expectThat(displayTimeRange) {
-            get { timeUnit } isEqualTo InAppMessage.TimeUnitType.CUSTOM
-            get { startEpochTimeMillis } isEqualTo InAppMessage.DisplayTimeRange.NONE
-            get { endEpochTimeMillis } isEqualTo 12345L
-        }
-    }
-
-    @Test
-    fun `timeUnit 이 CUSTOM 인 경우 start 또는 end epoch 타임 하나라도 NONE 이면 범위에 없는것으로 판단한다`() {
-
-        val inAppMessage = mockk<InAppMessage>()
-
-        every { inAppMessage.displayTimeRange.timeUnit } returns InAppMessage.TimeUnitType.CUSTOM
-        every { inAppMessage.displayTimeRange.startEpochTimeMillis } returns InAppMessage.DisplayTimeRange.NONE
-        every { inAppMessage.displayTimeRange.endEpochTimeMillis } returns 123123123L
-
-
-        val actual = inAppMessage.withInDisplayTimeRange(149124L)
-
-        expectThat(actual) isEqualTo false
-
-    }
-
-    @Test
-    fun `timeUnit 이 CUSTOM 인 경우 start 또는 end epoch 타임 하나라도 NONE 이면 범위에 없는것으로 판단한다 -- 2 `() {
-
-        val inAppMessage = mockk<InAppMessage>()
-
-        every { inAppMessage.displayTimeRange.timeUnit } returns InAppMessage.TimeUnitType.CUSTOM
-        every { inAppMessage.displayTimeRange.startEpochTimeMillis } returns 123123123L
-        every { inAppMessage.displayTimeRange.endEpochTimeMillis } returns InAppMessage.DisplayTimeRange.NONE
-
-
-        val actual = inAppMessage.withInDisplayTimeRange(149124L)
-
-        expectThat(actual) isEqualTo false
-
-    }
 
     @Test
     fun `timeUnit 이 CUSTOM이고 start 와 end epoch 타임이 모두 NONE 이 아닌 경우에 currentMillis 가 범위에 있으면 withinDisplayTimeRange 는 true 를 리턴한다`() {
         val inAppMessage = mockk<InAppMessage>()
 
-        every { inAppMessage.displayTimeRange.timeUnit } returns InAppMessage.TimeUnitType.CUSTOM
-        every { inAppMessage.displayTimeRange.startEpochTimeMillis } returns 1L
-        every { inAppMessage.displayTimeRange.endEpochTimeMillis } returns 100L
+        every { inAppMessage.displayTimeRange } returns InAppMessage.Range.Custom(1L, 100L)
 
-        val actual = inAppMessage.withInDisplayTimeRange(50L)
+        val actual = inAppMessage.displayTimeRange.within(50L)
 
         expectThat(actual) isEqualTo true
     }
@@ -395,16 +325,22 @@ class InAppMessageTest {
     @Test
     fun `timeUnit 이 CUSTOM이고 start 와 end epoch 타임이 모두 NONE 이 아닌 경우에 currentMillis 가 범위에 들지 않으면 withinDisplayTimeRange 는 false 를 리턴한다`() {
         val inAppMessage = mockk<InAppMessage>()
+        every { inAppMessage.displayTimeRange } returns InAppMessage.Range.Custom(1L, 100L)
 
-        every { inAppMessage.displayTimeRange.timeUnit } returns InAppMessage.TimeUnitType.CUSTOM
-        every { inAppMessage.displayTimeRange.startEpochTimeMillis } returns 1L
-        every { inAppMessage.displayTimeRange.endEpochTimeMillis } returns 100L
-
-        val actual = inAppMessage.withInDisplayTimeRange(101L)
+        val actual = inAppMessage.displayTimeRange.within(101L)
 
         expectThat(actual) isEqualTo false
     }
 
+    @Test
+    fun `timeUnit 이 CUSTOM이고 start 와 end epoch 타임이 모두 NONE 이 아닌 경우에 currentMillis 가 범위에 들지 않으면 withinDisplayTimeRange 는 false 를 리턴한다 -- 2`() {
+        val inAppMessage = mockk<InAppMessage>()
+        every { inAppMessage.displayTimeRange } returns InAppMessage.Range.Custom(1L, 100L)
+
+        val actual = inAppMessage.displayTimeRange.within(0L)
+
+        expectThat(actual) isEqualTo false
+    }
 
     data class MockInAppMessageDto(
         val key: Long,

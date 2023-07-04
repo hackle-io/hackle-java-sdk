@@ -1,39 +1,29 @@
 package io.hackle.sdk.core.model
 
-import io.hackle.sdk.core.model.InAppMessage.DisplayTimeRange.Companion.NONE
-
-
 data class InAppMessage(
     val id: Long,
     val key: Long,
-    val displayTimeRange: DisplayTimeRange,
+    val displayTimeRange: Range,
     val status: Status,
     val eventTriggerRules: List<EventTriggerRule>,
     val targetContext: TargetContext,
     val messageContext: MessageContext
 ) {
-    data class DisplayTimeRange(
-        val timeUnit: TimeUnitType,
-        val startEpochTimeMillis: Long = NONE,
-        val endEpochTimeMillis: Long = NONE
-    ) {
-        companion object {
-            const val NONE = -1L
-            fun from(
-                timeUnit: TimeUnitType,
-                startEpochTimeMillis: Long?,
-                endEpochTimeMillis: Long?
-            ): DisplayTimeRange {
-                return when (timeUnit) {
-                    TimeUnitType.IMMEDIATE -> DisplayTimeRange(timeUnit, NONE, NONE)
-                    TimeUnitType.CUSTOM -> DisplayTimeRange(
-                        timeUnit,
-                        startEpochTimeMillis ?: NONE,
-                        endEpochTimeMillis ?: NONE
-                    )
-                }
+
+    sealed class Range {
+        fun within(now: Long): Boolean {
+            return when (this) {
+                is Immediate -> true
+                is Custom -> now in startEpochTimeMillis until endEpochTimeMillis
             }
         }
+
+        object Immediate : Range()
+
+        data class Custom(
+            val startEpochTimeMillis: Long,
+            val endEpochTimeMillis: Long
+        ) : Range()
     }
 
     data class EventTriggerRule(
@@ -215,18 +205,6 @@ data class InAppMessage(
             fun from(type: String): Status? {
                 return VALUES[type.toLowerCase()]
             }
-        }
-    }
-}
-
-fun InAppMessage.withInDisplayTimeRange(currentMillisTime: Long): Boolean {
-    return when (displayTimeRange.timeUnit) {
-        InAppMessage.TimeUnitType.IMMEDIATE -> true
-        InAppMessage.TimeUnitType.CUSTOM -> {
-            if (displayTimeRange.startEpochTimeMillis == NONE || displayTimeRange.endEpochTimeMillis == NONE)
-                false
-            else
-                displayTimeRange.startEpochTimeMillis <= currentMillisTime && currentMillisTime <= displayTimeRange.endEpochTimeMillis
         }
     }
 }

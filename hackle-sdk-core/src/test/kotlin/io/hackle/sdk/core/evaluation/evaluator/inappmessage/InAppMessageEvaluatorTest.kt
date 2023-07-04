@@ -10,13 +10,11 @@ import io.hackle.sdk.core.evaluation.target.InAppMessageTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideDeterminer
 import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.PlatformType.*
-import io.hackle.sdk.core.model.withInDisplayTimeRange
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -61,16 +59,12 @@ internal class InAppMessageEvaluatorTest {
         inAppMessage = mockk()
         message = mockk()
         request = inAppMessageRequest(inAppMessage = inAppMessage, currentTimeMillis = NOW)
-        mockkStatic("io.hackle.sdk.core.model.InAppMessageKt")
         every { message.lang } returns "ko"
         every { inAppMessage.key } returns 123L
         every { inAppMessage.messageContext } returns mockk()
         every { inAppMessage.messageContext.defaultLang } returns "ko"
         every { inAppMessage.messageContext.messages } returns listOf(message)
-
-        every { inAppMessage.displayTimeRange.timeUnit } returns InAppMessage.TimeUnitType.CUSTOM
-        every { inAppMessage.displayTimeRange.startEpochTimeMillis } returns NOW - 1L
-        every { inAppMessage.displayTimeRange.endEpochTimeMillis } returns NOW + 1L
+        every { inAppMessage.displayTimeRange } returns InAppMessage.Range.Custom(NOW - 1L, NOW + 1L)
 
         every { inAppMessageResolver.resolve(any(), any()) } returns message
     }
@@ -83,7 +77,6 @@ internal class InAppMessageEvaluatorTest {
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo false
             get { reason } isEqualTo DecisionReason.UNSUPPORTED_PLATFORM
         }
     }
@@ -97,7 +90,6 @@ internal class InAppMessageEvaluatorTest {
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo true
             get { reason } isEqualTo DecisionReason.OVERRIDDEN
         }
     }
@@ -112,7 +104,6 @@ internal class InAppMessageEvaluatorTest {
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo false
             get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_DRAFT
         }
     }
@@ -126,11 +117,9 @@ internal class InAppMessageEvaluatorTest {
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo false
             get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_PAUSED
         }
     }
-
 
 
     @Test
@@ -138,12 +127,12 @@ internal class InAppMessageEvaluatorTest {
         every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
         every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.withInDisplayTimeRange(any()) } returns false
+        every { inAppMessage.displayTimeRange.within(any()) } returns false
+
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo false
             get { reason } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_PERIOD
         }
 
@@ -153,17 +142,16 @@ internal class InAppMessageEvaluatorTest {
     fun `오버라이드 조건 false, status ACTIVE, display 시간 맞음, Hidden 상태이면 보여주지 않음`() {
         every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
         every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
+        every { inAppMessageTargetDeterminer.determine(any(), any()) } returns true
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.withInDisplayTimeRange(any()) } returns true
-        every { hackleInAppMessageStorage.exist(any(),any()) } returns false
+        every { inAppMessage.displayTimeRange.within(any()) } returns true
+        every { hackleInAppMessageStorage.exist(any(), any()) } returns true
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo false
             get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_HIDDEN
         }
-
     }
 
     @Test
@@ -172,13 +160,12 @@ internal class InAppMessageEvaluatorTest {
         every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
         every { inAppMessageTargetDeterminer.determine(any(), any()) } returns true
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.withInDisplayTimeRange(any()) } returns true
-        every { hackleInAppMessageStorage.exist(any(),any()) } returns false
+        every { inAppMessage.displayTimeRange.within(any()) } returns true
+        every { hackleInAppMessageStorage.exist(any(), any()) } returns false
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo true
             get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_TARGET
         }
     }
@@ -190,13 +177,12 @@ internal class InAppMessageEvaluatorTest {
         every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
         every { inAppMessageTargetDeterminer.determine(any(), any()) } returns false
         every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.withInDisplayTimeRange(any()) } returns true
-        every { hackleInAppMessageStorage.exist(any(),any()) } returns false
+        every { inAppMessage.displayTimeRange.within(any()) } returns true
+        every { hackleInAppMessageStorage.exist(any(), any()) } returns false
 
         val evaluation = sut.evaluate(request, Evaluators.context())
 
         expectThat(evaluation) {
-            get { isShow } isEqualTo false
             get { reason } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
         }
     }

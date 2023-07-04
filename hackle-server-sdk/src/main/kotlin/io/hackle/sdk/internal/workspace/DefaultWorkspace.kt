@@ -11,7 +11,6 @@ import io.hackle.sdk.core.workspace.Workspace
 internal class DefaultWorkspace(
     override val experiments: List<Experiment>,
     override val featureFlags: List<Experiment>,
-    override val inAppMessages: List<InAppMessage> = emptyList(),
     private val eventTypes: Map<String, EventType>,
     private val buckets: Map<Long, Bucket>,
     private val segments: Map<String, Segment>,
@@ -19,6 +18,8 @@ internal class DefaultWorkspace(
     private val parameterConfigurations: Map<Long, ParameterConfiguration>,
     private val remoteConfigParameters: Map<String, RemoteConfigParameter>
 ) : Workspace {
+    override val inAppMessages: List<InAppMessage>
+        get() = emptyList()
 
     private val _experiments = experiments.associateBy { it.key }
     private val _featureFlags = featureFlags.associateBy { it.key }

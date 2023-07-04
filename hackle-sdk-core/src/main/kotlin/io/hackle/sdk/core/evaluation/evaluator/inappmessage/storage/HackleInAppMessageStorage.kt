@@ -17,6 +17,6 @@ class DefaultHackleInAppMessageStorage : HackleInAppMessageStorage {
     }
 
     override fun put(inAppMessage: InAppMessage, expiredAtMillis: Long) {
-        //Do Nothing
+        // Do Nothing
     }
 }

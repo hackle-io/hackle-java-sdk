@@ -145,15 +145,15 @@ class HackleCore internal constructor(
     }
 
     fun inAppMessage(inAppMessageKey: Long, user: HackleUser): InAppMessageDecision {
-        val workspace = workspaceFetcher.fetch() ?: return InAppMessageDecision(SDK_NOT_READY, false)
+        val workspace = workspaceFetcher.fetch() ?: return InAppMessageDecision(SDK_NOT_READY)
 
         val inAppMessage = workspace.getInAppMessageOrNull(inAppMessageKey)
-            ?: return InAppMessageDecision(IN_APP_MESSAGE_NOT_FOUND, false)
+            ?: return InAppMessageDecision(IN_APP_MESSAGE_NOT_FOUND)
 
-        val request = InAppMessageRequest(workspace, user, inAppMessage, nowTimeMillis = Clock.SYSTEM.currentMillis())
+        val request = InAppMessageRequest(workspace, user, inAppMessage, timestamp = Clock.SYSTEM.currentMillis())
 
         val evaluation = inAppMessageEvaluator.evaluate(request, Evaluators.context())
-        return InAppMessageDecision(evaluation.reason, evaluation.isShow, inAppMessage, evaluation.message)
+        return InAppMessageDecision(evaluation.reason, inAppMessage, evaluation.message)
     }
 
 
@@ -163,7 +163,6 @@ class HackleCore internal constructor(
     }
 
     companion object {
-
         fun create(
             workspaceFetcher: WorkspaceFetcher,
             eventProcessor: EventProcessor,

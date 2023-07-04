@@ -18,8 +18,7 @@ internal class TargetingTypeTest {
                 HACKLE_PROPERTY -> assertFalse(targetingType.supports(keyType))
 
                 AB_TEST,
-                FEATURE_FLAG -> assertFalse(targetingType.supports(keyType))
-
+                FEATURE_FLAG,
                 EVENT_PROPERTY -> assertFalse(targetingType.supports(keyType))
             }.safe
         }
@@ -34,10 +33,11 @@ internal class TargetingTypeTest {
                 USER_PROPERTY,
                 HACKLE_PROPERTY,
                 AB_TEST,
+                EVENT_PROPERTY,
                 FEATURE_FLAG -> assertTrue(targetingType.supports(keyType))
 
                 USER_ID -> assertFalse(targetingType.supports(keyType))
-                EVENT_PROPERTY -> assertFalse(targetingType.supports(keyType))
+
             }.safe
         }
     }
@@ -53,29 +53,9 @@ internal class TargetingTypeTest {
 
                 SEGMENT -> assertFalse(targetingType.supports(keyType))
                 AB_TEST,
-                FEATURE_FLAG -> assertFalse(targetingType.supports(keyType))
-
+                FEATURE_FLAG,
                 EVENT_PROPERTY -> assertFalse(targetingType.supports(keyType))
             }.safe
         }
-    }
-
-
-    @Test
-    fun `IN_APP_MESSAGE`() {
-        for (keyType in Target.Key.Type.values()) {
-            val targetingType = TargetingType.IN_APP_MESSAGE
-            when (keyType) {
-                USER_PROPERTY,
-                HACKLE_PROPERTY,
-                EVENT_PROPERTY
-                -> assertTrue(targetingType.supports(keyType))
-                SEGMENT -> assertFalse(targetingType.supports(keyType))
-                AB_TEST,
-                FEATURE_FLAG,
-                USER_ID -> assertFalse(targetingType.supports(keyType))
-            }
-        }
-
     }
 }

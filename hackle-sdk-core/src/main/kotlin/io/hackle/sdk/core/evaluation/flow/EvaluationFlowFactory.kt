@@ -39,8 +39,7 @@ internal class EvaluationFlowFactory(
         HackleCoreContext.registerInstance(targetMatcher)
 
         val actionResolver = ActionResolver(bucketer)
-        val overrideResolver =
-            OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
+        val overrideResolver = OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
         val containerResolver = ContainerResolver(bucketer)
 
         val abTestFlow = EvaluationFlow.of(
@@ -67,7 +66,6 @@ internal class EvaluationFlowFactory(
 
         this.abTestFlow = abTestFlow
         this.featureFlagFlow = featureFlagFlow
-
 
         HackleCoreContext.registerInstance(InAppMessageTargetDeterminer(targetMatcher))
         HackleCoreContext.registerInstance(InAppMessageUserOverrideDeterminer())

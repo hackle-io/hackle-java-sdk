@@ -22,15 +22,13 @@ class InAppMessageEvaluationTest {
         val evaluation = InAppMessageEvaluation.of(
             DecisionReason.DEFAULT_RULE,
             context,
-            true,
-            message,
+            message
         )
 
         expectThat(evaluation) {
             get { this.reason } isEqualTo DecisionReason.DEFAULT_RULE
             get { this.targetEvaluations } hasSize 1
             get { this.message } isEqualTo message
-            get { this.isShow } isEqualTo true
         }
     }
 }

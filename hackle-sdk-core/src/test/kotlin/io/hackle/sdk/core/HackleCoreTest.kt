@@ -708,8 +708,7 @@ internal class HackleCoreTest {
             val evaluation = mockk<InAppMessageEvaluation>()
             val message = mockk<InAppMessage.MessageContext.Message>()
             every { evaluation.message } returns message
-            every { evaluation.reason } returns TARGET_RULE_MATCH
-            every { evaluation.isShow } returns true
+            every { evaluation.reason } returns IN_APP_MESSAGE_TARGET
             every { workspaceFetcher.fetch() } returns workspace
             every { workspace.getInAppMessageOrNull(any()) } returns inAppMessage
             every { inAppMessageEvaluator.evaluate(any(), any()) } returns evaluation
@@ -717,10 +716,9 @@ internal class HackleCoreTest {
             val actual = sut.inAppMessage(123L, hackleUser("test"))
 
             expectThat(actual) {
-                get { reason } isEqualTo TARGET_RULE_MATCH
+                get { reason } isEqualTo IN_APP_MESSAGE_TARGET
                 get { this.inAppMessage } isEqualTo inAppMessage
                 get { message } isEqualTo message
-                get { isShow } isEqualTo true
             }
 
         }

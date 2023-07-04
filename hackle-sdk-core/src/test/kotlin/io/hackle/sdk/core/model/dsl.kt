@@ -387,7 +387,7 @@ class SegmentDsl(
 fun inAppMessage(
     id: Long = IdentifierGenerator.generate("inAppMessage"),
     key: Long = IdentifierGenerator.generate("inAppMessageKey"),
-    displayTimeRange: InAppMessage.DisplayTimeRange,
+    displayTimeRange: InAppMessage.Range,
     status: InAppMessage.Status = InAppMessage.Status.DRAFT,
     eventTriggerRules: List<InAppMessage.EventTriggerRule> = emptyList(),
     targetContext: InAppMessage.TargetContext,

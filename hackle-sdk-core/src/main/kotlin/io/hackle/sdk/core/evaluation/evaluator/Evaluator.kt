@@ -32,7 +32,7 @@ interface Evaluator {
     }
 
     interface EventRequest : Request {
-        val event: UserEvent.Track
+        val event: UserEvent
     }
 
     interface Evaluation {

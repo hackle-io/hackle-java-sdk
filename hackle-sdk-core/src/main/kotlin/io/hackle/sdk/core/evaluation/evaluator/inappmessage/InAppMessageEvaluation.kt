@@ -9,21 +9,18 @@ class InAppMessageEvaluation(
     override val reason: DecisionReason,
     override val targetEvaluations: List<Evaluator.Evaluation>,
     val message: InAppMessage.MessageContext.Message?,
-    val isShow : Boolean
 ) : Evaluator.Evaluation {
 
     companion object {
         fun of(
             reason: DecisionReason,
             context: Evaluator.Context,
-            isShow: Boolean,
             message: InAppMessage.MessageContext.Message? = null
         ): InAppMessageEvaluation {
             return InAppMessageEvaluation(
                 reason = reason,
                 targetEvaluations = context.targetEvaluations,
-                message = message,
-                isShow = isShow
+                message = message
             )
         }
     }

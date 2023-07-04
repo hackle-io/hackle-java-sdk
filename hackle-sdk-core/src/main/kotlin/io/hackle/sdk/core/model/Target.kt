@@ -20,7 +20,6 @@ data class Target(
             FEATURE_FLAG,
             EVENT_PROPERTY
         }
-
     }
 
     data class Match(

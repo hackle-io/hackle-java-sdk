@@ -8,7 +8,6 @@ import io.hackle.sdk.core.evaluation.target.InAppMessageResolver
 import io.hackle.sdk.core.evaluation.target.InAppMessageTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideDeterminer
 import io.hackle.sdk.core.model.InAppMessage
-import io.hackle.sdk.core.model.withInDisplayTimeRange
 
 internal class InAppMessageEvaluator(
     private val inAppMessageUserOverrideDeterminer: InAppMessageUserOverrideDeterminer,
@@ -26,7 +25,7 @@ internal class InAppMessageEvaluator(
         val inAppMessage = request.inAppMessage
 
         if (inAppMessage.messageContext.platformTypes.none { it == InAppMessage.MessageContext.PlatformType.ANDROID }) {
-            return InAppMessageEvaluation.of(DecisionReason.UNSUPPORTED_PLATFORM, context, false)
+            return InAppMessageEvaluation.of(DecisionReason.UNSUPPORTED_PLATFORM, context)
         }
 
         if (inAppMessageUserOverrideDeterminer.determine(request)) {
@@ -34,31 +33,31 @@ internal class InAppMessageEvaluator(
         }
 
         if (inAppMessage.status == InAppMessage.Status.PAUSE) {
-            return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_PAUSED, context, false)
+            return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_PAUSED, context)
         }
 
         if (inAppMessage.status == InAppMessage.Status.DRAFT) {
-            return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_DRAFT, context, false)
+            return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_DRAFT, context)
         }
 
-        if (!isWithInTimeRange(inAppMessage, request.nowTimeMillis)) {
-            return InAppMessageEvaluation.of(DecisionReason.NOT_IN_IN_APP_MESSAGE_PERIOD, context, false)
+        if (!isWithInTimeRange(inAppMessage, request.timestamp)) {
+            return InAppMessageEvaluation.of(DecisionReason.NOT_IN_IN_APP_MESSAGE_PERIOD, context)
         }
 
-        if (isHidden(inAppMessage, request.nowTimeMillis)) {
-            return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_HIDDEN, context, false)
+        if (isHidden(inAppMessage, request.timestamp)) {
+            return InAppMessageEvaluation.of(DecisionReason.IN_APP_MESSAGE_HIDDEN, context)
         }
 
         if (inAppMessageTargetDeterminer.determine(request, context)) {
             return evaluation(request, context, DecisionReason.IN_APP_MESSAGE_TARGET)
         }
 
-        return InAppMessageEvaluation.of(DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET, context, false)
+        return InAppMessageEvaluation.of(DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET, context)
     }
 
 
     private fun isWithInTimeRange(inAppMessage: InAppMessage, nowTimeMillis: Long): Boolean {
-        if (!inAppMessage.withInDisplayTimeRange(nowTimeMillis)) {
+        if (!inAppMessage.displayTimeRange.within(nowTimeMillis)) {
             return false
         }
         return true
@@ -74,6 +73,6 @@ internal class InAppMessageEvaluator(
         decisionReason: DecisionReason
     ): InAppMessageEvaluation {
         val message = inAppMessageResolver.resolve(request, context)
-        return InAppMessageEvaluation.of(decisionReason, context, true, message)
+        return InAppMessageEvaluation.of(decisionReason, context, message)
     }
 }

@@ -2,6 +2,7 @@ package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.event.UserEvent
+import io.hackle.sdk.core.event.properties
 import io.hackle.sdk.core.model.Target
 
 
@@ -26,9 +27,9 @@ internal class EventConditionMatcher(
 
 internal class EventValueResolver {
 
-    fun resolveOrNull(track: UserEvent.Track, key: Target.Key): Any? {
+    fun resolveOrNull(event: UserEvent, key: Target.Key): Any? {
         return when (key.type) {
-            Target.Key.Type.EVENT_PROPERTY -> track.event.properties[key.name]
+            Target.Key.Type.EVENT_PROPERTY -> event.properties[key.name]
             Target.Key.Type.USER_ID,
             Target.Key.Type.USER_PROPERTY,
             Target.Key.Type.HACKLE_PROPERTY,
