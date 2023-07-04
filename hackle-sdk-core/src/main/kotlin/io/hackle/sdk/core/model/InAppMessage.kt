@@ -51,24 +51,10 @@ data class InAppMessage(
 
         enum class PlatformType {
             ANDROID, IOS, WEB;
-
-            companion object {
-                private val VALUES = values().associateBy { it.name.toLowerCase() }
-                fun from(type: String): PlatformType? {
-                    return VALUES[type.toLowerCase()]
-                }
-            }
         }
 
         enum class Orientation {
             VERTICAL, HORIZONTAL;
-
-            companion object {
-                private val VALUES = values().associateBy { it.name.toLowerCase() }
-                fun from(type: String): Orientation? {
-                    return VALUES[type.toLowerCase()]
-                }
-            }
         }
 
         data class Exposure(
@@ -165,15 +151,6 @@ data class InAppMessage(
                 WEB_LINK,
                 CLOSE,
                 HIDDEN;
-
-
-                companion object {
-                    private val VALUES = values().associateBy { it.name.toLowerCase() }
-
-                    fun from(type: String): Type? {
-                        return VALUES[type.toLowerCase()]
-                    }
-                }
             }
 
         }
@@ -181,14 +158,6 @@ data class InAppMessage(
 
     enum class TimeUnitType {
         CUSTOM, IMMEDIATE;
-
-        companion object {
-            private val VALUES = values().associateBy { it.name.toLowerCase() }
-
-            fun from(type: String): TimeUnitType? {
-                return VALUES[type.toLowerCase()]
-            }
-        }
     }
 
     enum class Status {
@@ -198,13 +167,5 @@ data class InAppMessage(
         PAUSE,
         FINISH,
         ARCHIVED;
-
-        companion object {
-            private val VALUES = values().associateBy { it.name.toLowerCase() }
-
-            fun from(type: String): Status? {
-                return VALUES[type.toLowerCase()]
-            }
-        }
     }
 }

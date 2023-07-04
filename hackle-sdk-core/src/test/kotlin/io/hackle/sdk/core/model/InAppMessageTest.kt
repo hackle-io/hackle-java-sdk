@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.model
 
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.Action.Type
-import io.hackle.sdk.core.model.InAppMessage.MessageContext.Orientation.HORIZONTAL
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.Orientation.VERTICAL
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.PlatformType.ANDROID
 import io.hackle.sdk.core.model.InAppMessage.MessageContext.PlatformType.WEB
@@ -205,44 +204,8 @@ class InAppMessageTest {
             value = "test://activity"
         )
         expectThat(action.behavior) isEqualTo InAppMessage.MessageContext.Action.Behavior.CLICK
-        expectThat(InAppMessage.MessageContext.Action.Type.from("WEB_LINK")) isEqualTo Type.WEB_LINK
+        expectThat(action.type) isEqualTo Type.WEB_LINK
         expectThat(action.value) { isNotNull() }
-    }
-
-    @Test
-    fun `platform type`() {
-        expectThat(InAppMessage.MessageContext.PlatformType.from("IOS")) isEqualTo InAppMessage.MessageContext.PlatformType.IOS
-        expectThat(InAppMessage.MessageContext.PlatformType.from("WEB")) isEqualTo InAppMessage.MessageContext.PlatformType.WEB
-        expectThat(InAppMessage.MessageContext.PlatformType.from("ANDROID")) isEqualTo InAppMessage.MessageContext.PlatformType.ANDROID
-        expectThat(InAppMessage.MessageContext.PlatformType.from("INVALID")) isEqualTo null
-    }
-
-    @Test
-    fun `timeUnit type`() {
-        expectThat(InAppMessage.TimeUnitType.from("IMMEDIATE")) isEqualTo InAppMessage.TimeUnitType.IMMEDIATE
-        expectThat(InAppMessage.TimeUnitType.from("CUSTOM")) isEqualTo InAppMessage.TimeUnitType.CUSTOM
-        expectThat(InAppMessage.TimeUnitType.from("NOT_SUPPORT_TYPE")).isNull()
-
-    }
-
-    @Test
-    fun `Orientation`() {
-        expectThat(InAppMessage.MessageContext.Orientation.from("VERTICAL")) isEqualTo VERTICAL
-        expectThat(InAppMessage.MessageContext.Orientation.from("vertical")) isEqualTo VERTICAL
-        expectThat(InAppMessage.MessageContext.Orientation.from("HORIZONTAL")) isEqualTo HORIZONTAL
-        expectThat(InAppMessage.MessageContext.Orientation.from("horizontal")) isEqualTo HORIZONTAL
-        expectThat(InAppMessage.MessageContext.Orientation.from("Unsupported")).isNull()
-    }
-
-    @Test
-    fun `status`() {
-        expectThat(InAppMessage.Status.from("INITIALIZED")) isEqualTo InAppMessage.Status.INITIALIZED
-        expectThat(InAppMessage.Status.from("DRAFT")) isEqualTo InAppMessage.Status.DRAFT
-        expectThat(InAppMessage.Status.from("ACTIVE")) isEqualTo InAppMessage.Status.ACTIVE
-        expectThat(InAppMessage.Status.from("PAUSE")) isEqualTo InAppMessage.Status.PAUSE
-        expectThat(InAppMessage.Status.from("FINISH")) isEqualTo InAppMessage.Status.FINISH
-        expectThat(InAppMessage.Status.from("ARCHIVED")) isEqualTo InAppMessage.Status.ARCHIVED
-        expectThat(InAppMessage.Status.from("NOT_SUPPORT_STATUS")).isNull()
     }
 
     @Test

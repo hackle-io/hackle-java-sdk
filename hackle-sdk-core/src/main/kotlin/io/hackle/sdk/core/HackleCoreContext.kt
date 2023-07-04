@@ -1,7 +1,5 @@
 package io.hackle.sdk.core
 
-import java.util.LinkedHashMap
-
 
 object HackleCoreContext {
     private val instanceMap: LinkedHashMap<String, Any> = linkedMapOf()
@@ -17,7 +15,7 @@ object HackleCoreContext {
     }
 
     fun registerInstance(instance: Any) {
-        val name = instance::class.simpleName ?: return
+        val name = instance::class.java.simpleName
         if (!instanceMap.contains(name)) {
             this.instanceMap[name] = instance
         }
