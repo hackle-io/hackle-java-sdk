@@ -8,6 +8,7 @@ import io.hackle.sdk.core.evaluation.target.InAppMessageResolver
 import io.hackle.sdk.core.evaluation.target.InAppMessageTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideDeterminer
 import io.hackle.sdk.core.model.InAppMessage
+import io.hackle.sdk.core.model.InAppMessage.MessageContext.PlatformType.ANDROID
 
 internal class InAppMessageEvaluator(
     private val inAppMessageUserOverrideDeterminer: InAppMessageUserOverrideDeterminer,
@@ -24,7 +25,7 @@ internal class InAppMessageEvaluator(
     override fun evaluateInternal(request: InAppMessageRequest, context: Evaluator.Context): InAppMessageEvaluation {
         val inAppMessage = request.inAppMessage
 
-        if (inAppMessage.messageContext.platformTypes.none { it == InAppMessage.MessageContext.PlatformType.ANDROID }) {
+        if (ANDROID !in inAppMessage.messageContext.platformTypes) {
             return InAppMessageEvaluation.of(DecisionReason.UNSUPPORTED_PLATFORM, context)
         }
 

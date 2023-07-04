@@ -104,6 +104,7 @@ sealed class UserEvent {
         }
     }
 }
+
 val UserEvent.properties
     get() = when (this) {
         is UserEvent.Exposure -> properties

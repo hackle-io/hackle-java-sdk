@@ -10,6 +10,7 @@ internal data class WorkspaceDto(
     val parameterConfigurations: List<ParameterConfigurationDto>,
     val remoteConfigParameters: List<RemoteConfigParameterDto>,
 )
+
 internal data class ExperimentDto(
     val id: Long,
     val key: Long,

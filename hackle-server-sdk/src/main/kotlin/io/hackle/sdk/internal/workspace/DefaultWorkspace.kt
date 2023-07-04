@@ -18,8 +18,8 @@ internal class DefaultWorkspace(
     private val parameterConfigurations: Map<Long, ParameterConfiguration>,
     private val remoteConfigParameters: Map<String, RemoteConfigParameter>
 ) : Workspace {
-    override val inAppMessages: List<InAppMessage>
-        get() = emptyList()
+
+    override val inAppMessages: List<InAppMessage> get() = emptyList()
 
     private val _experiments = experiments.associateBy { it.key }
     private val _featureFlags = featureFlags.associateBy { it.key }
@@ -98,7 +98,7 @@ internal class DefaultWorkspace(
                 segments = segments,
                 containers = containers,
                 parameterConfigurations = parameterConfigurations,
-                remoteConfigParameters = remoteConfigParameters
+                remoteConfigParameters = remoteConfigParameters,
             )
         }
     }

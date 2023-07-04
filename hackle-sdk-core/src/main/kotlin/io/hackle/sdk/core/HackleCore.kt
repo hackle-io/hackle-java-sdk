@@ -3,24 +3,24 @@ package io.hackle.sdk.core
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.ParameterConfig
 import io.hackle.sdk.common.Variation
-import io.hackle.sdk.common.decision.*
+import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
+import io.hackle.sdk.common.decision.FeatureFlagDecision
+import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.decision.InAppMessageDecision
 import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.*
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.storage.DefaultHackleInAppMessageStorage
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.storage.HackleInAppMessageStorage
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.evaluation.target.*
-import io.hackle.sdk.core.evaluation.target.DelegatingManualOverrideStorage
-import io.hackle.sdk.core.evaluation.target.InAppMessageTargetDeterminer
-import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideDeterminer
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.event.UserEventFactory
@@ -177,9 +177,8 @@ class HackleCore internal constructor(
                 .also { delegatingEvaluator.add(it) }
 
             val remoteConfigEvaluator =
-                RemoteConfigEvaluator<Any>(
-                    HackleCoreContext.get(RemoteConfigParameterTargetRuleDeterminer::class.java)
-                ).also { delegatingEvaluator.add(it) }
+                RemoteConfigEvaluator<Any>(HackleCoreContext.get(RemoteConfigParameterTargetRuleDeterminer::class.java))
+                    .also { delegatingEvaluator.add(it) }
 
             val inAppMessageStorage =
                 HackleCoreContext.getOrNull(HackleInAppMessageStorage::class.java) ?: DefaultHackleInAppMessageStorage()

@@ -22,6 +22,7 @@ enum class TargetingType(
         Target.Key.Type.USER_PROPERTY,
         Target.Key.Type.HACKLE_PROPERTY,
     );
+
     constructor(vararg keyTypes: Target.Key.Type) : this(keyTypes.toSet())
 
     fun supports(keyType: Target.Key.Type): Boolean {

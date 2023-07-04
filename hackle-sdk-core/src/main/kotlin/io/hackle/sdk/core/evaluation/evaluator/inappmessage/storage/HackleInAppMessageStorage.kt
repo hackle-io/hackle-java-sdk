@@ -10,7 +10,7 @@ interface HackleInAppMessageStorage {
 
 }
 
-class DefaultHackleInAppMessageStorage : HackleInAppMessageStorage {
+internal class DefaultHackleInAppMessageStorage : HackleInAppMessageStorage {
 
     override fun exist(inAppMessage: InAppMessage, nowTimeMillis: Long): Boolean {
         return false
