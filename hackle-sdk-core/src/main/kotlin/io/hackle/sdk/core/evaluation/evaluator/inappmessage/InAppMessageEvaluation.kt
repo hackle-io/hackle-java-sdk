@@ -5,7 +5,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.InAppMessage
 
 
-class InAppMessageEvaluation(
+internal class InAppMessageEvaluation(
     override val reason: DecisionReason,
     override val targetEvaluations: List<Evaluator.Evaluation>,
     val message: InAppMessage.MessageContext.Message?,
