@@ -6,6 +6,7 @@ package io.hackle.sdk.core.model
 data class Experiment(
     val id: Long,
     val key: Long,
+    val name: String?,
     val type: Type,
     val identifierType: String,
     val status: Status,
