@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
 
-interface ConditionMatcher {
+internal interface ConditionMatcher {
     fun matches(
         request: Evaluator.Request,
         context: Evaluator.Context,
@@ -12,7 +12,7 @@ interface ConditionMatcher {
     ): Boolean
 }
 
-class ConditionMatcherFactory(evaluator: Evaluator) {
+internal class ConditionMatcherFactory(evaluator: Evaluator) {
 
     private val userConditionMatcher: ConditionMatcher
     private val segmentConditionMatcher: ConditionMatcher
