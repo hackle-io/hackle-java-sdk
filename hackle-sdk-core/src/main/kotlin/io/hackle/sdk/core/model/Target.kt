@@ -17,7 +17,8 @@ data class Target(
             HACKLE_PROPERTY,
             SEGMENT,
             AB_TEST,
-            FEATURE_FLAG
+            FEATURE_FLAG,
+            EVENT_PROPERTY
         }
     }
 

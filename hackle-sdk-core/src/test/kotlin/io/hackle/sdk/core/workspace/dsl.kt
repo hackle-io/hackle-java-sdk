@@ -8,8 +8,9 @@ fun workspace(init: WorkspaceDsl.() -> Unit = {}): Workspace {
     return WorkspaceDsl().apply(init).build()
 }
 
-class WorkspaceDsl : BucketRegistry, Workspace {
+class WorkspaceDsl() : BucketRegistry, Workspace {
 
+    private val _inAppMessages = mutableMapOf<Long, InAppMessage>()
     private val _experiments = mutableMapOf<Long, Experiment>()
     private val _featureFlags = mutableMapOf<Long, Experiment>()
     private val eventTypes = mutableMapOf<String, EventType>()
@@ -20,7 +21,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
 
     override val experiments: List<Experiment> get() = _experiments.values.toList()
     override val featureFlags: List<Experiment> get() = _featureFlags.values.toList()
-
+    override val inAppMessages: List<InAppMessage> get() = _inAppMessages.values.toList()
     fun experiment(
         id: Long = IdentifierGenerator.generate("experiment"),
         key: Long = IdentifierGenerator.generate("experimentKey"),
@@ -66,6 +67,7 @@ class WorkspaceDsl : BucketRegistry, Workspace {
         parameterConfigurations[parameterConfigurationId]
 
     override fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter? = null
+    override fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessage? = null
 
     override fun register(bucket: Bucket) {
         buckets[bucket.id] = bucket

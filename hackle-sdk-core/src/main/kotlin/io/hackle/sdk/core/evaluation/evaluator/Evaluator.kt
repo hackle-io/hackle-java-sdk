@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.evaluator
 
 import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
@@ -9,13 +10,14 @@ import io.hackle.sdk.core.workspace.Workspace
 /**
  * @author Yong
  */
-internal interface Evaluator {
+interface Evaluator {
 
     fun evaluate(request: Request, context: Context): Evaluation
 
     enum class Type {
         EXPERIMENT,
-        REMOTE_CONFIG
+        REMOTE_CONFIG,
+        IN_APP_MESSAGE
     }
 
     data class Key(
@@ -27,6 +29,10 @@ internal interface Evaluator {
         val key: Key
         val workspace: Workspace
         val user: HackleUser
+    }
+
+    interface EventRequest : Request {
+        val event: UserEvent
     }
 
     interface Evaluation {
