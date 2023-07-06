@@ -19,6 +19,8 @@ internal class DefaultWorkspace(
     private val remoteConfigParameters: Map<String, RemoteConfigParameter>
 ) : Workspace {
 
+    override val inAppMessages: List<InAppMessage> get() = emptyList()
+
     private val _experiments = experiments.associateBy { it.key }
     private val _featureFlags = featureFlags.associateBy { it.key }
 
@@ -54,6 +56,10 @@ internal class DefaultWorkspace(
         return remoteConfigParameters[parameterKey]
     }
 
+    override fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessage? {
+        return null
+    }
+
     companion object {
         fun from(dto: WorkspaceDto): Workspace {
 
@@ -83,7 +89,6 @@ internal class DefaultWorkspace(
             val remoteConfigParameters = dto.remoteConfigParameters.asSequence()
                 .mapNotNull { it.toRemoteConfigParameterOrNull() }
                 .associateBy { it.key }
-
 
             return DefaultWorkspace(
                 experiments = experiments,

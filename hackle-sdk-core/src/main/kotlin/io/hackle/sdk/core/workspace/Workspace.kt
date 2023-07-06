@@ -11,6 +11,8 @@ interface Workspace {
 
     val featureFlags: List<Experiment>
 
+    val inAppMessages: List<InAppMessage>
+
     fun getExperimentOrNull(experimentKey: Long): Experiment?
 
     fun getFeatureFlagOrNull(featureKey: Long): Experiment?
@@ -26,4 +28,6 @@ interface Workspace {
     fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration?
 
     fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter?
+
+    fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessage?
 }

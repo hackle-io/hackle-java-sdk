@@ -3,7 +3,7 @@ package io.hackle.sdk.core.evaluation.evaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.model.Experiment
 
-internal object Evaluators {
+object Evaluators {
 
     fun context(): Evaluator.Context {
         return DefaultContext()
