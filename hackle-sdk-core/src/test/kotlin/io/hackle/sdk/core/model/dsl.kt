@@ -100,6 +100,7 @@ class ExperimentDsl(
         return Experiment(
             id,
             key,
+            null,
             type,
             identifierType,
             status,
