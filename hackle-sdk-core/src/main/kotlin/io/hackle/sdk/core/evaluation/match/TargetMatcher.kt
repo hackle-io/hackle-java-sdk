@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Target
 
 
-class TargetMatcher(
+class TargetMatcher internal constructor(
     private val conditionMatcherFactory: ConditionMatcherFactory
 ) {
 
