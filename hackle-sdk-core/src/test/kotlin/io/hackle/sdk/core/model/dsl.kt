@@ -385,9 +385,31 @@ class SegmentDsl(
     }
 }
 
+fun inAppMessage(
+    id: Long = IdentifierGenerator.generate("inAppMessage"),
+    key: Long = IdentifierGenerator.generate("inAppMessageKey"),
+    displayTimeRange: InAppMessage.Range,
+    status: InAppMessage.Status = InAppMessage.Status.DRAFT,
+    eventTriggerRules: List<InAppMessage.EventTriggerRule> = emptyList(),
+    targetContext: InAppMessage.TargetContext,
+    messageContext: InAppMessage.MessageContext,
+): InAppMessage {
+    return InAppMessage(
+        id,
+        key,
+        displayTimeRange,
+        status,
+        eventTriggerRules,
+        targetContext,
+        messageContext,
+    )
+}
+
 object IdentifierGenerator {
     private val store = ConcurrentHashMap<String, Long>()
     fun generate(type: String): Long {
         return requireNotNull(store.compute(type) { _, id -> if (id == null) 1 else id + 1 })
     }
 }
+
+

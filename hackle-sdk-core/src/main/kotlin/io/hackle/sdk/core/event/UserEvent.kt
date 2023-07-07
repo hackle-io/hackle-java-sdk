@@ -104,3 +104,10 @@ sealed class UserEvent {
         }
     }
 }
+
+val UserEvent.properties
+    get() = when (this) {
+        is UserEvent.Exposure -> properties
+        is UserEvent.Track -> event.properties
+        is UserEvent.RemoteConfig -> properties
+    }
