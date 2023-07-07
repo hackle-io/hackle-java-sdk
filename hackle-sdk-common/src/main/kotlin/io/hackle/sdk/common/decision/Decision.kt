@@ -73,113 +73,38 @@ data class RemoteConfigDecision<T> internal constructor(
  */
 enum class DecisionReason {
 
-    /**
-     * Indicates that the sdk is not ready to use. e.g. invalid SDK key.
-     */
     SDK_NOT_READY,
-
-    /**
-     * Indicates that the variation could not be decided due to an unexpected exception.
-     */
     EXCEPTION,
-
-    /**
-     * Indicates that the input value is invalid.
-     */
     INVALID_INPUT,
 
-    /**
-     * Indicates that no experiment was found for the experiment key provided by the caller.
-     */
     EXPERIMENT_NOT_FOUND,
-
-    /**
-     * Indicates that the experiment is in draft.
-     */
     EXPERIMENT_DRAFT,
-
-    /**
-     * Indicates that the experiment was paused.
-     */
     EXPERIMENT_PAUSED,
-
-    /**
-     * Indicates that the experiment was completed.
-     */
     EXPERIMENT_COMPLETED,
-
-    /**
-     * Indicates that the user has been overridden as a specific variation.
-     */
     OVERRIDDEN,
-
-    /**
-     * Indicates that the experiment is running but the user is not allocated to the experiment.
-     */
     TRAFFIC_NOT_ALLOCATED,
-
-    /**
-     * Indicates that the experiment is running but the user is not allocated to the mutual exclusion experiment.
-     */
     NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT,
-
-    /**
-     * Indicates that no found identifier of experiment for the user provided by the caller.
-     */
     IDENTIFIER_NOT_FOUND,
-
-    /**
-     * Indicates that the original decided variation has been dropped.
-     */
     VARIATION_DROPPED,
-
-    /**
-     * Indicates that the user has been allocated to the experiment.
-     */
     TRAFFIC_ALLOCATED,
-
-    /**
-     * Indicates that traffic was allocated by targeting from another experiment.
-     */
     TRAFFIC_ALLOCATED_BY_TARGETING,
-
-    /**
-     * Indicates that the user is not the target of the experiment.
-     */
     NOT_IN_EXPERIMENT_TARGET,
 
-    /**
-     * Indicates that no feature flag was found for the feature key provided by the caller.
-     */
     FEATURE_FLAG_NOT_FOUND,
-
-    /**
-     * Indicates that the feature flag is inactive.
-     */
     FEATURE_FLAG_INACTIVE,
-
-    /**
-     * Indicates that the user is matched to the individual target.
-     */
     INDIVIDUAL_TARGET_MATCH,
-
-    /**
-     * Indicates that the user is matched to the target rule.
-     */
     TARGET_RULE_MATCH,
-
-    /**
-     * Indicates that the user did not match any individual targets or target rules.
-     */
     DEFAULT_RULE,
-
-    /**
-     * Indicates that no remote config parameter was found for the parameter key provided by the caller.
-     */
     REMOTE_CONFIG_PARAMETER_NOT_FOUND,
+    TYPE_MISMATCH,
 
-    /**
-     * Indicates a mismatch between result type and request type.
-     */
-    TYPE_MISMATCH
+    UNSUPPORTED_PLATFORM,
+
+    IN_APP_MESSAGE_NOT_FOUND,
+    IN_APP_MESSAGE_DRAFT,
+    IN_APP_MESSAGE_PAUSED,
+    IN_APP_MESSAGE_HIDDEN,
+    IN_APP_MESSAGE_TARGET,
+    NOT_IN_IN_APP_MESSAGE_PERIOD,
+    NOT_IN_IN_APP_MESSAGE_TARGET
 }
