@@ -6,6 +6,7 @@ import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.HackleCore
+import io.hackle.sdk.core.evaluation.EvaluationContext
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
@@ -38,7 +39,7 @@ internal class HackleCoreTest {
     fun `target_experiment`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment.json")
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventProcessor)
 
         val user = HackleUser.builder().identifier(IdentifierType.ID, "user").build()
         val decision = core.remoteConfig("rc", user, ValueType.STRING, "42")
@@ -79,7 +80,7 @@ internal class HackleCoreTest {
     fun `target_experiment_circular`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment_circular.json")
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventProcessor)
 
         val user = HackleUser.builder().identifier(IdentifierType.ID, "a").build()
         val exception = assertThrows<IllegalArgumentException> {
@@ -104,7 +105,7 @@ internal class HackleCoreTest {
     fun `container`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("container.json")
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventProcessor)
 
         val decision = List(10000) {
             val user = HackleUser.builder().identifier(IdentifierType.ID, UUID.randomUUID().toString()).build()
@@ -124,7 +125,7 @@ internal class HackleCoreTest {
     fun `dto`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment.json")
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventProcessor)
 
         val user = HackleUser.builder()
             .identifier(IdentifierType.ID, "user")
@@ -152,7 +153,7 @@ internal class HackleCoreTest {
     fun `segment_match`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("segment_match.json")
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(workspaceFetcher, eventProcessor)
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventProcessor)
 
 
         val user1 = HackleUser.builder().identifier(IdentifierType.ID, "matched_id").build()

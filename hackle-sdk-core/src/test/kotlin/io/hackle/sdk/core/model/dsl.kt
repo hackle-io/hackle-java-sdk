@@ -2,10 +2,18 @@ package io.hackle.sdk.core.model
 
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
+import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
 import io.hackle.sdk.core.model.ValueType.*
+import io.hackle.sdk.core.user.HackleUser
+import io.hackle.sdk.core.user.IdentifierType
+import io.hackle.sdk.core.workspace.Workspace
+import io.hackle.sdk.core.workspace.workspace
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -385,26 +393,6 @@ class SegmentDsl(
     }
 }
 
-fun inAppMessage(
-    id: Long = IdentifierGenerator.generate("inAppMessage"),
-    key: Long = IdentifierGenerator.generate("inAppMessageKey"),
-    displayTimeRange: InAppMessage.Range,
-    status: InAppMessage.Status = InAppMessage.Status.DRAFT,
-    eventTriggerRules: List<InAppMessage.EventTriggerRule> = emptyList(),
-    targetContext: InAppMessage.TargetContext,
-    messageContext: InAppMessage.MessageContext,
-): InAppMessage {
-    return InAppMessage(
-        id,
-        key,
-        displayTimeRange,
-        status,
-        eventTriggerRules,
-        targetContext,
-        messageContext,
-    )
-}
-
 object IdentifierGenerator {
     private val store = ConcurrentHashMap<String, Long>()
     fun generate(type: String): Long {
@@ -413,3 +401,177 @@ object IdentifierGenerator {
 }
 
 
+internal object InAppMessages {
+
+    fun create(
+        id: Long = 1,
+        key: Long = 1,
+        status: InAppMessage.Status = InAppMessage.Status.ACTIVE,
+        period: InAppMessage.Period = InAppMessage.Period.Always,
+        eventTrigger: InAppMessage.EventTrigger = eventTrigger(),
+        targetContext: InAppMessage.TargetContext = targetContext(),
+        messageContext: InAppMessage.MessageContext = messageContext()
+    ): InAppMessage {
+        return InAppMessage(
+            id = id,
+            key = key,
+            status = status,
+            period = period,
+            eventTrigger = eventTrigger,
+            targetContext = targetContext,
+            messageContext = messageContext
+        )
+    }
+
+    fun eventTrigger(
+        rules: List<InAppMessage.EventTrigger.Rule> = listOf(InAppMessage.EventTrigger.Rule("test", emptyList())),
+        frequencyCap: InAppMessage.EventTrigger.FrequencyCap? = null
+    ): InAppMessage.EventTrigger {
+        return InAppMessage.EventTrigger(rules = rules, frequencyCap = frequencyCap)
+    }
+
+    fun frequencyCap(
+        identifierCaps: List<InAppMessage.EventTrigger.IdentifierCap> = emptyList(),
+        durationCap: InAppMessage.EventTrigger.DurationCap? = null
+    ): InAppMessage.EventTrigger.FrequencyCap {
+        return InAppMessage.EventTrigger.FrequencyCap(identifierCaps, durationCap)
+    }
+
+    fun identifierCap(
+        identifierType: String = "\$id",
+        count: Int = 1
+    ): InAppMessage.EventTrigger.IdentifierCap {
+        return InAppMessage.EventTrigger.IdentifierCap(identifierType, count)
+    }
+
+    fun durationCap(
+        duration: Long = 60,
+        count: Int = 1
+    ): InAppMessage.EventTrigger.DurationCap {
+        return InAppMessage.EventTrigger.DurationCap(duration, count)
+    }
+
+    fun targetContext(
+        targets: List<Target> = emptyList(),
+        overrides: List<InAppMessage.UserOverride> = emptyList()
+    ): InAppMessage.TargetContext {
+        return InAppMessage.TargetContext(targets, overrides)
+    }
+
+    fun messageContext(
+        defaultLang: String = "ko",
+        platformTypes: List<InAppMessage.PlatformType> = listOf(InAppMessage.PlatformType.ANDROID),
+        orientations: List<InAppMessage.Orientation> = listOf(InAppMessage.Orientation.VERTICAL),
+        messages: List<InAppMessage.Message> = listOf(message())
+    ): InAppMessage.MessageContext {
+        return InAppMessage.MessageContext(
+            defaultLang,
+            platformTypes,
+            orientations,
+            messages
+        )
+    }
+
+    fun message(
+        lang: String = "ko",
+        images: List<InAppMessage.Message.Image> = listOf(image()),
+        text: InAppMessage.Message.Text? = text(),
+        buttons: List<InAppMessage.Message.Button> = listOf(button()),
+        closeButton: InAppMessage.Message.Button? = null
+    ): InAppMessage.Message {
+        return InAppMessage.Message(
+            lang = lang,
+            layout = InAppMessage.Message.Layout(
+                displayType = InAppMessage.DisplayType.MODAL,
+                layoutType = InAppMessage.LayoutType.IMAGE_ONLY
+            ),
+            images = images,
+            text = text,
+            buttons = buttons,
+            closeButton = closeButton,
+            background = InAppMessage.Message.Background("#FFFFFF")
+        )
+    }
+
+    fun action(
+        behavior: InAppMessage.Behavior = InAppMessage.Behavior.CLICK,
+        type: InAppMessage.ActionType = InAppMessage.ActionType.CLOSE,
+        value: String? = null
+    ): InAppMessage.Action {
+        return InAppMessage.Action(
+            behavior = behavior,
+            type = type,
+            value = value
+        )
+    }
+
+    fun button(
+        text: String = "button",
+        textColor: String = "#000000",
+        bgColor: String = "#FFFFFF",
+        borderColor: String = "#FFFFFF",
+        action: InAppMessage.Action = action()
+    ): InAppMessage.Message.Button {
+        return InAppMessage.Message.Button(
+            text = text,
+            style = InAppMessage.Message.Button.Style(
+                textColor = textColor,
+                bgColor = bgColor,
+                borderColor = borderColor
+            ),
+            action = action
+        )
+    }
+
+    fun image(
+        orientation: InAppMessage.Orientation = InAppMessage.Orientation.VERTICAL,
+        imagePath: String = "image_path",
+        action: InAppMessage.Action? = null
+    ): InAppMessage.Message.Image {
+        return InAppMessage.Message.Image(
+            orientation = orientation,
+            imagePath = imagePath,
+            action = action
+        )
+    }
+
+    fun text(
+        title: String = "title",
+        titleColor: String = "#000000",
+        body: String = "body",
+        bodyColor: String = "#FFFFFF"
+    ): InAppMessage.Message.Text {
+        return InAppMessage.Message.Text(
+            title = InAppMessage.Message.Text.Attribute(title, InAppMessage.Message.Text.Style(titleColor)),
+            body = InAppMessage.Message.Text.Attribute(body, InAppMessage.Message.Text.Style(bodyColor))
+        )
+    }
+
+    fun request(
+        workspace: Workspace = workspace(),
+        user: HackleUser = HackleUser.builder().identifier(IdentifierType.ID, "user").build(),
+        inAppMessage: InAppMessage = create(),
+        timestamp: Long = System.currentTimeMillis()
+    ): InAppMessageRequest {
+        return InAppMessageRequest(
+            workspace = workspace,
+            user = user,
+            inAppMessage = inAppMessage,
+            timestamp = timestamp
+        )
+    }
+
+    fun evaluation(
+        reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
+        targetEvaluations: List<Evaluator.Evaluation> = emptyList(),
+        inAppMessage: InAppMessage = create(),
+        message: InAppMessage.Message? = null
+    ): InAppMessageEvaluation {
+        return InAppMessageEvaluation(
+            reason = reason,
+            targetEvaluations = targetEvaluations,
+            inAppMessage = inAppMessage,
+            message = message
+        )
+    }
+}

@@ -2,193 +2,84 @@ package io.hackle.sdk.core.evaluation.evaluator.inappmessage
 
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.storage.HackleInAppMessageStorage
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
-import io.hackle.sdk.core.evaluation.target.InAppMessageResolver
-import io.hackle.sdk.core.evaluation.target.InAppMessageTargetDeterminer
-import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideDeterminer
-import io.hackle.sdk.core.model.InAppMessage
-import io.hackle.sdk.core.model.InAppMessage.MessageContext.PlatformType.*
+import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
+import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
+import io.hackle.sdk.core.evaluation.flow.create
+import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import strikt.assertions.*
 
 @ExtendWith(MockKExtension::class)
 internal class InAppMessageEvaluatorTest {
 
     @MockK
-    private lateinit var inAppMessageTargetDeterminer: InAppMessageTargetDeterminer
-
-    @MockK
-    private lateinit var inAppMessageUserOverrideDeterminer: InAppMessageUserOverrideDeterminer
-
-    @MockK
-    private lateinit var hackleInAppMessageStorage: HackleInAppMessageStorage
-
-
-    @MockK
-    private lateinit var inAppMessageResolver: InAppMessageResolver
+    private lateinit var evaluationFlowFactory: EvaluationFlowFactory
 
     @InjectMockKs
     private lateinit var sut: InAppMessageEvaluator
 
-
-    private lateinit var inAppMessage: InAppMessage
-    private lateinit var request: InAppMessageRequest
-    private lateinit var message: InAppMessage.MessageContext.Message
-
     @Test
-    fun supports() {
-        Assertions.assertTrue(sut.supports(mockk<InAppMessageRequest>()))
-        Assertions.assertFalse(sut.supports(mockk<RemoteConfigRequest<Any>>()))
-        Assertions.assertFalse(sut.supports(mockk<ExperimentRequest>()))
+    fun `supports`() {
+        expectThat(sut.supports(experimentRequest())).isFalse()
+        expectThat(sut.supports(InAppMessages.request())).isTrue()
     }
 
+    @Nested
+    inner class EvaluateTest {
 
-    @BeforeEach
-    fun setup() {
-        inAppMessage = mockk()
-        message = mockk()
-        request = inAppMessageRequest(inAppMessage = inAppMessage, currentTimeMillis = NOW)
-        every { message.lang } returns "ko"
-        every { inAppMessage.key } returns 123L
-        every { inAppMessage.messageContext } returns mockk()
-        every { inAppMessage.messageContext.defaultLang } returns "ko"
-        every { inAppMessage.messageContext.messages } returns listOf(message)
-        every { inAppMessage.displayTimeRange } returns InAppMessage.Range.Custom(NOW - 1L, NOW + 1L)
+        @Test
+        fun `circular`() {
+            val request = InAppMessages.request()
+            val context = Evaluators.context()
+            context.add(request)
 
-        every { inAppMessageResolver.resolve(any(), any()) } returns message
-    }
+            val exception = assertThrows<IllegalArgumentException> { sut.evaluate(request, context) }
 
-
-    @Test
-    fun `플랫폼타입에 ANDROID 가 없으면 보여주지 않음`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(WEB, IOS)
-
-        val evaluation = sut.evaluate(request, Evaluators.context())
-
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.UNSUPPORTED_PLATFORM
-        }
-    }
-
-
-    @Test
-    fun `오버라이드 조건이 true 이면 보여줌`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns true
-
-        val evaluation = sut.evaluate(request, Evaluators.context())
-
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.OVERRIDDEN
-        }
-    }
-
-
-    @Test
-    fun `오버라이드 조건 false, status DRAFT 이면 안보여줌`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
-        every { inAppMessage.status } returns InAppMessage.Status.DRAFT
-
-        val evaluation = sut.evaluate(request, Evaluators.context())
-
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_DRAFT
-        }
-    }
-
-    @Test
-    fun `오버라이드 조건 false, status PAUSE 이면 안보여줌`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
-        every { inAppMessage.status } returns InAppMessage.Status.PAUSE
-
-        val evaluation = sut.evaluate(request, Evaluators.context())
-
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_PAUSED
-        }
-    }
-
-
-    @Test
-    fun `오버라이드 조건 false, status ACTIVE, display 시간이 안 맞으면 안보여줌`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
-        every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.displayTimeRange.within(any()) } returns false
-
-
-        val evaluation = sut.evaluate(request, Evaluators.context())
-
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_PERIOD
+            expectThat(exception.message)
+                .isNotNull()
+                .startsWith("Circular evaluation has occurred")
         }
 
-    }
+        @Test
+        fun `flow - evaluation`() {
+            // given
+            val evaluation = InAppMessages.evaluation()
+            val evaluationFlow: InAppMessageFlow = EvaluationFlow.create(evaluation)
+            every { evaluationFlowFactory.inAppMessageFlow() } returns evaluationFlow
 
-    @Test
-    fun `오버라이드 조건 false, status ACTIVE, display 시간 맞음, Hidden 상태이면 보여주지 않음`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
-        every { inAppMessageTargetDeterminer.determine(any(), any()) } returns true
-        every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.displayTimeRange.within(any()) } returns true
-        every { hackleInAppMessageStorage.exist(any(), any()) } returns true
+            val request = InAppMessages.request()
+            val context = Evaluators.context()
 
-        val evaluation = sut.evaluate(request, Evaluators.context())
+            // when
+            val actual = sut.evaluate(request, context)
 
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_HIDDEN
+            // then
+            expectThat(actual).isSameInstanceAs(evaluation)
         }
-    }
 
-    @Test
-    fun `오버라이드 조건 false, status ACTIVE, display 시간 맞음, Hidden 상태 아니고 타겟팅 조건에 맞으면 보여줌`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
-        every { inAppMessageTargetDeterminer.determine(any(), any()) } returns true
-        every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.displayTimeRange.within(any()) } returns true
-        every { hackleInAppMessageStorage.exist(any(), any()) } returns false
+        @Test
+        fun `flow - default`() {
+            // given
+            val evaluationFlow: InAppMessageFlow = EvaluationFlow.end()
+            every { evaluationFlowFactory.inAppMessageFlow() } returns evaluationFlow
 
-        val evaluation = sut.evaluate(request, Evaluators.context())
+            val request = InAppMessages.request()
+            val context = Evaluators.context()
 
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_TARGET
+            // when
+            val actual = sut.evaluate(request, context)
+
+            // then
+            expectThat(actual.reason) isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
         }
-    }
-
-
-    @Test
-    fun `오버라이드 조건 false, status ACTIVE, display 시간 맞음, Hidden 상태 아니고 타겟팅 조건에도 맞지 않으면 보여주지 않음`() {
-        every { inAppMessage.messageContext.platformTypes } returns listOf(ANDROID)
-        every { inAppMessageUserOverrideDeterminer.determine(any()) } returns false
-        every { inAppMessageTargetDeterminer.determine(any(), any()) } returns false
-        every { inAppMessage.status } returns InAppMessage.Status.ACTIVE
-        every { inAppMessage.displayTimeRange.within(any()) } returns true
-        every { hackleInAppMessageStorage.exist(any(), any()) } returns false
-
-        val evaluation = sut.evaluate(request, Evaluators.context())
-
-        expectThat(evaluation) {
-            get { reason } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
-        }
-    }
-
-
-    companion object {
-        private const val NOW = 1686709946304L
     }
 }

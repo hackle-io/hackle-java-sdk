@@ -1,27 +1,37 @@
-package io.hackle.sdk.core.evaluation.flow
+package io.hackle.sdk.core.evaluation.evaluator.experiment
 
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.action.ActionResolver
 import io.hackle.sdk.core.evaluation.container.ContainerResolver
-import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator.Context
+import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
+import io.hackle.sdk.core.evaluation.flow.FlowEvaluator
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetDeterminer
 import io.hackle.sdk.core.evaluation.target.ExperimentTargetRuleDeterminer
 import io.hackle.sdk.core.evaluation.target.OverrideResolver
-import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Status.*
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 
-internal class OverrideEvaluator(
-    private val overrideResolver: OverrideResolver
-) : FlowEvaluator {
+
+internal typealias ExperimentFlow = EvaluationFlow<ExperimentRequest, ExperimentEvaluation>
+
+internal interface ExperimentFlowEvaluator : FlowEvaluator<ExperimentRequest, ExperimentEvaluation> {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation?
+}
+
+internal class OverrideEvaluator(
+    private val overrideResolver: OverrideResolver
+) : ExperimentFlowEvaluator {
+    override fun evaluate(
+        request: ExperimentRequest,
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         val overriddenVariation = overrideResolver.resolveOrNull(request, context)
         return if (overriddenVariation != null) {
             when (request.experiment.type) {
@@ -34,12 +44,12 @@ internal class OverrideEvaluator(
     }
 }
 
-internal class DraftExperimentEvaluator : FlowEvaluator {
+internal class DraftExperimentEvaluator : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         return if (request.experiment.status == DRAFT) {
             ExperimentEvaluation.ofDefault(request, context, EXPERIMENT_DRAFT)
         } else {
@@ -48,12 +58,12 @@ internal class DraftExperimentEvaluator : FlowEvaluator {
     }
 }
 
-internal class PausedExperimentEvaluator : FlowEvaluator {
+internal class PausedExperimentEvaluator : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         return if (request.experiment.status == PAUSED) {
             when (request.experiment.type) {
                 AB_TEST -> ExperimentEvaluation.ofDefault(request, context, EXPERIMENT_PAUSED)
@@ -65,12 +75,12 @@ internal class PausedExperimentEvaluator : FlowEvaluator {
     }
 }
 
-internal class CompletedExperimentEvaluator : FlowEvaluator {
+internal class CompletedExperimentEvaluator : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         return if (request.experiment.status == COMPLETED) {
             val winnerVariation =
                 requireNotNull(request.experiment.winnerVariation) { "winner variation [${request.experiment.id}]" }
@@ -83,12 +93,12 @@ internal class CompletedExperimentEvaluator : FlowEvaluator {
 
 internal class ExperimentTargetEvaluator(
     private val experimentTargetDeterminer: ExperimentTargetDeterminer
-) : FlowEvaluator {
+) : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         require(request.experiment.type == AB_TEST) { "experiment type must be AB_TEST [${request.experiment.id}]" }
         val isUserInExperimentTarget = experimentTargetDeterminer.isUserInExperimentTarget(request, context)
         return if (isUserInExperimentTarget) {
@@ -101,15 +111,15 @@ internal class ExperimentTargetEvaluator(
 
 internal class TrafficAllocateEvaluator(
     private val actionResolver: ActionResolver
-) : FlowEvaluator {
+) : ExperimentFlowEvaluator {
 
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         val experiment = request.experiment
-        require(request.experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
+        require(request.experiment.status == RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(request.experiment.type == AB_TEST) { "experiment type must be AB_TEST [${experiment.id}]" }
 
         val defaultRule = experiment.defaultRule
@@ -122,19 +132,18 @@ internal class TrafficAllocateEvaluator(
 
         return ExperimentEvaluation.of(request, context, variation, TRAFFIC_ALLOCATED)
     }
-
 }
 
 internal class TargetRuleEvaluator(
     private val targetRuleDeterminer: ExperimentTargetRuleDeterminer, private val actionResolver: ActionResolver
-) : FlowEvaluator {
+) : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         val experiment = request.experiment
-        require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
+        require(experiment.status == RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         if (request.user.identifiers[experiment.identifierType] == null) {
@@ -155,14 +164,14 @@ internal class TargetRuleEvaluator(
 
 internal class DefaultRuleEvaluator(
     private val actionResolver: ActionResolver
-) : FlowEvaluator {
+) : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
+        context: Context,
+        nextFlow: ExperimentFlow
     ): ExperimentEvaluation {
         val experiment = request.experiment
-        require(experiment.status == Experiment.Status.RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
+        require(experiment.status == RUNNING) { "experiment status must be RUNNING [${experiment.id}]" }
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         if (request.user.identifiers[experiment.identifierType] == null) {
@@ -179,12 +188,12 @@ internal class DefaultRuleEvaluator(
 
 internal class ContainerEvaluator(
     private val containerResolver: ContainerResolver
-) : FlowEvaluator {
+) : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         val experiment = request.experiment
         val containerId = experiment.containerId ?: return nextFlow.evaluate(request, context)
         val container = requireNotNull(request.workspace.getContainerOrNull(containerId)) { "Container[$containerId]" }
@@ -196,12 +205,12 @@ internal class ContainerEvaluator(
     }
 }
 
-internal class IdentifierEvaluator : FlowEvaluator {
+internal class IdentifierEvaluator : ExperimentFlowEvaluator {
     override fun evaluate(
         request: ExperimentRequest,
-        context: Evaluator.Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation {
+        context: Context,
+        nextFlow: ExperimentFlow
+    ): ExperimentEvaluation? {
         return if (request.user.identifiers[request.experiment.identifierType] != null) {
             nextFlow.evaluate(request, context)
         } else {
