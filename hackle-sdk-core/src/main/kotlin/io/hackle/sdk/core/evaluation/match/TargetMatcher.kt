@@ -12,6 +12,13 @@ class TargetMatcher internal constructor(
         return target.conditions.all { matches(request, context, it) }
     }
 
+    fun anyMatches(request: Evaluator.Request, context: Evaluator.Context, targets: List<Target>): Boolean {
+        if (targets.isEmpty()) {
+            return true
+        }
+        return targets.any { matches(request, context, it) }
+    }
+
     private fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
         val conditionMatcher = conditionMatcherFactory.getMatcher(condition.key.type)
         return conditionMatcher.matches(request, context, condition)

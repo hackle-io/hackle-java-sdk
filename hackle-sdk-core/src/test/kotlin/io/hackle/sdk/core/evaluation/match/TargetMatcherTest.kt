@@ -10,8 +10,13 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import strikt.api.expectThat
+import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 @ExtendWith(MockKExtension::class)
 internal class TargetMatcherTest {
@@ -25,58 +30,100 @@ internal class TargetMatcherTest {
     @InjectMockKs
     private lateinit var sut: TargetMatcher
 
-
     @BeforeEach
     fun beforeEach() {
         every { conditionMatcherFactory.getMatcher(any()) } returns conditionMatcher
     }
 
-    @Test
-    fun `타겟의 모든 조건이 일치하면 match true`() {
-        // given
-        val target = Target(
-            conditions = listOf(
-                condition(true),
-                condition(true),
-                condition(true),
-                condition(true),
-                condition(true),
+    @DisplayName("matches()")
+    @Nested
+    inner class MatchesTest {
+        @Test
+        fun `타겟의 모든 조건이 일치하면 match true`() {
+            // given
+            val target = Target(
+                conditions = listOf(
+                    condition(true),
+                    condition(true),
+                    condition(true),
+                    condition(true),
+                    condition(true),
+                )
             )
-        )
 
-        // when
-        val actual = sut.matches(mockk(), mockk(), target)
+            // when
+            val actual = sut.matches(mockk(), mockk(), target)
 
-        // then
-        assertTrue(actual)
-        verify(exactly = 5) {
-            conditionMatcher.matches(any(), any(), any())
+            // then
+            assertTrue(actual)
+            verify(exactly = 5) {
+                conditionMatcher.matches(any(), any(), any())
+            }
+        }
+
+        @Test
+        fun `타겟의 조건중 하나라도 일치하지 않으면 match false`() {
+            // given
+            val target = Target(
+                conditions = listOf(
+                    condition(true),
+                    condition(true),
+                    condition(true),
+                    condition(false),
+                    condition(true),
+                    condition(true),
+                    condition(true),
+                )
+            )
+
+            // when
+            val actual = sut.matches(mockk(), mockk(), target)
+
+            // then
+            assertFalse(actual)
+            verify(exactly = 4) {
+                conditionMatcher.matches(any(), any(), any())
+            }
         }
     }
 
-    @Test
-    fun `타겟의 조건중 하나라도 일치하지 않으면 match false`() {
-        // given
 
-        val target = Target(
-            conditions = listOf(
-                condition(true),
-                condition(true),
-                condition(true),
-                condition(false),
-                condition(true),
-                condition(true),
-                condition(true),
-            )
-        )
+    @DisplayName("anyMatches()")
+    @Nested
+    inner class AnyMatchesTest {
 
-        // when
-        val actual = sut.matches(mockk(), mockk(), target)
 
-        // then
-        assertFalse(actual)
-        verify(exactly = 4) {
-            conditionMatcher.matches(any(), any(), any())
+        @Test
+        fun `when empty then returns true`() {
+            expectThat(sut.anyMatches(mockk(), mockk(), emptyList())).isTrue()
+        }
+
+
+        @Test
+        fun `when any of target matched then return true`() {
+            expectThat(
+                sut.anyMatches(
+                    mockk(), mockk(), listOf(
+                        Target(listOf(condition(false))),
+                        Target(listOf(condition(true))),
+                    )
+                )
+            ).isTrue()
+        }
+
+        @Test
+        fun `when all targets not matched then returns false`() {
+            expectThat(
+                sut.anyMatches(
+                    mockk(), mockk(), listOf(
+                        Target(listOf(condition(false))),
+                        Target(listOf(condition(false))),
+                        Target(listOf(condition(false))),
+                        Target(listOf(condition(false))),
+                        Target(listOf(condition(false))),
+                    )
+                )
+            ).isFalse()
         }
     }
 
