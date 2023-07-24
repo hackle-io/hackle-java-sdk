@@ -1,16 +1,14 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.core.evaluation.evaluator.Evaluator.Context
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 
 /**
  * @author Yong
  */
-internal interface FlowEvaluator {
+internal interface FlowEvaluator<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> {
     fun evaluate(
-        request: ExperimentRequest,
-        context: Context,
-        nextFlow: EvaluationFlow
-    ): ExperimentEvaluation
+        request: REQUEST,
+        context: Evaluator.Context,
+        nextFlow: EvaluationFlow<REQUEST, EVALUATION>
+    ): EVALUATION?
 }

@@ -1,6 +1,7 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.core.HackleCore
+import io.hackle.sdk.core.evaluation.EvaluationContext
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.log.metrics.MetricLoggerFactory
 import io.hackle.sdk.core.internal.metrics.Metrics
@@ -88,6 +89,7 @@ object HackleClients {
         )
 
         val core = HackleCore.create(
+            context = EvaluationContext.GLOBAL,
             workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
             eventProcessor = defaultEventProcessor.apply { start() }
         )

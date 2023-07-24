@@ -1,18 +1,23 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.core.evaluation.EvaluationContext
+import io.hackle.sdk.core.evaluation.evaluator.experiment.*
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.*
 import io.hackle.sdk.core.model.Experiment
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import strikt.api.Assertion
 import strikt.api.expectThat
-import strikt.assertions.isA
 
 internal class EvaluationFlowFactoryTest {
 
+    val sut = EvaluationFlowFactory(EvaluationContext().also {
+        it.initialize(mockk(), mockk())
+    })
+
     @Test
-    fun `AB_TEST evaluationFlow`() {
-        val actual = EvaluationFlowFactory(mockk(), mockk()).getFlow(Experiment.Type.AB_TEST)
-        expectThat(actual)
+    fun `AB_TEST`() {
+        val flow = sut.experimentFlow(Experiment.Type.AB_TEST)
+        expectThat(flow)
             .isDecisionWith<OverrideEvaluator>()
             .isDecisionWith<IdentifierEvaluator>()
             .isDecisionWith<ContainerEvaluator>()
@@ -21,13 +26,13 @@ internal class EvaluationFlowFactoryTest {
             .isDecisionWith<PausedExperimentEvaluator>()
             .isDecisionWith<CompletedExperimentEvaluator>()
             .isDecisionWith<TrafficAllocateEvaluator>()
-            .isA<EvaluationFlow.End>()
+            .isEnd()
     }
 
     @Test
-    fun `FEATURE_FLAG evaluationFlow`() {
-        val actual = EvaluationFlowFactory(mockk(), mockk()).getFlow(Experiment.Type.FEATURE_FLAG)
-        expectThat(actual)
+    fun `FEATURE_FLAG`() {
+        val flow = sut.experimentFlow(Experiment.Type.FEATURE_FLAG)
+        expectThat(flow)
             .isDecisionWith<DraftExperimentEvaluator>()
             .isDecisionWith<PausedExperimentEvaluator>()
             .isDecisionWith<CompletedExperimentEvaluator>()
@@ -35,12 +40,20 @@ internal class EvaluationFlowFactoryTest {
             .isDecisionWith<IdentifierEvaluator>()
             .isDecisionWith<TargetRuleEvaluator>()
             .isDecisionWith<DefaultRuleEvaluator>()
-            .isA<EvaluationFlow.End>()
+            .isEnd()
     }
 
-    private inline fun <reified T : FlowEvaluator> Assertion.Builder<EvaluationFlow>.isDecisionWith(): Assertion.Builder<EvaluationFlow> {
-        return isA<EvaluationFlow.Decision>()
-            .and { get { flowEvaluator }.isA<T>() }
-            .get { nextFlow }
+    @Test
+    fun `IN_APP_MESSAGE`() {
+        val flow = sut.inAppMessageFlow()
+        expectThat(flow)
+            .isDecisionWith<PlatformInAppMessageFlowEvaluator>()
+            .isDecisionWith<OverrideInAppMessageFlowEvaluator>()
+            .isDecisionWith<DraftInAppMessageFlowEvaluator>()
+            .isDecisionWith<PauseInAppMessageFlowEvaluator>()
+            .isDecisionWith<PeriodInAppMessageFlowEvaluator>()
+            .isDecisionWith<HiddenInAppMessageFlowEvaluator>()
+            .isDecisionWith<TargetInAppMessageFlowEvaluator>()
+            .isEnd()
     }
 }

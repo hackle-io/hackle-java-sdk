@@ -1,73 +1,52 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentFlow
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.mockk.every
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageFlow
+import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isA
-import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 import strikt.assertions.isSameInstanceAs
 
 internal class EvaluationFlowTest {
 
     @Nested
     inner class EvaluateTest {
+
         @Test
-        fun `End는 TRAFFIC_NOT_ALLOCATED + 기본그룹으로 평가됨`() {
-            val request = experimentRequest()
-            val evaluation = EvaluationFlow.End.evaluate(request, Evaluators.context())
-            expectThat(evaluation.reason) isEqualTo DecisionReason.TRAFFIC_NOT_ALLOCATED
-            expectThat(evaluation.variationKey) isEqualTo "A"
+        fun `when end of flow then returns null`() {
+            val flow: ExperimentFlow = EvaluationFlow.end()
+            val actual = flow.evaluate(experimentRequest(), Evaluators.context())
+            expectThat(actual).isNull()
         }
 
         @Test
-        fun `Decision인 경우 flowEvaluator를 호출한다`() {
-            // given
-            val evaluation = mockk<ExperimentEvaluation>()
-            val nextFlow = mockk<EvaluationFlow>()
-            val flowEvaluator = mockk<FlowEvaluator> {
-                every { evaluate(any(), any(), any()) } returns evaluation
-            }
-            val request = experimentRequest()
-
-            val sut = EvaluationFlow.Decision(flowEvaluator, nextFlow)
-
-            // when
-            val actual = sut.evaluate(request, Evaluators.context())
-
-            // then
+        fun `when flow meed decision then evaluate flow`() {
+            val evaluation = InAppMessages.evaluation()
+            val flow: InAppMessageFlow = InAppMessageFlow.create(evaluation)
+            val actual = flow.evaluate(InAppMessages.request(), Evaluators.context())
             expectThat(actual) isSameInstanceAs evaluation
-            verify {
-                flowEvaluator.evaluate(request, any(), nextFlow)
-            }
         }
-
     }
 
     @Test
     fun `of`() {
-        val flowEvaluator1 = mockk<FlowEvaluator>()
-        val flowEvaluator2 = mockk<FlowEvaluator>()
-        val flowEvaluator3 = mockk<FlowEvaluator>()
 
-        val evaluationFlow = EvaluationFlow.of(flowEvaluator1, flowEvaluator2, flowEvaluator3)
+        val f1 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
+        val f2 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
+        val f3 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
 
-        expectThat(evaluationFlow)
-            .isA<EvaluationFlow.Decision>()
-            .and { get { flowEvaluator } isSameInstanceAs flowEvaluator1 }
-            .get { nextFlow }
-            .isA<EvaluationFlow.Decision>()
-            .and { get { flowEvaluator } isSameInstanceAs flowEvaluator2 }
-            .get { nextFlow }
-            .isA<EvaluationFlow.Decision>()
-            .and { get { flowEvaluator } isSameInstanceAs flowEvaluator3 }
-            .get { nextFlow }
-            .isA<EvaluationFlow.End>()
+        val flow = EvaluationFlow.of(f1, f2, f3)
+
+        expectThat(flow)
+            .isDecisionWith(f1)
+            .isDecisionWith(f2)
+            .isDecisionWith(f3)
+            .isEnd()
     }
 }

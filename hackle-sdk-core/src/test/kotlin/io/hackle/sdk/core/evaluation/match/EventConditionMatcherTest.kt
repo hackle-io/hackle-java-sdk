@@ -89,4 +89,21 @@ internal class EventConditionMatcherTest {
 
         expectThat(result) isEqualTo true
     }
+
+    @Test
+    fun `프로퍼티 값이 없으면 false`() {
+        val request = mockk<Evaluator.EventRequest>()
+        val condition = mockk<Target.Condition>()
+
+        every { condition.key.type } returns Target.Key.Type.EVENT_PROPERTY
+        every { condition.match } returns mockk()
+        every { request.event } returns mockk()
+        every {
+            eventValueResolver.resolveOrNull(any(), any())
+        } returns null
+
+        val result = sut.matches(request, context, condition)
+
+        expectThat(result) isEqualTo false
+    }
 }
