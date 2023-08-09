@@ -1,12 +1,9 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.core.evaluation.action.ActionResolver
-import io.hackle.sdk.core.evaluation.bucket.Bucketer
-import io.hackle.sdk.core.evaluation.container.ContainerResolver
-import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
-import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.target.*
+import io.hackle.sdk.core.evaluation.EvaluationContext
+import io.hackle.sdk.core.evaluation.evaluator.experiment.*
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.*
+import io.hackle.sdk.core.evaluation.get
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
 import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
@@ -14,63 +11,53 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 /**
  * @author Yong
  */
-internal class EvaluationFlowFactory(
-    evaluator: Evaluator,
-    manualOverrideStorage: ManualOverrideStorage
-) {
+internal class EvaluationFlowFactory(context: EvaluationContext) {
 
-    /**
-     * [EvaluationFlow] for [AB_TEST]
-     */
-    private val abTestFlow: EvaluationFlow
+    private val abTestFlow: ExperimentFlow
+    private val featureFlagFlow: ExperimentFlow
+    private val inAppMessageFlow: InAppMessageFlow
 
-    /**
-     * [EvaluationFlow] for [FEATURE_FLAG]
-     */
-    private val featureFlagFlow: EvaluationFlow
-
-
-    val remoteConfigParameterTargetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
 
     init {
-
-        val bucketer = Bucketer()
-        val targetMatcher = TargetMatcher(ConditionMatcherFactory(evaluator))
-        val actionResolver = ActionResolver(bucketer)
-        val overrideResolver = OverrideResolver(manualOverrideStorage, targetMatcher, actionResolver)
-        val containerResolver = ContainerResolver(bucketer)
-
-        val abTestFlow = EvaluationFlow.of(
-            OverrideEvaluator(overrideResolver),
+        abTestFlow = ExperimentFlow.of(
+            OverrideEvaluator(context.get()),
             IdentifierEvaluator(),
-            ContainerEvaluator(containerResolver),
-            ExperimentTargetEvaluator(ExperimentTargetDeterminer(targetMatcher)),
+            ContainerEvaluator(context.get()),
+            ExperimentTargetEvaluator(context.get()),
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-            TrafficAllocateEvaluator(actionResolver)
+            TrafficAllocateEvaluator(context.get())
         )
-
-        val featureFlagFlow = EvaluationFlow.of(
+        featureFlagFlow = EvaluationFlow.of(
             DraftExperimentEvaluator(),
             PausedExperimentEvaluator(),
             CompletedExperimentEvaluator(),
-            OverrideEvaluator(overrideResolver),
+            OverrideEvaluator(context.get()),
             IdentifierEvaluator(),
-            TargetRuleEvaluator(ExperimentTargetRuleDeterminer(targetMatcher), actionResolver),
-            DefaultRuleEvaluator(actionResolver)
+            TargetRuleEvaluator(context.get(), context.get()),
+            DefaultRuleEvaluator(context.get())
         )
 
-        this.abTestFlow = abTestFlow
-        this.featureFlagFlow = featureFlagFlow
-        this.remoteConfigParameterTargetRuleDeterminer =
-            RemoteConfigParameterTargetRuleDeterminer(targetMatcher, bucketer)
+        inAppMessageFlow = InAppMessageFlow.of(
+            PlatformInAppMessageFlowEvaluator(),
+            OverrideInAppMessageFlowEvaluator(context.get(), context.get()),
+            DraftInAppMessageFlowEvaluator(),
+            PauseInAppMessageFlowEvaluator(),
+            PeriodInAppMessageFlowEvaluator(),
+            HiddenInAppMessageFlowEvaluator(context.get()),
+            TargetInAppMessageFlowEvaluator(context.get(), context.get())
+        )
     }
 
-    fun getFlow(experimentType: Experiment.Type): EvaluationFlow {
+    fun experimentFlow(experimentType: Experiment.Type): ExperimentFlow {
         return when (experimentType) {
             AB_TEST -> abTestFlow
             FEATURE_FLAG -> featureFlagFlow
         }
+    }
+
+    fun inAppMessageFlow(): InAppMessageFlow {
+        return inAppMessageFlow
     }
 }

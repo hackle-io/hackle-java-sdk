@@ -1,31 +1,49 @@
 package io.hackle.sdk.core.evaluation.flow
 
-import io.hackle.sdk.common.decision.DecisionReason.TRAFFIC_NOT_ALLOCATED
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 
 /**
  * @author Yong
  */
-internal sealed class EvaluationFlow {
+internal sealed class EvaluationFlow<in REQUEST : Evaluator.Request, out EVALUATION : Evaluator.Evaluation> {
 
-    fun evaluate(request: ExperimentRequest, context: Evaluator.Context): ExperimentEvaluation {
+    class End<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> :
+        EvaluationFlow<REQUEST, EVALUATION>()
+
+    class Decision<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation>(
+        val flowEvaluator: FlowEvaluator<REQUEST, EVALUATION>,
+        val nextFlow: EvaluationFlow<REQUEST, EVALUATION>
+    ) : EvaluationFlow<REQUEST, EVALUATION>()
+
+    fun evaluate(request: REQUEST, context: Evaluator.Context): EVALUATION? {
         return when (this) {
-            is End -> ExperimentEvaluation.ofDefault(request, context, TRAFFIC_NOT_ALLOCATED)
-            is Decision -> flowEvaluator.evaluate(request, context, nextFlow)
+            is End<REQUEST, EVALUATION> -> null
+            is Decision<REQUEST, EVALUATION> -> flowEvaluator.evaluate(request, context, nextFlow)
         }
     }
 
-    object End : EvaluationFlow()
-    class Decision(val flowEvaluator: FlowEvaluator, val nextFlow: EvaluationFlow) : EvaluationFlow()
-
     companion object {
-        fun of(vararg evaluators: FlowEvaluator): EvaluationFlow {
-            var flow: EvaluationFlow = End
-            val iterator = evaluators.toList().listIterator(evaluators.size)
-            while (iterator.hasPrevious()) {
-                flow = Decision(iterator.previous(), flow)
+
+        private val END: EvaluationFlow<Evaluator.Request, Evaluator.Evaluation> = End()
+
+        fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> end(): EvaluationFlow<REQUEST, EVALUATION> {
+            @Suppress("UNCHECKED_CAST")
+            return END as EvaluationFlow<REQUEST, EVALUATION>
+        }
+
+        fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> decision(
+            evaluator: FlowEvaluator<REQUEST, EVALUATION>,
+            nextFlow: EvaluationFlow<REQUEST, EVALUATION>
+        ): EvaluationFlow<REQUEST, EVALUATION> {
+            return Decision(evaluator, nextFlow)
+        }
+
+        fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> of(
+            vararg evaluators: FlowEvaluator<REQUEST, EVALUATION>
+        ): EvaluationFlow<REQUEST, EVALUATION> {
+            var flow: EvaluationFlow<REQUEST, EVALUATION> = end()
+            for (evaluator in evaluators.reversed()) {
+                flow = decision(evaluator, flow)
             }
             return flow
         }

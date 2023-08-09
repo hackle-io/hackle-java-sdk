@@ -7,14 +7,19 @@ import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
+import io.hackle.sdk.core.decision.InAppMessageDecision
+import io.hackle.sdk.core.evaluation.EvaluationContext
 import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
+import io.hackle.sdk.core.evaluation.get
 import io.hackle.sdk.core.evaluation.target.DelegatingManualOverrideStorage
 import io.hackle.sdk.core.evaluation.target.ManualOverrideStorage
 import io.hackle.sdk.core.event.EventProcessor
@@ -40,9 +45,11 @@ import io.hackle.sdk.core.workspace.WorkspaceFetcher
 class HackleCore internal constructor(
     private val experimentEvaluator: ExperimentEvaluator,
     private val remoteConfigEvaluator: RemoteConfigEvaluator<Any>,
+    private val inAppMessageEvaluator: InAppMessageEvaluator,
     private val workspaceFetcher: WorkspaceFetcher,
     private val eventFactory: UserEventFactory,
     private val eventProcessor: EventProcessor,
+    private val clock: Clock,
 ) : AutoCloseable {
 
     fun experiment(experimentKey: Long, user: HackleUser, defaultVariation: Variation): Decision {
@@ -139,6 +146,18 @@ class HackleCore internal constructor(
         return RemoteConfigDecision.of(evaluation.value, evaluation.reason) as RemoteConfigDecision<T>
     }
 
+    fun inAppMessage(inAppMessageKey: Long, user: HackleUser): InAppMessageDecision {
+        val workspace = workspaceFetcher.fetch() ?: return InAppMessageDecision.of(SDK_NOT_READY)
+
+        val inAppMessage = workspace.getInAppMessageOrNull(inAppMessageKey)
+            ?: return InAppMessageDecision.of(IN_APP_MESSAGE_NOT_FOUND)
+
+        val request = InAppMessageRequest(workspace, user, inAppMessage, timestamp = clock.currentMillis())
+
+        val evaluation = inAppMessageEvaluator.evaluate(request, Evaluators.context())
+        return InAppMessageDecision.of(evaluation.reason, evaluation.inAppMessage, evaluation.message)
+    }
+
     override fun close() {
         workspaceFetcher.tryClose()
         eventProcessor.tryClose()
@@ -146,28 +165,31 @@ class HackleCore internal constructor(
 
     companion object {
         fun create(
+            context: EvaluationContext,
             workspaceFetcher: WorkspaceFetcher,
             eventProcessor: EventProcessor,
             vararg manualOverrideStorages: ManualOverrideStorage
         ): HackleCore {
 
             val delegatingEvaluator = DelegatingEvaluator()
-
-            val manualOverrideStorage = DelegatingManualOverrideStorage(manualOverrideStorages.toList())
-            val flowFactory = EvaluationFlowFactory(delegatingEvaluator, manualOverrideStorage)
+            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()))
+            val flowFactory = EvaluationFlowFactory(context)
 
             val experimentEvaluator = ExperimentEvaluator(flowFactory)
-                .also { delegatingEvaluator.add(it) }
-            val remoteConfigEvaluator =
-                RemoteConfigEvaluator<Any>(flowFactory.remoteConfigParameterTargetRuleDeterminer)
-                    .also { delegatingEvaluator.add(it) }
+            val remoteConfigEvaluator = RemoteConfigEvaluator<Any>(context.get())
+            val inAppMessageEvaluator = InAppMessageEvaluator(flowFactory)
+
+            delegatingEvaluator.add(experimentEvaluator)
+            delegatingEvaluator.add(remoteConfigEvaluator)
 
             return HackleCore(
-                experimentEvaluator,
-                remoteConfigEvaluator,
-                workspaceFetcher,
-                UserEventFactory(Clock.SYSTEM),
-                eventProcessor
+                experimentEvaluator = experimentEvaluator,
+                remoteConfigEvaluator = remoteConfigEvaluator,
+                inAppMessageEvaluator = inAppMessageEvaluator,
+                workspaceFetcher = workspaceFetcher,
+                eventFactory = UserEventFactory(Clock.SYSTEM),
+                eventProcessor = eventProcessor,
+                clock = Clock.SYSTEM,
             )
         }
     }

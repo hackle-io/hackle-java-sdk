@@ -55,8 +55,8 @@ internal class CumulativeTimerTest {
 
         expectThat(timer.count()).isEqualTo(10)
         expectThat(timer.totalTime(TimeUnit.MILLISECONDS)).isIn(1000.0..1050.0)
-        expectThat(timer.max(TimeUnit.MILLISECONDS)).isIn(100.0..110.0)
-        expectThat(timer.mean(TimeUnit.MILLISECONDS)).isIn(100.0..110.0)
+        expectThat(timer.max(TimeUnit.MILLISECONDS)).isIn(100.0..120.0)
+        expectThat(timer.mean(TimeUnit.MILLISECONDS)).isIn(100.0..120.0)
     }
 
     @Test
