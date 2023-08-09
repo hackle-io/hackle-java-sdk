@@ -1,5 +1,7 @@
 package io.hackle.sdk
 
+import io.hackle.sdk.common.HackleRegion
+
 class HackleConfig private constructor(builder: Builder) {
 
     val sdkUrl: String = builder.sdkUrl
@@ -8,9 +10,9 @@ class HackleConfig private constructor(builder: Builder) {
 
     class Builder {
 
-        internal var sdkUrl: String = Region.DEFAULT.sdkUrl
-        internal var eventUrl: String = Region.DEFAULT.eventUrl
-        internal var monitoringUrl: String = Region.DEFAULT.monitoringUrl
+        internal var sdkUrl: String = HackleRegion.DEFAULT.sdkUrl
+        internal var eventUrl: String = HackleRegion.DEFAULT.eventUrl
+        internal var monitoringUrl: String = HackleRegion.DEFAULT.monitoringUrl
 
         fun sdkUrl(sdkUrl: String) = apply {
             this.sdkUrl = sdkUrl
@@ -24,7 +26,7 @@ class HackleConfig private constructor(builder: Builder) {
             this.monitoringUrl = monitoringUrl
         }
 
-        fun region(region: Region) = apply {
+        fun region(region: HackleRegion) = apply {
             sdkUrl(region.sdkUrl)
             eventUrl(region.eventUrl)
             monitoringUrl(region.monitoringUrl)

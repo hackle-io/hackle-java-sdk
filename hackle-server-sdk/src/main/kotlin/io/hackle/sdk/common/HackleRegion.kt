@@ -1,6 +1,6 @@
-package io.hackle.sdk
+package io.hackle.sdk.common
 
-enum class Region(
+enum class HackleRegion(
     internal val sdkUrl: String,
     internal val eventUrl: String,
     internal val monitoringUrl: String,
