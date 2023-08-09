@@ -1,6 +1,6 @@
 package io.hackle.sdk
 
-enum class ServerZone(
+enum class Region(
     internal val sdkUrl: String,
     internal val eventUrl: String,
     internal val monitoringUrl: String,
