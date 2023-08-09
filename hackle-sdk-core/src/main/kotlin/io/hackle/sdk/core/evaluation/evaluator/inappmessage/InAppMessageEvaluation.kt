@@ -8,18 +8,21 @@ import io.hackle.sdk.core.model.InAppMessage
 internal class InAppMessageEvaluation(
     override val reason: DecisionReason,
     override val targetEvaluations: List<Evaluator.Evaluation>,
-    val message: InAppMessage.MessageContext.Message?,
+    val inAppMessage: InAppMessage,
+    val message: InAppMessage.Message?,
 ) : Evaluator.Evaluation {
 
     companion object {
         fun of(
-            reason: DecisionReason,
+            request: InAppMessageRequest,
             context: Evaluator.Context,
-            message: InAppMessage.MessageContext.Message? = null
+            reason: DecisionReason,
+            message: InAppMessage.Message? = null
         ): InAppMessageEvaluation {
             return InAppMessageEvaluation(
                 reason = reason,
                 targetEvaluations = context.targetEvaluations,
+                inAppMessage = request.inAppMessage,
                 message = message
             )
         }

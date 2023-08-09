@@ -1,5 +1,7 @@
 package io.hackle.sdk
 
+import io.hackle.sdk.common.HackleRegion
+
 class HackleConfig private constructor(builder: Builder) {
 
     val sdkUrl: String = builder.sdkUrl
@@ -8,9 +10,9 @@ class HackleConfig private constructor(builder: Builder) {
 
     class Builder {
 
-        internal var sdkUrl: String = DEFAULT_SDK_URL
-        internal var eventUrl: String = DEFAULT_EVENT_URL
-        internal var monitoringUrl: String = DEFAULT_MONITORING_URL
+        internal var sdkUrl: String = HackleRegion.DEFAULT.sdkUrl
+        internal var eventUrl: String = HackleRegion.DEFAULT.eventUrl
+        internal var monitoringUrl: String = HackleRegion.DEFAULT.monitoringUrl
 
         fun sdkUrl(sdkUrl: String) = apply {
             this.sdkUrl = sdkUrl
@@ -24,16 +26,18 @@ class HackleConfig private constructor(builder: Builder) {
             this.monitoringUrl = monitoringUrl
         }
 
+        fun region(region: HackleRegion) = apply {
+            sdkUrl(region.sdkUrl)
+            eventUrl(region.eventUrl)
+            monitoringUrl(region.monitoringUrl)
+        }
+
         fun build(): HackleConfig {
             return HackleConfig(this)
         }
     }
 
     companion object {
-
-        internal const val DEFAULT_SDK_URL = "https://sdk.hackle.io"
-        internal const val DEFAULT_EVENT_URL = "https://event.hackle.io"
-        internal const val DEFAULT_MONITORING_URL = "https://monitoring.hackle.io"
 
         val DEFAULT: HackleConfig = builder().build()
 

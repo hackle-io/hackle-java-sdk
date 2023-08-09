@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.evaluator.experiment
 
+import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.AbstractEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
@@ -12,7 +13,8 @@ internal class ExperimentEvaluator(
     }
 
     override fun evaluateInternal(request: ExperimentRequest, context: Evaluator.Context): ExperimentEvaluation {
-        val evaluationFlow = evaluationFlowFactory.getFlow(request.experiment.type)
+        val evaluationFlow = evaluationFlowFactory.experimentFlow(request.experiment.type)
         return evaluationFlow.evaluate(request, context)
+            ?: ExperimentEvaluation.ofDefault(request, context, DecisionReason.TRAFFIC_NOT_ALLOCATED)
     }
 }

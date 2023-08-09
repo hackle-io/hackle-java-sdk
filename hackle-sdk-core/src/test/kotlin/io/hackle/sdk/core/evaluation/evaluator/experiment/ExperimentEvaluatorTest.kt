@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation.evaluator.experiment
 
+import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 import strikt.assertions.isSameInstanceAs
 import strikt.assertions.startsWith
@@ -53,13 +54,13 @@ internal class ExperimentEvaluatorTest {
         }
 
         @Test
-        fun `evaluation - flow`() {
+        fun `flow - evaluation`() {
             // given
             val evaluation = mockk<ExperimentEvaluation>()
-            val evaluationFlow = mockk<EvaluationFlow> {
+            val evaluationFlow = mockk<ExperimentFlow> {
                 every { evaluate(any(), any()) } returns evaluation
             }
-            every { evaluationFlowFactory.getFlow(any()) } returns evaluationFlow
+            every { evaluationFlowFactory.experimentFlow(any()) } returns evaluationFlow
 
             val request = experimentRequest()
             val context = Evaluators.context()
@@ -69,6 +70,21 @@ internal class ExperimentEvaluatorTest {
 
             // then
             expectThat(actual) isSameInstanceAs evaluation
+        }
+
+        @Test
+        fun `flow - default`() {
+            // given
+            every { evaluationFlowFactory.experimentFlow(any()) } returns ExperimentFlow.end()
+
+            val request = experimentRequest()
+            val context = Evaluators.context()
+
+            // when
+            val actual = sut.evaluate(request, context)
+
+            // then
+            expectThat(actual.reason) isEqualTo DecisionReason.TRAFFIC_NOT_ALLOCATED
         }
     }
 }
