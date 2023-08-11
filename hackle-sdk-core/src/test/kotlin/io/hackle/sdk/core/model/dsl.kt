@@ -32,13 +32,14 @@ fun experiment(
     key: Long = IdentifierGenerator.generate("experimentKey"),
     identifierType: String = "\$id",
     version: Int = 1,
+    executionVersion: Int = 1,
     type: Experiment.Type = Experiment.Type.AB_TEST,
     status: Experiment.Status = Experiment.Status.RUNNING,
     containerId: Long? = null,
     bucketRegistry: BucketRegistry = BucketRegistry.None,
     init: ExperimentDsl.() -> Unit = { variations(A, B) }
 ): Experiment {
-    return ExperimentDsl(id, key, type, identifierType, status, version, containerId, bucketRegistry)
+    return ExperimentDsl(id, key, type, identifierType, status, version, executionVersion, containerId, bucketRegistry)
         .apply(init)
         .build()
 }
@@ -50,6 +51,7 @@ class ExperimentDsl(
     private val identifierType: String,
     private val status: Experiment.Status,
     private val version: Int,
+    private val executionVersion: Int,
     private val containerId: Long?,
     private val bucketRegistry: BucketRegistry,
 ) {
@@ -113,6 +115,7 @@ class ExperimentDsl(
             identifierType,
             status,
             version,
+            executionVersion,
             variations,
             overrides,
             segmentOverrides,

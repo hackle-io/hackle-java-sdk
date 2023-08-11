@@ -41,7 +41,7 @@ internal class UserEventFactoryTest {
         val evaluation2 = ExperimentEvaluation(
             DecisionReason.DEFAULT_RULE,
             emptyList(),
-            experiment(id = 2, type = Experiment.Type.FEATURE_FLAG),
+            experiment(id = 2, type = Experiment.Type.FEATURE_FLAG, version = 2, executionVersion = 3),
             320,
             "A",
             null
@@ -86,7 +86,9 @@ internal class UserEventFactoryTest {
                 get { properties } isEqualTo mapOf(
                     "\$targetingRootType" to "REMOTE_CONFIG",
                     "\$targetingRootId" to 1L,
-                    "\$parameterConfigurationId" to 42L
+                    "\$parameterConfigurationId" to 42L,
+                    "\$experiment_version" to 1,
+                    "\$execution_version" to 1,
                 )
             }
 
@@ -100,7 +102,9 @@ internal class UserEventFactoryTest {
                 get { decisionReason } isEqualTo DecisionReason.DEFAULT_RULE
                 get { properties } isEqualTo mapOf(
                     "\$targetingRootType" to "REMOTE_CONFIG",
-                    "\$targetingRootId" to 1L
+                    "\$targetingRootId" to 1L,
+                    "\$experiment_version" to 2,
+                    "\$execution_version" to 3,
                 )
             }
     }

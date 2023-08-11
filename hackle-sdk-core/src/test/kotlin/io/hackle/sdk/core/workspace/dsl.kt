@@ -27,10 +27,21 @@ class WorkspaceDsl() : BucketRegistry, Workspace {
         key: Long = IdentifierGenerator.generate("experimentKey"),
         identifierType: String = "\$id",
         version: Int = 1,
+        executionVersion: Int = 1,
         status: Experiment.Status = Experiment.Status.RUNNING,
         init: ExperimentDsl.() -> Unit
     ): Experiment {
-        return ExperimentDsl(id, key, AB_TEST, identifierType, status, version, null, this).apply(init).build().also {
+        return ExperimentDsl(
+            id,
+            key,
+            AB_TEST,
+            identifierType,
+            status,
+            version,
+            executionVersion,
+            null,
+            this
+        ).apply(init).build().also {
             _experiments[it.key] = it
         }
     }
@@ -41,7 +52,7 @@ class WorkspaceDsl() : BucketRegistry, Workspace {
         status: Experiment.Status,
         init: ExperimentDsl.() -> Unit
     ): Experiment {
-        return ExperimentDsl(id, key, FEATURE_FLAG, "\$id", status, 1, null, this).apply(init).build().also {
+        return ExperimentDsl(id, key, FEATURE_FLAG, "\$id", status, 1, 1, null, this).apply(init).build().also {
             _featureFlags[it.key] = it
         }
     }
