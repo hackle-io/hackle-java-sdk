@@ -22,6 +22,7 @@
       "execution": {
         "id": 2,
         "status": "RUNNING",
+        "version": 1,
         "userOverrides": [],
         "segmentOverrides": [],
         "targetAudiences": [],
@@ -67,13 +68,15 @@
   "segments": [],
   "containers": [
     {
-      "id":1,
+      "id": 1,
       "environmentId": 1,
       "bucketId": 1,
       "groups": [
         {
           "id": 1,
-          "experiments": [2]
+          "experiments": [
+            2
+          ]
         }
       ]
     }
