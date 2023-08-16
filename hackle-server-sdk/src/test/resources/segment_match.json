@@ -22,6 +22,7 @@
       "execution": {
         "id": 1,
         "status": "RUNNING",
+        "version": 1,
         "userOverrides": [],
         "segmentOverrides": [
           {
