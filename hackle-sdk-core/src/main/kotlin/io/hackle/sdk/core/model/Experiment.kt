@@ -11,6 +11,7 @@ data class Experiment(
     val identifierType: String,
     val status: Status,
     val version: Int,
+    val executionVersion: Int,
     val variations: List<Variation>,
     val userOverrides: Map<String, Long>,
     val segmentOverrides: List<TargetRule>,
