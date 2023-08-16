@@ -37,6 +37,8 @@ internal class UserEventFactory(
         return when (evaluation) {
             is ExperimentEvaluation -> {
                 properties.add(CONFIG_ID_PROPERTY_KEY, evaluation.config?.id)
+                properties.add(EXPERIMENT_VERSION_KEY, evaluation.experiment.version)
+                properties.add(EXECUTION_VERSION_KEY, evaluation.experiment.executionVersion)
                 UserEvent.exposure(
                     user = request.user,
                     evaluation = evaluation,
@@ -64,5 +66,8 @@ internal class UserEventFactory(
         private const val ROOT_ID = "\$targetingRootId"
 
         private const val CONFIG_ID_PROPERTY_KEY = "\$parameterConfigurationId"
+
+        private const val EXPERIMENT_VERSION_KEY = "\$experiment_version"
+        private const val EXECUTION_VERSION_KEY = "\$execution_version"
     }
 }
