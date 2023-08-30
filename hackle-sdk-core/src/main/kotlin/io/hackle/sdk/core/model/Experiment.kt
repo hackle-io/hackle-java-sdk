@@ -6,7 +6,7 @@ import io.hackle.sdk.common.HackleExperiment
  * @author Yong
  */
 data class Experiment(
-    override val id: Long,
+    val id: Long,
     override val key: Long,
     val name: String?,
     val type: Type,
