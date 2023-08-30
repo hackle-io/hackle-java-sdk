@@ -80,7 +80,8 @@ class HackleCore internal constructor(
     private fun experiment(request: ExperimentRequest): Pair<ExperimentEvaluation, Decision> {
         val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
         val config = evaluation.config ?: ParameterConfig.empty()
-        val decision = Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config)
+        val decision =
+            Decision.of(Variation.from(evaluation.variationKey), evaluation.reason, config, evaluation.experiment)
         return Pair(evaluation, decision)
     }
 
@@ -113,9 +114,9 @@ class HackleCore internal constructor(
         val evaluation = experimentEvaluator.evaluate(request, Evaluators.context())
         val config = evaluation.config ?: ParameterConfig.empty()
         val decision = if (Variation.from(evaluation.variationKey).isControl) {
-            FeatureFlagDecision.off(evaluation.reason, config)
+            FeatureFlagDecision.off(evaluation.reason, config, evaluation.experiment)
         } else {
-            FeatureFlagDecision.on(evaluation.reason, config)
+            FeatureFlagDecision.on(evaluation.reason, config, evaluation.experiment)
         }
         return Pair(evaluation, decision)
     }
