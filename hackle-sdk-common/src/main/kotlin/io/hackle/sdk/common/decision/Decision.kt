@@ -44,7 +44,7 @@ data class FeatureFlagDecision internal constructor(
 ) : ParameterConfig by config {
 
     override fun toString(): String {
-        return "FeatureFlagDecision(experiment=$featureFlag, isOn=$isOn, reason=$reason, config=${config.parameters})"
+        return "FeatureFlagDecision(featureFlag=$featureFlag, isOn=$isOn, reason=$reason, config=${config.parameters})"
     }
 
     companion object {
