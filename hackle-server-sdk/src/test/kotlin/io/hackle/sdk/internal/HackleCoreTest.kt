@@ -2,7 +2,6 @@ package io.hackle.sdk.internal
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.Variation
-import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.HackleCore
@@ -158,10 +157,18 @@ internal class HackleCoreTest {
 
         val user1 = HackleUser.builder().identifier(IdentifierType.ID, "matched_id").build()
         val decision1 = core.experiment(1, user1, Variation.A)
-        expectThat(decision1) isEqualTo Decision.of(Variation.A, DecisionReason.OVERRIDDEN)
+        expectThat(decision1) {
+            get { variation } isEqualTo Variation.A
+            get { reason } isEqualTo DecisionReason.OVERRIDDEN
+            get { experiment }.isNotNull()
+        }
 
         val user2 = HackleUser.builder().identifier(IdentifierType.ID, "not_matched_id").build()
         val decision2 = core.experiment(1, user2, Variation.A)
-        expectThat(decision2) isEqualTo Decision.of(Variation.A, DecisionReason.TRAFFIC_ALLOCATED)
+        expectThat(decision2) {
+            get { variation } isEqualTo Variation.A
+            get { reason } isEqualTo DecisionReason.TRAFFIC_ALLOCATED
+            get { experiment }.isNotNull()
+        }
     }
 }
