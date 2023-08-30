@@ -96,6 +96,7 @@ internal class HackleCoreTest {
             expectThat(actual) {
                 get { reason } isEqualTo SDK_NOT_READY
                 get { variation } isEqualTo defaultVariation
+                get { experiment }.isNull()
             }
             verify { eventProcessor wasNot Called }
         }
@@ -118,6 +119,7 @@ internal class HackleCoreTest {
             expectThat(actual) {
                 get { reason } isEqualTo EXPERIMENT_NOT_FOUND
                 get { variation } isEqualTo defaultVariation
+                get { experiment }.isNull()
             }
             verify { eventProcessor wasNot Called }
         }
@@ -150,7 +152,7 @@ internal class HackleCoreTest {
             val actual = sut.experiment(42, user, defaultVariation)
 
             // then
-            expectThat(actual) isEqualTo Decision.of(B, TRAFFIC_ALLOCATED, config)
+            expectThat(actual) isEqualTo Decision.of(B, TRAFFIC_ALLOCATED, config, experiment)
             verify(exactly = 2) {
                 eventProcessor.process(any())
             }
@@ -182,7 +184,7 @@ internal class HackleCoreTest {
             val actual = sut.experiment(42, user, defaultVariation)
 
             // then
-            expectThat(actual) isEqualTo Decision.of(B, TRAFFIC_ALLOCATED, ParameterConfig.empty())
+            expectThat(actual) isEqualTo Decision.of(B, TRAFFIC_ALLOCATED, ParameterConfig.empty(), experiment)
         }
     }
 
@@ -269,6 +271,7 @@ internal class HackleCoreTest {
             expectThat(actual) {
                 get { reason } isEqualTo SDK_NOT_READY
                 get { isOn }.isFalse()
+                get { featureFlag }.isNull()
             }
             verify { eventProcessor wasNot Called }
         }
@@ -289,6 +292,7 @@ internal class HackleCoreTest {
             expectThat(actual) {
                 get { reason } isEqualTo FEATURE_FLAG_NOT_FOUND
                 get { isOn }.isFalse()
+                get { featureFlag }.isNull()
             }
             verify { eventProcessor wasNot Called }
         }
@@ -308,7 +312,7 @@ internal class HackleCoreTest {
             val evaluation = ExperimentEvaluation(
                 TRAFFIC_ALLOCATED,
                 emptyList(),
-                experiment(),
+                featureFlag,
                 320,
                 "A",
                 config
@@ -338,7 +342,7 @@ internal class HackleCoreTest {
             val evaluation = ExperimentEvaluation(
                 TRAFFIC_ALLOCATED,
                 emptyList(),
-                experiment(),
+                featureFlag,
                 320,
                 "A",
                 null
@@ -352,6 +356,7 @@ internal class HackleCoreTest {
             expectThat(actual) {
                 get { isOn }.isFalse()
                 get { reason } isEqualTo TRAFFIC_ALLOCATED
+                get { this@get.featureFlag } isEqualTo featureFlag
             }
         }
 
@@ -368,7 +373,7 @@ internal class HackleCoreTest {
             val evaluation = ExperimentEvaluation(
                 TRAFFIC_ALLOCATED,
                 emptyList(),
-                experiment(),
+                featureFlag,
                 320,
                 "B",
                 null
@@ -383,6 +388,7 @@ internal class HackleCoreTest {
             expectThat(actual) {
                 get { isOn }.isTrue()
                 get { reason } isEqualTo TRAFFIC_ALLOCATED
+                get { this@get.featureFlag } isEqualTo featureFlag
             }
         }
 
@@ -401,7 +407,7 @@ internal class HackleCoreTest {
             val evaluation = ExperimentEvaluation(
                 TRAFFIC_ALLOCATED,
                 emptyList(),
-                experiment(),
+                featureFlag,
                 320,
                 "B",
                 config
@@ -412,7 +418,7 @@ internal class HackleCoreTest {
             val actual = sut.featureFlag(42, user)
 
             // then
-            expectThat(actual) isEqualTo FeatureFlagDecision.on(TRAFFIC_ALLOCATED, config)
+            expectThat(actual) isEqualTo FeatureFlagDecision.on(TRAFFIC_ALLOCATED, config, featureFlag)
         }
 
         @Test
@@ -428,7 +434,7 @@ internal class HackleCoreTest {
             val evaluation = ExperimentEvaluation(
                 TRAFFIC_ALLOCATED,
                 emptyList(),
-                experiment(),
+                featureFlag,
                 320,
                 "B",
                 null
@@ -439,7 +445,7 @@ internal class HackleCoreTest {
             val actual = sut.featureFlag(42, user)
 
             // then
-            expectThat(actual) isEqualTo FeatureFlagDecision.on(TRAFFIC_ALLOCATED, ParameterConfig.empty())
+            expectThat(actual) isEqualTo FeatureFlagDecision.on(TRAFFIC_ALLOCATED, ParameterConfig.empty(), featureFlag)
         }
     }
 
