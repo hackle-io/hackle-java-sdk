@@ -1,16 +1,18 @@
 package io.hackle.sdk.core.model
 
+import io.hackle.sdk.common.HackleExperiment
+
 /**
  * @author Yong
  */
 data class Experiment(
     val id: Long,
-    val key: Long,
+    override val key: Long,
     val name: String?,
     val type: Type,
     val identifierType: String,
     val status: Status,
-    val version: Int,
+    override val version: Int,
     val executionVersion: Int,
     val variations: List<Variation>,
     val userOverrides: Map<String, Long>,
@@ -20,7 +22,7 @@ data class Experiment(
     val defaultRule: Action,
     val containerId: Long?,
     private val winnerVariationId: Long?
-) {
+) : HackleExperiment {
 
     val winnerVariation: Variation? get() = if (winnerVariationId != null) getVariationOrNull(winnerVariationId) else null
 
@@ -42,6 +44,10 @@ data class Experiment(
 
     override fun hashCode(): Int {
         return id.hashCode()
+    }
+
+    override fun toString(): String {
+        return "Experiment(id=$id, key=$key, version=$version)"
     }
 
     enum class Status {
