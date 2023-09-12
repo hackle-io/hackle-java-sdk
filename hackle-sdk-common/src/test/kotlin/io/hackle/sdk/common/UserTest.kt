@@ -120,12 +120,8 @@ internal class UserTest {
             .locale("ko_KR")
             .language("ko")
             .timeZone("Asia.Seoul")
-            .orientation("portrait")
             .screenWidth(1080)
             .screenHeight(1920)
-            .carrierCode("45001")
-            .carrierName("KT")
-            .isWifi(false)
             .packageName("io.hackle")
             .versionCode(23)
             .versionName("2.5.6")
@@ -143,12 +139,8 @@ internal class UserTest {
             "locale" to "ko_KR",
             "language" to "ko",
             "timeZone" to "Asia.Seoul",
-            "orientation" to "portrait",
             "screenWidth" to 1080,
             "screenHeight" to 1920,
-            "carrierCode" to "45001",
-            "carrierName" to "KT",
-            "isWifi" to false,
             "packageName" to "io.hackle",
             "versionCode" to 23,
             "versionName" to "2.5.6",
