@@ -5,6 +5,7 @@ import strikt.api.expectThat
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import java.util.*
 
 internal class UserTest {
 
@@ -105,4 +106,45 @@ internal class UserTest {
         }
     }
 
+    @Test
+    fun `hackle property`() {
+        val user = User.builder()
+            .id(UUID.randomUUID().toString())
+            .platform("Web")
+            .osName("Android")
+            .osVersion("2.4.3")
+            .deviceModel("SM-S906N")
+            .deviceType("phone")
+            .deviceBrand("samsung")
+            .deviceManufacturer("samsung")
+            .locale("ko_KR")
+            .language("ko")
+            .timeZone("Asia.Seoul")
+            .screenWidth(1080)
+            .screenHeight(1920)
+            .packageName("io.hackle")
+            .versionCode(23)
+            .versionName("2.5.6")
+            .isApp(true)
+            .build()
+
+        expectThat(user.hackleProperties) isEqualTo mapOf(
+            "platform" to "Web",
+            "osName" to "Android",
+            "osVersion" to "2.4.3",
+            "deviceModel" to "SM-S906N",
+            "deviceType" to "phone",
+            "deviceBrand" to "samsung",
+            "deviceManufacturer" to "samsung",
+            "locale" to "ko_KR",
+            "language" to "ko",
+            "timeZone" to "Asia.Seoul",
+            "screenWidth" to 1080,
+            "screenHeight" to 1920,
+            "packageName" to "io.hackle",
+            "versionCode" to 23,
+            "versionName" to "2.5.6",
+            "isApp" to true,
+        )
+    }
 }
