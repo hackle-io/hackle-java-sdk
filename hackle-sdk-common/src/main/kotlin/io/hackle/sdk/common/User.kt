@@ -9,6 +9,7 @@ data class User internal constructor(
     val deviceId: String?,
     val identifiers: Map<String, String>,
     val properties: Map<String, Any>,
+    val hackleProperties: Map<String, Any>
 ) {
 
     fun toBuilder(): Builder {
@@ -23,6 +24,7 @@ data class User internal constructor(
             deviceId(user.deviceId)
             identifiers.add(user.identifiers)
             properties.add(user.properties)
+            hackleProperties.add(user.hackleProperties)
         }
 
         private var id: String? = null
@@ -30,14 +32,35 @@ data class User internal constructor(
         private var deviceId: String? = null
         private val identifiers = IdentifiersBuilder()
         private val properties = PropertiesBuilder()
+        private val hackleProperties = PropertiesBuilder()
 
         fun id(id: String?) = apply { this.id = id }
         fun userId(userId: String?) = apply { this.userId = userId }
         fun deviceId(deviceId: String?) = apply { this.deviceId = deviceId }
         fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
         fun identifiers(identifiers: Map<String, String?>?) = apply { identifiers?.let { this.identifiers.add(it) } }
+
         fun property(key: String, value: Any?) = apply { properties.add(key, value) }
         fun properties(properties: Map<String, Any?>?) = apply { properties?.let { this.properties.add(it) } }
+
+        fun platform(platform: String?) = hackleProperty("platform", platform)
+        fun osName(osName: String?) = hackleProperty("osName", osName)
+        fun osVersion(osVersion: String?) = hackleProperty("osVersion", osVersion)
+        fun deviceModel(deviceModel: String?) = hackleProperty("deviceModel", deviceModel)
+        fun deviceType(deviceType: String?) = hackleProperty("deviceType", deviceType)
+        fun deviceBrand(deviceBrand: String?) = hackleProperty("deviceBrand", deviceBrand)
+        fun deviceManufacturer(deviceManufacturer: String?) = hackleProperty("deviceManufacturer", deviceManufacturer)
+        fun locale(locale: String?) = hackleProperty("locale", locale)
+        fun language(language: String?) = hackleProperty("language", language)
+        fun timeZone(timeZone: String?) = hackleProperty("timeZone", timeZone)
+        fun screenWidth(screenWidth: Int) = hackleProperty("screenWidth", screenWidth)
+        fun screenHeight(screenHeight: Int) = hackleProperty("screenHeight", screenHeight)
+        fun packageName(packageName: String?) = hackleProperty("packageName", packageName)
+        fun versionCode(versionCode: Int) = hackleProperty("versionCode", versionCode)
+        fun versionName(versionName: String?) = hackleProperty("versionName", versionName)
+        fun isApp(isApp: Boolean) = hackleProperty("isApp", isApp)
+
+        private fun hackleProperty(key: String, value: Any?) = apply { hackleProperties.add(key, value) }
 
         fun build(): User {
             return User(
@@ -45,7 +68,8 @@ data class User internal constructor(
                 userId = userId,
                 deviceId = deviceId,
                 identifiers = identifiers.build(),
-                properties = properties.build()
+                properties = properties.build(),
+                hackleProperties = hackleProperties.build()
             )
         }
     }

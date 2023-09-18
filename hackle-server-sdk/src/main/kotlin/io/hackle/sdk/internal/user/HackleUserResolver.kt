@@ -13,6 +13,7 @@ internal class HackleUserResolver {
             .identifier(IdentifierType.USER, user.userId)
             .identifier(IdentifierType.DEVICE, user.deviceId)
             .properties(user.properties)
+            .hackleProperties(user.hackleProperties)
             .build()
         if (hackleUser.identifiers.isEmpty()) {
             return null
