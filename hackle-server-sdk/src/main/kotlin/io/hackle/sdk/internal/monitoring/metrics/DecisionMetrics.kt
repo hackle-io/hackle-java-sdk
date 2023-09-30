@@ -6,7 +6,7 @@ import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.metrics.Timer
 
-object DecisionMetrics {
+internal object DecisionMetrics {
 
     fun experiment(sample: Timer.Sample, key: Long, decision: Decision) {
         val tags = hashMapOf(

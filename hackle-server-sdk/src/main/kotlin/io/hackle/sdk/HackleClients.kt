@@ -51,9 +51,9 @@ object HackleClients {
 
         metricConfiguration(config, httpClient)
 
-
         val httpWorkspaceFetcher = HttpWorkspaceFetcher(
-            sdkBaseUrl = config.sdkUrl,
+            config = config,
+            sdk = sdk,
             httpClient = httpClient
         )
 
