@@ -1,5 +1,6 @@
 package io.hackle.sdk.internal.event
 
+import io.hackle.sdk.HackleConfig
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.internal.http.isSuccessful
@@ -20,13 +21,13 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * @author Yong
  */
 internal class EventDispatcher(
-    eventBaseUrl: String,
+    config: HackleConfig,
     private val httpClient: CloseableHttpClient,
     private val dispatcherExecutor: ExecutorService,
     private val shutdownTimeoutMillis: Long
 ) : AutoCloseable {
 
-    private val eventEndpoint = URI("$eventBaseUrl/api/v2/events")
+    private val eventEndpoint = URI(url(config))
 
     fun dispatch(userEvents: List<UserEvent>) {
         val task = DispatchTask(userEvents.toPayload())
@@ -81,5 +82,9 @@ internal class EventDispatcher(
     companion object {
         private val log = Logger<EventDispatcher>()
         private val REQUEST_CONTENT_TYPE: ContentType = ContentType.create("application/json", "utf-8")
+
+        private fun url(config: HackleConfig): String {
+            return "${config.eventUrl}/api/v2/events"
+        }
     }
 }
