@@ -18,7 +18,8 @@ data class Target(
             SEGMENT,
             AB_TEST,
             FEATURE_FLAG,
-            EVENT_PROPERTY
+            EVENT_PROPERTY,
+            COHORT,
         }
     }
 

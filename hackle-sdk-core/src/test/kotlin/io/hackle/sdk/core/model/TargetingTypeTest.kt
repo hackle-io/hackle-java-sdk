@@ -18,8 +18,10 @@ internal class TargetingTypeTest {
                 HACKLE_PROPERTY -> assertFalse(targetingType.supports(keyType))
 
                 AB_TEST,
-                FEATURE_FLAG,
+                FEATURE_FLAG -> assertFalse(targetingType.supports(keyType))
+
                 EVENT_PROPERTY -> assertFalse(targetingType.supports(keyType))
+                COHORT -> assertFalse(targetingType.supports(keyType))
             }.safe
         }
     }
@@ -34,7 +36,8 @@ internal class TargetingTypeTest {
                 HACKLE_PROPERTY,
                 AB_TEST,
                 EVENT_PROPERTY,
-                FEATURE_FLAG -> assertTrue(targetingType.supports(keyType))
+                FEATURE_FLAG,
+                COHORT -> assertTrue(targetingType.supports(keyType))
 
                 USER_ID -> assertFalse(targetingType.supports(keyType))
 
@@ -49,7 +52,8 @@ internal class TargetingTypeTest {
             when (keyType) {
                 USER_PROPERTY,
                 HACKLE_PROPERTY,
-                USER_ID -> assertTrue(targetingType.supports(keyType))
+                USER_ID,
+                COHORT -> assertTrue(targetingType.supports(keyType))
 
                 SEGMENT -> assertFalse(targetingType.supports(keyType))
                 AB_TEST,

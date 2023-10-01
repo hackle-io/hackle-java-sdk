@@ -18,5 +18,6 @@ internal class ConditionMatcherFactoryTest {
         expectThat(sut.getMatcher(Target.Key.Type.AB_TEST)).isA<ExperimentConditionMatcher>()
         expectThat(sut.getMatcher(Target.Key.Type.FEATURE_FLAG)).isA<ExperimentConditionMatcher>()
         expectThat(sut.getMatcher(Target.Key.Type.EVENT_PROPERTY)).isA<EventConditionMatcher>()
+        expectThat(sut.getMatcher(Target.Key.Type.COHORT)).isA<CohortConditionMatcher>()
     }
 }
