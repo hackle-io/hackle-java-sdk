@@ -63,7 +63,12 @@ class CohortConditionMatcherTest {
     fun `when all user cohorts do not matched then return false`() {
         // given
         val request = experimentRequest(
-            user = HackleUser.builder().identifier(IdentifierType.ID, "user").build()
+            user = HackleUser.builder()
+                .identifier(IdentifierType.ID, "user")
+                .cohort(Cohort(100))
+                .cohort(Cohort(101))
+                .cohort(Cohort(102))
+                .build()
         )
         val condition = condition {
             COHORT("COHORT")
