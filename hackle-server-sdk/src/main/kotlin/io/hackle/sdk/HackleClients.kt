@@ -66,7 +66,7 @@ object HackleClients {
         )
 
         val eventDispatcher = EventDispatcher(
-            eventBaseUrl = config.eventUrl,
+            config = config,
             httpClient = httpClient,
             dispatcherExecutor = PoolingExecutors.newThreadPool(
                 poolSize = 4,
