@@ -51,9 +51,9 @@ object HackleClients {
 
         metricConfiguration(config, httpClient)
 
-
         val httpWorkspaceFetcher = HttpWorkspaceFetcher(
-            sdkBaseUrl = config.sdkUrl,
+            config = config,
+            sdk = sdk,
             httpClient = httpClient
         )
 
@@ -66,7 +66,7 @@ object HackleClients {
         )
 
         val eventDispatcher = EventDispatcher(
-            eventBaseUrl = config.eventUrl,
+            config = config,
             httpClient = httpClient,
             dispatcherExecutor = PoolingExecutors.newThreadPool(
                 poolSize = 4,

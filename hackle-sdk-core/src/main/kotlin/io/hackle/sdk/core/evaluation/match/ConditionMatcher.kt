@@ -18,6 +18,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
     private val segmentConditionMatcher: ConditionMatcher
     private val experimentConditionMatcher: ConditionMatcher
     private val eventConditionMatcher: ConditionMatcher
+    private val cohortConditionMatcher: CohortConditionMatcher
 
     init {
         val valueOperatorMatcher = ValueOperatorMatcher(ValueOperatorMatcherFactory())
@@ -31,6 +32,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
             EventValueResolver(),
             valueOperatorMatcher
         )
+        this.cohortConditionMatcher = CohortConditionMatcher(valueOperatorMatcher)
     }
 
     fun getMatcher(type: Target.Key.Type): ConditionMatcher {
@@ -39,6 +41,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
             SEGMENT -> segmentConditionMatcher
             AB_TEST, FEATURE_FLAG -> experimentConditionMatcher
             EVENT_PROPERTY -> eventConditionMatcher
+            COHORT -> cohortConditionMatcher
         }
     }
 }

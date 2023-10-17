@@ -21,7 +21,7 @@ sealed class UserEvent {
 
     abstract fun with(user: HackleUser): UserEvent
 
-    data class Exposure internal constructor(
+    data class Exposure(
         override val insertId: String,
         override val timestamp: Long,
         override val user: HackleUser,
@@ -34,7 +34,7 @@ sealed class UserEvent {
         override fun with(user: HackleUser) = copy(user = user)
     }
 
-    data class Track internal constructor(
+    data class Track(
         override val insertId: String,
         override val timestamp: Long,
         override val user: HackleUser,
@@ -44,7 +44,7 @@ sealed class UserEvent {
         override fun with(user: HackleUser) = copy(user = user)
     }
 
-    data class RemoteConfig internal constructor(
+    data class RemoteConfig(
         override val insertId: String,
         override val timestamp: Long,
         override val user: HackleUser,

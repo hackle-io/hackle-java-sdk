@@ -1,12 +1,12 @@
 package io.hackle.sdk.internal.event
 
+import io.hackle.sdk.HackleConfig
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.internal.log.Logger
-import io.hackle.sdk.core.internal.metrics.Timer
-import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics
-import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics.POST_EVENTS
 import io.hackle.sdk.internal.http.isSuccessful
 import io.hackle.sdk.internal.http.statusCode
+import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics
+import io.hackle.sdk.internal.monitoring.metrics.ApiCallMetrics.POST_EVENTS
 import io.hackle.sdk.internal.utils.toJson
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * @author Yong
  */
 internal class EventDispatcher(
-    eventBaseUrl: String,
+    config: HackleConfig,
     private val httpClient: CloseableHttpClient,
     private val dispatcherExecutor: ExecutorService,
     private val shutdownTimeoutMillis: Long
 ) : AutoCloseable {
 
-    private val eventEndpoint = URI("$eventBaseUrl/api/v2/events")
+    private val eventEndpoint = URI(url(config))
 
     fun dispatch(userEvents: List<UserEvent>) {
         val task = DispatchTask(userEvents.toPayload())
@@ -57,13 +57,10 @@ internal class EventDispatcher(
 
     inner class DispatchTask(private val payload: EventPayloadDto) : Runnable {
         override fun run() {
-            val sample = Timer.start()
             try {
                 dispatch()
-                ApiCallMetrics.record(POST_EVENTS, sample, true)
             } catch (e: Exception) {
                 log.error { "Failed to dispatch events: $e" }
-                ApiCallMetrics.record(POST_EVENTS, sample, false)
             }
         }
 
@@ -72,8 +69,12 @@ internal class EventDispatcher(
                 entity = StringEntity(payload.toJson(), REQUEST_CONTENT_TYPE)
             }
 
-            httpClient.execute(post).use { response ->
-                check(response.isSuccessful) { "Http status code: ${response.statusCode}" }
+            val response = ApiCallMetrics.record(POST_EVENTS) {
+                httpClient.execute(post)
+            }
+
+            response.use {
+                check(it.isSuccessful) { "Http status code: ${response.statusCode}" }
             }
         }
     }
@@ -81,5 +82,9 @@ internal class EventDispatcher(
     companion object {
         private val log = Logger<EventDispatcher>()
         private val REQUEST_CONTENT_TYPE: ContentType = ContentType.create("application/json", "utf-8")
+
+        private fun url(config: HackleConfig): String {
+            return "${config.eventUrl}/api/v2/events"
+        }
     }
 }
