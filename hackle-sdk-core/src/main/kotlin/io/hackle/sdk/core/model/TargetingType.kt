@@ -14,13 +14,15 @@ enum class TargetingType(
         Target.Key.Type.EVENT_PROPERTY,
         Target.Key.Type.HACKLE_PROPERTY,
         Target.Key.Type.AB_TEST,
-        Target.Key.Type.FEATURE_FLAG
+        Target.Key.Type.FEATURE_FLAG,
+        Target.Key.Type.COHORT
     ),
 
     SEGMENT(
         Target.Key.Type.USER_ID,
         Target.Key.Type.USER_PROPERTY,
         Target.Key.Type.HACKLE_PROPERTY,
+        Target.Key.Type.COHORT,
     );
 
     constructor(vararg keyTypes: Target.Key.Type) : this(keyTypes.toSet())
