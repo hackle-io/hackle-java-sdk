@@ -62,7 +62,10 @@ class EventValueResolverTest {
             every { key.type } returns Target.Key.Type.USER_PROPERTY
             sut.resolveOrNull(track, key)
         }
-
+        assertThrows<IllegalArgumentException> {
+            every { key.type } returns Target.Key.Type.COHORT
+            sut.resolveOrNull(track, key)
+        }
         assertDoesNotThrow {
             every { key.type } returns Target.Key.Type.EVENT_PROPERTY
             sut.resolveOrNull(track, key)

@@ -3,11 +3,14 @@ package io.hackle.sdk.core.user
 import io.hackle.sdk.common.IdentifiersBuilder
 import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.User
+import io.hackle.sdk.core.model.Cohort
+import java.util.*
 
 data class HackleUser internal constructor(
     val identifiers: Map<String, String>,
     val properties: Map<String, Any>,
-    val hackleProperties: Map<String, Any>
+    val hackleProperties: Map<String, Any>,
+    val cohorts: List<Cohort>,
 ) {
 
     val id: String? get() = identifiers[IdentifierType.ID.key]
@@ -24,11 +27,13 @@ data class HackleUser internal constructor(
         private val identifiers: IdentifiersBuilder = IdentifiersBuilder()
         private val properties: PropertiesBuilder = PropertiesBuilder()
         private val hackleProperties: PropertiesBuilder = PropertiesBuilder()
+        private val cohorts = mutableListOf<Cohort>()
 
         internal constructor(user: HackleUser) : this() {
             identifiers.add(user.identifiers)
             properties.add(user.properties)
             hackleProperties.add(user.hackleProperties)
+            cohorts.addAll(user.cohorts)
         }
 
         fun identifiers(identifiers: Map<String, String>, overwrite: Boolean = true) =
@@ -46,11 +51,15 @@ data class HackleUser internal constructor(
         fun hackleProperties(properties: Map<String, Any>) = apply { this.hackleProperties.add(properties) }
         fun hackleProperty(key: String, value: Any) = apply { this.hackleProperties.add(key, value) }
 
+        fun cohort(cohort: Cohort) = apply { this.cohorts.add(cohort) }
+        fun cohorts(cohorts: List<Cohort>) = apply { this.cohorts.addAll(cohorts) }
+
         fun build(): HackleUser {
             return HackleUser(
                 identifiers = identifiers.build(),
                 properties = properties.build(),
-                hackleProperties = hackleProperties.build()
+                hackleProperties = hackleProperties.build(),
+                cohorts = Collections.unmodifiableList(cohorts)
             )
         }
     }

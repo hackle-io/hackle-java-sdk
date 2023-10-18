@@ -27,7 +27,7 @@ internal class PollingWorkspaceFetcher(
 
     private fun poll() {
         try {
-            val workspace = httpWorkspaceFetcher.fetch()
+            val workspace = httpWorkspaceFetcher.fetchIfModified() ?: return
             currentWorkspace.set(workspace)
         } catch (e: Exception) {
             log.error { "Failed to poll workspace: $e" }

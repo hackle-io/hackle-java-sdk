@@ -81,5 +81,6 @@ internal class ExperimentConditionMatcherTest {
         verify(USER_PROPERTY)
         verify(HACKLE_PROPERTY)
         verify(SEGMENT)
+        verify(COHORT)
     }
 }

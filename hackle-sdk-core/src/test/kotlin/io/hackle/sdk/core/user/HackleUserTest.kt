@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.user
 
+import io.hackle.sdk.core.model.Cohort
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -20,6 +21,8 @@ internal class HackleUserTest {
             .property("key-2", "value-2")
             .hackleProperties(mapOf("hkey-1" to "hvalue-1"))
             .hackleProperty("hkey-2", "hvalue-2")
+            .cohort(Cohort(42))
+            .cohorts(listOf(Cohort(43), Cohort(44)))
             .build()
 
         expectThat(user) {
@@ -43,6 +46,9 @@ internal class HackleUserTest {
             get { hackleProperties } isEqualTo mapOf(
                 "hkey-1" to "hvalue-1",
                 "hkey-2" to "hvalue-2",
+            )
+            get { cohorts } isEqualTo listOf(
+                Cohort(42), Cohort(43), Cohort(44)
             )
         }
         expectThat(user.toBuilder().build()) isEqualTo user

@@ -35,7 +35,8 @@ internal class EventValueResolver {
             Target.Key.Type.HACKLE_PROPERTY,
             Target.Key.Type.SEGMENT,
             Target.Key.Type.AB_TEST,
-            Target.Key.Type.FEATURE_FLAG -> throw IllegalArgumentException("Unsupported target key Type for EventValueResolver [${key.type}]")
+            Target.Key.Type.FEATURE_FLAG,
+            Target.Key.Type.COHORT -> throw IllegalArgumentException("Unsupported target key Type for EventValueResolver [${key.type}]")
         }
     }
 }
