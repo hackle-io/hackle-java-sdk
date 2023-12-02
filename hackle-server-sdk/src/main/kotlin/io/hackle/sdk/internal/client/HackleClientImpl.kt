@@ -46,8 +46,12 @@ internal class HackleClientImpl(
     override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
         val sample = Timer.start()
         return try {
-            val hackleUser = userResolver.resolveOrNull(user) ?: return Decision.of(defaultVariation, INVALID_INPUT)
-            core.experiment(experimentKey, hackleUser, defaultVariation)
+            val hackleUser = userResolver.resolveOrNull(user)
+            if (hackleUser == null) {
+                Decision.of(defaultVariation, INVALID_INPUT)
+            } else {
+                core.experiment(experimentKey, hackleUser, defaultVariation)
+            }
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding variation for experiment[$experimentKey]. Returning default variation[$defaultVariation]: $e" }
             Decision.of(defaultVariation, EXCEPTION)
@@ -71,11 +75,15 @@ internal class HackleClientImpl(
     override fun featureFlagDetail(featureKey: Long, user: User): FeatureFlagDecision {
         val sample = Timer.start()
         return try {
-            val hackleUser = userResolver.resolveOrNull(user) ?: return FeatureFlagDecision.off(INVALID_INPUT)
-            core.featureFlag(featureKey, hackleUser)
+            val hackleUser = userResolver.resolveOrNull(user)
+            if (hackleUser == null) {
+                FeatureFlagDecision.off(INVALID_INPUT)
+            } else {
+                core.featureFlag(featureKey, hackleUser)
+            }
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding feature flag[$featureKey]. Returning default flag[off]: $e" }
-            return FeatureFlagDecision.off(EXCEPTION)
+            FeatureFlagDecision.off(EXCEPTION)
         }.also {
             DecisionMetrics.featureFlag(sample, featureKey, it)
         }

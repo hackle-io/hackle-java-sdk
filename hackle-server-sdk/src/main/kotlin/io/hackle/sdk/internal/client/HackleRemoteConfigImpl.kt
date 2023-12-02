@@ -48,8 +48,11 @@ internal class HackleRemoteConfigImpl(
         val sample = Timer.start()
         return try {
             val hackleUser = userResolver.resolveOrNull(user)
-                ?: return RemoteConfigDecision.of(defaultValue, INVALID_INPUT)
-            core.remoteConfig(key, hackleUser, requiredType, defaultValue)
+            if (hackleUser == null) {
+                RemoteConfigDecision.of(defaultValue, INVALID_INPUT)
+            } else {
+                core.remoteConfig(key, hackleUser, requiredType, defaultValue)
+            }
         } catch (e: Exception) {
             log.error { "Unexpected exception while deciding remote config parameter[$key]. Returning default value." }
             RemoteConfigDecision.of(defaultValue, EXCEPTION)
