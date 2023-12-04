@@ -17,7 +17,7 @@ jobs:
         with:
           gradle-version: 7.2
       - name: Publish
-        run: gradle clean build publishToSonatype --info
+        run: gradle clean build publishToSonatype closeAndReleaseSonatypeStagingRepository --info
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
