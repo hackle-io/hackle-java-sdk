@@ -16,8 +16,10 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.2
+      - name: Build
+        run: ./gradlew clean build
       - name: Publish
-        run: gradle clean build publishToSonatype --info
+        run: ./gradlew --max-workers=1 publishToSonatype closeAndReleaseSonatypeStagingRepository --info
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
