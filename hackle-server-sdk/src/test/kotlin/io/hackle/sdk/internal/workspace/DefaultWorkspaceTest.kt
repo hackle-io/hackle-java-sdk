@@ -26,6 +26,9 @@ internal class DefaultWorkspaceTest {
 
         val workspace = ResourcesWorkspaceFetcher("workspace_config.json").fetch()
 
+        expectThat(workspace.id) isEqualTo 553
+        expectThat(workspace.environmentId) isEqualTo 1105
+
         expectThat(workspace.getExperimentOrNull(4)).isNull()
 
         expectThat(workspace.getExperimentOrNull(5))
