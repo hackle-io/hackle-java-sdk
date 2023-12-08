@@ -54,7 +54,7 @@ internal class HttpWorkspaceFetcher(
         check(response.isSuccessful) { "Http status code: ${response.statusCode}" }
         lastModified = response.getFirstHeader(LAST_MODIFIED)?.value
         val body = response.body()
-        val dto = body.parseJson<WorkspaceDto>()
+        val dto = body.parseJson<WorkspaceConfigDto>()
         return DefaultWorkspace.from(dto)
     }
 
