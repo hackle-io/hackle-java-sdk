@@ -9,6 +9,8 @@ import io.hackle.sdk.core.workspace.Workspace
  * @author Yong
  */
 internal class DefaultWorkspace(
+    override val id: Long,
+    override val environmentId: Long,
     override val experiments: List<Experiment>,
     override val featureFlags: List<Experiment>,
     private val eventTypes: Map<String, EventType>,
@@ -61,7 +63,7 @@ internal class DefaultWorkspace(
     }
 
     companion object {
-        fun from(dto: WorkspaceDto): Workspace {
+        fun from(dto: WorkspaceConfigDto): Workspace {
 
             val experiments: List<Experiment> = dto.experiments.mapNotNull { it.toExperimentOrNull(AB_TEST) }
 
@@ -91,6 +93,8 @@ internal class DefaultWorkspace(
                 .associateBy { it.key }
 
             return DefaultWorkspace(
+                id = dto.workspace.id,
+                environmentId = dto.workspace.environment.id,
                 experiments = experiments,
                 featureFlags = featureFlags,
                 eventTypes = eventTypes,

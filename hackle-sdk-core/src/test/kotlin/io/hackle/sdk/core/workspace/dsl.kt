@@ -19,6 +19,8 @@ class WorkspaceDsl() : BucketRegistry, Workspace {
     private val containers = mutableMapOf<Long, Container>()
     private val parameterConfigurations = mutableMapOf<Long, ParameterConfiguration>()
 
+    override val id: Long get() = 1
+    override val environmentId: Long get() = 1
     override val experiments: List<Experiment> get() = _experiments.values.toList()
     override val featureFlags: List<Experiment> get() = _featureFlags.values.toList()
     override val inAppMessages: List<InAppMessage> get() = _inAppMessages.values.toList()
