@@ -7,6 +7,10 @@ import io.hackle.sdk.core.model.*
  */
 interface Workspace {
 
+    val id: Long
+
+    val environmentId: Long
+
     val experiments: List<Experiment>
 
     val featureFlags: List<Experiment>

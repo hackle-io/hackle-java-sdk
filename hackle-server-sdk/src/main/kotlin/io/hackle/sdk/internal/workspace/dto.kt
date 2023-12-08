@@ -1,6 +1,7 @@
 package io.hackle.sdk.internal.workspace
 
-internal data class WorkspaceDto(
+internal data class WorkspaceConfigDto(
+    val workspace: WorkspaceDto,
     val experiments: List<ExperimentDto>,
     val featureFlags: List<ExperimentDto>,
     val buckets: List<BucketDto>,
@@ -9,6 +10,15 @@ internal data class WorkspaceDto(
     val containers: List<ContainerDto>,
     val parameterConfigurations: List<ParameterConfigurationDto>,
     val remoteConfigParameters: List<RemoteConfigParameterDto>,
+)
+
+internal data class WorkspaceDto(
+    val id: Long,
+    val environment: EnvironmentDto
+)
+
+internal data class EnvironmentDto(
+    val id: Long,
 )
 
 internal data class ExperimentDto(

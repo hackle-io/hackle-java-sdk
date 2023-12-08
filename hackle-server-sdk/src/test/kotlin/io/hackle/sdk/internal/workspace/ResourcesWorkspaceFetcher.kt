@@ -11,7 +11,7 @@ internal class ResourcesWorkspaceFetcher(fileName: String) : WorkspaceFetcher {
     private val workspace: Workspace
 
     init {
-        val dto = String(Files.readAllBytes(Paths.get("src/test/resources/$fileName"))).parseJson<WorkspaceDto>()
+        val dto = String(Files.readAllBytes(Paths.get("src/test/resources/$fileName"))).parseJson<WorkspaceConfigDto>()
         workspace = DefaultWorkspace.from(dto)
     }
 
