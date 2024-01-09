@@ -38,6 +38,7 @@ internal class UserTest {
             .id("id")
             .userId("userId")
             .deviceId("deviceId")
+            .sessionId("sessionId")
             .identifier("id1", "v1")
             .identifiers(mapOf("id2" to "v2"))
             .identifiers(null)
@@ -50,7 +51,7 @@ internal class UserTest {
             get { id } isEqualTo "id"
             get { userId } isEqualTo "userId"
             get { deviceId } isEqualTo "deviceId"
-            get { identifiers } isEqualTo mapOf("id1" to "v1", "id2" to "v2")
+            get { identifiers } isEqualTo mapOf("id1" to "v1", "id2" to "v2", "\$sessionId" to "sessionId")
             get { properties } isEqualTo mapOf("k1" to "v1", "k2" to 2)
         }
 

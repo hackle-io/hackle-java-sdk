@@ -37,6 +37,7 @@ data class User internal constructor(
         fun id(id: String?) = apply { this.id = id }
         fun userId(userId: String?) = apply { this.userId = userId }
         fun deviceId(deviceId: String?) = apply { this.deviceId = deviceId }
+        fun sessionId(sessionId: String?) = apply { identifier("\$sessionId", sessionId) }
         fun identifier(type: String, value: String?) = apply { identifiers.add(type, value) }
         fun identifiers(identifiers: Map<String, String?>?) = apply { identifiers?.let { this.identifiers.add(it) } }
 
