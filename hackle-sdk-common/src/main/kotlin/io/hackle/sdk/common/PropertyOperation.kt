@@ -18,7 +18,12 @@ enum class PropertyOperation(val key: String) {
 
         @JvmStatic
         fun from(key: String): PropertyOperation {
-            return requireNotNull(OPERATIONS[key]) { "PropertyOperation[$key]" }
+            return requireNotNull(fromOrNull(key)) { "PropertyOperation[$key]" }
+        }
+
+        @JvmStatic
+        fun fromOrNull(key: String): PropertyOperation? {
+            return OPERATIONS[key]
         }
     }
 }
