@@ -27,10 +27,7 @@ import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.user.IdentifierType
-import io.hackle.sdk.core.workspace.Workspace
-import io.hackle.sdk.core.workspace.WorkspaceDsl
-import io.hackle.sdk.core.workspace.WorkspaceFetcher
-import io.hackle.sdk.core.workspace.workspace
+import io.hackle.sdk.core.workspace.*
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -723,7 +720,23 @@ internal class HackleCoreTest {
                 get { this.inAppMessage } isEqualTo inAppMessage
                 get { message } isEqualTo message
             }
+        }
 
+        @Test
+        fun `평과 결과 이벤트를 처리한다`() {
+            val inAppMessage = InAppMessages.create(key = 42)
+            val workspace = Workspaces.create(inAppMessages = listOf(inAppMessage))
+            every { workspaceFetcher.fetch() } returns workspace
+
+            val evaluation = InAppMessages.evaluation(inAppMessage = inAppMessage)
+            every { inAppMessageEvaluator.evaluate(any(), any()) } returns evaluation
+            every { eventFactory.create(any(), evaluation) } returns listOf(mockk())
+
+            sut.inAppMessage(42, hackleUser("user"))
+
+            verify(exactly = 1) {
+                eventProcessor.process(any())
+            }
         }
 
         private fun hackleUser(

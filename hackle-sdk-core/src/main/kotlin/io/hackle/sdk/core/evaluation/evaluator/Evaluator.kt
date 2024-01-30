@@ -43,6 +43,7 @@ interface Evaluator {
     interface Context {
         val stack: List<Request>
         val targetEvaluations: List<Evaluation>
+        val properties: Map<String, Any>
 
         operator fun contains(request: Request): Boolean
         fun add(request: Request)
@@ -50,5 +51,7 @@ interface Evaluator {
 
         operator fun get(experiment: Experiment): Evaluation?
         fun add(evaluation: Evaluation)
+
+        fun addProperty(key: String, value: Any?)
     }
 }

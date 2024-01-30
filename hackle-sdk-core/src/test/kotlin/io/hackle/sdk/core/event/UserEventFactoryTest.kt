@@ -4,10 +4,12 @@ import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.remoteConfigRequest
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.InAppMessages
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.experiment
 import org.junit.jupiter.api.Test
@@ -109,4 +111,43 @@ internal class UserEventFactoryTest {
             }
     }
 
+    @Test
+    fun `create in-app message events`() {
+        val sut = UserEventFactory(object : Clock {
+            override fun currentMillis(): Long = 47
+            override fun tick(): Long = 48
+        })
+
+        val context = Evaluators.context()
+        val evaluation1 =
+            ExperimentEvaluation(DecisionReason.TRAFFIC_ALLOCATED, listOf(), experiment(id = 1), 42, "B", null)
+        context.add(evaluation1)
+
+        val request = InAppMessages.request()
+        val evaluation = InAppMessageEvaluation.of(
+            request,
+            context,
+            DecisionReason.IN_APP_MESSAGE_TARGET,
+            request.inAppMessage.messageContext.messages[0]
+        )
+
+        val events = sut.create(request, evaluation)
+
+        expectThat(events).hasSize(1)
+        expectThat(events[0])
+            .isA<UserEvent.Exposure>().and {
+                get { timestamp } isEqualTo 47
+                get { user } isSameInstanceAs request.user
+                get { experiment } isSameInstanceAs evaluation1.experiment
+                get { variationId } isEqualTo 42
+                get { variationKey } isEqualTo "B"
+                get { decisionReason } isEqualTo DecisionReason.TRAFFIC_ALLOCATED
+                get { properties } isEqualTo mapOf(
+                    "\$targetingRootType" to "IN_APP_MESSAGE",
+                    "\$targetingRootId" to 1L,
+                    "\$experiment_version" to 1,
+                    "\$execution_version" to 1,
+                )
+            }
+    }
 }
