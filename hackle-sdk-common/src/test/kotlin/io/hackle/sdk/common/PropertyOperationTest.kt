@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 
 internal class PropertyOperationTest {
 
@@ -41,5 +42,11 @@ internal class PropertyOperationTest {
         assertThrows<IllegalArgumentException> {
             PropertyOperation.from("invalid_operation")
         }
+    }
+
+    @Test
+    fun `fromOrNull`() {
+        expectThat(PropertyOperation.fromOrNull("invalid_operation")).isNull()
+        expectThat(PropertyOperation.fromOrNull("\$set")).isEqualTo(PropertyOperation.SET)
     }
 }
