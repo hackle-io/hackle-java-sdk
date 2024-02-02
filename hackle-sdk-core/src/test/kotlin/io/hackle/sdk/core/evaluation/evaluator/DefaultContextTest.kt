@@ -9,14 +9,12 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.hasSize
-import strikt.assertions.isNull
-import strikt.assertions.isSameInstanceAs
+import strikt.assertions.*
 
 internal class DefaultContextTest {
 
     @Test
-    fun `strack`() {
+    fun `stack`() {
 
         val context = Evaluators.context()
         expectThat(context.stack).hasSize(0)
@@ -64,6 +62,18 @@ internal class DefaultContextTest {
         expectThat(context[experiment]) isSameInstanceAs evaluation2
 
         expectThat(context[experiment(id = 2)]).isNull()
+    }
+
+    @Test
+    fun `property`() {
+        val context = Evaluators.context()
+        val p1 = context.properties
+        expectThat(p1).isEqualTo(mapOf())
+
+        context.setProperty("a", 1)
+        val p2 = context.properties
+        expectThat(p1).isEqualTo(mapOf())
+        expectThat(p2).isEqualTo(mapOf("a" to 1))
     }
 
     private fun experimentEvaluation(experiment: Experiment): ExperimentEvaluation {

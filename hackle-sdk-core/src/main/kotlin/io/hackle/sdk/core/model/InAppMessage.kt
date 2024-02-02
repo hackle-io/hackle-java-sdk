@@ -104,14 +104,20 @@ data class InAppMessage(
         val identifiers: List<String>
     )
 
+    data class ExperimentContext(
+        val key: Long
+    )
+
     data class MessageContext(
         val defaultLang: String,
+        val experimentContext: ExperimentContext?,
         val platformTypes: List<PlatformType>,
         val orientations: List<Orientation>,
         val messages: List<Message>
     )
 
     data class Message(
+        val variationKey: String?,
         val lang: String,
         val layout: Layout,
         val images: List<Image>,
