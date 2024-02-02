@@ -7,7 +7,7 @@ data class InAppMessageDecision internal constructor(
     val inAppMessage: InAppMessage?,
     val message: InAppMessage.Message?,
     val reason: DecisionReason,
-    val properties: Map<String, Any>
+    val properties: Map<String, Any>,
 ) {
     val isShow: Boolean get() = inAppMessage != null && message != null
 
@@ -16,7 +16,7 @@ data class InAppMessageDecision internal constructor(
             reason: DecisionReason,
             inAppMessage: InAppMessage? = null,
             message: InAppMessage.Message? = null,
-            properties: Map<String, Any> = emptyMap()
+            properties: Map<String, Any> = emptyMap(),
         ): InAppMessageDecision {
             return InAppMessageDecision(inAppMessage, message, reason, properties)
         }

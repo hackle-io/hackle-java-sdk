@@ -32,11 +32,11 @@ internal class InAppMessageResolver(
 
     private fun addExperimentContext(evaluation: ExperimentEvaluation, context: Evaluator.Context) {
         context.add(evaluation)
-        context.addProperty("experiment_id", evaluation.experiment.id)
-        context.addProperty("experiment_key", evaluation.experiment.key)
-        context.addProperty("variation_id", evaluation.variationId)
-        context.addProperty("variation_key", evaluation.variationKey)
-        context.addProperty("experiment_decision_reason", evaluation.reason.name)
+        context.setProperty("experiment_id", evaluation.experiment.id)
+        context.setProperty("experiment_key", evaluation.experiment.key)
+        context.setProperty("variation_id", evaluation.variationId)
+        context.setProperty("variation_key", evaluation.variationKey)
+        context.setProperty("experiment_decision_reason", evaluation.reason.name)
     }
 
     private fun resolveDefault(request: InAppMessageRequest): InAppMessage.Message {

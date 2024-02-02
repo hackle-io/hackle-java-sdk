@@ -8,7 +8,7 @@ import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluati
 import io.hackle.sdk.core.internal.time.Clock
 
 internal class UserEventFactory(
-    private val clock: Clock
+    private val clock: Clock,
 ) {
 
     fun create(request: Evaluator.Request, evaluation: Evaluator.Evaluation): List<UserEvent> {
@@ -37,7 +37,7 @@ internal class UserEventFactory(
         request: Evaluator.Request,
         evaluation: Evaluator.Evaluation,
         timestamp: Long,
-        properties: PropertiesBuilder
+        properties: PropertiesBuilder,
     ): UserEvent? {
         return when (evaluation) {
             is ExperimentEvaluation -> {

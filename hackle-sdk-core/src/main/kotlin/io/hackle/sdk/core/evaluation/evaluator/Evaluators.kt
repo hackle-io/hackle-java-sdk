@@ -40,7 +40,7 @@ object Evaluators {
             _evaluations.add(evaluation)
         }
 
-        override fun addProperty(key: String, value: Any?) {
+        override fun setProperty(key: String, value: Any?) {
             _properties.add(key, value)
         }
     }

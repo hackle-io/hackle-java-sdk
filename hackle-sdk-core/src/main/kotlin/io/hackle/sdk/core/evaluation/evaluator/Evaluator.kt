@@ -22,7 +22,7 @@ interface Evaluator {
 
     data class Key(
         val type: Type,
-        val id: Long
+        val id: Long,
     )
 
     interface Request {
@@ -52,6 +52,6 @@ interface Evaluator {
         operator fun get(experiment: Experiment): Evaluation?
         fun add(evaluation: Evaluation)
 
-        fun addProperty(key: String, value: Any?)
+        fun setProperty(key: String, value: Any?)
     }
 }

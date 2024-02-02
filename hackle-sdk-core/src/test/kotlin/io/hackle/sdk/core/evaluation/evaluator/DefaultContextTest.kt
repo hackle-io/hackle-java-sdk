@@ -10,7 +10,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.*
-import javax.naming.event.EventContext
 
 internal class DefaultContextTest {
 
@@ -71,7 +70,7 @@ internal class DefaultContextTest {
         val p1 = context.properties
         expectThat(p1).isEqualTo(mapOf())
 
-        context.addProperty("a", 1)
+        context.setProperty("a", 1)
         val p2 = context.properties
         expectThat(p1).isEqualTo(mapOf())
         expectThat(p2).isEqualTo(mapOf("a" to 1))
