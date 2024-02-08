@@ -156,7 +156,16 @@ class HackleCore internal constructor(
         val request = InAppMessageRequest(workspace, user, inAppMessage, timestamp = clock.currentMillis())
 
         val evaluation = inAppMessageEvaluator.evaluate(request, Evaluators.context())
-        return InAppMessageDecision.of(evaluation.reason, evaluation.inAppMessage, evaluation.message)
+
+        val events = eventFactory.create(request, evaluation)
+        eventProcessor.process(events)
+
+        return InAppMessageDecision.of(
+            evaluation.reason,
+            evaluation.inAppMessage,
+            evaluation.message,
+            evaluation.properties
+        )
     }
 
     override fun close() {
