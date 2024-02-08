@@ -13,5 +13,5 @@ internal class InAppMessageRequest(
     val timestamp: Long
 ) : AbstractEvaluatorRequest() {
     override val key: Evaluator.Key
-        get() = Evaluator.Key(Evaluator.Type.IN_APP_MESSAGE, inAppMessage.key)
+        get() = Evaluator.Key(Evaluator.Type.IN_APP_MESSAGE, inAppMessage.id)
 }

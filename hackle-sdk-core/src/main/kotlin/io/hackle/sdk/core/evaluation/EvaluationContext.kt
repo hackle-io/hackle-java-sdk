@@ -39,7 +39,7 @@ class EvaluationContext internal constructor() {
         register(ExperimentTargetRuleDeterminer(get()))
         register(RemoteConfigParameterTargetRuleDeterminer.Matcher(get(), get()))
         register(RemoteConfigParameterTargetRuleDeterminer(get()))
-        register(InAppMessageResolver())
+        register(InAppMessageResolver(get()))
         register(InAppMessageUserOverrideMatcher())
         register(InAppMessageTargetMatcher(get()))
         register(InAppMessageHiddenMatcher(getOrNull() ?: NoopInAppMessageHiddenStorage))

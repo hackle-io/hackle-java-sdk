@@ -10,6 +10,7 @@ internal class InAppMessageEvaluation(
     override val targetEvaluations: List<Evaluator.Evaluation>,
     val inAppMessage: InAppMessage,
     val message: InAppMessage.Message?,
+    val properties: Map<String, Any>,
 ) : Evaluator.Evaluation {
 
     companion object {
@@ -17,13 +18,14 @@ internal class InAppMessageEvaluation(
             request: InAppMessageRequest,
             context: Evaluator.Context,
             reason: DecisionReason,
-            message: InAppMessage.Message? = null
+            message: InAppMessage.Message? = null,
         ): InAppMessageEvaluation {
             return InAppMessageEvaluation(
                 reason = reason,
                 targetEvaluations = context.targetEvaluations,
                 inAppMessage = request.inAppMessage,
-                message = message
+                message = message,
+                properties = context.properties
             )
         }
     }
