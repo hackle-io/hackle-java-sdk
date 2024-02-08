@@ -103,7 +103,7 @@ class PropertiesBuilder {
     }
 
     fun build(): Map<String, Any> {
-        return Collections.unmodifiableMap(properties)
+        return Collections.unmodifiableMap(HashMap(properties))
     }
 
     companion object {

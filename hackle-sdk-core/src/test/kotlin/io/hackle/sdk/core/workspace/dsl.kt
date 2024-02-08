@@ -90,3 +90,86 @@ class WorkspaceDsl() : BucketRegistry, Workspace {
         return this
     }
 }
+
+
+object Workspaces {
+
+    fun create(
+        id: Long = 1,
+        environmentId: Long = 1,
+        experiments: List<Experiment> = emptyList(),
+        featureFlags: List<Experiment> = emptyList(),
+        inAppMessages: List<InAppMessage> = emptyList(),
+        eventTypes: List<EventType> = emptyList(),
+        buckets: List<Bucket> = emptyList(),
+        segments: List<Segment> = emptyList(),
+        containers: List<Container> = emptyList(),
+        parameterConfigurations: List<ParameterConfiguration> = emptyList(),
+        remoteConfigParameters: List<RemoteConfigParameter> = emptyList(),
+    ): Workspace {
+        return MockWorkspace(
+            id,
+            environmentId,
+            experiments,
+            featureFlags,
+            inAppMessages,
+            eventTypes,
+            buckets,
+            segments,
+            containers,
+            parameterConfigurations,
+            remoteConfigParameters
+        )
+    }
+
+    private class MockWorkspace(
+        override val id: Long,
+        override val environmentId: Long,
+        override val experiments: List<Experiment>,
+        override val featureFlags: List<Experiment>,
+        override val inAppMessages: List<InAppMessage>,
+        private val eventTypes: List<EventType>,
+        private val buckets: List<Bucket>,
+        private val segments: List<Segment>,
+        private val containers: List<Container>,
+        private val parameterConfigurations: List<ParameterConfiguration>,
+        private val remoteConfigParameters: List<RemoteConfigParameter>,
+    ) : Workspace {
+
+        override fun getExperimentOrNull(experimentKey: Long): Experiment? {
+            return experiments.find { it.key == experimentKey }
+        }
+
+        override fun getFeatureFlagOrNull(featureKey: Long): Experiment? {
+            return featureFlags.find { it.key == featureKey }
+        }
+
+        override fun getEventTypeOrNull(eventTypeKey: String): EventType? {
+            return eventTypes.find { it.key == eventTypeKey }
+        }
+
+        override fun getBucketOrNull(bucketId: Long): Bucket? {
+            return buckets.find { it.id == bucketId }
+        }
+
+        override fun getSegmentOrNull(segmentKey: String): Segment? {
+            return segments.find { it.key == segmentKey }
+        }
+
+        override fun getContainerOrNull(containerId: Long): Container? {
+            return containers.find { it.id == containerId }
+        }
+
+        override fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration? {
+            return parameterConfigurations.find { it.id == parameterConfigurationId }
+        }
+
+        override fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter? {
+            return remoteConfigParameters.find { it.key == parameterKey }
+        }
+
+        override fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessage? {
+            return inAppMessages.find { it.key == inAppMessageKey }
+        }
+    }
+}

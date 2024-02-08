@@ -3,6 +3,7 @@ package io.hackle.sdk.core.model
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.core.decision.InAppMessageDecision
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
@@ -463,12 +464,14 @@ internal object InAppMessages {
 
     fun messageContext(
         defaultLang: String = "ko",
+        experimentContext: InAppMessage.ExperimentContext? = null,
         platformTypes: List<InAppMessage.PlatformType> = listOf(InAppMessage.PlatformType.ANDROID),
         orientations: List<InAppMessage.Orientation> = listOf(InAppMessage.Orientation.VERTICAL),
         messages: List<InAppMessage.Message> = listOf(message())
     ): InAppMessage.MessageContext {
         return InAppMessage.MessageContext(
             defaultLang,
+            experimentContext,
             platformTypes,
             orientations,
             messages
@@ -476,6 +479,7 @@ internal object InAppMessages {
     }
 
     fun message(
+        variationKey: String? = null,
         lang: String = "ko",
         images: List<InAppMessage.Message.Image> = listOf(image()),
         text: InAppMessage.Message.Text? = text(),
@@ -483,6 +487,7 @@ internal object InAppMessages {
         closeButton: InAppMessage.Message.Button? = null
     ): InAppMessage.Message {
         return InAppMessage.Message(
+            variationKey = variationKey,
             lang = lang,
             layout = InAppMessage.Message.Layout(
                 displayType = InAppMessage.DisplayType.MODAL,
@@ -568,13 +573,24 @@ internal object InAppMessages {
         reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
         targetEvaluations: List<Evaluator.Evaluation> = emptyList(),
         inAppMessage: InAppMessage = create(),
-        message: InAppMessage.Message? = null
+        message: InAppMessage.Message? = inAppMessage.messageContext.messages[0],
+        properties: Map<String, Any> = emptyMap()
     ): InAppMessageEvaluation {
         return InAppMessageEvaluation(
             reason = reason,
             targetEvaluations = targetEvaluations,
             inAppMessage = inAppMessage,
-            message = message
+            message = message,
+            properties = properties
         )
+    }
+
+    fun decision(
+        inAppMessage: InAppMessage? = InAppMessages.create(),
+        message: InAppMessage.Message? = inAppMessage?.messageContext?.messages?.get(0),
+        reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
+        properties: Map<String, Any> = emptyMap()
+    ): InAppMessageDecision {
+        return InAppMessageDecision(inAppMessage, message, reason, properties)
     }
 }
