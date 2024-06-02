@@ -21,7 +21,7 @@ internal class DefaultEventProcessor(
     private val flushScheduler: Scheduler,
     private val flushIntervalMillis: Long,
     private val consumingExecutor: ExecutorService,
-    private val shutdownTimeoutMillis: Long
+    private val shutdownTimeoutMillis: Long,
 ) : EventProcessor, AutoCloseable {
 
     private var flushingJob: ScheduledJob? = null
@@ -35,7 +35,7 @@ internal class DefaultEventProcessor(
         }
     }
 
-    private fun flush() {
+    override fun flush() {
         produce(Message.Flush)
     }
 
