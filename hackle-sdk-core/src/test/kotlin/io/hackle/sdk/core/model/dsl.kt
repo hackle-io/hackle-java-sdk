@@ -38,7 +38,7 @@ fun experiment(
     status: Experiment.Status = Experiment.Status.RUNNING,
     containerId: Long? = null,
     bucketRegistry: BucketRegistry = BucketRegistry.None,
-    init: ExperimentDsl.() -> Unit = { variations(A, B) }
+    init: ExperimentDsl.() -> Unit = { variations(A, B) },
 ): Experiment {
     return ExperimentDsl(id, key, type, identifierType, status, version, executionVersion, containerId, bucketRegistry)
         .apply(init)
@@ -167,7 +167,7 @@ class TargetRuleDsl(
 
 class ActionDsl(
     private val variations: List<Variation>,
-    private val bucketRegistry: BucketRegistry
+    private val bucketRegistry: BucketRegistry,
 ) {
 
     private lateinit var action: Action
@@ -181,7 +181,7 @@ class ActionDsl(
         id: Long = IdentifierGenerator.generate("bucket"),
         seed: Int = Random.nextInt(Int.MAX_VALUE),
         slotSize: Int = 10000,
-        init: BucketDsl.() -> Unit = {}
+        init: BucketDsl.() -> Unit = {},
     ) {
 
         val bucket = BucketDsl(id, seed, slotSize, variations, bucketRegistry).apply(init).build()
@@ -248,7 +248,7 @@ class TargetDsl {
             type: Target.Match.Type,
             operator: Target.Match.Operator,
             valueType: ValueType,
-            vararg values: Any
+            vararg values: Any,
         ) {
             match = Target.Match(type, operator, valueType, values.toList())
         }
@@ -290,7 +290,7 @@ class VariationDsl {
     operator fun VariationKey.invoke(
         id: Long = IdentifierGenerator.generate("variation"),
         isDropped: Boolean = false,
-        configId: Long? = null
+        configId: Long? = null,
     ) {
         variations += Variation(id, this.name, isDropped, configId)
     }
@@ -414,7 +414,7 @@ internal object InAppMessages {
         period: InAppMessage.Period = InAppMessage.Period.Always,
         eventTrigger: InAppMessage.EventTrigger = eventTrigger(),
         targetContext: InAppMessage.TargetContext = targetContext(),
-        messageContext: InAppMessage.MessageContext = messageContext()
+        messageContext: InAppMessage.MessageContext = messageContext(),
     ): InAppMessage {
         return InAppMessage(
             id = id,
@@ -429,35 +429,35 @@ internal object InAppMessages {
 
     fun eventTrigger(
         rules: List<InAppMessage.EventTrigger.Rule> = listOf(InAppMessage.EventTrigger.Rule("test", emptyList())),
-        frequencyCap: InAppMessage.EventTrigger.FrequencyCap? = null
+        frequencyCap: InAppMessage.EventTrigger.FrequencyCap? = null,
     ): InAppMessage.EventTrigger {
         return InAppMessage.EventTrigger(rules = rules, frequencyCap = frequencyCap)
     }
 
     fun frequencyCap(
         identifierCaps: List<InAppMessage.EventTrigger.IdentifierCap> = emptyList(),
-        durationCap: InAppMessage.EventTrigger.DurationCap? = null
+        durationCap: InAppMessage.EventTrigger.DurationCap? = null,
     ): InAppMessage.EventTrigger.FrequencyCap {
         return InAppMessage.EventTrigger.FrequencyCap(identifierCaps, durationCap)
     }
 
     fun identifierCap(
         identifierType: String = "\$id",
-        count: Int = 1
+        count: Int = 1,
     ): InAppMessage.EventTrigger.IdentifierCap {
         return InAppMessage.EventTrigger.IdentifierCap(identifierType, count)
     }
 
     fun durationCap(
         duration: Long = 60,
-        count: Int = 1
+        count: Int = 1,
     ): InAppMessage.EventTrigger.DurationCap {
         return InAppMessage.EventTrigger.DurationCap(duration, count)
     }
 
     fun targetContext(
         targets: List<Target> = emptyList(),
-        overrides: List<InAppMessage.UserOverride> = emptyList()
+        overrides: List<InAppMessage.UserOverride> = emptyList(),
     ): InAppMessage.TargetContext {
         return InAppMessage.TargetContext(targets, overrides)
     }
@@ -467,7 +467,7 @@ internal object InAppMessages {
         experimentContext: InAppMessage.ExperimentContext? = null,
         platformTypes: List<InAppMessage.PlatformType> = listOf(InAppMessage.PlatformType.ANDROID),
         orientations: List<InAppMessage.Orientation> = listOf(InAppMessage.Orientation.VERTICAL),
-        messages: List<InAppMessage.Message> = listOf(message())
+        messages: List<InAppMessage.Message> = listOf(message()),
     ): InAppMessage.MessageContext {
         return InAppMessage.MessageContext(
             defaultLang,
@@ -484,27 +484,32 @@ internal object InAppMessages {
         images: List<InAppMessage.Message.Image> = listOf(image()),
         text: InAppMessage.Message.Text? = text(),
         buttons: List<InAppMessage.Message.Button> = listOf(button()),
-        closeButton: InAppMessage.Message.Button? = null
+        closeButton: InAppMessage.Message.Button? = null,
+        action: InAppMessage.Action? = null,
+        outerButtons: List<InAppMessage.Message.PositionalButton> = emptyList(),
     ): InAppMessage.Message {
         return InAppMessage.Message(
             variationKey = variationKey,
             lang = lang,
             layout = InAppMessage.Message.Layout(
                 displayType = InAppMessage.DisplayType.MODAL,
-                layoutType = InAppMessage.LayoutType.IMAGE_ONLY
+                layoutType = InAppMessage.LayoutType.IMAGE_ONLY,
+                alignment = null
             ),
             images = images,
             text = text,
             buttons = buttons,
             closeButton = closeButton,
-            background = InAppMessage.Message.Background("#FFFFFF")
+            background = InAppMessage.Message.Background("#FFFFFF"),
+            action = action,
+            outerButtons = outerButtons
         )
     }
 
     fun action(
         behavior: InAppMessage.Behavior = InAppMessage.Behavior.CLICK,
         type: InAppMessage.ActionType = InAppMessage.ActionType.CLOSE,
-        value: String? = null
+        value: String? = null,
     ): InAppMessage.Action {
         return InAppMessage.Action(
             behavior = behavior,
@@ -518,7 +523,7 @@ internal object InAppMessages {
         textColor: String = "#000000",
         bgColor: String = "#FFFFFF",
         borderColor: String = "#FFFFFF",
-        action: InAppMessage.Action = action()
+        action: InAppMessage.Action = action(),
     ): InAppMessage.Message.Button {
         return InAppMessage.Message.Button(
             text = text,
@@ -534,7 +539,7 @@ internal object InAppMessages {
     fun image(
         orientation: InAppMessage.Orientation = InAppMessage.Orientation.VERTICAL,
         imagePath: String = "image_path",
-        action: InAppMessage.Action? = null
+        action: InAppMessage.Action? = null,
     ): InAppMessage.Message.Image {
         return InAppMessage.Message.Image(
             orientation = orientation,
@@ -547,7 +552,7 @@ internal object InAppMessages {
         title: String = "title",
         titleColor: String = "#000000",
         body: String = "body",
-        bodyColor: String = "#FFFFFF"
+        bodyColor: String = "#FFFFFF",
     ): InAppMessage.Message.Text {
         return InAppMessage.Message.Text(
             title = InAppMessage.Message.Text.Attribute(title, InAppMessage.Message.Text.Style(titleColor)),
@@ -559,7 +564,7 @@ internal object InAppMessages {
         workspace: Workspace = workspace(),
         user: HackleUser = HackleUser.builder().identifier(IdentifierType.ID, "user").build(),
         inAppMessage: InAppMessage = create(),
-        timestamp: Long = System.currentTimeMillis()
+        timestamp: Long = System.currentTimeMillis(),
     ): InAppMessageRequest {
         return InAppMessageRequest(
             workspace = workspace,
@@ -574,7 +579,7 @@ internal object InAppMessages {
         targetEvaluations: List<Evaluator.Evaluation> = emptyList(),
         inAppMessage: InAppMessage = create(),
         message: InAppMessage.Message? = inAppMessage.messageContext.messages[0],
-        properties: Map<String, Any> = emptyMap()
+        properties: Map<String, Any> = emptyMap(),
     ): InAppMessageEvaluation {
         return InAppMessageEvaluation(
             reason = reason,
@@ -589,7 +594,7 @@ internal object InAppMessages {
         inAppMessage: InAppMessage? = InAppMessages.create(),
         message: InAppMessage.Message? = inAppMessage?.messageContext?.messages?.get(0),
         reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
-        properties: Map<String, Any> = emptyMap()
+        properties: Map<String, Any> = emptyMap(),
     ): InAppMessageDecision {
         return InAppMessageDecision(inAppMessage, message, reason, properties)
     }
