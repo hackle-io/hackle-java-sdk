@@ -50,6 +50,7 @@ data class InAppMessage(
     }
 
     enum class ActionArea {
+        MESSAGE,
         IMAGE,
         BUTTON,
         X_BUTTON
