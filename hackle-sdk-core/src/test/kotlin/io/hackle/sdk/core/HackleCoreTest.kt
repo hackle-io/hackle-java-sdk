@@ -747,6 +747,17 @@ internal class HackleCoreTest {
     }
 
     @Nested
+    inner class FlushTest {
+        @Test
+        fun `flush EventProcessor`() {
+            sut.flush()
+            verify(exactly = 1) {
+                eventProcessor.flush()
+            }
+        }
+    }
+
+    @Nested
     inner class CloseTest {
 
         @Test
@@ -1074,6 +1085,9 @@ internal class HackleCoreTest {
 
     private object EventProcessorStub : EventProcessor {
         override fun process(event: UserEvent) {
+        }
+
+        override fun flush() {
         }
     }
 }

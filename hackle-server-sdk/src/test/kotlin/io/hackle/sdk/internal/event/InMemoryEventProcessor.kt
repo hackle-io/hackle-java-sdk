@@ -12,4 +12,8 @@ internal class InMemoryEventProcessor : EventProcessor {
     override fun process(event: UserEvent) {
         events.add(event)
     }
+
+    override fun flush() {
+        events.clear()
+    }
 }

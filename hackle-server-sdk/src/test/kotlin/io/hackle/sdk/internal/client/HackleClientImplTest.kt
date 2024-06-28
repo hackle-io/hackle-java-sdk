@@ -300,6 +300,9 @@ internal class HackleClientImplTest {
             verify(exactly = 1) {
                 core.track(withArg { expectThat(it.key) isEqualTo "\$properties" }, any(), any())
             }
+            verify(exactly = 1) {
+                core.flush()
+            }
         }
 
 
