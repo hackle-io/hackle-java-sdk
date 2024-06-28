@@ -7,7 +7,7 @@ data class InAppMessage(
     val period: Period,
     val eventTrigger: EventTrigger,
     val targetContext: TargetContext,
-    val messageContext: MessageContext
+    val messageContext: MessageContext,
 ) {
 
     enum class Status {
@@ -28,12 +28,14 @@ data class InAppMessage(
     }
 
     enum class DisplayType {
-        MODAL
+        MODAL, BANNER
     }
 
     enum class LayoutType {
         IMAGE_ONLY,
-        IMAGE_TEXT
+        IMAGE_TEXT,
+        TEXT_ONLY,
+        IMAGE
     }
 
     enum class Behavior {
@@ -48,6 +50,7 @@ data class InAppMessage(
     }
 
     enum class ActionArea {
+        MESSAGE,
         IMAGE,
         BUTTON,
         X_BUTTON
@@ -65,47 +68,47 @@ data class InAppMessage(
 
         class Custom(
             val startMillisInclusive: Long,
-            val endMillisExclusive: Long
+            val endMillisExclusive: Long,
         ) : Period()
     }
 
     data class EventTrigger(
         val rules: List<Rule>,
-        val frequencyCap: FrequencyCap?
+        val frequencyCap: FrequencyCap?,
     ) {
         data class Rule(
             val eventKey: String,
-            val targets: List<Target>
+            val targets: List<Target>,
         )
 
         data class FrequencyCap(
             val identifierCaps: List<IdentifierCap>,
-            val durationCap: DurationCap?
+            val durationCap: DurationCap?,
         )
 
         data class IdentifierCap(
             val identifierType: String,
-            val count: Int
+            val count: Int,
         )
 
         data class DurationCap(
             val durationMillis: Long,
-            val count: Int
+            val count: Int,
         )
     }
 
     data class TargetContext(
         val targets: List<Target>,
-        val overrides: List<UserOverride>
+        val overrides: List<UserOverride>,
     )
 
     data class UserOverride(
         val identifierType: String,
-        val identifiers: List<String>
+        val identifiers: List<String>,
     )
 
     data class ExperimentContext(
-        val key: Long
+        val key: Long,
     )
 
     data class MessageContext(
@@ -113,7 +116,7 @@ data class InAppMessage(
         val experimentContext: ExperimentContext?,
         val platformTypes: List<PlatformType>,
         val orientations: List<Orientation>,
-        val messages: List<Message>
+        val messages: List<Message>,
     )
 
     data class Message(
@@ -124,56 +127,76 @@ data class InAppMessage(
         val text: Text?,
         val buttons: List<Button>,
         val closeButton: Button?,
-        val background: Background
+        val background: Background,
+        val action: Action?,
+        val outerButtons: List<PositionalButton>,
     ) {
+        data class Alignment(
+            val horizontal: Horizontal,
+            val vertical: Vertical,
+        ) {
+            enum class Horizontal {
+                LEFT, CENTER, RIGHT
+            }
+
+            enum class Vertical {
+                TOP, MIDDLE, BOTTOM
+            }
+        }
 
         data class Layout(
             val displayType: DisplayType,
-            val layoutType: LayoutType
+            val layoutType: LayoutType,
+            val alignment: Alignment?,
         )
 
         data class Image(
             val orientation: Orientation,
             val imagePath: String,
-            val action: Action?
+            val action: Action?,
         )
 
         data class Text(
             val title: Attribute,
-            val body: Attribute
+            val body: Attribute,
         ) {
             data class Attribute(
                 val text: String,
-                val style: Style
+                val style: Style,
             )
 
             data class Style(
-                val textColor: String
+                val textColor: String,
             )
         }
 
         data class Button(
             val text: String,
             val style: Style,
-            val action: Action
+            val action: Action,
         ) {
 
             data class Style(
                 val textColor: String,
                 val bgColor: String,
-                val borderColor: String
+                val borderColor: String,
             )
         }
 
+        data class PositionalButton(
+            val button: Button,
+            val alignment: Alignment,
+        )
+
         data class Background(
-            val color: String
+            val color: String,
         )
     }
 
     data class Action(
         val behavior: Behavior,
         val type: ActionType,
-        val value: String?
+        val value: String?,
     )
 }
 
