@@ -5,4 +5,5 @@ package io.hackle.sdk.core.event
  */
 interface EventProcessor {
     fun process(event: UserEvent)
+    fun flush()
 }

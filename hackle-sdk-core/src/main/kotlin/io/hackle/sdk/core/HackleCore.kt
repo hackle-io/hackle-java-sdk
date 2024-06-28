@@ -168,6 +168,10 @@ class HackleCore internal constructor(
         )
     }
 
+    fun flush() {
+        eventProcessor.flush()
+    }
+
     override fun close() {
         workspaceFetcher.tryClose()
         eventProcessor.tryClose()

@@ -114,6 +114,7 @@ internal class HackleClientImpl(
         try {
             val event = operations.toEvent()
             track(event, user)
+            core.flush()
         } catch (e: Exception) {
             log.error { "Unexpected exception while update user properties: $e" }
         }
