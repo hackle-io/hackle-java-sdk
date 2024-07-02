@@ -22,7 +22,11 @@ data class Identifiers internal constructor(private val identifiers: Map<String,
     fun asMap(): Map<String, String> {
         return identifiers
     }
-    
+
+    fun asList(): List<Identifier> {
+        return identifiers.map { (type, value) -> Identifier(type, value) }
+    }
+
     companion object {
         private val EMPTY = Identifiers(emptyMap())
 
