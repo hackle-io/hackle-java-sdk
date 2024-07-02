@@ -4,10 +4,7 @@ import io.hackle.sdk.common.User
 import io.hackle.sdk.core.user.IdentifierType
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
-import strikt.assertions.isFalse
-import strikt.assertions.isNull
-import strikt.assertions.isTrue
+import strikt.assertions.*
 
 class IdentifiersTest {
 
@@ -30,6 +27,14 @@ class IdentifiersTest {
                 "customId" to "customIdValue",
             )
         )
+
+        expectThat(identifiers.asList()) {
+            hasSize(4)
+            contains(Identifier("\$id", "id"))
+            contains(Identifier("\$userId", "userId"))
+            contains(Identifier("\$deviceId", "deviceId"))
+            contains(Identifier("customId", "customIdValue"))
+        }
     }
 
     @Test
