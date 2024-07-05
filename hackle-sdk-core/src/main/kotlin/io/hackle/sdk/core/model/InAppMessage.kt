@@ -28,10 +28,11 @@ data class InAppMessage(
     }
 
     enum class DisplayType {
-        MODAL, BANNER
+        NONE, MODAL, BANNER
     }
 
     enum class LayoutType {
+        NONE,
         IMAGE_ONLY,
         IMAGE_TEXT,
         TEXT_ONLY,
