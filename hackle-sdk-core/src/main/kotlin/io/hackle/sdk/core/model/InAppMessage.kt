@@ -28,7 +28,7 @@ data class InAppMessage(
     }
 
     enum class DisplayType {
-        NONE, MODAL, BANNER
+        NONE, MODAL, BANNER, BOTTOM_SHEET;
     }
 
     enum class LayoutType {
