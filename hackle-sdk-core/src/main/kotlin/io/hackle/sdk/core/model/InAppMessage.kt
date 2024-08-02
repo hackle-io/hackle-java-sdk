@@ -131,6 +131,7 @@ data class InAppMessage(
         val background: Background,
         val action: Action?,
         val outerButtons: List<PositionalButton>,
+        val innerButtons: List<PositionalButton>,
     ) {
         data class Alignment(
             val horizontal: Horizontal,

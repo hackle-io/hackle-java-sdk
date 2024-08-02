@@ -487,6 +487,7 @@ internal object InAppMessages {
         closeButton: InAppMessage.Message.Button? = null,
         action: InAppMessage.Action? = null,
         outerButtons: List<InAppMessage.Message.PositionalButton> = emptyList(),
+        innerButtons: List<InAppMessage.Message.PositionalButton> = emptyList(),
     ): InAppMessage.Message {
         return InAppMessage.Message(
             variationKey = variationKey,
@@ -502,7 +503,8 @@ internal object InAppMessages {
             closeButton = closeButton,
             background = InAppMessage.Message.Background("#FFFFFF"),
             action = action,
-            outerButtons = outerButtons
+            outerButtons = outerButtons,
+            innerButtons = innerButtons
         )
     }
 
