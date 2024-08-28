@@ -1,14 +1,18 @@
 package io.hackle.sdk.core.model
 
+import io.hackle.sdk.common.HackleInAppMessage
+import io.hackle.sdk.common.HackleInAppMessageAction
+import io.hackle.sdk.common.HackleInAppMessageActionType
+
 data class InAppMessage(
     val id: Long,
-    val key: Long,
+    override val key: Long,
     val status: Status,
     val period: Period,
     val eventTrigger: EventTrigger,
     val targetContext: TargetContext,
     val messageContext: MessageContext,
-) {
+) : HackleInAppMessage {
 
     enum class Status {
         INITIALIZED,
@@ -197,9 +201,22 @@ data class InAppMessage(
 
     data class Action(
         val behavior: Behavior,
-        val type: ActionType,
+        val actionType: ActionType,
         val value: String?,
-    )
+    ) : HackleInAppMessageAction {
+        override val type: HackleInAppMessageActionType
+            get() = when (actionType) {
+                ActionType.CLOSE -> HackleInAppMessageActionType.CLOSE
+                ActionType.HIDDEN -> HackleInAppMessageActionType.HIDDEN
+                ActionType.WEB_LINK -> HackleInAppMessageActionType.LINK
+                ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK_AND_CLOSE
+            }
+        override val url: String?
+            get() = when (actionType) {
+                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> value
+                ActionType.CLOSE, ActionType.HIDDEN -> null
+            }
+    }
 }
 
 internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
