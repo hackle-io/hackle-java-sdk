@@ -204,19 +204,42 @@ data class InAppMessage(
         val actionType: ActionType,
         val value: String?,
     ) : HackleInAppMessageAction {
+
         override val type: HackleInAppMessageActionType
             get() = when (actionType) {
-                ActionType.CLOSE -> HackleInAppMessageActionType.CLOSE
-                ActionType.HIDDEN -> HackleInAppMessageActionType.HIDDEN
-                ActionType.WEB_LINK -> HackleInAppMessageActionType.LINK
-                ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK_AND_CLOSE
+                ActionType.CLOSE, ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
+                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK
             }
-        override val url: String?
-            get() = when (actionType) {
-                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> value
+
+        override val close: HackleInAppMessageAction.Close? by lazy {
+            when (actionType) {
+                ActionType.CLOSE -> InAppMessageCloseAction(null)
+                ActionType.HIDDEN -> InAppMessageCloseAction(DEFAULT_HIDE_DURATION_MILLIS)
+                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> null
+            }
+        }
+
+        override val link: HackleInAppMessageAction.Link? by lazy {
+            when (actionType) {
                 ActionType.CLOSE, ActionType.HIDDEN -> null
+                ActionType.WEB_LINK -> InAppMessageLinkAction(requireNotNull(value), false)
+                ActionType.LINK_AND_CLOSE -> InAppMessageLinkAction(requireNotNull(value), true)
             }
+        }
+
+        companion object {
+            const val DEFAULT_HIDE_DURATION_MILLIS: Long = 1000 * 60 * 60 * 24 // 24H
+        }
     }
+
+    private data class InAppMessageCloseAction(
+        override val hideDurationMillis: Long?,
+    ) : HackleInAppMessageAction.Close
+
+    private data class InAppMessageLinkAction(
+        override val url: String,
+        override val shouldCloseAfterLink: Boolean,
+    ) : HackleInAppMessageAction.Link
 }
 
 internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
