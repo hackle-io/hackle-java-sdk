@@ -515,7 +515,7 @@ internal object InAppMessages {
     ): InAppMessage.Action {
         return InAppMessage.Action(
             behavior = behavior,
-            type = type,
+            actionType = type,
             value = value
         )
     }
