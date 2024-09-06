@@ -1,14 +1,18 @@
 package io.hackle.sdk.core.model
 
+import io.hackle.sdk.common.HackleInAppMessage
+import io.hackle.sdk.common.HackleInAppMessageAction
+import io.hackle.sdk.common.HackleInAppMessageActionType
+
 data class InAppMessage(
     val id: Long,
-    val key: Long,
+    override val key: Long,
     val status: Status,
     val period: Period,
     val eventTrigger: EventTrigger,
     val targetContext: TargetContext,
     val messageContext: MessageContext,
-) {
+) : HackleInAppMessage {
 
     enum class Status {
         INITIALIZED,
@@ -197,9 +201,45 @@ data class InAppMessage(
 
     data class Action(
         val behavior: Behavior,
-        val type: ActionType,
+        val actionType: ActionType,
         val value: String?,
-    )
+    ) : HackleInAppMessageAction {
+
+        override val type: HackleInAppMessageActionType
+            get() = when (actionType) {
+                ActionType.CLOSE, ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
+                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK
+            }
+
+        override val close: HackleInAppMessageAction.Close? by lazy {
+            when (actionType) {
+                ActionType.CLOSE -> InAppMessageCloseAction(null)
+                ActionType.HIDDEN -> InAppMessageCloseAction(DEFAULT_HIDE_DURATION_MILLIS)
+                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> null
+            }
+        }
+
+        override val link: HackleInAppMessageAction.Link? by lazy {
+            when (actionType) {
+                ActionType.CLOSE, ActionType.HIDDEN -> null
+                ActionType.WEB_LINK -> InAppMessageLinkAction(requireNotNull(value), false)
+                ActionType.LINK_AND_CLOSE -> InAppMessageLinkAction(requireNotNull(value), true)
+            }
+        }
+
+        companion object {
+            const val DEFAULT_HIDE_DURATION_MILLIS: Long = 1000 * 60 * 60 * 24 // 24H
+        }
+    }
+
+    private data class InAppMessageCloseAction(
+        override val hideDurationMillis: Long?,
+    ) : HackleInAppMessageAction.Close
+
+    private data class InAppMessageLinkAction(
+        override val url: String,
+        override val shouldCloseAfterLink: Boolean,
+    ) : HackleInAppMessageAction.Link
 }
 
 internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
