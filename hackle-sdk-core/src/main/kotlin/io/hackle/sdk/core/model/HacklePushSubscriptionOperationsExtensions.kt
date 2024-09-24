@@ -6,7 +6,7 @@ import io.hackle.sdk.common.HacklePushSubscriptionOperations
 fun HacklePushSubscriptionOperations.toEvent(): Event {
     val builder = Event.builder("\$push_subscriptions")
     for ((type, status) in asMap()) {
-        builder.property(type.key, status.key)
+        builder.property(type, status.key)
     }
     return builder.build()
 }

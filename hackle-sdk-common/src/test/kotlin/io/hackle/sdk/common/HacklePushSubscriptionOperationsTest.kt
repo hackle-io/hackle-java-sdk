@@ -13,6 +13,6 @@ class HacklePushSubscriptionOperationsTest {
                 .build()
 
         expectThat(operations.size).isEqualTo(1)
-        expectThat(operations.asMap()).isEqualTo(mapOf(HacklePushSubscriptionType.GLOBAL to HacklePushSubscriptionStatus.UNSUBSCRIBED))
+        expectThat(operations.asMap()).isEqualTo(mapOf("\$global" to HacklePushSubscriptionStatus.UNSUBSCRIBED))
     }
 }

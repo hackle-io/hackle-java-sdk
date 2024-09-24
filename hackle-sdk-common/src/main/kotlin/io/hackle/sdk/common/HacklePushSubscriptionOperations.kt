@@ -1,20 +1,24 @@
 package io.hackle.sdk.common
 
 class HacklePushSubscriptionOperations private constructor(
-    private val operations: Map<HacklePushSubscriptionType, HacklePushSubscriptionStatus>,
+
+    /**
+     * PushSubscriptionType -> Status
+     */
+    private val operations: Map<String, HacklePushSubscriptionStatus>,
 ) {
     val size: Int get() = operations.size
 
-    fun asMap(): Map<HacklePushSubscriptionType, HacklePushSubscriptionStatus> {
+    fun asMap(): Map<String, HacklePushSubscriptionStatus> {
         return operations
     }
 
     class Builder {
 
-        private val operations = hashMapOf<HacklePushSubscriptionType, HacklePushSubscriptionStatus>()
+        private val operations = hashMapOf<String, HacklePushSubscriptionStatus>()
 
         fun global(status: HacklePushSubscriptionStatus) = apply {
-            operations[HacklePushSubscriptionType.GLOBAL] = status
+            operations[HacklePushSubscriptionType.GLOBAL.key] = status
         }
 
         fun build(): HacklePushSubscriptionOperations {
