@@ -1,7 +1,7 @@
 package io.hackle.sdk.common
 
-class HacklePushSubscriptionOperations (
-    private val operations: Map<HacklePushSubscriptionType, String>
+class HacklePushSubscriptionOperations private constructor(
+    private val operations: Map<HacklePushSubscriptionType, String>,
 ) {
     val size: Int get() = operations.size
 
@@ -13,12 +13,20 @@ class HacklePushSubscriptionOperations (
 
         private val operations = hashMapOf<HacklePushSubscriptionType, String>()
 
-        fun  global(state: HacklePushSubscriptionState) {
+        fun global(state: HacklePushSubscriptionState) = apply {
             operations[HacklePushSubscriptionType.GLOBAL] = state.key
         }
 
         fun build(): HacklePushSubscriptionOperations {
             return HacklePushSubscriptionOperations(operations)
+        }
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun builder(): Builder {
+            return Builder()
         }
     }
 }

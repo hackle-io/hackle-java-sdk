@@ -5,18 +5,18 @@ package io.hackle.sdk.common
  */
 enum class HacklePushSubscriptionState(val key: String) {
 
-   /*
-    * Subscribe push message
-    */
+    /**
+     * Subscribe push message
+     */
     SUBSCRIBED("SUBSCRIBED"),
 
-    /*
-    * Unsubscribe push message
-    */
+    /**
+     * Unsubscribe push message
+     */
     UNSUBSCRIBED("UNSUBSCRIBED"),
 
-    /*
-    * Unable to determine state
-    */
+    /**
+     * Unable to determine state
+     */
     UNKNOWN("UNKNOWN"),
 }
