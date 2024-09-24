@@ -13,8 +13,8 @@ class HacklePushSubscriptionOperations private constructor(
 
         private val operations = hashMapOf<HacklePushSubscriptionType, String>()
 
-        fun global(state: HacklePushSubscriptionState) = apply {
-            operations[HacklePushSubscriptionType.GLOBAL] = state.key
+        fun global(status: HacklePushSubscriptionStatus) = apply {
+            operations[HacklePushSubscriptionType.GLOBAL] = status.key
         }
 
         fun build(): HacklePushSubscriptionOperations {

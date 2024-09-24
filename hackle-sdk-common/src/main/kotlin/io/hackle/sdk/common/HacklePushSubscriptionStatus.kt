@@ -1,9 +1,9 @@
 package io.hackle.sdk.common
 
 /**
- * An enum that represents the state of a push subscription.
+ * An enum that represents the status of a push subscription.
  */
-enum class HacklePushSubscriptionState(val key: String) {
+enum class HacklePushSubscriptionStatus(val key: String) {
 
     /**
      * Subscribe push message
@@ -16,7 +16,7 @@ enum class HacklePushSubscriptionState(val key: String) {
     UNSUBSCRIBED("UNSUBSCRIBED"),
 
     /**
-     * Unable to determine state
+     * Unable to determine status
      */
     UNKNOWN("UNKNOWN"),
 }
