@@ -1,143 +1,143 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.model.Target.Match
+import io.hackle.sdk.core.model.Target.Match.Type.MATCH
+import io.hackle.sdk.core.model.Target.Match.Type.NOT_MATCH
 import io.hackle.sdk.core.model.ValueType
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ValueOperatorMatcherTest {
 
+    val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
+
     @Test
-    fun `match values중 하나라도 일지하는 값이 있으면 true`() {
-        // given
-        val match = Match(
-            type = Match.Type.MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
+    fun `matches`() {
 
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
+        // A 는 [A] 중 하나
+        verify(MATCH, "A", listOf("A"), true)
 
-        // when
-        val actual = sut.matches(3, match)
+        // A 는 [A, B] 중 하나
+        verify(MATCH, "A", listOf("A", "B"), true)
 
-        // then
-        assertTrue(actual)
+        // B 는 [A, B] 중 하나
+        verify(MATCH, "B", listOf("A", "B"), true)
+
+        // A 는 [B] 중 하나
+        verify(MATCH, "A", listOf("B"), false)
+
+        // A 는 [B, C] 중 하나
+        verify(MATCH, "A", listOf("B", "C"), false)
+
+        // [] 는 [A] 중 하나
+        verify(MATCH, listOf<String>(), listOf("A"), false)
+
+        // [A] 는 [A] 중 하나
+        verify(MATCH, listOf("A"), listOf("A"), true)
+
+        // [A] 는 [A, B] 중 하나
+        verify(MATCH, listOf("A"), listOf("A", "B"), true)
+
+        // [B] 는 [A, B] 중 하나
+        verify(MATCH, listOf("B"), listOf("A", "B"), true)
+
+        // [A] 는 [B] 중 하나
+        verify(MATCH, listOf("A"), listOf("B"), false)
+
+        // [A] 는 [B, C] 중 하나
+        verify(MATCH, listOf("A"), listOf("B", "C"), false)
+
+        // [A, B] 는 [A] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("A"), true)
+
+        // [A, B] 는 [B] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("B"), true)
+
+        // [A, B] 는 [C] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("C"), false)
+
+        // [A, B] 는 [A, B] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("A", "B"), true)
+
+        // [A, B] 는 [A, C] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("A", "C"), true)
+
+        // [A, B] 는 [B, C] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("B", "C"), true)
+
+        // [A, B] 는 [A, C] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("A", "C"), true)
+
+        // [A, B] 는 [C, A] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("C", "A"), true)
+
+        // [A, B] 는 [C, D] 중 하나
+        verify(MATCH, listOf("A", "B"), listOf("C", "D"), false)
+
+        // A 는 [A] 중 하나가 아닌
+        verify(NOT_MATCH, "A", listOf("A"), false)
+
+        // A 는 [A, B] 중 하나가 아닌
+        verify(NOT_MATCH, "A", listOf("A", "B"), false)
+
+        // B 는 [A, B] 중 하나가 아닌
+        verify(NOT_MATCH, "B", listOf("A", "B"), false)
+
+        // A 는 [B] 중 하나가 아닌
+        verify(NOT_MATCH, "A", listOf("B"), true)
+
+        // A 는 [B, C] 중 하나가 아닌
+        verify(NOT_MATCH, "A", listOf("B", "C"), true)
+
+        // [] 는 [A] 중 하나가 아닌
+        verify(NOT_MATCH, listOf<String>(), listOf("A"), true)
+
+        // [A] 는 [A] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A"), listOf("A"), false)
+
+        // [A] 는 [A, B] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A"), listOf("A", "B"), false)
+
+        // [B] 는 [A, B] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("B"), listOf("A", "B"), false)
+
+        // [A] 는 [B] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A"), listOf("B"), true)
+
+        // [A] 는 [B, C] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A"), listOf("B", "C"), true)
+
+        // [A, B] 는 [A] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("A"), false)
+
+        // [A, B] 는 [B] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("B"), false)
+
+        // [A, B] 는 [C] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("C"), true)
+
+        // [A, B] 는 [A, B] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("A", "B"), false)
+
+        // [A, B] 는 [A, C] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("A", "C"), false)
+
+        // [A, B] 는 [B, C] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("B", "C"), false)
+
+        // [A, B] 는 [A, C] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("A", "C"), false)
+
+        // [A, B] 는 [C, A] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("C", "A"), false)
+
+        // [A, B] 는 [C, D] 중 하나가 아닌
+        verify(NOT_MATCH, listOf("A", "B"), listOf("C", "D"), true)
     }
 
-    @Test
-    fun `match values중 일치하는 값이 하나도 없으면 false`() {
-        // given
-        val match = Match(
-            type = Match.Type.MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
-
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
-
-        // when
-        val actual = sut.matches(4, match)
-
-        // then
-        assertFalse(actual)
-    }
-
-    @Test
-    fun `일치하는 값이 있지만 MatchType이 NOT_MATCH면 false`() {
-        // given
-        val match = Match(
-            type = Match.Type.NOT_MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
-
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
-
-        // when
-        val actual = sut.matches(3, match)
-
-        // then
-        assertFalse(actual)
-    }
-
-    @Test
-    fun `일치하는 값이 없지만 MatchType이 NOT_MATCH면 true`() {
-        // given
-        val match = Match(
-            type = Match.Type.NOT_MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
-
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
-
-        // when
-        val actual = sut.matches(4, match)
-
-        // then
-        assertTrue(actual)
-    }
-
-    @Test
-    fun `userValue 가 collection인 경우 하나라도 매칭되면 true`() {
-        // given
-        val match = Match(
-            type = Match.Type.MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
-
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
-
-        // when
-        val actual = sut.matches(listOf(2), match)
-
-        // then
-        assertTrue(actual)
-    }
-
-    @Test
-    fun `collection userValue 중 매칭되는게 하나도 없으면 false`() {
-        // given
-        val match = Match(
-            type = Match.Type.MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
-
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
-
-        // when
-        val actual = sut.matches(listOf(4, 5, 6), match)
-
-        // then
-        assertFalse(actual)
-    }
-
-    @Test
-    fun `collection 이 비어있으면 false`() {
-        // given
-        val match = Match(
-            type = Match.Type.MATCH,
-            operator = Match.Operator.IN,
-            valueType = ValueType.NUMBER,
-            values = listOf(1, 2, 3)
-        )
-
-        val sut = ValueOperatorMatcher(ValueOperatorMatcherFactory())
-
-        // when
-        val actual = sut.matches(listOf<Any>(), match)
-
-        // then
-        assertFalse(actual)
+    private fun verify(type: Match.Type, userValue: Any, matchValues: List<String>, expected: Boolean) {
+        val match = Match(type, Match.Operator.IN, ValueType.STRING, matchValues)
+        val actual = sut.matches(userValue, match)
+        assertEquals(expected, actual)
     }
 }
