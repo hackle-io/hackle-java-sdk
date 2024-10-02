@@ -250,9 +250,17 @@ class TargetDsl {
             valueType: ValueType,
             vararg values: Any,
         ) {
-            match = Target.Match(type, operator, valueType, values.toList())
+            match(type, operator, valueType, values.toList())
         }
 
+        fun match(
+            type: Target.Match.Type,
+            operator: Target.Match.Operator,
+            valueType: ValueType,
+            values: List<Any>,
+        ) {
+            match = Target.Match(type, operator, valueType, values)
+        }
 
         internal inline operator fun <reified T : Any> Target.Match.Operator.invoke(vararg values: T) {
 
