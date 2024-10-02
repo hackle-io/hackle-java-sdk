@@ -5,10 +5,11 @@ import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.COHORT
 
 internal class CohortConditionMatcher(
-    private val valueOperatorMatcher: ValueOperatorMatcher
+    private val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ConditionMatcher {
     override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
         require(condition.key.type == COHORT) { "Unsupported Target.Key.Type [${condition.key.type}]" }
-        return request.user.cohorts.any { valueOperatorMatcher.matches(it.id, condition.match) }
+        val cohortIds = request.user.cohorts.map { it.id }
+        return valueOperatorMatcher.matches(cohortIds, condition.match)
     }
 }
