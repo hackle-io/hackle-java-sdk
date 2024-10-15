@@ -123,9 +123,9 @@ subprojects {
                     }
 
                     scm {
-                        connection.set("scm:git:https://github.com/hackle-io/hackle-jvm-sdk.git")
-                        developerConnection.set("scm:git:https://github.com/hackle-io/hackle-jvm-sdk.git")
-                        url.set("https://github.com/hackle-io/hackle-jvm-sdk")
+                        connection.set("scm:git:https://github.com/hackle-io/hackle-java-sdk.git")
+                        developerConnection.set("scm:git:https://github.com/hackle-io/hackle-java-sdk.git")
+                        url.set("https://github.com/hackle-io/hackle-java-sdk")
                     }
                 }
             }
