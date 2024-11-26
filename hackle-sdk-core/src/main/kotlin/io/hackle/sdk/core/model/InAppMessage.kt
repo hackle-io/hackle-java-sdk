@@ -129,6 +129,7 @@ data class InAppMessage(
         val lang: String,
         val layout: Layout,
         val images: List<Image>,
+        val imageAutoScroll: ImageAutoScroll?,
         val text: Text?,
         val buttons: List<Button>,
         val closeButton: Button?,
@@ -160,6 +161,10 @@ data class InAppMessage(
             val orientation: Orientation,
             val imagePath: String,
             val action: Action?,
+        )
+
+        data class ImageAutoScroll(
+            val intervalMillis: Long,
         )
 
         data class Text(

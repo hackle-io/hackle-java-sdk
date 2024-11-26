@@ -490,6 +490,7 @@ internal object InAppMessages {
         variationKey: String? = null,
         lang: String = "ko",
         images: List<InAppMessage.Message.Image> = listOf(image()),
+        imageAutoScroll: InAppMessage.Message.ImageAutoScroll? = null,
         text: InAppMessage.Message.Text? = text(),
         buttons: List<InAppMessage.Message.Button> = listOf(button()),
         closeButton: InAppMessage.Message.Button? = null,
@@ -506,6 +507,7 @@ internal object InAppMessages {
                 alignment = null
             ),
             images = images,
+            imageAutoScroll = imageAutoScroll,
             text = text,
             buttons = buttons,
             closeButton = closeButton,
