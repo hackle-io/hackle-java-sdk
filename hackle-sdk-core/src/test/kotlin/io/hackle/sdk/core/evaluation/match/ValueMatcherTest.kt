@@ -143,13 +143,13 @@ internal class ValueMatcherTest {
             assertTrue(BooleanMatcher.matches(InMatcher, "false", false))
             assertTrue(BooleanMatcher.matches(InMatcher, "FALSE", false))
 
-            assertTrue(BooleanMatcher.matches(InMatcher, true, "True"))
-            assertTrue(BooleanMatcher.matches(InMatcher, true, "tRuE"))
-            assertTrue(BooleanMatcher.matches(InMatcher, false, "False"))
-            assertTrue(BooleanMatcher.matches(InMatcher, false, "fAlSE"))
+            assertTrue(BooleanMatcher.matches(InMatcher, true, "TRUE"))
+            assertTrue(BooleanMatcher.matches(InMatcher, true, "true"))
+            assertTrue(BooleanMatcher.matches(InMatcher, false, "FALSE"))
+            assertTrue(BooleanMatcher.matches(InMatcher, false, "false"))
 
             assertFalse(BooleanMatcher.matches(InMatcher, "FALSE", true))
-            assertFalse(BooleanMatcher.matches(InMatcher, "True", false))
+            assertFalse(BooleanMatcher.matches(InMatcher, "true", false))
         }
     }
 
