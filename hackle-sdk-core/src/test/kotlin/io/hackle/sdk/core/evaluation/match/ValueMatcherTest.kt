@@ -105,7 +105,7 @@ internal class ValueMatcherTest {
         @Test
         fun `userValue가 Boolean타입이 아니면 false`() {
             // given
-            val userValue = "false"
+            val userValue = "string"
             val matchValue = false
             val operatorMatcher = mockk<OperatorMatcher>()
 
@@ -123,7 +123,7 @@ internal class ValueMatcherTest {
         fun `userValue가 Boolean타입이지만 matchValue가 Boolean타입이 아니면 false`() {
             // given
             val userValue = false
-            val matchValue = "false"
+            val matchValue = "string"
             val operatorMatcher = mockk<OperatorMatcher>()
 
             val sut = BooleanMatcher
@@ -134,6 +134,22 @@ internal class ValueMatcherTest {
             // then
             assertFalse(actual)
             verify { operatorMatcher wasNot Called }
+        }
+
+        @Test
+        fun `userValue 혹은 matchValue가 String타입이지만 true이거나 false이면 BoolMatcher의 일치 결과로 평가한다`() {
+            assertTrue(BooleanMatcher.matches(InMatcher, "true", true))
+            assertTrue(BooleanMatcher.matches(InMatcher, "TRUE", true))
+            assertTrue(BooleanMatcher.matches(InMatcher, "false", false))
+            assertTrue(BooleanMatcher.matches(InMatcher, "FALSE", false))
+
+            assertTrue(BooleanMatcher.matches(InMatcher, true, "True"))
+            assertTrue(BooleanMatcher.matches(InMatcher, true, "tRuE"))
+            assertTrue(BooleanMatcher.matches(InMatcher, false, "False"))
+            assertTrue(BooleanMatcher.matches(InMatcher, false, "fAlSE"))
+
+            assertFalse(BooleanMatcher.matches(InMatcher, "FALSE", true))
+            assertFalse(BooleanMatcher.matches(InMatcher, "True", false))
         }
     }
 
