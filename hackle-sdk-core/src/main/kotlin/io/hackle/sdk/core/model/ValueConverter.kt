@@ -19,10 +19,25 @@ internal object ValueConverter {
     }
 
     fun asBooleanOrNull(value: Any): Boolean? {
-        return value as? Boolean
+        return when (value) {
+            is Boolean -> value
+            is String -> value.toBoolean()
+            else -> null
+        }
     }
 
     fun asVersionOrNull(value: Any): Version? {
         return Version.parseOrNull(value)
     }
+
+    private fun String.toBoolean(): Boolean? {
+        if (length > 5) return null
+
+        return when (toLowerCase()) {
+            "true" -> true
+            "false" -> false
+            else -> null
+        }
+    }
+
 }
