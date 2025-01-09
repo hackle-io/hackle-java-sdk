@@ -5,6 +5,7 @@ internal object ValueConverter {
         return when (value) {
             is String -> return value
             is Number -> value.toString()
+            is Boolean -> value.toString()
             else -> null
         }
     }
@@ -32,8 +33,8 @@ internal object ValueConverter {
 
     private fun String.toBoolean(): Boolean? {
         if (length > 5) return null
-
-        return when (toLowerCase()) {
+        // "true" or "false"
+        return when (this) {
             "true" -> true
             "false" -> false
             else -> null

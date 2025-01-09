@@ -35,8 +35,20 @@ internal class ValueMatcherTest {
         }
 
         @Test
+        fun `boolean 타입이면 캐스팅 후 match`() {
+            assertTrue(StringMatcher.matches(InMatcher, "true", true))
+            assertTrue(StringMatcher.matches(InMatcher, true, "true"))
+            assertTrue(StringMatcher.matches(InMatcher, true, true))
+            assertTrue(StringMatcher.matches(InMatcher, "false", false))
+            assertTrue(StringMatcher.matches(InMatcher, false, "false"))
+            assertTrue(StringMatcher.matches(InMatcher, false, false))
+
+            assertFalse(StringMatcher.matches(InMatcher, true, "TRUE"))
+            assertFalse(StringMatcher.matches(InMatcher, false, "FALSE"))
+        }
+
+        @Test
         fun `지원하지 않는 타입`() {
-            assertFalse(StringMatcher.matches(InMatcher, true, true))
             assertFalse(StringMatcher.matches(InMatcher, true, "1"))
             assertFalse(StringMatcher.matches(InMatcher, "1", true))
         }
@@ -139,16 +151,16 @@ internal class ValueMatcherTest {
         @Test
         fun `userValue 혹은 matchValue가 String타입이지만 true이거나 false이면 BoolMatcher의 일치 결과로 평가한다`() {
             assertTrue(BooleanMatcher.matches(InMatcher, "true", true))
-            assertTrue(BooleanMatcher.matches(InMatcher, "TRUE", true))
             assertTrue(BooleanMatcher.matches(InMatcher, "false", false))
-            assertTrue(BooleanMatcher.matches(InMatcher, "FALSE", false))
 
-            assertTrue(BooleanMatcher.matches(InMatcher, true, "TRUE"))
             assertTrue(BooleanMatcher.matches(InMatcher, true, "true"))
-            assertTrue(BooleanMatcher.matches(InMatcher, false, "FALSE"))
             assertTrue(BooleanMatcher.matches(InMatcher, false, "false"))
 
-            assertFalse(BooleanMatcher.matches(InMatcher, "FALSE", true))
+            assertFalse(BooleanMatcher.matches(InMatcher, "TRUE", true))
+            assertFalse(BooleanMatcher.matches(InMatcher, "FALSE", false))
+            assertFalse(BooleanMatcher.matches(InMatcher, true, "TRUE"))
+            assertFalse(BooleanMatcher.matches(InMatcher, false, "FALSE"))
+            assertFalse(BooleanMatcher.matches(InMatcher, "false", true))
             assertFalse(BooleanMatcher.matches(InMatcher, "true", false))
         }
     }
