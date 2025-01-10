@@ -8,7 +8,7 @@ plugins {
 }
 
 val groupName = "io.hackle"
-val versionName = "2.25.7"
+val versionName = "2.25.8"
 
 group = groupName
 version = versionName
@@ -123,9 +123,9 @@ subprojects {
                     }
 
                     scm {
-                        connection.set("scm:git:https://github.com/hackle-io/hackle-jvm-sdk.git")
-                        developerConnection.set("scm:git:https://github.com/hackle-io/hackle-jvm-sdk.git")
-                        url.set("https://github.com/hackle-io/hackle-jvm-sdk")
+                        connection.set("scm:git:https://github.com/hackle-io/hackle-java-sdk.git")
+                        developerConnection.set("scm:git:https://github.com/hackle-io/hackle-java-sdk.git")
+                        url.set("https://github.com/hackle-io/hackle-java-sdk")
                     }
                 }
             }
