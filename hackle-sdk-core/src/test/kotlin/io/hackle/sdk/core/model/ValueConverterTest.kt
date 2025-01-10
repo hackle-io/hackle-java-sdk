@@ -15,7 +15,8 @@ internal class ValueConverterTest {
         expectThat(ValueConverter.asStringOrNull(42L)).isEqualTo("42")
         expectThat(ValueConverter.asStringOrNull(42.0)).isEqualTo("42.0")
         expectThat(ValueConverter.asStringOrNull(42.42)).isEqualTo("42.42")
-        expectThat(ValueConverter.asStringOrNull(true)).isNull()
+        expectThat(ValueConverter.asStringOrNull(true)).isEqualTo("true")
+        expectThat(ValueConverter.asStringOrNull(false)).isEqualTo("false")
     }
 
     @Test
@@ -37,6 +38,13 @@ internal class ValueConverterTest {
         expectThat(ValueConverter.asBooleanOrNull(true)).isEqualTo(true)
         expectThat(ValueConverter.asBooleanOrNull(false)).isEqualTo(false)
 
+        expectThat(ValueConverter.asBooleanOrNull("true")).isEqualTo(true)
+        expectThat(ValueConverter.asBooleanOrNull("false")).isEqualTo(false)
+
+        expectThat(ValueConverter.asBooleanOrNull("TRUE")).isNull()
+        expectThat(ValueConverter.asBooleanOrNull("FALSE")).isNull()
+        expectThat(ValueConverter.asBooleanOrNull("trues")).isNull()
+        expectThat(ValueConverter.asBooleanOrNull("strings")).isNull()
         expectThat(ValueConverter.asBooleanOrNull(1)).isNull()
         expectThat(ValueConverter.asBooleanOrNull(0)).isNull()
     }
