@@ -42,6 +42,9 @@ class EvaluationContext internal constructor() {
         register(InAppMessageResolver(get()))
         register(InAppMessageUserOverrideMatcher())
         register(InAppMessageTargetMatcher(get()))
+        // server sdk: NoopInAppMessageHiddenStorage
+        // android sdk: AndroidInAppMessageHiddenStorage
+        //  hackle-android-sdk 에서 초기화 할 때 EvaluationContext.GLOBAL에 등록함
         register(InAppMessageHiddenMatcher(getOrNull() ?: NoopInAppMessageHiddenStorage))
     }
 
