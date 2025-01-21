@@ -20,6 +20,7 @@ data class Target(
             FEATURE_FLAG,
             EVENT_PROPERTY,
             COHORT,
+            NUMBER_OF_EVENTS_IN_DAYS
         }
     }
 
