@@ -6,9 +6,22 @@ class TargetSegmentationOption {
         val period: Int,
         val timeUnit: TimeUnit
     ) {
+        val periodDays: Int
+            get() {
+                return if(timeUnit == TimeUnit.DAYS) {
+                    period
+                } else {
+                    period * WEEKDAY
+                }
+            }
+
         enum class TimeUnit {
             DAYS,
             WEEKS,
+        }
+
+        companion object {
+            private const val WEEKDAY = 7
         }
     }
 

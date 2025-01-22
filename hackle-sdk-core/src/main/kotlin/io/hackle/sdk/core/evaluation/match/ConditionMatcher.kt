@@ -19,7 +19,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
     private val experimentConditionMatcher: ConditionMatcher
     private val eventConditionMatcher: ConditionMatcher
     private val cohortConditionMatcher: CohortConditionMatcher
-    private val audienceConditionMatcher: AudienceConditionMatcher
+    private val targetEventConditionMatcher: TargetEventConditionMatcher
 
     init {
         val valueOperatorMatcher = ValueOperatorMatcher(ValueOperatorMatcherFactory())
@@ -34,7 +34,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
             valueOperatorMatcher
         )
         this.cohortConditionMatcher = CohortConditionMatcher(valueOperatorMatcher)
-        this.audienceConditionMatcher = AudienceConditionMatcher()
+        this.targetEventConditionMatcher = TargetEventConditionMatcher(valueOperatorMatcher)
     }
 
     fun getMatcher(type: Target.Key.Type): ConditionMatcher {
@@ -44,7 +44,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
             AB_TEST, FEATURE_FLAG -> experimentConditionMatcher
             EVENT_PROPERTY -> eventConditionMatcher
             COHORT -> cohortConditionMatcher
-            NUMBER_OF_EVENTS_IN_DAYS -> audienceConditionMatcher
+            NUMBER_OF_EVENTS_IN_DAYS -> targetEventConditionMatcher
         }
     }
 }

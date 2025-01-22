@@ -1,0 +1,37 @@
+package io.hackle.sdk.core.model
+
+/**
+ * TODO: 객체명 수정
+ * Audience 타겟팅을 위한 Event 객체
+ *
+ * @param eventKey 타겟팅 할 이벤트 키
+ * @param stats 이벤트 통계
+ * @param property 추가로 타겟팅 할 이벤트의 프로퍼티
+ */
+data class TargetEvent(
+    val eventKey: String,
+    val stats: List<Stat>,
+    val property: Property? = null
+    ) {
+    /**
+     * 이벤트의 프로퍼티
+     *
+     * @param key 프로퍼티 키
+     * @param value 프로퍼티 값
+     */
+    data class Property(
+        val key: String,
+        val value: Any
+    )
+
+    /**
+     * 이벤트 통계
+     *
+     * @param date UTC 날짜
+     * @param count 이벤트 발생 횟수
+     */
+    data class Stat(
+        val date: Long,
+        val count: Int
+    )
+}

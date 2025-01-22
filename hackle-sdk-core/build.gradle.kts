@@ -1,5 +1,6 @@
 dependencies {
     api(project(":hackle-sdk-common"))
+    implementation("com.google.code.gson:gson:2.8.6")
 }
 
 tasks.jacocoTestReport {
