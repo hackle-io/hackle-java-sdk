@@ -7,6 +7,7 @@ import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS
 import io.hackle.sdk.core.model.TargetEvent
 import io.hackle.sdk.core.model.TargetSegmentationExpression
+import io.hackle.sdk.core.model.TargetSegmentationOption
 
 /**
  * TargetEventConditionMatcher
@@ -43,55 +44,55 @@ internal class NumberOfEventsInDaysMatcher(
         val numberOfEventsInDays = condition.key.toNumberOfEventsInDays()
         val periodDays = numberOfEventsInDays.timeRange.periodDays
         val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(periodDays)
-
-        val numOfEvents = targetEvents
-            .firstOrNull { it.eventKey == numberOfEventsInDays.eventKey && it.property == null }
-            .let {
-                it ?: return false
-            }
-            .stats
-            .filter { it.date >= daysAgoUtc }
-            .sumOf { it.count }
-
-        return valueOperatorMatcher.matches(numOfEvents, condition.match)
-    }
-}
-
-internal class NumberOfEventsInDaysWithPropertyMatcher(
-    override val valueOperatorMatcher: ValueOperatorMatcher
-): TargetSegmentationExpressionMatcher() {
-    override fun matches(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
-        val numberOfEventsInDays = condition.key.toNumberOfEventsInDays()
-        requireNotNull(numberOfEventsInDays.filters)
-        val periodDays = numberOfEventsInDays.timeRange.periodDays
-        val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(periodDays)
-
         val filteredTargetEvents = targetEvents
             .filter { it.eventKey == numberOfEventsInDays.eventKey }
 
-        val isMatched = numberOfEventsInDays.filters.all { propertyFilter ->
-            val numOfEvents = filteredTargetEvents
-                .firstOrNull { event -> event.property?.key ==  propertyFilter.propertyKey.name }
-                .let { event ->
-                    if(event?.property?.let { valueOperatorMatcher.matches(it.value, propertyFilter.match) } == true) {
-                        event
-                    } else {
-                        return false
-                    }
-                }
-                .stats
-                .filter { it.date >= daysAgoUtc }
-                .sumOf { it.count }
 
-                return valueOperatorMatcher.matches(numOfEvents, condition.match)
-            }
-
-        return isMatched
+        return if (numberOfEventsInDays.filters.isNullOrEmpty()) {
+            matchWithoutProperty(filteredTargetEvents, daysAgoUtc, condition)
+        } else {
+            matchWithProperty(filteredTargetEvents, numberOfEventsInDays.filters, daysAgoUtc, condition)
+        }
     }
-}
 
+    private fun matchWithoutProperty(
+        filteredTargetEvents: List<TargetEvent>,
+        daysAgoUtc: Long,
+        condition: Target.Condition
+    ): Boolean {
+        val numOfEvents = filteredTargetEvents
+            .firstOrNull { it.property == null }
+            ?.stats
+            ?.filter { it.date >= daysAgoUtc }
+            ?.sumOf { it.count }
+            ?: return false
 
-private fun Target.Key.toNumberOfEventsInDays(): TargetSegmentationExpression.NumberOfEventsInDays {
-    require(type == NUMBER_OF_EVENTS_IN_DAYS) { "Unsupported Target.Key.Type [${type}]" }
-    return Gson().fromJson(name, TargetSegmentationExpression.NumberOfEventsInDays::class.java)
+        return valueOperatorMatcher.matches(numOfEvents, condition.match)
+    }
+
+    private fun matchWithProperty(
+        filteredTargetEvents: List<TargetEvent>,
+        filters: List<TargetSegmentationOption.PropertyFilter>,
+        daysAgoUtc: Long,
+        condition: Target.Condition
+    ): Boolean {
+        return filters.all { propertyFilter ->
+            val numOfEvents = filteredTargetEvents
+                .firstOrNull { it.property?.key == propertyFilter.propertyKey.name }
+                ?.takeIf { event ->
+                    event.property?.let { valueOperatorMatcher.matches(it.value, propertyFilter.match) } == true
+                }
+                ?.stats
+                ?.filter { it.date >= daysAgoUtc }
+                ?.sumOf { it.count }
+                ?: return false
+
+            valueOperatorMatcher.matches(numOfEvents, condition.match)
+        }
+    }
+
+    private fun Target.Key.toNumberOfEventsInDays(): TargetSegmentationExpression.NumberOfEventsInDays {
+        require(type == NUMBER_OF_EVENTS_IN_DAYS) { "Unsupported Target.Key.Type [${type}]" }
+        return Gson().fromJson(name, TargetSegmentationExpression.NumberOfEventsInDays::class.java)
+    }
 }

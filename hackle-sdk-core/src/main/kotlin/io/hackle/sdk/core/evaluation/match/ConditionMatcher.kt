@@ -34,7 +34,7 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
             valueOperatorMatcher
         )
         this.cohortConditionMatcher = CohortConditionMatcher(valueOperatorMatcher)
-        this.targetEventConditionMatcher = TargetEventConditionMatcher(valueOperatorMatcher)
+        this.targetEventConditionMatcher = TargetEventConditionMatcher(NumberOfEventsInDaysMatcher(valueOperatorMatcher))
     }
 
     fun getMatcher(type: Target.Key.Type): ConditionMatcher {
