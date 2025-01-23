@@ -28,6 +28,7 @@ internal class TargetEventConditionMatcher(
 
 internal abstract class TargetSegmentationExpressionMatcher {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
+    internal val gson = Gson()
 
     fun matches(request: Evaluator.Request, condition: Target.Condition): Boolean {
         requireNotNull(condition.key.name)
@@ -40,13 +41,13 @@ internal abstract class TargetSegmentationExpressionMatcher {
 internal class NumberOfEventsInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher
 ): TargetSegmentationExpressionMatcher() {
+
     override fun matches(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
         val numberOfEventsInDays = condition.key.toNumberOfEventsInDays()
         val periodDays = numberOfEventsInDays.timeRange.periodDays
         val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(periodDays)
         val filteredTargetEvents = targetEvents
             .filter { it.eventKey == numberOfEventsInDays.eventKey }
-
 
         return if (numberOfEventsInDays.filters.isNullOrEmpty()) {
             matchWithoutProperty(filteredTargetEvents, daysAgoUtc, condition)
@@ -93,6 +94,6 @@ internal class NumberOfEventsInDaysMatcher(
 
     private fun Target.Key.toNumberOfEventsInDays(): TargetSegmentationExpression.NumberOfEventsInDays {
         require(type == NUMBER_OF_EVENTS_IN_DAYS) { "Unsupported Target.Key.Type [${type}]" }
-        return Gson().fromJson(name, TargetSegmentationExpression.NumberOfEventsInDays::class.java)
+        return gson.fromJson(name, TargetSegmentationExpression.NumberOfEventsInDays::class.java)
     }
 }
