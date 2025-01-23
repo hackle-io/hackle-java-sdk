@@ -16,9 +16,9 @@ sealed class TargetSegmentationExpression {
             get() = Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS
 
         init {
-            require(timeRange.timeUnit == TargetSegmentationOption.TimeRange.TimeUnit.DAYS) {
-                "invalid time range time unit type, only supported ${TargetSegmentationOption.TimeRange.TimeUnit.DAYS} time unit type"
-            }
+            //require(timeRange.timeUnit == TargetSegmentationOption.TimeRange.TimeUnit.DAYS) {
+            //    "invalid time range time unit type, only supported ${TargetSegmentationOption.TimeRange.TimeUnit.DAYS} time unit type"
+            //}
             require(timeRange.period <= MAX_DAY_PERIOD) {
                 "period max value 30, input value : ${timeRange.period}"
             }
