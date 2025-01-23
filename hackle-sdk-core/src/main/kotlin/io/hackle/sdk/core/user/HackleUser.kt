@@ -37,6 +37,7 @@ data class HackleUser internal constructor(
             properties.add(user.properties)
             hackleProperties.add(user.hackleProperties)
             cohorts.addAll(user.cohorts)
+            targetEvents.addAll(user.targetEvents)
         }
 
         fun identifiers(identifiers: Map<String, String>, overwrite: Boolean = true) =
