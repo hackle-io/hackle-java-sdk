@@ -26,6 +26,9 @@ internal class TargetEventConditionMatcher(
     }
 }
 
+/**
+ * TargetSegmentationExpressionMatcher
+ */
 internal abstract class TargetSegmentationExpressionMatcher {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
     internal val gson = Gson()
@@ -38,58 +41,55 @@ internal abstract class TargetSegmentationExpressionMatcher {
     protected abstract fun matches(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean
 }
 
+/**
+ * NumberOfEventsInDaysMatcher
+ *
+ * 기간 내 이벤트 발생 횟수
+ */
 internal class NumberOfEventsInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher
 ): TargetSegmentationExpressionMatcher() {
 
     override fun matches(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
         val numberOfEventsInDays = condition.key.toNumberOfEventsInDays()
-        val periodDays = numberOfEventsInDays.timeRange.periodDays
-        val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(periodDays)
+        val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(numberOfEventsInDays.timeRange.periodDays)
         val filteredTargetEvents = targetEvents
             .filter { it.eventKey == numberOfEventsInDays.eventKey }
 
-        return if (numberOfEventsInDays.filters.isNullOrEmpty()) {
-            matchWithoutProperty(filteredTargetEvents, daysAgoUtc, condition)
-        } else {
-            matchWithProperty(filteredTargetEvents, numberOfEventsInDays.filters, daysAgoUtc, condition)
-        }
+        return match(filteredTargetEvents, daysAgoUtc, condition, numberOfEventsInDays.filters)
     }
 
-    private fun matchWithoutProperty(
+    private fun match(
         filteredTargetEvents: List<TargetEvent>,
         daysAgoUtc: Long,
-        condition: Target.Condition
+        condition: Target.Condition,
+        filters: List<TargetSegmentationOption.PropertyFilter>? = null
     ): Boolean {
-        val numOfEvents = filteredTargetEvents
-            .firstOrNull { it.property == null }
-            ?.stats
-            ?.filter { it.date >= daysAgoUtc }
-            ?.sumOf { it.count }
-            ?: return false
-
-        return valueOperatorMatcher.matches(numOfEvents, condition.match)
-    }
-
-    private fun matchWithProperty(
-        filteredTargetEvents: List<TargetEvent>,
-        filters: List<TargetSegmentationOption.PropertyFilter>,
-        daysAgoUtc: Long,
-        condition: Target.Condition
-    ): Boolean {
-        return filters.all { propertyFilter ->
-            val numOfEvents = filteredTargetEvents
-                .firstOrNull { it.property?.key == propertyFilter.propertyKey.name }
-                ?.takeIf { event ->
-                    event.property?.let { valueOperatorMatcher.matches(it.value, propertyFilter.match) } == true
-                }
-                ?.stats
-                ?.filter { it.date >= daysAgoUtc }
-                ?.sumOf { it.count }
-                ?: return false
-
+        val targetEventMap = filteredTargetEvents
+            .groupBy { it.property?.key }
+        return if (filters.isNullOrEmpty()) {
+            val numOfEvents = eventCounts(targetEventMap[null], daysAgoUtc)
             valueOperatorMatcher.matches(numOfEvents, condition.match)
+        } else {
+            filters.all { propertyFilter ->
+                val numOfEvents = eventCountsWithProperty(targetEventMap[propertyFilter.propertyKey.name], propertyFilter, daysAgoUtc)
+                valueOperatorMatcher.matches(numOfEvents, condition.match)
+            }
         }
+    }
+
+    private fun eventCounts(events: List<TargetEvent>?, daysAgoUtc: Long): Int {
+        return events?.firstOrNull()?.let {
+            it.stats.filter { stat -> stat.date >= daysAgoUtc }.sumOf { stat -> stat.count }
+        } ?: 0
+    }
+
+    private fun eventCountsWithProperty(events: List<TargetEvent>?, propertyFilter: TargetSegmentationOption.PropertyFilter, daysAgoUtc: Long): Int {
+        return events?.firstOrNull { event ->
+            event.property?.let { valueOperatorMatcher.matches(it.value, propertyFilter.match) } == true
+        }?.let {
+            it.stats.filter { stat -> stat.date >= daysAgoUtc }.sumOf { stat -> stat.count }
+        } ?: 0
     }
 
     private fun Target.Key.toNumberOfEventsInDays(): TargetSegmentationExpression.NumberOfEventsInDays {
