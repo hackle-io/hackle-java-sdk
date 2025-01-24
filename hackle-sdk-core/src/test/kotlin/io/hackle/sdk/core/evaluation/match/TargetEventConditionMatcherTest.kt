@@ -30,14 +30,23 @@ class TargetEventConditionMatcherTest {
             match(MATCH, Target.Match.Operator.IN, NUMBER, 42)
         }
         // when
-        val actual = assertThrows<IllegalArgumentException> {
+        val actualSut = assertThrows<IllegalArgumentException> {
             sut.matches(request, Evaluators.context(), condition)
         }
 
-        // then
-        expectThat(actual.message)
+        expectThat(actualSut.message)
             .isNotNull()
             .isEqualTo("Unsupported Target.Key.Type [USER_PROPERTY]")
+
+        // when
+        val actualMatcher = assertThrows<IllegalArgumentException> {
+            numberOfEventsInDaysMatcher.matches(request.user.targetEvents, condition)
+        }
+
+        expectThat(actualMatcher.message)
+            .isNotNull()
+            .isEqualTo("Unsupported Target.Key.Type [USER_PROPERTY]")
+
     }
 
     @Test
@@ -77,6 +86,12 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
+    fun `5일 전 purchase 이벤트가 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 성공`() {
+        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
+            Target.Match.Operator.GTE, NUMBER, 1, false)
+    }
+
+    @Test
     fun `5일 전 purchase 이벤트가 milk properoty와 1회 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 성공`() {
         verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
             Target.Match.Operator.GTE, NUMBER, 1, true)
@@ -98,6 +113,15 @@ class TargetEventConditionMatcherTest {
     fun `매일 siver grade 등급의 로그인이 6회 발생했고, 30일 내 platinum grade 등급의 로그인 이벤트가 30회 이상 발생한 조건이 들어온 경우 실패`() {
         verify(listOf(TargetEvent("login", makeTargetEventsStat(30, 6), TargetEvent.Property("grade", "silver"))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"grade\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"platinum\"]}}]}", MATCH,
             Target.Match.Operator.GTE, NUMBER, 30, false)
+    }
+
+    @Test
+    fun `stat에 property가 있는 이벤트만 있는데 filter가 비어있는 경우`() {
+        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\", \"filters\": null}}", MATCH,
+            Target.Match.Operator.GTE, NUMBER, 1, false)
+
+        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\",\"filters\":[]}}", MATCH,
+            Target.Match.Operator.GTE, NUMBER, 1, false)
     }
 
     /**

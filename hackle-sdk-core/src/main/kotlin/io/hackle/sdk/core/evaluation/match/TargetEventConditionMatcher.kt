@@ -63,39 +63,36 @@ internal class NumberOfEventsInDaysMatcher(
         filteredTargetEvents: List<TargetEvent>,
         daysAgoUtc: Long,
         condition: Target.Condition,
-        filters: List<TargetSegmentationOption.PropertyFilter>? = null
+        filters: List<TargetSegmentationOption.PropertyFilter>?
     ): Boolean {
         val targetEventMap = filteredTargetEvents
             .groupBy { it.property?.key }
         return if (filters.isNullOrEmpty()) {
-            val numOfEvents = eventCountsWithoutProperty(targetEventMap[null], daysAgoUtc)
-            valueOperatorMatcher.matches(numOfEvents, condition.match)
+            targetEventMap[null]?.let {
+                val numOfEvents = eventCounts(it.first(), daysAgoUtc)
+                valueOperatorMatcher.matches(numOfEvents, condition.match)
+            } ?: false
         } else {
             filters.all { propertyFilter ->
-                val numOfEvents = eventCountsWithProperty(targetEventMap[propertyFilter.propertyKey.name], propertyFilter, daysAgoUtc)
-                valueOperatorMatcher.matches(numOfEvents, condition.match)
+                targetEventMap[propertyFilter.propertyKey.name]?.let {
+                    it.firstOrNull { event ->
+                        event.property?.let { property ->
+                            valueOperatorMatcher.matches(property.value, propertyFilter.match)
+                        } == true
+                    }?.let { targetEvent ->
+                        val numOfEvents = eventCounts(targetEvent, daysAgoUtc)
+                        valueOperatorMatcher.matches(numOfEvents, condition.match)
+                    }
+                } ?: false
             }
         }
     }
 
     /**
-     * 프로퍼티가 없는 경우 기간 내 이벤트 발생 횟수
+     * 기간 내 이벤트 발생 횟수
      */
-    private fun eventCountsWithoutProperty(events: List<TargetEvent>?, daysAgoUtc: Long): Int {
-        return events?.firstOrNull()?.let {
-            it.stats.filter { stat -> stat.date >= daysAgoUtc }.sumOf { stat -> stat.count }
-        } ?: 0
-    }
-
-    /**
-     *  프로퍼티가 있는 경우 기간 내 이벤트 발생 횟수
-     */
-    private fun eventCountsWithProperty(events: List<TargetEvent>?, propertyFilter: TargetSegmentationOption.PropertyFilter, daysAgoUtc: Long): Int {
-        return events?.firstOrNull { event ->
-            event.property?.let { valueOperatorMatcher.matches(it.value, propertyFilter.match) } == true
-        }?.let {
-            it.stats.filter { stat -> stat.date >= daysAgoUtc }.sumOf { stat -> stat.count }
-        } ?: 0
+    private fun eventCounts(events: TargetEvent, daysAgoUtc: Long): Int {
+        return events.stats.filter { stat -> stat.date >= daysAgoUtc }.sumOf { stat -> stat.count }
     }
 
     /**
