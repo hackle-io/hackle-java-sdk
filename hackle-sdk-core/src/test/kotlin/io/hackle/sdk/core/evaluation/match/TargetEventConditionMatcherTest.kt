@@ -22,14 +22,13 @@ class TargetEventConditionMatcherTest {
     private val sut = TargetEventConditionMatcher(numberOfEventsInDaysMatcher)
 
     @Test
-    fun `when condition key type is not NUMBER_OF_EVENTS_IN_DAYS then throw exception`() {
+    fun `condition 타입이 NUMBER_OF_EVENTS_IN_DAYS가 아니면 실패`() {
         // given
         val request = experimentRequest()
         val condition = condition {
             key(Target.Key.Type.USER_PROPERTY, "age")
             match(MATCH, Target.Match.Operator.IN, NUMBER, 42)
         }
-
         // when
         val actual = assertThrows<IllegalArgumentException> {
             sut.matches(request, Evaluators.context(), condition)
