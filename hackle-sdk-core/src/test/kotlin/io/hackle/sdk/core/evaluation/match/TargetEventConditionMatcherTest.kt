@@ -86,7 +86,7 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `5일 전 purchase 이벤트가 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 성공`() {
+    fun `5일 전 purchase 이벤트가 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 실패`() {
         verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
             Target.Match.Operator.GTE, NUMBER, 1, false)
     }
@@ -113,7 +113,7 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `6일 전 purchase 이벤트가 cookie property 그리고 금액 13000원 이벤트와 함께 1회 발생했고, 최근 7일 내 cookie를 15000원 이상 구매한 이벤트가 1회 이상 발생한 조건이 들어온 경우 실공`() {
+    fun `6일 전 purchase 이벤트가 cookie property 그리고 금액 13000원 이벤트와 함께 1회 발생했고, 최근 7일 내 cookie를 15000원 이상 구매한 이벤트가 1회 이상 발생한 조건이 들어온 경우 실패`() {
         verify(listOf(
             TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("productName", "cookie")),
             TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("price", 13000))
@@ -145,7 +145,7 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `stat에 property가 있는 이벤트만 있는데 filter가 비어있는 경우`() {
+    fun `stat에 property가 있는 이벤트만 있는데 filter가 비어있는 경우 실패`() {
         verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\", \"filters\": null}}", MATCH,
             Target.Match.Operator.GTE, NUMBER, 1, false)
 
