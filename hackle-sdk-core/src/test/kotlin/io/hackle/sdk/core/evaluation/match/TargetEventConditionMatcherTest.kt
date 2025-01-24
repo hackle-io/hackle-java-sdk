@@ -60,9 +60,15 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `어제 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(TargetEvent("login", makeTargetEventsStat(1, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}", MATCH,
+    fun `오늘 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 성공`() {
+        verify(listOf(TargetEvent("login", makeSingleTargetEventsStat(0, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}", MATCH,
             Target.Match.Operator.IN, NUMBER, 3, true)
+    }
+
+    @Test
+    fun `어제 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 실패`() {
+        verify(listOf(TargetEvent("login", makeSingleTargetEventsStat(1, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}", MATCH,
+            Target.Match.Operator.IN, NUMBER, 3, false)
     }
 
     @Test
@@ -73,13 +79,13 @@ class TargetEventConditionMatcherTest {
 
     @Test
     fun `5일 전 purchase 이벤트가 milk properoty와 1회 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
+        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
             Target.Match.Operator.GTE, NUMBER, 1, true)
     }
 
     @Test
     fun `5일 전 purchase 이벤트가 milk properoty와 1회 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 초과 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
+        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(4, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
             Target.Match.Operator.GT, NUMBER, 1, false)
     }
 
@@ -95,7 +101,18 @@ class TargetEventConditionMatcherTest {
             Target.Match.Operator.GTE, NUMBER, 30, false)
     }
 
-
+    /**
+     * TargetEvent.Condition 매칭 테스트
+     *
+     * expected와 다른 결과가 나오는 경우 실패
+     * @param targetEvents TargetEvent 리스트
+     * @param key Target.Condition key
+     * @param matchType Target.Condition match type
+     * @param operator Target.Condition operator
+     * @param valueType Target.Condition value type
+     * @param targetValue Target.Condition value
+     * @param expected 예상 결과
+     */
     private fun verify(targetEvents: List<TargetEvent>, key: String, matchType: Target.Match.Type, operator: Target.Match.Operator, valueType: ValueType, targetValue: Any, expected: Boolean) {
         val request = experimentRequest(
             user = HackleUser.builder()
@@ -113,19 +130,48 @@ class TargetEventConditionMatcherTest {
         assertEquals(expected, actual)
     }
 
+    /**
+     * 오늘 기준으로 days 전까지의 TargetEvent.Stat 리스트를 생성한다.
+     * @param days days 전
+     * @param numOfEventsInDay 하루에 발생한 이벤트 수
+     * @return TargetEvent.Stat 리스트
+     */
     private fun makeTargetEventsStat(days: Int, numOfEventsInDay: Int = 1): List<TargetEvent.Stat> {
         val targetEvents = mutableListOf<TargetEvent.Stat>()
         for (i in 0 until days) {
-            val timestamp = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(i) + 2 * 60 * 60 * 1000L // 현재시간 - i일 + 2시간, TODO: 일단 테스트를 위해 임의로 적었는데 서버에서 어떻게 시간이 내려오는지 확인 필요
+            val timestamp = getTimeStamp(i)
             targetEvents.add(TargetEvent.Stat(timestamp, numOfEventsInDay))
         }
         return targetEvents
     }
 
+    /**
+     * 오늘 기준으로 days 전 해당 일에 TargetEvent.Stat 를 생성한다.
+     *
+     * 타겟이벤트에 Stat이 리스트로만 들어가 있어야 하기 때문에 리스트를 반환한다.
+     * @param days days 전
+     * @param numOfEventInDay 해당 일에 발생한 이벤트 수
+     * @return TargetEvent.Stat 리스트
+     */
     private fun makeSingleTargetEventsStat(daysAgo: Int, numOfEventInDay: Int = 1): List<TargetEvent.Stat> {
         val targetEvents = mutableListOf<TargetEvent.Stat>()
-        val timestamp = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(daysAgo) - 2 * 60 * 60 * 1000L // 현재시간 - i일 - 2시간, TODO: 일단 테스트를 위해 임의로 적었는데 서버에서 어떻게 시간이 내려오는지 확인 필요
+        val timestamp = getTimeStamp(daysAgo)
         targetEvents.add(TargetEvent.Stat(timestamp, numOfEventInDay))
         return targetEvents
+    }
+
+    /**
+     * 오늘 기준으로 daysAgo 일 전의 timestamp를 반환한다.
+     *
+     * daysAgo 일의 00:00:00의 timestamp를 반환한다.
+     *
+     * @param daysAgo daysAgo 일 전
+     * @return timestamp
+     */
+    private fun getTimeStamp(daysAgo: Int): Long {
+        val currentMillis = Clock.SYSTEM.currentMillis()
+        val daysAgoMillis = Clock.daysToMillis(daysAgo)
+        val timestamp = currentMillis - (currentMillis % (24 * 60 * 60 * 1000L)) - daysAgoMillis
+        return timestamp
     }
 }
