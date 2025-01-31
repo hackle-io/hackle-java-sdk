@@ -56,102 +56,244 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
+    fun `필터가 없을 때 프로퍼티가 없는 이벤트만 존재하는 경우 성공`() {
+        // 30일 내 프로퍼티 없는 purchase 이벤트 1회 발생
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1))
+        )
+
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}",
+            matchType = MATCH,
+            operator = Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = true
+        )
+    }
+
+    @Test
+    fun `필터가 있는데 프로퍼티가 없는 이벤트만 존재하는 경우 실패`() {
+        // 30일 내 프로퍼티 없는 purchase 이벤트 1회 발생
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1))
+        )
+
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}",
+            matchType = MATCH,
+            operator = Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false
+        )
+    }
+
+    @Test
     fun `이벤트 key가 다르면 실패`() {
-        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1))), "{\"eventKey\":\"purchased\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}", MATCH,
-            Target.Match.Operator.GT, NUMBER, 1, false)
+        val targetEvents = listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1)))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchased\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}",
+            matchType = MATCH,
+            operator = Target.Match.Operator.GT,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false
+        )
     }
 
     @Test
     fun `매일 1회씩 purchase 이벤트가 발생했고, 30일 내 1회 이상 purchase 가 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}", MATCH,
-            Target.Match.Operator.GT, NUMBER, 1, true)
+        val targetEvents = listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1)))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}",
+            matchType = MATCH,
+            operator = Target.Match.Operator.GT,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = true)
     }
 
     @Test
     fun `오늘 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(TargetEvent("login", makeSingleTargetEventsStat(0, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}", MATCH,
-            Target.Match.Operator.IN, NUMBER, 3, true)
+        val targetEvents = listOf(TargetEvent("login", makeSingleTargetEventsStat(0, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1)))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}",
+            matchType = MATCH,
+            operator = Target.Match.Operator.IN,
+            valueType = NUMBER,
+            targetValue = 3,
+            expected = true)
     }
 
     @Test
     fun `어제 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(TargetEvent("login", makeSingleTargetEventsStat(1, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}", MATCH,
-            Target.Match.Operator.IN, NUMBER, 3, false)
+        val targetEvents = listOf(TargetEvent("login", makeSingleTargetEventsStat(1, 3)), TargetEvent("purchase", makeTargetEventsStat(1, 1)))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"login\",\"timeRange\":{\"period\":1,\"timeUnit\":\"DAYS\"}}",
+            matchType =MATCH,
+            operator = Target.Match.Operator.IN,
+            valueType = NUMBER,
+            targetValue = 3,
+            expected = false)
     }
 
     @Test
     fun `매일 3회씩 purchase 이벤트가 발생했고, 30일 내 100회 purchase 가 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 3))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}", MATCH,
-            Target.Match.Operator.GT, NUMBER, 100, false)
+        val targetEvents = listOf(TargetEvent("purchase", makeTargetEventsStat(30, 3)))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"}}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GT,
+            valueType = NUMBER,
+            targetValue = 100,
+            expected = false)
     }
 
     @Test
     fun `5일 전 purchase 이벤트가 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 1, false)
+        val targetEvents = listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2)))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false)
     }
 
     @Test
     fun `5일 전 purchase 이벤트가 milk properoty와 1회 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 1, true)
+        val targetEvents = listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2), TargetEvent.Property("productName", "milk")))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = true)
     }
 
     @Test
     fun `5일 전 purchase 이벤트가 milk properoty와 1회 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 초과 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(TargetEvent("purchase", makeSingleTargetEventsStat(4, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}", MATCH,
-            Target.Match.Operator.GT, NUMBER, 1, false)
+        val targetEvents = listOf(TargetEvent("purchase", makeSingleTargetEventsStat(4, 1), TargetEvent.Property("productName", "milk")))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GT,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false)
     }
 
     @Test
     fun `6일 전 purchase 이벤트가 cookie property 그리고 금액 13000원 이벤트와 함께 1회 발생했고, 최근 7일 내 cookie를 10000원 이상 구매한 이벤트가 1회 이상 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(
+        val targetEvents = listOf(
             TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("productName", "cookie")),
             TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("price", 13000))
-        ), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"cookie\"]}}, {\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"price\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"GTE\",\"valueType\":\"NUMBER\",\"values\":[10000]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 1, true)
+        )
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"cookie\"]}}, {\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"price\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"GTE\",\"valueType\":\"NUMBER\",\"values\":[10000]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = true)
     }
 
     @Test
     fun `6일 전 purchase 이벤트가 cookie property 그리고 금액 13000원 이벤트와 함께 1회 발생했고, 최근 7일 내 cookie를 15000원 이상 구매한 이벤트가 1회 이상 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(
+        val targetEvents = listOf(
             TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("productName", "cookie")),
             TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("price", 13000))
-        ), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"cookie\"]}}, {\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"price\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"GTE\",\"valueType\":\"NUMBER\",\"values\":[15000]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 1, false)
+        )
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"cookie\"]}}, {\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"price\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"GTE\",\"valueType\":\"NUMBER\",\"values\":[15000]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false)
     }
 
     // TODO: NOTE: 이 조건 우선 서버에서 동일한 propertyKey가 안들어 오게 막는다고 했는데, 이 경우는 어떻게 처리해야할지 논의 필요
     @Test
     fun `7일 동안 purchase 이벤트가 milk property와 함께 매일 1회씩 발생했고 3일 동안 purchase 이벤트가 cookie property와 함께 2회씩 발생했는데, 최근 5일 내 purchase 이벤트가 5회 발생했는데 filter가  milk, cookie 인 경우 성공`() {
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeTargetEventsStat(5, 1), TargetEvent.Property("productName", "milk")),
+            TargetEvent("purchase", makeTargetEventsStat(3, 2), TargetEvent.Property("productName", "cookie"))
+        )
         verify(
-            listOf(
-                TargetEvent("purchase", makeTargetEventsStat(5, 1), TargetEvent.Property("productName", "milk")),
-                TargetEvent("purchase", makeTargetEventsStat(3, 2), TargetEvent.Property("productName", "cookie"))
-            ), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":5,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}, {\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"cookie\"]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 5, true)
+            targetEvents= targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":5,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}, {\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"cookie\"]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 5,
+            expected = true)
     }
 
     @Test
     fun `매일 gold grade 등급의 로그인 이벤트가 2회 발생했고, 30일 내 gold grade 등급의 로그인 이벤트가 30회 이상 발생한 조건이 들어온 경우 성공`() {
-        verify(listOf(TargetEvent("login", makeTargetEventsStat(30, 2), TargetEvent.Property("grade", "gold"))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"grade\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"gold\"]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 30, true)
+        val targetEvents = listOf(TargetEvent("login", makeTargetEventsStat(30, 2), TargetEvent.Property("grade", "gold")))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"login\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"grade\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"gold\"]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 30,
+            expected = true)
     }
 
     @Test
     fun `매일 siver grade 등급의 로그인이 6회 발생했고, 30일 내 platinum grade 등급의 로그인 이벤트가 30회 이상 발생한 조건이 들어온 경우 실패`() {
-        verify(listOf(TargetEvent("login", makeTargetEventsStat(30, 6), TargetEvent.Property("grade", "silver"))), "{\"eventKey\":\"login\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"grade\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"platinum\"]}}]}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 30, false)
+        val targetEvents = listOf(TargetEvent("login", makeTargetEventsStat(30, 6), TargetEvent.Property("grade", "silver")))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"login\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"grade\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"platinum\"]}}]}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 30,
+            expected = false)
     }
 
     @Test
     fun `stat에 property가 있는 이벤트만 있는데 filter가 비어있는 경우 실패`() {
-        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\", \"filters\": null}}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 1, false)
+        val targetEvents = listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk")))
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\", \"filters\": null}}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false)
 
-        verify(listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk"))), "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\",\"filters\":[]}}", MATCH,
-            Target.Match.Operator.GTE, NUMBER, 1, false)
+        verify(
+            targetEvents = targetEvents,
+            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":30,\"timeUnit\":\"DAYS\",\"filters\":[]}}",
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = false)
     }
+
+
 
     /**
      * TargetEvent.Condition 매칭 테스트

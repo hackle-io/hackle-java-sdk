@@ -27,6 +27,10 @@ internal class TargetEventConditionMatcher(
  * TargetSegmentationExpressionMatcher
  */
 internal abstract class TargetSegmentationExpressionMatcher {
+    companion object {
+        const val DEFAULT_PROPERTY_KEY = "DEFAULT_HACKLE_PROPERTY"
+    }
+
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
     internal val gson = Gson()
 
@@ -65,34 +69,35 @@ internal class NumberOfEventsInDaysMatcher(
         condition: Target.Condition,
         filters: List<TargetSegmentationOption.PropertyFilter>?
     ): Boolean {
+        // 프로퍼티 키가 없으면 null 대신 기본 키로 설정
         val targetEventMap = filteredTargetEvents
-            .groupBy { it.property?.key }
-        return if (filters.isNullOrEmpty()) {
-            targetEventMap[null]?.let {
-                val numOfEvents = eventCounts(it.first(), daysAgoUtc)
-                valueOperatorMatcher.matches(numOfEvents, condition.match)
-            } ?: false
-        } else {
-            filters.all { propertyFilter ->
-                targetEventMap[propertyFilter.propertyKey.name]?.let {
-                    it.firstOrNull { event ->
-                        event.property?.let { property ->
-                            valueOperatorMatcher.matches(property.value, propertyFilter.match)
-                        } == true
-                    }?.let { targetEvent ->
-                        val numOfEvents = eventCounts(targetEvent, daysAgoUtc)
-                        valueOperatorMatcher.matches(numOfEvents, condition.match)
-                    }
+            .groupBy { it.property?.key ?: DEFAULT_PROPERTY_KEY }
+
+        // 필터가 있으면 모든 필터를 만족해야 함
+        return filters?.all { propertyFilter ->
+            // 필터의 프로퍼티 키에 해당하는 이벤트가 있는지 확인
+            targetEventMap[propertyFilter.propertyKey.name]?.any { event ->
+                event.property?.let { property ->
+                    val eventCount = event.countWithinDays(daysAgoUtc)
+                    valueOperatorMatcher.matches(property.value, propertyFilter.match) &&
+                            valueOperatorMatcher.matches(eventCount, condition.match)
                 } ?: false
-            }
+            } ?: false
         }
+            // 필터가 없으면 프로퍼티 없는 경우
+            // 즉, 기본 키로 설정된 이벤트만 확인
+            ?: (targetEventMap[DEFAULT_PROPERTY_KEY]?.any {
+                val eventCount = it.countWithinDays(daysAgoUtc)
+                valueOperatorMatcher.matches(eventCount, condition.match)
+            } ?: false)
     }
 
     /**
      * 기간 내 이벤트 발생 횟수
      */
-    private fun eventCounts(events: TargetEvent, daysAgoUtc: Long): Int {
-        return events.stats.filter { stat -> stat.date >= daysAgoUtc }.sumOf { stat -> stat.count }
+    private val TargetEvent.countWithinDays: (Long) -> Int
+        get() = { daysAgoUtc ->
+            stats.filter { it.date >= daysAgoUtc }.sumOf { it.count }
     }
 
     /**
