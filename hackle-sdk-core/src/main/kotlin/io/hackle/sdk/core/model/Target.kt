@@ -20,7 +20,8 @@ data class Target(
             FEATURE_FLAG,
             EVENT_PROPERTY,
             COHORT,
-            NUMBER_OF_EVENTS_IN_DAYS
+            NUMBER_OF_EVENTS_IN_DAYS,
+            NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS
         }
     }
 
@@ -44,5 +45,18 @@ data class Target(
             LT,
             LTE,
         }
+    }
+
+    sealed class TargetSegmentationExpression {
+        data class NumberOfEventsInDays(
+            val eventKey: String,
+            val days: Int
+        ): TargetSegmentationExpression()
+
+        data class NumberOfEventsWithPropertyInDays(
+            val eventKey: String,
+            val days: Int,
+            val propertyFilter: Target
+        ): TargetSegmentationExpression()
     }
 }

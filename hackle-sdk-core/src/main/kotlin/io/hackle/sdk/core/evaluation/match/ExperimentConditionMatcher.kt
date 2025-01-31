@@ -18,7 +18,7 @@ internal class ExperimentConditionMatcher(
         return when (condition.key.type) {
             AB_TEST -> abTestMatcher.matches(request, context, condition)
             FEATURE_FLAG -> featureFlagMatcher.matches(request, context, condition)
-            USER_ID, USER_PROPERTY, HACKLE_PROPERTY, SEGMENT, EVENT_PROPERTY, COHORT, NUMBER_OF_EVENTS_IN_DAYS  -> throw IllegalArgumentException("Unsupported Target.Key.Type[${condition.key.type}]")
+            USER_ID, USER_PROPERTY, HACKLE_PROPERTY, SEGMENT, EVENT_PROPERTY, COHORT, NUMBER_OF_EVENTS_IN_DAYS, NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS  -> throw IllegalArgumentException("Unsupported Target.Key.Type[${condition.key.type}]")
         }
     }
 }
