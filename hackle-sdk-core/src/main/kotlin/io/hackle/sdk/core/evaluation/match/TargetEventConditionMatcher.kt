@@ -91,9 +91,7 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
                 if (targetEvent.property == null) {
                     return@filter false
                 }
-                numberOfEventsWithPropertyInDays.propertyFilter.conditions.any { propertyCondition ->
-                    return@filter propertyMatch(targetEvent.property, propertyCondition)
-                }
+                return@filter propertyMatch(targetEvent.property, numberOfEventsWithPropertyInDays.propertyFilter)
             }
             .any { targetEvent ->
                 val eventCount = targetEvent.countWithinDays(daysAgoUtc)

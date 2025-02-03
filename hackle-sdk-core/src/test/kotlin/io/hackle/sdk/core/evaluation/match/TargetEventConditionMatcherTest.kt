@@ -156,13 +156,9 @@ class TargetEventConditionMatcherTest {
         verify(
             targetEvents = targetEvents,
             key = getKeyString(
-                "purchase", 7, Target(
-                    listOf(
-                        Target.Condition(
-                            Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
-                            Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk"))
-                        )
-                    )
+                "purchase", 7,  Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
+                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk"))
                 )
             ),
             matchType = MATCH,
@@ -178,13 +174,9 @@ class TargetEventConditionMatcherTest {
         verify(
             targetEvents = targetEvents,
             key = getKeyString(
-                "purchase", 7, Target(
-                    listOf(
-                        Target.Condition(
-                            Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
-                            Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk"))
-                        )
-                    )
+                "purchase", 7, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
+                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk"))
                 )
             ),
             matchType = MATCH,
@@ -203,13 +195,9 @@ class TargetEventConditionMatcherTest {
         verify(
             targetEvents = targetEvents,
             key = getKeyString(
-                "purchase", 7, Target(
-                    listOf(
-                        Target.Condition(
-                            Target.Key(Target.Key.Type.HACKLE_PROPERTY, "price"),
-                            Target.Match(MATCH, Target.Match.Operator.GTE, NUMBER, listOf(10000))
-                        )
-                    )
+                "purchase", 7, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "price"),
+                    Target.Match(MATCH, Target.Match.Operator.GTE, NUMBER, listOf(10000))
                 )
             ),
             matchType = MATCH,
@@ -230,13 +218,9 @@ class TargetEventConditionMatcherTest {
         verify(
             targetEvents= targetEvents,
             key = getKeyString(
-                "purchase", 5, Target(
-                    listOf(
-                        Target.Condition(
-                            Target.Key(Target.Key.Type.USER_PROPERTY, "productName"),
-                            Target.Match(MATCH, Target.Match.Operator.CONTAINS, STRING, listOf("cookie", "milk"))
-                        )
-                    )
+                "purchase", 5, Target.Condition(
+                    Target.Key(Target.Key.Type.USER_PROPERTY, "productName"),
+                    Target.Match(MATCH, Target.Match.Operator.CONTAINS, STRING, listOf("cookie", "milk"))
                 )
             ),
             matchType = MATCH,
@@ -252,13 +236,9 @@ class TargetEventConditionMatcherTest {
         verify(
             targetEvents = targetEvents,
             key = getKeyString(
-                "login", 30, Target(
-                    listOf(
-                        Target.Condition(
-                            Target.Key(Target.Key.Type.HACKLE_PROPERTY, "grade"),
-                            Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("gold", "platinum"))
-                        )
-                    )
+                "login", 30, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "grade"),
+                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("gold", "platinum"))
                 )
             ),            matchType = MATCH,
             operator =Target.Match.Operator.GTE,
@@ -364,7 +344,7 @@ class TargetEventConditionMatcherTest {
         return Gson().toJson(model)
     }
 
-    private fun getKeyString(eventKey: String, days: Int, filter: Target): String {
+    private fun getKeyString(eventKey: String, days: Int, filter: Target.Condition): String {
         val model = Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays(eventKey, days, filter)
         return Gson().toJson(model)
     }

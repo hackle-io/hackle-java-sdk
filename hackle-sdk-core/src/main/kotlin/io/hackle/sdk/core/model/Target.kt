@@ -56,7 +56,7 @@ data class Target(
         data class NumberOfEventsWithPropertyInDays(
             val eventKey: String,
             val days: Int,
-            val propertyFilter: Target
+            val propertyFilter: Condition
         ): TargetSegmentationExpression()
     }
 }
