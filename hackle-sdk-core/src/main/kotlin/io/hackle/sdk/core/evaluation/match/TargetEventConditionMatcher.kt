@@ -5,8 +5,9 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS
-import io.hackle.sdk.core.model.Target.Key.Type.NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS
+import io.hackle.sdk.core.model.Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS
 import io.hackle.sdk.core.model.TargetEvent
+import java.util.concurrent.TimeUnit
 
 /**
  * TargetEventConditionMatcher
@@ -18,7 +19,7 @@ internal class TargetEventConditionMatcher(
     override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
         return when (condition.key.type) {
             NUMBER_OF_EVENTS_IN_DAYS -> numberOfEventsInDaysMatcher.match(request.user.targetEvents, condition)
-            NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS -> numberOfEventsWithPropertyInDaysMatcher.match(request.user.targetEvents, condition)
+            NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> numberOfEventsWithPropertyInDaysMatcher.match(request.user.targetEvents, condition)
             else -> throw IllegalArgumentException("Unsupported Target.Key.Type [${condition.key.type}]")
         }
     }
@@ -48,18 +49,15 @@ internal class NumberOfEventsInDaysMatcher(
 
     override fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
         val numberOfEventsInDays = condition.key.toNumberOfEventsInDays()
-        val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(numberOfEventsInDays.days)
+        val daysAgoUtc = Clock.SYSTEM.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsInDays.days.toLong())
         return targetEvents
-            // 이벤트 키에 프로퍼티 없는 targetEvent 는 1개 이하가 보장
             .filter { it.eventKey == numberOfEventsInDays.eventKey }
-            .firstOrNull { targetEvent ->
-                return@firstOrNull targetEvent.property == null
+            // 이벤트 키에 프로퍼티 없는 targetEvent 는 1개 이하가 보장
+            // 만족하는 이벤트가 하나도 없을 때 null 이벤트를 만들어서 이벤트 횟수 0으로 처리
+            .firstOrNull {
+                return@firstOrNull it.property == null
             }
             .let { targetEvent ->
-                if (targetEvent == null) {
-                    return@let false
-                }
-
                 val eventCount = targetEvent.countWithinDays(daysAgoUtc)
                 return@let valueOperatorMatcher.matches(eventCount, condition.match)
             }
@@ -83,16 +81,19 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
 ): TargetSegmentationExpressionMatcher()  {
     override fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
         val numberOfEventsWithPropertyInDays = condition.key.toNumberOfEventsWithPropertyInDays()
-        val daysAgoUtc = Clock.SYSTEM.currentMillis() - Clock.daysToMillis(numberOfEventsWithPropertyInDays.days)
+        val daysAgoUtc = Clock.SYSTEM.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsWithPropertyInDays.days.toLong())
 
-        return targetEvents
+        val filteredTargetEvent = targetEvents
             .filter { it.eventKey == numberOfEventsWithPropertyInDays.eventKey }
-            .filter { targetEvent ->
-                if (targetEvent.property == null) {
-                    return@filter false
-                }
-                return@filter propertyMatch(targetEvent.property, numberOfEventsWithPropertyInDays.propertyFilter)
-            }
+            .filter { propertyMatch(it.property, numberOfEventsWithPropertyInDays.propertyFilter) }
+            .toMutableList<TargetEvent?>()
+
+        // 만약 만족하는 이벤트의 갯수가 조건의 갯수보다 적다면 null 이벤트를 추가하여 이벤트 횟수 0인 이벤트 추가
+        if(filteredTargetEvent.size < numberOfEventsWithPropertyInDays.propertyFilter.match.values.size) {
+            filteredTargetEvent.add(null)
+        }
+
+        return filteredTargetEvent
             .any { targetEvent ->
                 val eventCount = targetEvent.countWithinDays(daysAgoUtc)
                 return@any valueOperatorMatcher.matches(eventCount, condition.match)
@@ -105,8 +106,8 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
      * @param propertyCondition Target.Condition.Property
      * @return Boolean
      */
-    private fun propertyMatch(property: TargetEvent.Property, propertyCondition: Target.Condition): Boolean {
-        if (propertyCondition.key.name == property.key) {
+    private fun propertyMatch(property: TargetEvent.Property?, propertyCondition: Target.Condition): Boolean {
+        if (propertyCondition.key.name == property?.key) {
             return valueOperatorMatcher.matches(property.value, propertyCondition.match)
         }
         return false
@@ -123,7 +124,12 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
 /**
  * 기간 내 이벤트 발생 횟수
  */
-private val TargetEvent.countWithinDays: (Long) -> Int
+private val TargetEvent?.countWithinDays: (Long) -> Int
     get() = { daysAgoUtc ->
-        stats.filter { it.date >= daysAgoUtc }.sumOf { it.count }
+        if (this == null) {
+            0 // null 이벤트는 이벤트 횟수 0
+        } else {
+            stats.filter { it.date >= daysAgoUtc }.sumOf { it.count }
+        }
+
     }

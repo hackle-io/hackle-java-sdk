@@ -29,7 +29,7 @@ enum class TargetingType(
         Target.Key.Type.FEATURE_FLAG,
         Target.Key.Type.COHORT,
         Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS,
-        Target.Key.Type.NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS
+        Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS
     ),
 
     /**
@@ -43,7 +43,7 @@ enum class TargetingType(
         Target.Key.Type.HACKLE_PROPERTY,
         Target.Key.Type.COHORT,
         Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS,
-        Target.Key.Type.NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS
+        Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS
     );
 
     constructor(vararg keyTypes: Target.Key.Type) : this(keyTypes.toSet())

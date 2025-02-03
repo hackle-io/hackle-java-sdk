@@ -28,14 +28,5 @@ interface Clock {
                 return System.nanoTime()
             }
         }
-
-        /**
-         * days to millis
-         * @param day
-         */
-        fun daysToMillis(day: Int): Long {
-            // 하루의 밀리초 값 (24시간 * 60분 * 60초 * 1000밀리초)
-            return day * 24 * 60 * 60 * 1000L
-        }
     }
 }

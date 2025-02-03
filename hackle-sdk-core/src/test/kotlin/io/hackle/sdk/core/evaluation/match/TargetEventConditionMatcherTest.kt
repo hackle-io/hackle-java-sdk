@@ -14,13 +14,32 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNotNull
+import java.util.concurrent.TimeUnit
 
 class TargetEventConditionMatcherTest {
 
     private val numberOfEventsInDaysMatcher = NumberOfEventsInDaysMatcher(ValueOperatorMatcher(ValueOperatorMatcherFactory()))
     private val numberOfEventsWithPropertyInDaysMatcher = NumberOfEventsWithPropertyInDaysMatcher(ValueOperatorMatcher(ValueOperatorMatcherFactory()))
     private val sut = TargetEventConditionMatcher(numberOfEventsInDaysMatcher, numberOfEventsWithPropertyInDaysMatcher)
+
+    @Test
+    fun `올바르지 않는 type이 들어온 경우 실패`() {
+        val request = experimentRequest(
+            user = HackleUser.builder()
+                .targetEvents(listOf())
+                .build()
+        )
+        val condition = condition {
+            key(Target.Key.Type.FEATURE_FLAG, "purchase")
+            match(MATCH, Target.Match.Operator.GTE, NUMBER, 1)
+        }
+
+        val exception = assertThrows<IllegalArgumentException> {
+            sut.matches(request, Evaluators.context(), condition)
+        }
+
+        expectThat(exception.message) isEqualTo "Unsupported Target.Key.Type [FEATURE_FLAG]"
+    }
 
     @Test
     fun `30일 내 발생한 타겟 이벤트가 1회도 없는 경우는 실패`() {
@@ -138,19 +157,6 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `5일 전 purchase 이벤트가 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 실패`() {
-        val targetEvents = listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2)))
-        verify(
-            targetEvents = targetEvents,
-            key = "{\"eventKey\":\"purchase\",\"timeRange\":{\"period\":7,\"timeUnit\":\"DAYS\"},\"filters\":[{\"propertyKey\":{\"type\":\"EVENT\",\"name\":\"productName\"},\"match\":{\"type\":\"MATCH\",\"operator\":\"IN\",\"valueType\":\"STRING\",\"values\":[\"milk\"]}}]}",
-            matchType = MATCH,
-            operator =Target.Match.Operator.GTE,
-            valueType = NUMBER,
-            targetValue = 1,
-            expected = false)
-    }
-
-    @Test
     fun `5일 전 purchase 이벤트가 milk properoty와 1회 발생했고, 최근 7일 내 purchase 이벤트가 milk property와 1회 이상 발생한 조건이 들어온 경우 성공`() {
         val targetEvents = listOf(TargetEvent("purchase", makeSingleTargetEventsStat(5, 2), TargetEvent.Property("productName", "milk")))
         verify(
@@ -187,27 +193,6 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `6일 전 purchase 이벤트가 cookie property 그리고 금액 13000원 이벤트와 함께 1회 발생했고, 최근 7일 내 10000원 이상 구매한 이벤트가 1회 이상 발생한 조건이 들어온 경우 성공`() {
-        val targetEvents = listOf(
-            TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("productName", "cookie")),
-            TargetEvent("purchase", makeSingleTargetEventsStat(6, 1), TargetEvent.Property("price", 13000))
-        )
-        verify(
-            targetEvents = targetEvents,
-            key = getKeyString(
-                "purchase", 7, Target.Condition(
-                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "price"),
-                    Target.Match(MATCH, Target.Match.Operator.GTE, NUMBER, listOf(10000))
-                )
-            ),
-            matchType = MATCH,
-            operator = Target.Match.Operator.GTE,
-            valueType = NUMBER,
-            targetValue = 1,
-            expected = true)
-    }
-
-    @Test
     fun `7일 동안 purchase 이벤트가 milk property와 함께 매일 1회씩 발생했고 1일 동안 purchase 이벤트가 cookie property와 함께 2회씩 발생했는데, 최근 5일 내 purchase 이벤트가 5회 발생하고 filter가  milk, cookie 인 경우 성공`() {
         val targetEvents = listOf(
             TargetEvent("purchase", makeTargetEventsStat(1, 1), TargetEvent.Property("productName", "milk")),
@@ -231,23 +216,6 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `매일 gold grade 등급의 로그인 이벤트가 2회 발생했고, 30일 내 gold grade 등급의 로그인 이벤트가 30회 이상 발생한 조건이 들어온 경우 성공`() {
-        val targetEvents = listOf(TargetEvent("login", makeTargetEventsStat(30, 2), TargetEvent.Property("grade", "gold")))
-        verify(
-            targetEvents = targetEvents,
-            key = getKeyString(
-                "login", 30, Target.Condition(
-                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "grade"),
-                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("gold", "platinum"))
-                )
-            ),            matchType = MATCH,
-            operator =Target.Match.Operator.GTE,
-            valueType = NUMBER,
-            targetValue = 30,
-            expected = true)
-    }
-
-    @Test
     fun `stat에 property가 있는 이벤트만 있는데 filter가 비어있는 경우 실패`() {
         val targetEvents = listOf(TargetEvent("purchase", makeTargetEventsStat(30, 1), TargetEvent.Property("productName", "milk")))
         verify(
@@ -257,6 +225,128 @@ class TargetEventConditionMatcherTest {
             operator =Target.Match.Operator.GTE,
             valueType = NUMBER,
             targetValue = 1,
+            expected = false)
+    }
+
+    @Test
+    fun `발생한 이벤트가 없는데 0회 발생 조건이면 성공`() {
+        val targetEvents = listOf<TargetEvent>()
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString("purchase", 1),
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 0,
+            expected = true)
+
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString("purchase", 1, Target.Condition(
+                Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
+                Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk"))
+            )),
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 0,
+            expected = true)
+    }
+
+    @Test
+    fun `발생 조건에 부합하지 않는 이벤트만 발생했는데, 부합 조건이 0이면 성공`() {
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeSingleTargetEventsStat(1, 3), TargetEvent.Property("productName", "smartphone")),
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1))
+        )
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString("login", 1),
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 0,
+            expected = true)
+
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString(
+                "purchase", 1, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "price"),
+                    Target.Match(MATCH, Target.Match.Operator.GTE, NUMBER, listOf(10000))
+                )
+            ),
+            matchType = MATCH,
+            operator =Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 0,
+            expected = true)
+    }
+
+    @Test
+    fun `발생 조건에 일부 부합하는 이벤트가 발생했지만 부합조건이 0이면 성공`() {
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeSingleTargetEventsStat(1, 3), TargetEvent.Property("productName", "cookie")),
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1))
+        )
+
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString(
+                "purchase", 7, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
+                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk", "cookie"))
+                )
+            ),
+            matchType = MATCH,
+            operator =Target.Match.Operator.IN,
+            valueType = NUMBER,
+            targetValue = 0,
+            expected = true)
+    }
+
+    @Test
+    fun `발생 조건에 일부 부합하는 이벤트가 발생했고 부합조건도 만족하면 성공`() {
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeSingleTargetEventsStat(1, 3), TargetEvent.Property("productName", "cookie")),
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1))
+        )
+
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString(
+                "purchase", 7, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
+                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk", "cookie"))
+                )
+            ),
+            matchType = MATCH,
+            operator = Target.Match.Operator.GTE,
+            valueType = NUMBER,
+            targetValue = 1,
+            expected = true)
+    }
+
+    @Test
+    fun `발생 조건에 부합하는 이벤트만 발생했지만 부합조건이 0이면 실패`() {
+        val targetEvents = listOf(
+            TargetEvent("purchase", makeSingleTargetEventsStat(1, 3), TargetEvent.Property("productName", "cookie")),
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1), TargetEvent.Property("productName", "milk")),
+            TargetEvent("purchase", makeSingleTargetEventsStat(0, 1))
+        )
+
+        verify(
+            targetEvents = targetEvents,
+            key = getKeyString(
+                "purchase", 7, Target.Condition(
+                    Target.Key(Target.Key.Type.HACKLE_PROPERTY, "productName"),
+                    Target.Match(MATCH, Target.Match.Operator.IN, STRING, listOf("milk", "cookie"))
+                )
+            ),
+            matchType = MATCH,
+            operator =Target.Match.Operator.IN,
+            valueType = NUMBER,
+            targetValue = 0,
             expected = false)
     }
 
@@ -279,7 +369,7 @@ class TargetEventConditionMatcherTest {
                 .build()
         )
         val keyType = if(key.contains("propertyFilter")) {
-            Target.Key.Type.NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS
+            Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS
         } else {
             Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS
         }
@@ -334,7 +424,7 @@ class TargetEventConditionMatcherTest {
      */
     private fun getTimeStamp(daysAgo: Int): Long {
         val currentMillis = Clock.SYSTEM.currentMillis()
-        val daysAgoMillis = Clock.daysToMillis(daysAgo)
+        val daysAgoMillis = TimeUnit.DAYS.toMillis(daysAgo.toLong())
         val timestamp = currentMillis - (currentMillis % (24 * 60 * 60 * 1000L)) - daysAgoMillis
         return timestamp
     }

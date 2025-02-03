@@ -21,7 +21,7 @@ data class Target(
             EVENT_PROPERTY,
             COHORT,
             NUMBER_OF_EVENTS_IN_DAYS,
-            NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS
+            NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS
         }
     }
 

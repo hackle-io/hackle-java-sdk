@@ -24,7 +24,7 @@ internal class TargetingTypeTest {
                 COHORT -> assertFalse(targetingType.supports(keyType))
 
                 NUMBER_OF_EVENTS_IN_DAYS -> assertFalse(targetingType.supports(keyType))
-                NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS -> assertFalse(targetingType.supports(keyType))
+                NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> assertFalse(targetingType.supports(keyType))
             }.safe
         }
     }
@@ -42,7 +42,7 @@ internal class TargetingTypeTest {
                 FEATURE_FLAG,
                 COHORT,
                 NUMBER_OF_EVENTS_IN_DAYS,
-                NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS -> assertTrue(targetingType.supports(keyType))
+                NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> assertTrue(targetingType.supports(keyType))
 
                 USER_ID -> assertFalse(targetingType.supports(keyType))
 
@@ -60,7 +60,7 @@ internal class TargetingTypeTest {
                 USER_ID,
                 COHORT,
                 NUMBER_OF_EVENTS_IN_DAYS,
-                NUMBER_OF_EVENT_WITH_PROPERTY_IN_DAYS -> assertTrue(targetingType.supports(keyType))
+                NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> assertTrue(targetingType.supports(keyType))
 
                 SEGMENT -> assertFalse(targetingType.supports(keyType))
                 AB_TEST,
