@@ -40,6 +40,7 @@ internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegm
         val numberOfEventsInDays = condition.key.toSegmentationExpression()
         val daysAgoUtc = clock.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsInDays.days.toLong())
         val eventCount = targetEvents
+            .asSequence()
             .filter { match(it, numberOfEventsInDays) }
             .sumOf { it.countWithinDays(daysAgoUtc) }
 
