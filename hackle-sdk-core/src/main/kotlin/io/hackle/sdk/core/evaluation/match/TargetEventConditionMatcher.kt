@@ -26,12 +26,26 @@ internal class TargetEventConditionMatcher(
 }
 
 /**
+ * TargetSegmentationExpressionMatcher
+ */
+internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegmentationExpression> {
+
+    protected abstract val valueOperatorMatcher: ValueOperatorMatcher
+    internal val gson = Gson()
+
+    /**
+     * Target.Key to TargetSegmentationExpression
+     */
+    internal abstract fun Target.Key.toSegmentationExpression(): T
+}
+
+/**
  * NumberOfEventInDayMatcher
  */
-internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationExpression.NumberOfEventInDay> {
-    protected abstract val valueOperatorMatcher: ValueOperatorMatcher
+internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationExpression.NumberOfEventInDay>:
+    TargetSegmentationExpressionMatcher<T>() {
+
     protected abstract val clock: Clock
-    internal val gson = Gson()
 
     /**
      * TargetEvent List 에서 Target.Condition 에 해당하는 이벤트가 있는지 확인
@@ -50,12 +64,7 @@ internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationEx
     /**
      * TargetEvent 에서 NumberOfEventInDay 에 해당하는 이벤트가 있는지 확인
      */
-    internal abstract fun match(targetEvent: TargetEvent, targetSegmentationExpression: T): Boolean
-
-    /**
-     * Target.Key to NumberOfEventInDay
-     */
-    internal abstract fun Target.Key.toSegmentationExpression(): T
+    internal abstract fun match(targetEvent: TargetEvent, numberOfEventInDay: T): Boolean
 
     /**
      * 기간 내 이벤트 발생 횟수
@@ -76,8 +85,8 @@ internal class NumberOfEventsInDaysMatcher(
     override val clock: Clock
 ): NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays>() {
 
-    override fun match(targetEvent: TargetEvent, targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays): Boolean {
-        return targetEvent.eventKey == targetSegmentationExpression.eventKey && targetEvent.property == null
+    override fun match(targetEvent: TargetEvent, numberOfEventInDay: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays): Boolean {
+        return targetEvent.eventKey == numberOfEventInDay.eventKey && targetEvent.property == null
     }
 
     override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays {
@@ -97,9 +106,9 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
 
     override fun match(
         targetEvent: TargetEvent,
-        targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays
+        numberOfEventInDay: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays
     ): Boolean {
-        return targetEvent.eventKey == targetSegmentationExpression.eventKey && propertyMatch(targetEvent.property, targetSegmentationExpression.propertyFilter)
+        return targetEvent.eventKey == numberOfEventInDay.eventKey && propertyMatch(targetEvent.property, numberOfEventInDay.propertyFilter)
     }
 
     override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays {
