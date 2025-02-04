@@ -444,12 +444,12 @@ class TargetEventConditionMatcherTest {
     }
 
     private fun getKeyString(eventKey: String, days: Int): String {
-        val model = Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsInDays(eventKey, days)
+        val model = Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays(eventKey, days)
         return Gson().toJson(model)
     }
 
     private fun getKeyString(eventKey: String, days: Int, filter: Target.Condition): String {
-        val model = Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsWithPropertyInDays(eventKey, days, filter)
+        val model = Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays(eventKey, days, filter)
         return Gson().toJson(model)
     }
 
