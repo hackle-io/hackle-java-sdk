@@ -125,8 +125,6 @@ class TargetEventConditionMatcherTest {
 
     @Test
     fun `오늘 09시 기준 어제 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 성공`() {
-        testClock.setKstTime(14)
-
         val targetEvents = listOf(
             TargetEvent("login", makeSingleTargetEventsStat(1, 3)),
             TargetEvent("purchase", makeTargetEventsStat(1, 1))
@@ -446,12 +444,12 @@ class TargetEventConditionMatcherTest {
     }
 
     private fun getKeyString(eventKey: String, days: Int): String {
-        val model = Target.TargetSegmentationExpression.NumberOfEventsInDays(eventKey, days)
+        val model = Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsInDays(eventKey, days)
         return Gson().toJson(model)
     }
 
     private fun getKeyString(eventKey: String, days: Int, filter: Target.Condition): String {
-        val model = Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays(eventKey, days, filter)
+        val model = Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsWithPropertyInDays(eventKey, days, filter)
         return Gson().toJson(model)
     }
 

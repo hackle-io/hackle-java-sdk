@@ -47,16 +47,38 @@ data class Target(
         }
     }
 
+    /**
+     * key가 TargetSegmentationExpression 인 경우
+     */
     sealed class TargetSegmentationExpression {
-        data class NumberOfEventsInDays(
-            val eventKey: String,
-            val days: Int
-        ): TargetSegmentationExpression()
+        /**
+         * TargetEvent 에 해당하는 TargetSegmentationExpression
+         */
+        sealed class TargetEvent: TargetSegmentationExpression() {
+            abstract val eventKey: String
+            abstract val days: Int
 
-        data class NumberOfEventsWithPropertyInDays(
-            val eventKey: String,
-            val days: Int,
-            val propertyFilter: Condition
-        ): TargetSegmentationExpression()
+            /**
+             * NUMBER_OF_EVENTS_IN_DAYS TargetSegmentationExpression
+             */
+            data class NumberOfEventsInDays(
+                override val eventKey: String,
+                override val days: Int
+            ): TargetEvent()
+
+            /**
+             * NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS TargetSegmentationExpression
+             */
+            data class NumberOfEventsWithPropertyInDays(
+                override val eventKey: String,
+                override val days: Int,
+                /**
+                 * 이벤트 속성 필터
+                 *
+                 * EVENT_PROPERTY 타입만 허용됨
+                 */
+                val propertyFilter: Condition
+            ): TargetEvent()
+        }
     }
 }

@@ -28,26 +28,41 @@ internal class TargetEventConditionMatcher(
 /**
  * TargetSegmentationExpressionMatcher
  */
-internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegmentationExpression> {
+internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegmentationExpression.TargetEvent> {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
     protected abstract val clock: Clock
     internal val gson = Gson()
 
-
     /**
      * TargetEvent List 에서 Target.Condition 에 해당하는 이벤트가 있는지 확인
      */
-    internal abstract fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean
+    fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
+        val numberOfEventsInDays = condition.key.toSegmentationExpression()
+        val daysAgoUtc = clock.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsInDays.days.toLong())
+        val eventCount = targetEvents
+            .filter { match(it, numberOfEventsInDays) }
+            .sumOf { it.countWithinDays(daysAgoUtc) }
+
+        return valueOperatorMatcher.matches(eventCount, condition.match)
+    }
 
     /**
-     * TargetEvent 에서 Target.TargetSegmentationExpression 에 해당하는 이벤트가 있는지 확인
+     * TargetEvent 에서 Target.TargetSegmentationExpression.TargetEvent 에 해당하는 이벤트가 있는지 확인
      */
     internal abstract fun match(targetEvent: TargetEvent, targetSegmentationExpression: T): Boolean
 
     /**
-     * Target.Key to Target.TargetSegmentationExpression
+     * Target.Key to Target.TargetSegmentationExpression.TargetEvent
      */
     internal abstract fun Target.Key.toSegmentationExpression(): T
+
+    /**
+     * 기간 내 이벤트 발생 횟수
+     */
+    private val TargetEvent.countWithinDays: (Long) -> Int
+        get() = { daysAgoUtc ->
+            stats.filter { it.date >= daysAgoUtc }.sumOf { it.count }
+        }
 }
 
 /**
@@ -58,24 +73,14 @@ internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegm
 internal class NumberOfEventsInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher,
     override val clock: Clock
-): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.NumberOfEventsInDays>() {
+): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsInDays>() {
 
-    override fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
-        val numberOfEventsInDays = condition.key.toSegmentationExpression()
-        val daysAgoUtc = clock.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsInDays.days.toLong())
-        val eventCount = targetEvents
-            .filter { match(it, numberOfEventsInDays) }
-            .sumOf { it.countWithinDays(daysAgoUtc) }
-
-        return valueOperatorMatcher.matches(eventCount, condition.match)
-    }
-
-    override fun match(targetEvent: TargetEvent, targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventsInDays): Boolean {
+    override fun match(targetEvent: TargetEvent, targetSegmentationExpression: Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsInDays): Boolean {
         return targetEvent.eventKey == targetSegmentationExpression.eventKey && targetEvent.property == null
     }
 
-    override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventsInDays {
-        return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventsInDays::class.java)
+    override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsInDays {
+        return gson.fromJson(name, Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsInDays::class.java)
     }
 }
 
@@ -87,27 +92,17 @@ internal class NumberOfEventsInDaysMatcher(
 internal class NumberOfEventsWithPropertyInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher,
     override val clock: Clock
-): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays>()  {
-
-    override fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
-        val numberOfEventsWithPropertyInDays = condition.key.toSegmentationExpression()
-        val daysAgoUtc = clock.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsWithPropertyInDays.days.toLong())
-        val eventCount = targetEvents
-            .filter { match(it, numberOfEventsWithPropertyInDays) }
-            .sumOf { it.countWithinDays(daysAgoUtc) }
-
-        return valueOperatorMatcher.matches(eventCount, condition.match)
-    }
+): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsWithPropertyInDays>()  {
 
     override fun match(
         targetEvent: TargetEvent,
-        targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays
+        targetSegmentationExpression: Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsWithPropertyInDays
     ): Boolean {
         return targetEvent.eventKey == targetSegmentationExpression.eventKey && propertyMatch(targetEvent.property, targetSegmentationExpression.propertyFilter)
     }
 
-    override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays {
-        return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays::class.java)
+    override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsWithPropertyInDays {
+        return gson.fromJson(name, Target.TargetSegmentationExpression.TargetEvent.NumberOfEventsWithPropertyInDays::class.java)
     }
 
     /**
@@ -125,16 +120,3 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
         return false
     }
 }
-
-/**
- * 기간 내 이벤트 발생 횟수
- */
-private val TargetEvent?.countWithinDays: (Long) -> Int
-    get() = { daysAgoUtc ->
-        if (this == null) {
-            0 // null 이벤트는 이벤트 횟수 0
-        } else {
-            stats.filter { it.date >= daysAgoUtc }.sumOf { it.count }
-        }
-
-    }
