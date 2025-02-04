@@ -48,12 +48,12 @@ internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegm
     }
 
     /**
-     * TargetEvent 에서 Target.TargetSegmentationExpression.TargetEvent 에 해당하는 이벤트가 있는지 확인
+     * TargetEvent 에서 NumberOfEventInDay 에 해당하는 이벤트가 있는지 확인
      */
     internal abstract fun match(targetEvent: TargetEvent, targetSegmentationExpression: T): Boolean
 
     /**
-     * Target.Key to Target.TargetSegmentationExpression.TargetEvent
+     * Target.Key to NumberOfEventInDay
      */
     internal abstract fun Target.Key.toSegmentationExpression(): T
 
