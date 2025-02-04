@@ -26,9 +26,9 @@ internal class TargetEventConditionMatcher(
 }
 
 /**
- * TargetSegmentationExpressionMatcher
+ * NumberOfEventInDayMatcher
  */
-internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegmentationExpression.NumberOfEventInDay> {
+internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationExpression.NumberOfEventInDay> {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
     protected abstract val clock: Clock
     internal val gson = Gson()
@@ -74,7 +74,7 @@ internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegm
 internal class NumberOfEventsInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher,
     override val clock: Clock
-): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays>() {
+): NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays>() {
 
     override fun match(targetEvent: TargetEvent, targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays): Boolean {
         return targetEvent.eventKey == targetSegmentationExpression.eventKey && targetEvent.property == null
@@ -93,7 +93,7 @@ internal class NumberOfEventsInDaysMatcher(
 internal class NumberOfEventsWithPropertyInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher,
     override val clock: Clock
-): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays>()  {
+): NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays>()  {
 
     override fun match(
         targetEvent: TargetEvent,
