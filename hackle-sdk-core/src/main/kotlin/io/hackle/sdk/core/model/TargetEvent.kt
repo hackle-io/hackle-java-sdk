@@ -20,6 +20,7 @@ data class TargetEvent(
      */
     data class Property(
         val key: String,
+        val type: Target.Key.Type,
         val value: Any
     )
 

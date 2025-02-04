@@ -192,7 +192,7 @@ class HackleCore internal constructor(
         ): HackleCore {
 
             val delegatingEvaluator = DelegatingEvaluator()
-            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()))
+            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()), Clock.SYSTEM)
             val flowFactory = EvaluationFlowFactory(context)
 
             val experimentEvaluator = ExperimentEvaluator(flowFactory)

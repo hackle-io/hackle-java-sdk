@@ -28,14 +28,26 @@ internal class TargetEventConditionMatcher(
 /**
  * TargetSegmentationExpressionMatcher
  */
-internal abstract class TargetSegmentationExpressionMatcher {
+internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegmentationExpression> {
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
+    protected abstract val clock: Clock
     internal val gson = Gson()
+
 
     /**
      * TargetEvent List 에서 Target.Condition 에 해당하는 이벤트가 있는지 확인
      */
     internal abstract fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean
+
+    /**
+     * TargetEvent 에서 Target.TargetSegmentationExpression 에 해당하는 이벤트가 있는지 확인
+     */
+    internal abstract fun match(targetEvent: TargetEvent, targetSegmentationExpression: T): Boolean
+
+    /**
+     * Target.Key to Target.TargetSegmentationExpression
+     */
+    internal abstract fun Target.Key.toSegmentationExpression(): T
 }
 
 /**
@@ -44,29 +56,25 @@ internal abstract class TargetSegmentationExpressionMatcher {
  * 기간 내 이벤트 발생 횟수
  */
 internal class NumberOfEventsInDaysMatcher(
-    override val valueOperatorMatcher: ValueOperatorMatcher
-): TargetSegmentationExpressionMatcher() {
+    override val valueOperatorMatcher: ValueOperatorMatcher,
+    override val clock: Clock
+): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.NumberOfEventsInDays>() {
 
     override fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
-        val numberOfEventsInDays = condition.key.toNumberOfEventsInDays()
-        val daysAgoUtc = Clock.SYSTEM.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsInDays.days.toLong())
-        return targetEvents
-            .filter { it.eventKey == numberOfEventsInDays.eventKey }
-            // 이벤트 키에 프로퍼티 없는 targetEvent 는 1개 이하가 보장
-            // 만족하는 이벤트가 하나도 없을 때 null 이벤트를 만들어서 이벤트 횟수 0으로 처리
-            .firstOrNull {
-                return@firstOrNull it.property == null
-            }
-            .let { targetEvent ->
-                val eventCount = targetEvent.countWithinDays(daysAgoUtc)
-                return@let valueOperatorMatcher.matches(eventCount, condition.match)
-            }
+        val numberOfEventsInDays = condition.key.toSegmentationExpression()
+        val daysAgoUtc = clock.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsInDays.days.toLong())
+        val eventCount = targetEvents
+            .filter { match(it, numberOfEventsInDays) }
+            .sumOf { it.countWithinDays(daysAgoUtc) }
+
+        return valueOperatorMatcher.matches(eventCount, condition.match)
     }
 
-    /**
-     * Target.Key to NumberOfEventsInDays
-     */
-    private fun Target.Key.toNumberOfEventsInDays(): Target.TargetSegmentationExpression.NumberOfEventsInDays {
+    override fun match(targetEvent: TargetEvent, targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventsInDays): Boolean {
+        return targetEvent.eventKey == targetSegmentationExpression.eventKey && targetEvent.property == null
+    }
+
+    override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventsInDays {
         return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventsInDays::class.java)
     }
 }
@@ -77,47 +85,44 @@ internal class NumberOfEventsInDaysMatcher(
  * 기간 내 특정 프로퍼티를 가진 이벤트 발생 횟수
  */
 internal class NumberOfEventsWithPropertyInDaysMatcher(
-    override val valueOperatorMatcher: ValueOperatorMatcher
-): TargetSegmentationExpressionMatcher()  {
+    override val valueOperatorMatcher: ValueOperatorMatcher,
+    override val clock: Clock
+): TargetSegmentationExpressionMatcher<Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays>()  {
+
     override fun match(targetEvents: List<TargetEvent>, condition: Target.Condition): Boolean {
-        val numberOfEventsWithPropertyInDays = condition.key.toNumberOfEventsWithPropertyInDays()
-        val daysAgoUtc = Clock.SYSTEM.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsWithPropertyInDays.days.toLong())
+        val numberOfEventsWithPropertyInDays = condition.key.toSegmentationExpression()
+        val daysAgoUtc = clock.currentMillis() - TimeUnit.DAYS.toMillis(numberOfEventsWithPropertyInDays.days.toLong())
+        val eventCount = targetEvents
+            .filter { match(it, numberOfEventsWithPropertyInDays) }
+            .sumOf { it.countWithinDays(daysAgoUtc) }
 
-        val filteredTargetEvent = targetEvents
-            .filter { it.eventKey == numberOfEventsWithPropertyInDays.eventKey }
-            .filter { propertyMatch(it.property, numberOfEventsWithPropertyInDays.propertyFilter) }
-            .toMutableList<TargetEvent?>()
+        return valueOperatorMatcher.matches(eventCount, condition.match)
+    }
 
-        // 만약 만족하는 이벤트의 갯수가 조건의 갯수보다 적다면 null 이벤트를 추가하여 이벤트 횟수 0인 이벤트 추가
-        if(filteredTargetEvent.size < numberOfEventsWithPropertyInDays.propertyFilter.match.values.size) {
-            filteredTargetEvent.add(null)
-        }
+    override fun match(
+        targetEvent: TargetEvent,
+        targetSegmentationExpression: Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays
+    ): Boolean {
+        return targetEvent.eventKey == targetSegmentationExpression.eventKey && propertyMatch(targetEvent.property, targetSegmentationExpression.propertyFilter)
+    }
 
-        return filteredTargetEvent
-            .any { targetEvent ->
-                val eventCount = targetEvent.countWithinDays(daysAgoUtc)
-                return@any valueOperatorMatcher.matches(eventCount, condition.match)
-            }
+    override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays {
+        return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays::class.java)
     }
 
     /**
      * TargetEvent.Property 와 Target.Condition.Property 비교
+     *
+     * property의 key, type, value가 모두 일치하면 true
      * @param property TargetEvent.Property
      * @param propertyCondition Target.Condition.Property
      * @return Boolean
      */
     private fun propertyMatch(property: TargetEvent.Property?, propertyCondition: Target.Condition): Boolean {
-        if (propertyCondition.key.name == property?.key) {
+        if (property?.type == propertyCondition.key.type && property.key == propertyCondition.key.name) {
             return valueOperatorMatcher.matches(property.value, propertyCondition.match)
         }
         return false
-    }
-
-    /**
-     * Target.Key to NumberOfEventsWithPropertyInDays
-     */
-    private fun Target.Key.toNumberOfEventsWithPropertyInDays(): Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays {
-        return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventsWithPropertyInDays::class.java)
     }
 }
 

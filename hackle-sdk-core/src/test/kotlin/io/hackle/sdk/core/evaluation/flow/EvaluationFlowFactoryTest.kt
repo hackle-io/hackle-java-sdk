@@ -11,7 +11,7 @@ import strikt.api.expectThat
 internal class EvaluationFlowFactoryTest {
 
     val sut = EvaluationFlowFactory(EvaluationContext().also {
-        it.initialize(mockk(), mockk())
+        it.initialize(mockk(), mockk(), mockk())
     })
 
     @Test

@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
 
@@ -12,7 +13,7 @@ internal interface ConditionMatcher {
     ): Boolean
 }
 
-internal class ConditionMatcherFactory(evaluator: Evaluator) {
+internal class ConditionMatcherFactory(evaluator: Evaluator, clock: Clock) {
 
     private val userConditionMatcher: ConditionMatcher
     private val segmentConditionMatcher: ConditionMatcher
@@ -33,10 +34,11 @@ internal class ConditionMatcherFactory(evaluator: Evaluator) {
             EventValueResolver(),
             valueOperatorMatcher
         )
+
         this.cohortConditionMatcher = CohortConditionMatcher(valueOperatorMatcher)
         this.targetEventConditionMatcher = TargetEventConditionMatcher(
-            NumberOfEventsInDaysMatcher(valueOperatorMatcher),
-            NumberOfEventsWithPropertyInDaysMatcher(valueOperatorMatcher)
+            NumberOfEventsInDaysMatcher(valueOperatorMatcher, clock),
+            NumberOfEventsWithPropertyInDaysMatcher(valueOperatorMatcher, clock)
         )
     }
 
