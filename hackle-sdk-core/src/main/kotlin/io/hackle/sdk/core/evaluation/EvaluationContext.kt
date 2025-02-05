@@ -7,6 +7,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.*
+import io.hackle.sdk.core.internal.time.Clock
 
 class EvaluationContext internal constructor() {
 
@@ -26,11 +27,12 @@ class EvaluationContext internal constructor() {
         return requireNotNull(getOrNull(type)) { "Instance not registered [${type.simpleName}]" }
     }
 
-    internal fun initialize(evaluator: Evaluator, manualOverrideStorage: ManualOverrideStorage) {
+    internal fun initialize(evaluator: Evaluator, manualOverrideStorage: ManualOverrideStorage, clock: Clock) {
         register(evaluator)
         register(manualOverrideStorage)
         register(Bucketer())
-        register(ConditionMatcherFactory(get()))
+        register(clock)
+        register(ConditionMatcherFactory(get(), get()))
         register(TargetMatcher(get()))
         register(ActionResolver(get()))
         register(OverrideResolver(get(), get(), get()))
@@ -42,6 +44,9 @@ class EvaluationContext internal constructor() {
         register(InAppMessageResolver(get()))
         register(InAppMessageUserOverrideMatcher())
         register(InAppMessageTargetMatcher(get()))
+        // server sdk: NoopInAppMessageHiddenStorage
+        // android sdk: AndroidInAppMessageHiddenStorage
+        //  hackle-android-sdk 에서 초기화 할 때 EvaluationContext.GLOBAL에 등록함
         register(InAppMessageHiddenMatcher(getOrNull() ?: NoopInAppMessageHiddenStorage))
     }
 

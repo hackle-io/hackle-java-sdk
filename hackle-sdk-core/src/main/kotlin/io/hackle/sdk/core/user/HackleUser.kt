@@ -4,6 +4,7 @@ import io.hackle.sdk.common.IdentifiersBuilder
 import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.User
 import io.hackle.sdk.core.model.Cohort
+import io.hackle.sdk.core.model.TargetEvent
 import java.util.*
 
 data class HackleUser internal constructor(
@@ -11,6 +12,7 @@ data class HackleUser internal constructor(
     val properties: Map<String, Any>,
     val hackleProperties: Map<String, Any>,
     val cohorts: List<Cohort>,
+    val targetEvents: List<TargetEvent>
 ) {
 
     val id: String? get() = identifiers[IdentifierType.ID.key]
@@ -28,12 +30,14 @@ data class HackleUser internal constructor(
         private val properties: PropertiesBuilder = PropertiesBuilder()
         private val hackleProperties: PropertiesBuilder = PropertiesBuilder()
         private val cohorts = mutableListOf<Cohort>()
+        private val targetEvents = mutableListOf<TargetEvent>()
 
         internal constructor(user: HackleUser) : this() {
             identifiers.add(user.identifiers)
             properties.add(user.properties)
             hackleProperties.add(user.hackleProperties)
             cohorts.addAll(user.cohorts)
+            targetEvents.addAll(user.targetEvents)
         }
 
         fun identifiers(identifiers: Map<String, String>, overwrite: Boolean = true) =
@@ -54,12 +58,16 @@ data class HackleUser internal constructor(
         fun cohort(cohort: Cohort) = apply { this.cohorts.add(cohort) }
         fun cohorts(cohorts: List<Cohort>) = apply { this.cohorts.addAll(cohorts) }
 
+        fun targetEvent(targetEvent: TargetEvent) = apply { this.targetEvents.add(targetEvent) }
+        fun targetEvents(targetEvents: List<TargetEvent>) = apply { this.targetEvents.addAll(targetEvents) }
+
         fun build(): HackleUser {
             return HackleUser(
                 identifiers = identifiers.build(),
                 properties = properties.build(),
                 hackleProperties = hackleProperties.build(),
-                cohorts = Collections.unmodifiableList(cohorts)
+                cohorts = Collections.unmodifiableList(cohorts),
+                targetEvents = Collections.unmodifiableList(targetEvents)
             )
         }
     }
