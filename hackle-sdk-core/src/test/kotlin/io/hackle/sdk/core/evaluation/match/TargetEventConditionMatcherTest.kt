@@ -124,7 +124,8 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `오늘 09시 기준 어제 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 성공`() {
+    fun `오늘 08시 기준 어제 3회 login 이벤트가 발생했고, 1일 내 3회 login 이벤트가 발생한 조건이 들어온 경우 성공`() {
+        testClock.setKstTime(8)
         val targetEvents = listOf(
             TargetEvent("login", makeSingleTargetEventsStat(1, 3)),
             TargetEvent("purchase", makeTargetEventsStat(1, 1))
@@ -231,7 +232,7 @@ class TargetEventConditionMatcherTest {
     }
 
     @Test
-    fun `7일 전 purchase 이벤트가 milk property와 함께 매일 1회씩 발생했고 2일 동안 purchase 이벤트가 cookie property와 함께 2회씩 발생했는데, 최근 7일 내 purchase 이벤트가 5회 발생하고 filter가  milk, cookie 인 경우 성공`() {
+    fun `7일 전 purchase 이벤트가 milk property와 함께 매일 1회씩 발생했고 2일 동안 purchase 이벤트가 cookie property와 함께 2회씩 발생했는데, 최근 8일 내 purchase 이벤트가 5회 발생하고 filter가  milk, cookie 인 경우 성공`() {
         val targetEvents = listOf(
             TargetEvent("purchase", makeSingleTargetEventsStat(7, 1), TargetEvent.Property("productName", Target.Key.Type.EVENT_PROPERTY, "milk")),
             TargetEvent("purchase", makeTargetEventsStat(2, 2), TargetEvent.Property("productName", Target.Key.Type.EVENT_PROPERTY, "cookie")),
@@ -239,7 +240,7 @@ class TargetEventConditionMatcherTest {
         verify(
             targetEvents= targetEvents,
             key = getKeyString(
-                "purchase", 7, Target.Condition(
+                "purchase", 8, Target.Condition(
                     Target.Key(Target.Key.Type.EVENT_PROPERTY, "productName"),
                     Target.Match(MATCH, Target.Match.Operator.CONTAINS, STRING, listOf("cookie", "milk"))
                 )

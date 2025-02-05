@@ -71,7 +71,7 @@ internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationEx
      */
     private val TargetEvent.countWithinDays: (Long) -> Int
         get() = { daysAgoUtc ->
-            stats.filter { it.date >= daysAgoUtc }.sumOf { it.count }
+            stats.filter { it.date > daysAgoUtc }.sumOf { it.count }
         }
 }
 
