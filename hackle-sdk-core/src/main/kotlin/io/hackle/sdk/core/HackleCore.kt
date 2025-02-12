@@ -147,6 +147,12 @@ class HackleCore internal constructor(
         return RemoteConfigDecision.of(evaluation.value, evaluation.reason) as RemoteConfigDecision<T>
     }
 
+    /**
+     * 인앱메시지를 띄워야 하는지 판단합니다.
+     * @param inAppMessageKey
+     * @param user
+     * @return InAppMessageDecision
+     */
     fun inAppMessage(inAppMessageKey: Long, user: HackleUser): InAppMessageDecision {
         val workspace = workspaceFetcher.fetch() ?: return InAppMessageDecision.of(SDK_NOT_READY)
 
@@ -186,7 +192,7 @@ class HackleCore internal constructor(
         ): HackleCore {
 
             val delegatingEvaluator = DelegatingEvaluator()
-            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()))
+            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()), Clock.SYSTEM)
             val flowFactory = EvaluationFlowFactory(context)
 
             val experimentEvaluator = ExperimentEvaluator(flowFactory)
