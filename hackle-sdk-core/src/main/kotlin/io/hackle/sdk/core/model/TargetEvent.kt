@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.model
 
+import java.util.Objects.hash
+
 /**
  * Audience 타겟팅을 위한 Event 객체
  *
@@ -34,4 +36,13 @@ data class TargetEvent(
         val date: Long,
         val count: Int
     )
+
+    override fun hashCode(): Int = hash(eventKey, property)
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is TargetEvent) return false
+
+        return eventKey == other.eventKey &&
+                property == other.property
+    }
 }
