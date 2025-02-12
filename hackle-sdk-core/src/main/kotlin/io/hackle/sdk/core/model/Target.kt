@@ -20,6 +20,8 @@ data class Target(
             FEATURE_FLAG,
             EVENT_PROPERTY,
             COHORT,
+            NUMBER_OF_EVENTS_IN_DAYS,
+            NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS
         }
     }
 
@@ -42,6 +44,41 @@ data class Target(
             GTE,
             LT,
             LTE,
+        }
+    }
+
+    /**
+     * key가 TargetSegmentationExpression 인 경우
+     */
+    sealed class TargetSegmentationExpression {
+        /**
+         * TargetEvent 에 해당하는 TargetSegmentationExpression
+         */
+        sealed class NumberOfEventInDay: TargetSegmentationExpression() {
+            abstract val eventKey: String
+            abstract val days: Int
+
+            /**
+             * NUMBER_OF_EVENTS_IN_DAYS TargetSegmentationExpression
+             */
+            data class NumberOfEventsInDays(
+                override val eventKey: String,
+                override val days: Int
+            ): NumberOfEventInDay()
+
+            /**
+             * NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS TargetSegmentationExpression
+             */
+            data class NumberOfEventsWithPropertyInDays(
+                override val eventKey: String,
+                override val days: Int,
+                /**
+                 * 이벤트 속성 필터
+                 *
+                 * EVENT_PROPERTY 타입만 허용됨
+                 */
+                val propertyFilter: Condition
+            ): NumberOfEventInDay()
         }
     }
 }
