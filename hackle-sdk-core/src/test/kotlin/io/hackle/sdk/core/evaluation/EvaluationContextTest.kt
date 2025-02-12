@@ -7,6 +7,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.*
+import io.hackle.sdk.core.internal.time.Clock
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -37,7 +38,7 @@ internal class EvaluationContextTest {
 
         val evaluator = mockk<Evaluator>()
         val manualOverrideStorage = mockk<ManualOverrideStorage>()
-        sut.initialize(evaluator, manualOverrideStorage)
+        sut.initialize(evaluator, manualOverrideStorage, clock = Clock.SYSTEM)
 
 
         expectThat(sut.get<Evaluator>()) isSameInstanceAs evaluator

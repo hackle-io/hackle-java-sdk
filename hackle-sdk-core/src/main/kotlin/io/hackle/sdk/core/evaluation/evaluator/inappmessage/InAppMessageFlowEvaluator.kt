@@ -34,6 +34,11 @@ private fun InAppMessageResolver.resolve(
     return InAppMessageEvaluation.of(request, context, reason, message)
 }
 
+/**
+ * Android platform check
+ *
+ * 안드로이드를 지원안하면 UNSUPPORTED_PLATFORM
+ */
 internal class PlatformInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     override fun evaluate(
         request: InAppMessageRequest,
@@ -47,6 +52,11 @@ internal class PlatformInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     }
 }
 
+/**
+ * Specific User Check
+ *
+ * 특정 유저가 타겟팅 된 경우 OVERRIDDEN
+ */
 internal class OverrideInAppMessageFlowEvaluator(
     private val userOverrideMatcher: InAppMessageUserOverrideMatcher,
     private val inAppMessageResolver: InAppMessageResolver
@@ -63,6 +73,11 @@ internal class OverrideInAppMessageFlowEvaluator(
     }
 }
 
+/**
+ * Draft Check
+ *
+ * IAM이 초안인 경우 IN_APP_MESSAGE_DRAFT
+ */
 internal class DraftInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     override fun evaluate(
         request: InAppMessageRequest,
@@ -76,6 +91,11 @@ internal class DraftInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     }
 }
 
+/**
+ * Pause Status Check
+ *
+ * 현재 Pause 상태인 경우 IN_APP_MESSAGE_PAUSED
+ */
 internal class PauseInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     override fun evaluate(
         request: InAppMessageRequest,
@@ -89,6 +109,11 @@ internal class PauseInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     }
 }
 
+/**
+ * Period Check
+ *
+ * IAM의 기간에 포함되지 않는 경우 NOT_IN_IN_APP_MESSAGE_PERIOD
+ */
 internal class PeriodInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     override fun evaluate(
         request: InAppMessageRequest,
@@ -102,6 +127,12 @@ internal class PeriodInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     }
 }
 
+/**
+ * Hidden Check
+ *
+ * SDK에서 판단해서 숨겨야 하는 경우
+ * - 하루동안 가리기 설정된 경우
+ */
 internal class HiddenInAppMessageFlowEvaluator(
     private val hiddenMatcher: InAppMessageHiddenMatcher
 ) : InAppMessageFlowEvaluator {
@@ -117,6 +148,11 @@ internal class HiddenInAppMessageFlowEvaluator(
     }
 }
 
+/**
+ * Target Check
+ *
+ * IAM 타겟팅이 된 경우
+ */
 internal class TargetInAppMessageFlowEvaluator(
     private val targetMatcher: InAppMessageTargetMatcher,
     private val inAppMessageResolver: InAppMessageResolver
