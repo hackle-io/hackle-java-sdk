@@ -2,6 +2,8 @@ package io.hackle.sdk.core.evaluation.match
 
 import com.google.gson.Gson
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.internal.workspace.TargetDto
+import io.hackle.sdk.core.internal.workspace.toTargetSegmentationExpression
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS
@@ -90,7 +92,8 @@ internal class NumberOfEventsInDaysMatcher(
     }
 
     override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays {
-        return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays::class.java)
+        val numberOfEventsInDaysDto = gson.fromJson(name, TargetDto.NumberOfEventsInDaysDto::class.java)
+        return numberOfEventsInDaysDto.toTargetSegmentationExpression()
     }
 }
 
@@ -112,7 +115,8 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
     }
 
     override fun Target.Key.toSegmentationExpression(): Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays {
-        return gson.fromJson(name, Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays::class.java)
+        val numberOfEventsWithPropertyInDaysDto = gson.fromJson(name, TargetDto.NumberOfEventsWithPropertyInDaysDto::class.java)
+        return numberOfEventsWithPropertyInDaysDto.toTargetSegmentationExpression()
     }
 
     /**
@@ -130,3 +134,4 @@ internal class NumberOfEventsWithPropertyInDaysMatcher(
         return false
     }
 }
+
