@@ -70,7 +70,7 @@ object HackleClients {
             httpClient = httpClient,
             dispatcherExecutor = PoolingExecutors.newThreadPool(
                 poolSize = 4,
-                workQueueCapacity = 100,
+                workQueueCapacity = 10000,
                 threadFactory = NamedThreadFactory("Hackle-EventDispatcher-", true)
             ),
             shutdownTimeoutMillis = 10 * 1000
@@ -79,7 +79,7 @@ object HackleClients {
         val defaultEventProcessor = DefaultEventProcessor(
             queue = ArrayBlockingQueue(10000),
             eventDispatcher = eventDispatcher,
-            eventDispatchSize = 500,
+            eventDispatchSize = 100,
             flushScheduler = Schedulers.executor(
                 newSingleThreadScheduledExecutor(NamedThreadFactory("Hackle-EventFlush-", true))
             ),
