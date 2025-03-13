@@ -1,8 +1,5 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.core.model.Version
-
-
 internal interface OperatorMatcher {
     fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValue: List<Any>): Boolean
 }
@@ -58,12 +55,5 @@ internal object LessThanOrEqualToMatcher : OperatorMatcher {
 internal object ExistsMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValue: List<Any>): Boolean {
         return valueMatcher.existsMatch(userValue)
-    }
-}
-
-
-internal object NotExistsMatcher : OperatorMatcher {
-    override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValue: List<Any>): Boolean {
-        return valueMatcher.notExistsMatch(userValue)
     }
 }

@@ -16,7 +16,6 @@ internal interface ValueMatcher {
     fun lessThanMatch(userValue: Any?, matchValue: Any): Boolean
     fun lessThanOrEqualToMatch(userValue: Any?, matchValue: Any): Boolean
     fun existsMatch(userValue: Any?): Boolean
-    fun notExistsMatch(userValue: Any?): Boolean
 }
 
 internal object StringMatcher : ValueMatcher {
@@ -71,10 +70,6 @@ internal object StringMatcher : ValueMatcher {
     override fun existsMatch(userValue: Any?): Boolean {
         return userValue != null
     }
-
-    override fun notExistsMatch(userValue: Any?): Boolean {
-        return userValue == null
-    }
 }
 
 internal object NumberMatcher : ValueMatcher {
@@ -123,11 +118,6 @@ internal object NumberMatcher : ValueMatcher {
     override fun existsMatch(userValue: Any?): Boolean {
         return userValue != null
     }
-
-    override fun notExistsMatch(userValue: Any?): Boolean {
-        return userValue == null
-    }
-
 }
 
 internal object BooleanMatcher : ValueMatcher {
@@ -167,10 +157,6 @@ internal object BooleanMatcher : ValueMatcher {
 
     override fun existsMatch(userValue: Any?): Boolean {
         return userValue != null
-    }
-
-    override fun notExistsMatch(userValue: Any?): Boolean {
-        return userValue == null
     }
 }
 
@@ -219,9 +205,5 @@ internal object VersionMatcher : ValueMatcher {
 
     override fun existsMatch(userValue: Any?): Boolean {
         return userValue != null
-    }
-
-    override fun notExistsMatch(userValue: Any?): Boolean {
-        return userValue == null
     }
 }
