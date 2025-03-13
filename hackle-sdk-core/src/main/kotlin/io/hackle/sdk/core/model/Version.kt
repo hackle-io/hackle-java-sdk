@@ -76,7 +76,7 @@ internal class Version private constructor(
             return Version(coreVersion, prerelease, build)
         }
 
-        fun parseOrNull(value: Any): Version? {
+        fun parseOrNull(value: Any?): Version? {
             return when (value) {
                 is Version -> value
                 !is String -> null

@@ -7,7 +7,7 @@ internal class ValueOperatorMatcher(
     private val factory: ValueOperatorMatcherFactory
 ) {
 
-    fun matches(userValue: Any, match: Target.Match): Boolean {
+    fun matches(userValue: Any?, match: Target.Match): Boolean {
         val valueMatcher = factory.getValueMatcher(match.valueType)
         val operatorMatcher = factory.getOperatorMatcher(match.operator)
         @Suppress("UNCHECKED_CAST")
@@ -19,12 +19,12 @@ internal class ValueOperatorMatcher(
     }
 
     private fun singleMatches(
-        userValue: Any,
+        userValue: Any?,
         match: Target.Match,
         valueMatcher: ValueMatcher,
         operatorMatcher: OperatorMatcher
     ): Boolean {
-        return match.values.any { valueMatcher.matches(operatorMatcher, userValue, it) }
+        return operatorMatcher.matches(valueMatcher, userValue, match.values)
     }
 
     private fun arrayMatches(
@@ -58,6 +58,8 @@ internal class ValueOperatorMatcherFactory {
             Target.Match.Operator.GTE -> GreaterThanOrEqualToMatcher
             Target.Match.Operator.LT -> LessThanMatcher
             Target.Match.Operator.LTE -> LessThanOrEqualToMatcher
+            Target.Match.Operator.EXISTS -> ExistsMatcher
+            Target.Match.Operator.NOT_EXISTS -> NotExistsMatcher
         }
     }
 }

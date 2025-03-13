@@ -44,6 +44,8 @@ data class Target(
             GTE,
             LT,
             LTE,
+            EXISTS,
+            NOT_EXISTS,
         }
     }
 
