@@ -10,7 +10,7 @@ internal class UserConditionMatcher(
     private val valueOperatorMatcher: ValueOperatorMatcher
 ) : ConditionMatcher {
     override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
-        val userValue = userValueResolver.resolveOrNull(request.user, condition.key) ?: return false
+        val userValue = userValueResolver.resolveOrNull(request.user, condition.key)
         return valueOperatorMatcher.matches(userValue, condition.match)
     }
 }
