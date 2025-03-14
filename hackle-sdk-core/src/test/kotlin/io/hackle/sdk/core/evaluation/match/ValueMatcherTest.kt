@@ -39,6 +39,19 @@ internal class ValueMatcherTest {
         }
 
         @Test
+        fun `target이 자료형이 아니면 항상 false`() {
+            class tmp {}
+            assertFalse(StringMatcher.inMatch("42", tmp()))
+            assertFalse(StringMatcher.containsMatch("42", tmp()))
+            assertFalse(StringMatcher.startsWithMatch("42", tmp()))
+            assertFalse(StringMatcher.endsWithMatch("42", tmp()))
+            assertFalse(StringMatcher.greaterThanMatch("42", tmp()))
+            assertFalse(StringMatcher.greaterThanOrEqualToMatch("42", tmp()))
+            assertFalse(StringMatcher.lessThanMatch("42", tmp()))
+            assertFalse(StringMatcher.lessThanOrEqualToMatch("42", tmp()))
+        }
+
+        @Test
         fun `number 타입이면 캐스팅 후 match`() {
             assertTrue(StringMatcher.inMatch("42", 42))
             assertTrue(StringMatcher.inMatch(42, "42"))
@@ -137,6 +150,18 @@ internal class ValueMatcherTest {
             assertFalse(NumberMatcher.lessThanMatch(null, 42))
             assertFalse(NumberMatcher.lessThanOrEqualToMatch(null, 42))
             assertFalse(NumberMatcher.existsMatch(null))
+        }
+
+        @Test
+        fun `target이 숫자형이 아니면 항상 false`() {
+            assertFalse(NumberMatcher.inMatch(42, "string"))
+            assertFalse(NumberMatcher.containsMatch(42, "string"))
+            assertFalse(NumberMatcher.startsWithMatch(42, false))
+            assertFalse(NumberMatcher.endsWithMatch(42, "string"))
+            assertFalse(NumberMatcher.greaterThanMatch(42, false))
+            assertFalse(NumberMatcher.greaterThanOrEqualToMatch(42, true))
+            assertFalse(NumberMatcher.lessThanMatch(42, "1.1.1"))
+            assertFalse(NumberMatcher.lessThanOrEqualToMatch(42, "string"))
         }
 
         @Test
@@ -260,6 +285,13 @@ internal class ValueMatcherTest {
         fun `Version타입이 아니면 false`() {
             assertFalse(VersionMatcher.inMatch(1, "1.0.0"))
             assertFalse(VersionMatcher.inMatch("1.0.0", 1))
+            assertFalse(VersionMatcher.containsMatch("1.0.0", true))
+            assertFalse(VersionMatcher.startsWithMatch("1.0.0", true))
+            assertFalse(VersionMatcher.endsWithMatch("1.0.0", true))
+            assertFalse(VersionMatcher.greaterThanMatch("1.0.0", true))
+            assertFalse(VersionMatcher.greaterThanOrEqualToMatch("1.0.0", true))
+            assertFalse(VersionMatcher.lessThanMatch("1.0.0", true))
+            assertFalse(VersionMatcher.lessThanOrEqualToMatch("1.0.0", true))
         }
 
         @Test
