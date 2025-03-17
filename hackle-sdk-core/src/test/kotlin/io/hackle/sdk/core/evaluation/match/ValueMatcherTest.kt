@@ -22,20 +22,6 @@ internal class ValueMatcherTest {
             assertTrue(StringMatcher.lessThanMatch("41", "42"))
             assertTrue(StringMatcher.lessThanOrEqualToMatch("42", "42"))
             assertTrue(StringMatcher.lessThanOrEqualToMatch("41", "42"))
-            assertTrue(StringMatcher.existsMatch("42"))
-        }
-
-        @Test
-        fun `uservalue가 null이면 항상 false`() {
-            assertFalse(StringMatcher.inMatch(null, "42"))
-            assertFalse(StringMatcher.containsMatch(null, "42"))
-            assertFalse(StringMatcher.startsWithMatch(null, "42"))
-            assertFalse(StringMatcher.endsWithMatch(null, "42"))
-            assertFalse(StringMatcher.greaterThanMatch(null, "42"))
-            assertFalse(StringMatcher.greaterThanOrEqualToMatch(null, "42"))
-            assertFalse(StringMatcher.lessThanMatch(null, "42"))
-            assertFalse(StringMatcher.lessThanOrEqualToMatch(null, "42"))
-            assertFalse(StringMatcher.existsMatch(null))
         }
 
         @Test
@@ -135,21 +121,6 @@ internal class ValueMatcherTest {
             assertTrue(NumberMatcher.lessThanOrEqualToMatch(42, 42L))
             assertTrue(NumberMatcher.lessThanOrEqualToMatch(0, 0.0))
             assertTrue(NumberMatcher.lessThanOrEqualToMatch(0.0, 0))
-
-            assertTrue(NumberMatcher.existsMatch(42))
-        }
-
-        @Test
-        fun `userValue가 null이면 항상 false`() {
-            assertFalse(NumberMatcher.inMatch(null, 42))
-            assertFalse(NumberMatcher.containsMatch(null, 42))
-            assertFalse(NumberMatcher.startsWithMatch(null, 42))
-            assertFalse(NumberMatcher.endsWithMatch(null, 42))
-            assertFalse(NumberMatcher.greaterThanMatch(null, 42))
-            assertFalse(NumberMatcher.greaterThanOrEqualToMatch(null, 42))
-            assertFalse(NumberMatcher.lessThanMatch(null, 42))
-            assertFalse(NumberMatcher.lessThanOrEqualToMatch(null, 42))
-            assertFalse(NumberMatcher.existsMatch(null))
         }
 
         @Test
@@ -232,23 +203,6 @@ internal class ValueMatcherTest {
             assertFalse(BooleanMatcher.inMatch(1L, "true"))
             assertFalse(BooleanMatcher.inMatch("string", true))
             assertFalse(BooleanMatcher.inMatch(true, "string"))
-
-            assertTrue(BooleanMatcher.existsMatch(true))
-            assertTrue(BooleanMatcher.existsMatch(false))
-            assertFalse(BooleanMatcher.existsMatch(null))
-        }
-
-        @Test
-        fun `userValue가 null이면 항상 false`() {
-            assertFalse(BooleanMatcher.inMatch(null, true))
-            assertFalse(BooleanMatcher.containsMatch(null, true))
-            assertFalse(BooleanMatcher.startsWithMatch(null, true))
-            assertFalse(BooleanMatcher.endsWithMatch(null, true))
-            assertFalse(BooleanMatcher.greaterThanMatch(null, true))
-            assertFalse(BooleanMatcher.greaterThanOrEqualToMatch(null, true))
-            assertFalse(BooleanMatcher.lessThanMatch(null, true))
-            assertFalse(BooleanMatcher.lessThanOrEqualToMatch(null, true))
-            assertFalse(BooleanMatcher.existsMatch(null))
         }
 
         @Test
@@ -261,8 +215,6 @@ internal class ValueMatcherTest {
             assertFalse(BooleanMatcher.lessThanMatch(true, true))
             assertFalse(BooleanMatcher.lessThanOrEqualToMatch(true, true))
         }
-
-
     }
 
     @Nested
@@ -278,7 +230,6 @@ internal class ValueMatcherTest {
             assertTrue(VersionMatcher.lessThanMatch("0.0.9", "1.0.0"))
             assertTrue(VersionMatcher.lessThanOrEqualToMatch("1.0.0", "1.0.0"))
             assertTrue(VersionMatcher.lessThanOrEqualToMatch("1.0.0", "1.0.1"))
-            assertTrue(VersionMatcher.existsMatch("1.0.0"))
         }
 
         @Test
@@ -295,25 +246,10 @@ internal class ValueMatcherTest {
         }
 
         @Test
-        fun `userValue가 null이면 항상 false`() {
-            assertFalse(VersionMatcher.inMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.containsMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.startsWithMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.endsWithMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.greaterThanMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.greaterThanOrEqualToMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.lessThanMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.lessThanOrEqualToMatch(null, "1.0.0"))
-            assertFalse(VersionMatcher.existsMatch(null))
-        }
-
-        @Test
         fun `지원하지 않는 연산자`() {
             assertFalse(VersionMatcher.containsMatch("1.0.0", "1.0.0"))
             assertFalse(VersionMatcher.startsWithMatch("1.0.0", "1.0.0"))
             assertFalse(VersionMatcher.endsWithMatch("1.0.0", "1.0.0"))
-
         }
     }
-
 }

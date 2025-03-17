@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.model
 
 internal object ValueConverter {
-    fun asStringOrNull(value: Any?): String? {
+    fun asStringOrNull(value: Any): String? {
         return when (value) {
             is String -> return value
             is Number -> value.toString()
@@ -10,7 +10,7 @@ internal object ValueConverter {
         }
     }
 
-    fun asDoubleOrNull(value: Any?): Double? {
+    fun asDoubleOrNull(value: Any): Double? {
         return when (value) {
             is Double -> value
             is Number -> value.toDouble()
@@ -19,7 +19,7 @@ internal object ValueConverter {
         }
     }
 
-    fun asBooleanOrNull(value: Any?): Boolean? {
+    fun asBooleanOrNull(value: Any): Boolean? {
         return when (value) {
             is Boolean -> value
             is String -> value.toBoolean()
@@ -27,7 +27,7 @@ internal object ValueConverter {
         }
     }
 
-    fun asVersionOrNull(value: Any?): Version? {
+    fun asVersionOrNull(value: Any): Version? {
         return Version.parseOrNull(value)
     }
 
