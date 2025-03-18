@@ -19,8 +19,7 @@ internal class EventConditionMatcher(
         if (request !is Evaluator.EventRequest) {
             return false
         }
-        val eventValue = eventValueResolver.resolveOrNull(request.event, condition.key) ?: return false
-
+        val eventValue = eventValueResolver.resolveOrNull(request.event, condition.key)
         return valueOperatorMatcher.matches(eventValue, condition.match)
     }
 }
