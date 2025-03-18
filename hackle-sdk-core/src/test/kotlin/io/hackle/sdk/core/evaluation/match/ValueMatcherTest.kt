@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class ValueMatcherTest {
-
+    class tmp {}
     @Nested
     inner class StringMatcherTest {
         @Test
@@ -26,7 +26,6 @@ internal class ValueMatcherTest {
 
         @Test
         fun `target이 자료형이 아니면 항상 false`() {
-            class tmp {}
             assertFalse(StringMatcher.inMatch("42", tmp()))
             assertFalse(StringMatcher.containsMatch("42", tmp()))
             assertFalse(StringMatcher.startsWithMatch("42", tmp()))
@@ -35,6 +34,18 @@ internal class ValueMatcherTest {
             assertFalse(StringMatcher.greaterThanOrEqualToMatch("42", tmp()))
             assertFalse(StringMatcher.lessThanMatch("42", tmp()))
             assertFalse(StringMatcher.lessThanOrEqualToMatch("42", tmp()))
+        }
+
+        @Test
+        fun `userValue가 자료형이 아니면 항상 false`() {
+            assertFalse(StringMatcher.inMatch(tmp(), "42"))
+            assertFalse(StringMatcher.containsMatch(tmp(), "42"))
+            assertFalse(StringMatcher.startsWithMatch(tmp(), "42"))
+            assertFalse(StringMatcher.endsWithMatch(tmp(), "42"))
+            assertFalse(StringMatcher.greaterThanMatch(tmp(), "42"))
+            assertFalse(StringMatcher.greaterThanOrEqualToMatch(tmp(), "42"))
+            assertFalse(StringMatcher.lessThanMatch(tmp(), "42"))
+            assertFalse(StringMatcher.lessThanOrEqualToMatch(tmp(), "42"))
         }
 
         @Test
@@ -70,6 +81,8 @@ internal class ValueMatcherTest {
             assertFalse(StringMatcher.inMatch(true, "1"))
             assertFalse(StringMatcher.inMatch("1", true))
         }
+
+
     }
 
     @Nested
@@ -133,6 +146,18 @@ internal class ValueMatcherTest {
             assertFalse(NumberMatcher.greaterThanOrEqualToMatch(42, true))
             assertFalse(NumberMatcher.lessThanMatch(42, "1.1.1"))
             assertFalse(NumberMatcher.lessThanOrEqualToMatch(42, "string"))
+        }
+
+        @Test
+        fun `userValue가 숫자형 아니면 항상 false`() {
+            assertFalse(NumberMatcher.inMatch("string", 42))
+            assertFalse(NumberMatcher.containsMatch(false, 42))
+            assertFalse(NumberMatcher.startsWithMatch("string", 42))
+            assertFalse(NumberMatcher.endsWithMatch(false, 42))
+            assertFalse(NumberMatcher.greaterThanMatch(false, 42))
+            assertFalse(NumberMatcher.greaterThanOrEqualToMatch(true, 42))
+            assertFalse(NumberMatcher.lessThanMatch("1.1.1", 42))
+            assertFalse(NumberMatcher.lessThanOrEqualToMatch("string", 42))
         }
 
         @Test
@@ -233,7 +258,7 @@ internal class ValueMatcherTest {
         }
 
         @Test
-        fun `Version타입이 아니면 false`() {
+        fun `target이 Version타입이 아니면 false`() {
             assertFalse(VersionMatcher.inMatch(1, "1.0.0"))
             assertFalse(VersionMatcher.inMatch("1.0.0", 1))
             assertFalse(VersionMatcher.containsMatch("1.0.0", true))
@@ -243,6 +268,18 @@ internal class ValueMatcherTest {
             assertFalse(VersionMatcher.greaterThanOrEqualToMatch("1.0.0", true))
             assertFalse(VersionMatcher.lessThanMatch("1.0.0", true))
             assertFalse(VersionMatcher.lessThanOrEqualToMatch("1.0.0", true))
+        }
+
+        @Test
+        fun `userValue가 Version타입이 아니면 false`() {
+            assertFalse(VersionMatcher.inMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.containsMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.startsWithMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.endsWithMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.greaterThanMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.greaterThanOrEqualToMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.lessThanMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.lessThanOrEqualToMatch(true, "1.0.0"))
         }
 
         @Test

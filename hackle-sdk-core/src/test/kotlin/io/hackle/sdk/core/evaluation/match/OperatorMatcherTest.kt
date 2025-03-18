@@ -43,6 +43,14 @@ internal class OperatorMatcherTest {
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("1.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
         }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
+        }
     }
 
     @Nested
@@ -80,6 +88,14 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("1.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
         }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
+        }
     }
 
     @Nested
@@ -113,6 +129,14 @@ internal class OperatorMatcherTest {
         fun `version`() {
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("1.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
+        }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
         }
     }
 
@@ -148,6 +172,14 @@ internal class OperatorMatcherTest {
         fun `version`() {
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("1.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
+        }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
         }
     }
 
@@ -199,6 +231,14 @@ internal class OperatorMatcherTest {
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("2.0.0"), matchValue = listOf(v("1.0.0"))))
         }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
+        }
     }
 
     @Nested
@@ -248,6 +288,14 @@ internal class OperatorMatcherTest {
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("1.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("2.0.0"), matchValue = listOf(v("1.0.0"))))
+        }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
         }
     }
 
@@ -299,6 +347,14 @@ internal class OperatorMatcherTest {
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("2.0.0"), matchValue = listOf(v("1.0.0"))))
         }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
+        }
     }
 
     @Nested
@@ -348,6 +404,48 @@ internal class OperatorMatcherTest {
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("1.0.0"))))
             assertTrue(sut.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = listOf(v("2.0.0"))))
             assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = v("2.0.0"), matchValue = listOf(v("1.0.0"))))
+        }
+
+        @Test
+        fun `if null fail`() {
+            assertFalse(sut.matches(valueMatcher = StringMatcher, userValue = null, matchValue = listOf("abc")))
+            assertFalse(sut.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = listOf(320)))
+            assertFalse(sut.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = listOf(true)))
+            assertFalse(sut.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = listOf(v("1.0.0"))))
+        }
+    }
+
+    @Nested
+    inner class ExistMatcherTest() {
+        @Test
+        fun `if null fail`() {
+            assertFalse(ExistsMatcher.matches(valueMatcher = StringMatcher, userValue = null, matchValue = emptyList()))
+            assertFalse(ExistsMatcher.matches(valueMatcher = NumberMatcher, userValue = null, matchValue = emptyList()))
+            assertFalse(ExistsMatcher.matches(valueMatcher = BooleanMatcher, userValue = null, matchValue = emptyList()))
+            assertFalse(ExistsMatcher.matches(valueMatcher = VersionMatcher, userValue = null, matchValue = emptyList()))
+        }
+
+        @Test
+        fun `if not null success`() {
+            assertTrue(ExistsMatcher.matches(valueMatcher = StringMatcher, userValue = "abc", matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = StringMatcher, userValue = 320, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = StringMatcher, userValue = true, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = StringMatcher, userValue = v("1.0.0"), matchValue = emptyList()))
+
+            assertTrue(ExistsMatcher.matches(valueMatcher = NumberMatcher, userValue = "abc", matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = NumberMatcher, userValue = 320, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = NumberMatcher, userValue = true, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = NumberMatcher, userValue = v("1.0.0"), matchValue = emptyList()))
+
+            assertTrue(ExistsMatcher.matches(valueMatcher = BooleanMatcher, userValue = "abc", matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = BooleanMatcher, userValue = 320, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = BooleanMatcher, userValue = true, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = BooleanMatcher, userValue = v("1.0.0"), matchValue = emptyList()))
+
+            assertTrue(ExistsMatcher.matches(valueMatcher = VersionMatcher, userValue = "abc", matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = VersionMatcher, userValue = 320, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = VersionMatcher, userValue = true, matchValue = emptyList()))
+            assertTrue(ExistsMatcher.matches(valueMatcher = VersionMatcher, userValue = v("1.0.0"), matchValue = emptyList()))
         }
     }
 
