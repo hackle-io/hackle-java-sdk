@@ -137,6 +137,24 @@ internal class ValueMatcherTest {
         }
 
         @Test
+        fun `숫자형 범위 체크`() {
+            assertTrue(NumberMatcher.inMatch(0, 0))
+            assertTrue(NumberMatcher.inMatch(0.0, 0.0))
+
+            assertTrue(NumberMatcher.inMatch(Int.MAX_VALUE, Int.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Int.MIN_VALUE, Int.MIN_VALUE))
+
+            assertTrue(NumberMatcher.inMatch(Double.MAX_VALUE, Double.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Double.MIN_VALUE, Double.MIN_VALUE))
+
+            assertTrue(NumberMatcher.inMatch(Long.MAX_VALUE, Long.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Long.MIN_VALUE, Long.MIN_VALUE))
+
+            assertTrue(NumberMatcher.inMatch(Float.MAX_VALUE, Float.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Float.MIN_VALUE, Float.MIN_VALUE))
+        }
+
+        @Test
         fun `target이 숫자형이 아니면 항상 false`() {
             assertFalse(NumberMatcher.inMatch(42, "string"))
             assertFalse(NumberMatcher.containsMatch(42, "string"))

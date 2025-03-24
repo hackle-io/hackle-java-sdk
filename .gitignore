@@ -34,3 +34,5 @@ out/
 ### macOS ###
 .DS_Store
 .java-version
+
+.qodo
