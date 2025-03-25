@@ -26,5 +26,6 @@ internal class ValueOperatorMatcherFactoryTest {
         assertEquals(GreaterThanOrEqualToMatcher, ValueOperatorMatcherFactory().getOperatorMatcher(GTE))
         assertEquals(LessThanMatcher, ValueOperatorMatcherFactory().getOperatorMatcher(LT))
         assertEquals(LessThanOrEqualToMatcher, ValueOperatorMatcherFactory().getOperatorMatcher(LTE))
+        assertEquals(ExistsMatcher, ValueOperatorMatcherFactory().getOperatorMatcher(EXISTS))
     }
 }
