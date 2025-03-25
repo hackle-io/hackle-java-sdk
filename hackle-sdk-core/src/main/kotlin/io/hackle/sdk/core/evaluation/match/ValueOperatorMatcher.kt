@@ -10,6 +10,7 @@ internal class ValueOperatorMatcher(
     fun matches(userValue: Any?, match: Target.Match): Boolean {
         val valueMatcher = factory.getValueMatcher(match.valueType)
         val operatorMatcher = factory.getOperatorMatcher(match.operator)
+
         @Suppress("UNCHECKED_CAST")
         val isMatched = when (userValue) {
             is Collection<*> -> arrayMatches(userValue as Collection<Any>, match, valueMatcher, operatorMatcher)

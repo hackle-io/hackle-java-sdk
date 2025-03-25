@@ -6,56 +6,56 @@ internal interface OperatorMatcher {
 
 internal object InMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.inMatch(userValue, it) }
     }
 }
 
 internal object ContainsMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.containsMatch(userValue, it) }
     }
 }
 
 internal object StartsWithMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.startsWithMatch(userValue, it) }
     }
 }
 
 internal object EndsWithMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.endsWithMatch(userValue, it) }
     }
 }
 
 internal object GreaterThanMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.greaterThanMatch(userValue, it) }
     }
 }
 
 internal object GreaterThanOrEqualToMatcher : OperatorMatcher {
-   override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-       if(userValue == null) return false
+    override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.greaterThanOrEqualToMatch(userValue, it) }
     }
 }
 
 internal object LessThanMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.lessThanMatch(userValue, it) }
     }
 }
 
 internal object LessThanOrEqualToMatcher : OperatorMatcher {
     override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
-        if(userValue == null) return false
+        if (userValue == null) return false
         return matchValues.any { valueMatcher.lessThanOrEqualToMatch(userValue, it) }
     }
 }

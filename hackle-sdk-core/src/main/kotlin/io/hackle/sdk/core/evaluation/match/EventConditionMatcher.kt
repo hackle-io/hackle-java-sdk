@@ -37,7 +37,7 @@ internal class EventValueResolver {
             Target.Key.Type.FEATURE_FLAG,
             Target.Key.Type.COHORT,
             Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS,
-            Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS-> throw IllegalArgumentException("Unsupported target key Type for EventValueResolver [${key.type}]")
+            Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> throw IllegalArgumentException("Unsupported target key Type for EventValueResolver [${key.type}]")
         }
     }
 }
