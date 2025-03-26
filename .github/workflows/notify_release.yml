@@ -1,0 +1,31 @@
+name: notify release
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      manual_java_sdk_version:
+        description: 'Java SDK Version (Only for testing)'
+        required: false
+jobs:
+  notify_hackle_java_sdk_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "java_sdk_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "java_sdk_version=${{ github.event.inputs.manual_java_sdk_version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger hackle-android-sdk workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: update core sdk
+          repo: hackle-io/hackle-android-sdk
+          ref: master
+          token: ${{ secrets.PAT }}
+          inputs: '{ "core_version": "${{ steps.version.outputs.java_sdk_version }}" }'
