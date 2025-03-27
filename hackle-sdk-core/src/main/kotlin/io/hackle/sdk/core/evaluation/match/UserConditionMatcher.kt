@@ -10,7 +10,7 @@ internal class UserConditionMatcher(
     private val valueOperatorMatcher: ValueOperatorMatcher
 ) : ConditionMatcher {
     override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
-        val userValue = userValueResolver.resolveOrNull(request.user, condition.key) ?: return false
+        val userValue = userValueResolver.resolveOrNull(request.user, condition.key)
         return valueOperatorMatcher.matches(userValue, condition.match)
     }
 }
@@ -21,7 +21,9 @@ internal class UserValueResolver {
             USER_ID -> user.identifiers[key.name]
             USER_PROPERTY -> user.properties[key.name]
             HACKLE_PROPERTY -> user.hackleProperties[key.name]
-            SEGMENT, AB_TEST, FEATURE_FLAG, EVENT_PROPERTY, COHORT, NUMBER_OF_EVENTS_IN_DAYS, NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> throw IllegalArgumentException("Unsupported target.key.type [${key.type}]")
+            SEGMENT, AB_TEST, FEATURE_FLAG, EVENT_PROPERTY, COHORT, NUMBER_OF_EVENTS_IN_DAYS, NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> throw IllegalArgumentException(
+                "Unsupported target.key.type [${key.type}]"
+            )
         }
     }
 }

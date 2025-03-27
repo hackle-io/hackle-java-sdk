@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.model
 
 import io.mockk.mockk
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -159,6 +160,21 @@ internal class VersionTest {
             expectThat(v("1.0.0-beta").toString()) isEqualTo "Version(1.0.0-beta)"
             expectThat(v("1.0.0-beta+build").toString()) isEqualTo "Version(1.0.0-beta+build)"
             expectThat(v("1.0.0+build").toString()) isEqualTo "Version(1.0.0+build)"
+        }
+
+        @Test
+        fun `hashTest`() {
+            expectThat(v("1.0.0").hashCode()) isEqualTo v("1.0.0").hashCode()
+            expectThat(v("1.0.0-beta").hashCode()) isEqualTo v("1.0.0-beta").hashCode()
+            expectThat(v("1.0.0-beta+build").hashCode()) isEqualTo v("1.0.0-beta+build").hashCode()
+            expectThat(v("1.0.0+build").hashCode()) isEqualTo v("1.0.0+build").hashCode()
+        }
+
+        @Test
+        fun `equalTest`() {
+            expectThat(v("1.0.0") == v("1.0.0"))
+            expectThat(v("1.0.0") != v("1.0.0-beta"))
+            assertFalse(v("1.0.0").equals(1))
         }
 
         private fun verifyNull(version: String) {
