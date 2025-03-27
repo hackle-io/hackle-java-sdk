@@ -1,57 +1,88 @@
 package io.hackle.sdk.core.evaluation.match
 
-import io.hackle.sdk.core.model.Version
-import io.mockk.Called
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class ValueMatcherTest {
-
+    class tmp {}
     @Nested
     inner class StringMatcherTest {
         @Test
         fun `string type match`() {
-            assertTrue(StringMatcher.matches(InMatcher, "42", "42"))
+            assertTrue(StringMatcher.inMatch("42", "42"))
+            assertTrue(StringMatcher.inMatch("42.42", "42.42"))
+            assertTrue(StringMatcher.containsMatch("42", "4"))
+            assertTrue(StringMatcher.startsWithMatch("42", "4"))
+            assertTrue(StringMatcher.endsWithMatch("42", "2"))
+            assertTrue(StringMatcher.greaterThanMatch("42", "41"))
+            assertTrue(StringMatcher.greaterThanOrEqualToMatch("42", "42"))
+            assertTrue(StringMatcher.greaterThanOrEqualToMatch("43", "42"))
+            assertTrue(StringMatcher.lessThanMatch("41", "42"))
+            assertTrue(StringMatcher.lessThanOrEqualToMatch("42", "42"))
+            assertTrue(StringMatcher.lessThanOrEqualToMatch("41", "42"))
+        }
+
+        @Test
+        fun `target이 자료형이 아니면 항상 false`() {
+            assertFalse(StringMatcher.inMatch("42", tmp()))
+            assertFalse(StringMatcher.containsMatch("42", tmp()))
+            assertFalse(StringMatcher.startsWithMatch("42", tmp()))
+            assertFalse(StringMatcher.endsWithMatch("42", tmp()))
+            assertFalse(StringMatcher.greaterThanMatch("42", tmp()))
+            assertFalse(StringMatcher.greaterThanOrEqualToMatch("42", tmp()))
+            assertFalse(StringMatcher.lessThanMatch("42", tmp()))
+            assertFalse(StringMatcher.lessThanOrEqualToMatch("42", tmp()))
+        }
+
+        @Test
+        fun `userValue가 자료형이 아니면 항상 false`() {
+            assertFalse(StringMatcher.inMatch(tmp(), "42"))
+            assertFalse(StringMatcher.containsMatch(tmp(), "42"))
+            assertFalse(StringMatcher.startsWithMatch(tmp(), "42"))
+            assertFalse(StringMatcher.endsWithMatch(tmp(), "42"))
+            assertFalse(StringMatcher.greaterThanMatch(tmp(), "42"))
+            assertFalse(StringMatcher.greaterThanOrEqualToMatch(tmp(), "42"))
+            assertFalse(StringMatcher.lessThanMatch(tmp(), "42"))
+            assertFalse(StringMatcher.lessThanOrEqualToMatch(tmp(), "42"))
         }
 
         @Test
         fun `number 타입이면 캐스팅 후 match`() {
-            assertTrue(StringMatcher.matches(InMatcher, "42", 42))
-            assertTrue(StringMatcher.matches(InMatcher, 42, "42"))
-            assertTrue(StringMatcher.matches(InMatcher, 42, 42))
+            assertTrue(StringMatcher.inMatch("42", 42))
+            assertTrue(StringMatcher.inMatch(42, "42"))
+            assertTrue(StringMatcher.inMatch(42, 42))
 
-            assertTrue(StringMatcher.matches(InMatcher, 42.42, "42.42"))
-            assertTrue(StringMatcher.matches(InMatcher, "42.42", 42.42))
-            assertTrue(StringMatcher.matches(InMatcher, 42.42, 42.42))
+            assertTrue(StringMatcher.inMatch(42.42, "42.42"))
+            assertTrue(StringMatcher.inMatch("42.42", 42.42))
+            assertTrue(StringMatcher.inMatch(42.42, 42.42))
 
-            assertTrue(StringMatcher.matches(InMatcher, "42.0", 42.0))
-            assertTrue(StringMatcher.matches(InMatcher, 42.0, "42.0"))
-            assertTrue(StringMatcher.matches(InMatcher, 42.0, 42.0))
+            assertTrue(StringMatcher.inMatch("42.0", 42.0))
+            assertTrue(StringMatcher.inMatch(42.0, "42.0"))
+            assertTrue(StringMatcher.inMatch(42.0, 42.0))
         }
 
         @Test
         fun `boolean 타입이면 캐스팅 후 match`() {
-            assertTrue(StringMatcher.matches(InMatcher, "true", true))
-            assertTrue(StringMatcher.matches(InMatcher, true, "true"))
-            assertTrue(StringMatcher.matches(InMatcher, true, true))
-            assertTrue(StringMatcher.matches(InMatcher, "false", false))
-            assertTrue(StringMatcher.matches(InMatcher, false, "false"))
-            assertTrue(StringMatcher.matches(InMatcher, false, false))
+            assertTrue(StringMatcher.inMatch("true", true))
+            assertTrue(StringMatcher.inMatch(true, "true"))
+            assertTrue(StringMatcher.inMatch(true, true))
+            assertTrue(StringMatcher.inMatch("false", false))
+            assertTrue(StringMatcher.inMatch(false, "false"))
+            assertTrue(StringMatcher.inMatch(false, false))
 
-            assertFalse(StringMatcher.matches(InMatcher, true, "TRUE"))
-            assertFalse(StringMatcher.matches(InMatcher, false, "FALSE"))
+            assertFalse(StringMatcher.inMatch(true, "TRUE"))
+            assertFalse(StringMatcher.inMatch(false, "FALSE"))
         }
 
         @Test
         fun `지원하지 않는 타입`() {
-            assertFalse(StringMatcher.matches(InMatcher, true, "1"))
-            assertFalse(StringMatcher.matches(InMatcher, "1", true))
+            assertFalse(StringMatcher.inMatch(true, "1"))
+            assertFalse(StringMatcher.inMatch("1", true))
         }
+
+
     }
 
     @Nested
@@ -59,109 +90,173 @@ internal class ValueMatcherTest {
 
         @Test
         fun `number type match`() {
-            assertTrue(NumberMatcher.matches(InMatcher, 42, 42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42.42, 42.42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42, 42.0))
-            assertTrue(NumberMatcher.matches(InMatcher, 42.0, 42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42L, 42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42, 42L))
-            assertTrue(NumberMatcher.matches(InMatcher, 0, 0.0))
-            assertTrue(NumberMatcher.matches(InMatcher, 0.0, 0))
+            assertTrue(NumberMatcher.inMatch(42, 42))
+            assertTrue(NumberMatcher.inMatch(42.42, 42.42))
+            assertTrue(NumberMatcher.inMatch(42, 42.0))
+            assertTrue(NumberMatcher.inMatch(42.0, 42))
+            assertTrue(NumberMatcher.inMatch(42L, 42))
+            assertTrue(NumberMatcher.inMatch(42, 42L))
+            assertTrue(NumberMatcher.inMatch(0, 0.0))
+            assertTrue(NumberMatcher.inMatch(0.0, 0))
+
+            assertTrue(NumberMatcher.greaterThanMatch(42, 41))
+            assertTrue(NumberMatcher.greaterThanMatch(42.42, 42.41))
+            assertTrue(NumberMatcher.greaterThanMatch(42, 41.0))
+            assertTrue(NumberMatcher.greaterThanMatch(42.0, 41))
+            assertTrue(NumberMatcher.greaterThanMatch(42L, 41))
+            assertTrue(NumberMatcher.greaterThanMatch(42, 41L))
+            assertTrue(NumberMatcher.greaterThanMatch(0, -1))
+            assertTrue(NumberMatcher.greaterThanMatch(0.0, -1))
+
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(42, 42))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(42.42, 42.42))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(42, 42.0))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(42.0, 42))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(42L, 42))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(42, 42L))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(0, 0.0))
+            assertTrue(NumberMatcher.greaterThanOrEqualToMatch(0.0, 0))
+
+            assertTrue(NumberMatcher.lessThanMatch(41, 42))
+            assertTrue(NumberMatcher.lessThanMatch(42.41, 42.42))
+            assertTrue(NumberMatcher.lessThanMatch(41, 42.0))
+            assertTrue(NumberMatcher.lessThanMatch(41.0, 42))
+            assertTrue(NumberMatcher.lessThanMatch(41L, 42))
+            assertTrue(NumberMatcher.lessThanMatch(41, 42L))
+            assertTrue(NumberMatcher.lessThanMatch(-1, 0))
+            assertTrue(NumberMatcher.lessThanMatch(-1.0, 0))
+
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(42, 42))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(42.42, 42.42))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(42, 42.0))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(42.0, 42))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(42L, 42))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(42, 42L))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(0, 0.0))
+            assertTrue(NumberMatcher.lessThanOrEqualToMatch(0.0, 0))
+        }
+
+        @Test
+        fun `숫자형 범위 체크`() {
+            assertTrue(NumberMatcher.inMatch(0, 0))
+            assertTrue(NumberMatcher.inMatch(0.0, 0.0))
+
+            assertTrue(NumberMatcher.inMatch(Int.MAX_VALUE, Int.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Int.MIN_VALUE, Int.MIN_VALUE))
+
+            assertTrue(NumberMatcher.inMatch(Double.MAX_VALUE, Double.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Double.MIN_VALUE, Double.MIN_VALUE))
+
+            assertTrue(NumberMatcher.inMatch(Long.MAX_VALUE, Long.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Long.MIN_VALUE, Long.MIN_VALUE))
+
+            assertTrue(NumberMatcher.inMatch(Float.MAX_VALUE, Float.MAX_VALUE))
+            assertTrue(NumberMatcher.inMatch(Float.MIN_VALUE, Float.MIN_VALUE))
+        }
+
+        @Test
+        fun `target이 숫자형이 아니면 항상 false`() {
+            assertFalse(NumberMatcher.inMatch(42, "string"))
+            assertFalse(NumberMatcher.containsMatch(42, "string"))
+            assertFalse(NumberMatcher.startsWithMatch(42, false))
+            assertFalse(NumberMatcher.endsWithMatch(42, "string"))
+            assertFalse(NumberMatcher.greaterThanMatch(42, false))
+            assertFalse(NumberMatcher.greaterThanOrEqualToMatch(42, true))
+            assertFalse(NumberMatcher.lessThanMatch(42, "1.1.1"))
+            assertFalse(NumberMatcher.lessThanOrEqualToMatch(42, "string"))
+        }
+
+        @Test
+        fun `userValue가 숫자형 아니면 항상 false`() {
+            assertFalse(NumberMatcher.inMatch("string", 42))
+            assertFalse(NumberMatcher.containsMatch(false, 42))
+            assertFalse(NumberMatcher.startsWithMatch("string", 42))
+            assertFalse(NumberMatcher.endsWithMatch(false, 42))
+            assertFalse(NumberMatcher.greaterThanMatch(false, 42))
+            assertFalse(NumberMatcher.greaterThanOrEqualToMatch(true, 42))
+            assertFalse(NumberMatcher.lessThanMatch("1.1.1", 42))
+            assertFalse(NumberMatcher.lessThanOrEqualToMatch("string", 42))
         }
 
         @Test
         fun `string 타입이면 캐스팅 후 match`() {
-            assertTrue(NumberMatcher.matches(InMatcher, "42", "42"))
-            assertTrue(NumberMatcher.matches(InMatcher, "42", 42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42, "42"))
+            assertTrue(NumberMatcher.inMatch("42", "42"))
+            assertTrue(NumberMatcher.inMatch("42", 42))
+            assertTrue(NumberMatcher.inMatch(42, "42"))
 
-            assertTrue(NumberMatcher.matches(InMatcher, "42.42", "42.42"))
-            assertTrue(NumberMatcher.matches(InMatcher, "42.42", 42.42))
-            assertTrue(NumberMatcher.matches(InMatcher, 42.42, "42.42"))
+            assertTrue(NumberMatcher.inMatch("42.42", "42.42"))
+            assertTrue(NumberMatcher.inMatch("42.42", 42.42))
+            assertTrue(NumberMatcher.inMatch(42.42, "42.42"))
 
-            assertTrue(NumberMatcher.matches(InMatcher, "42.0", "42.0"))
-            assertTrue(NumberMatcher.matches(InMatcher, "42.0", 42.0))
-            assertTrue(NumberMatcher.matches(InMatcher, 42.0, "42.0"))
+            assertTrue(NumberMatcher.inMatch("42.0", "42.0"))
+            assertTrue(NumberMatcher.inMatch("42.0", 42.0))
+            assertTrue(NumberMatcher.inMatch(42.0, "42.0"))
         }
 
         @Test
         fun `지원하지 않는 타입`() {
-            assertFalse(NumberMatcher.matches(InMatcher, "42a", 42))
-            assertFalse(NumberMatcher.matches(InMatcher, 0, "false"))
-            assertFalse(NumberMatcher.matches(InMatcher, 0, false))
-            assertFalse(NumberMatcher.matches(InMatcher, true, true))
+            assertFalse(NumberMatcher.inMatch("42a", 42))
+            assertFalse(NumberMatcher.inMatch(0, "false"))
+            assertFalse(NumberMatcher.inMatch(0, false))
+            assertFalse(NumberMatcher.inMatch(true, true))
+        }
+
+        @Test
+        fun `지원하지 않는 연산자`() {
+            assertFalse(NumberMatcher.containsMatch(42, 42))
+            assertFalse(NumberMatcher.startsWithMatch(42, 42))
+            assertFalse(NumberMatcher.endsWithMatch(42, 42))
         }
     }
 
     @Nested
     inner class BooleanMatcherTest {
-
         @Test
-        fun `userValue, matchValue가 Boolean타입이면 OperatorMatcher의 일치 결과로 평가한다`() {
-            // given
-            val userValue = false
-            val matchValue = false
-            val operatorMatcher = mockk<OperatorMatcher> {
-                every { matches(userValue, matchValue) } returns true
-            }
+        fun `boolean type matcher`() {
+            assertTrue(BooleanMatcher.inMatch(true, true))
+            assertTrue(BooleanMatcher.inMatch(false, false))
+            assertFalse(BooleanMatcher.inMatch(true, false))
+            assertFalse(BooleanMatcher.inMatch(false, true))
 
-            val sut = BooleanMatcher
+            assertTrue(BooleanMatcher.inMatch("true", true))
+            assertTrue(BooleanMatcher.inMatch("false", false))
+            assertTrue(BooleanMatcher.inMatch(true, "true"))
+            assertTrue(BooleanMatcher.inMatch(false, "false"))
+            assertFalse(BooleanMatcher.inMatch("true", false))
+            assertFalse(BooleanMatcher.inMatch("false", true))
 
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
+            assertFalse(BooleanMatcher.inMatch("TRUE", true))
+            assertFalse(BooleanMatcher.inMatch("FALSE", false))
+            assertFalse(BooleanMatcher.inMatch(true, "TRUE"))
+            assertFalse(BooleanMatcher.inMatch(false, "FALSE"))
 
-            // then
-            assertTrue(actual)
+            assertFalse(BooleanMatcher.inMatch("true", 1))
+            assertFalse(BooleanMatcher.inMatch(1, "true"))
+            assertFalse(BooleanMatcher.inMatch("true", 1.0))
+            assertFalse(BooleanMatcher.inMatch(1.0, "true"))
+            assertFalse(BooleanMatcher.inMatch("true", "1"))
+            assertFalse(BooleanMatcher.inMatch("1", "true"))
+
+            assertFalse(BooleanMatcher.inMatch("false", 1))
+            assertFalse(BooleanMatcher.inMatch(1, "false"))
+            assertFalse(BooleanMatcher.inMatch("false", 1.0))
+            assertFalse(BooleanMatcher.inMatch(1.0, "false"))
+
+            assertFalse(BooleanMatcher.inMatch("true", 1L))
+            assertFalse(BooleanMatcher.inMatch(1L, "true"))
+            assertFalse(BooleanMatcher.inMatch("string", true))
+            assertFalse(BooleanMatcher.inMatch(true, "string"))
         }
 
         @Test
-        fun `userValue가 Boolean타입이 아니면 false`() {
-            // given
-            val userValue = "string"
-            val matchValue = false
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = BooleanMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
-        }
-
-        @Test
-        fun `userValue가 Boolean타입이지만 matchValue가 Boolean타입이 아니면 false`() {
-            // given
-            val userValue = false
-            val matchValue = "string"
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = BooleanMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
-        }
-
-        @Test
-        fun `userValue 혹은 matchValue가 String타입이지만 true이거나 false이면 BoolMatcher의 일치 결과로 평가한다`() {
-            assertTrue(BooleanMatcher.matches(InMatcher, "true", true))
-            assertTrue(BooleanMatcher.matches(InMatcher, "false", false))
-
-            assertTrue(BooleanMatcher.matches(InMatcher, true, "true"))
-            assertTrue(BooleanMatcher.matches(InMatcher, false, "false"))
-
-            assertFalse(BooleanMatcher.matches(InMatcher, "TRUE", true))
-            assertFalse(BooleanMatcher.matches(InMatcher, "FALSE", false))
-            assertFalse(BooleanMatcher.matches(InMatcher, true, "TRUE"))
-            assertFalse(BooleanMatcher.matches(InMatcher, false, "FALSE"))
-            assertFalse(BooleanMatcher.matches(InMatcher, "false", true))
-            assertFalse(BooleanMatcher.matches(InMatcher, "true", false))
+        fun `지원하지 않는 연산자`() {
+            assertFalse(BooleanMatcher.containsMatch(true, true))
+            assertFalse(BooleanMatcher.startsWithMatch(true, true))
+            assertFalse(BooleanMatcher.endsWithMatch(true, true))
+            assertFalse(BooleanMatcher.greaterThanMatch(true, true))
+            assertFalse(BooleanMatcher.greaterThanOrEqualToMatch(true, true))
+            assertFalse(BooleanMatcher.lessThanMatch(true, true))
+            assertFalse(BooleanMatcher.lessThanOrEqualToMatch(true, true))
         }
     }
 
@@ -169,56 +264,47 @@ internal class ValueMatcherTest {
     inner class VersionMatcherTest {
 
         @Test
-        fun `userValue, matchValue가 Version타입이면 OperatorMatcher의 일치 결과로 평가한다`() {
-            // given
-            val userValue = "1.0.0"
-            val matchValue = "2.0.0"
-            val operatorMatcher = mockk<OperatorMatcher> {
-                every { matches(any<Version>(), any<Version>()) } returns true
-            }
+        fun `version type match`() {
+            assertTrue(VersionMatcher.inMatch("1.0.0", "1.0.0"))
+            assertFalse(VersionMatcher.inMatch("1.0.0", "2.0.0"))
+            assertTrue(VersionMatcher.greaterThanMatch("1.0.1", "1.0.0"))
+            assertTrue(VersionMatcher.greaterThanOrEqualToMatch("1.0.0", "1.0.0"))
+            assertTrue(VersionMatcher.lessThanOrEqualToMatch("1.0.0", "1.0.0"))
+            assertTrue(VersionMatcher.lessThanMatch("0.0.9", "1.0.0"))
+            assertTrue(VersionMatcher.lessThanOrEqualToMatch("1.0.0", "1.0.0"))
+            assertTrue(VersionMatcher.lessThanOrEqualToMatch("1.0.0", "1.0.1"))
+        }
 
-            val sut = VersionMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertTrue(actual)
+        @Test
+        fun `target이 Version타입이 아니면 false`() {
+            assertFalse(VersionMatcher.inMatch(1, "1.0.0"))
+            assertFalse(VersionMatcher.inMatch("1.0.0", 1))
+            assertFalse(VersionMatcher.containsMatch("1.0.0", true))
+            assertFalse(VersionMatcher.startsWithMatch("1.0.0", true))
+            assertFalse(VersionMatcher.endsWithMatch("1.0.0", true))
+            assertFalse(VersionMatcher.greaterThanMatch("1.0.0", true))
+            assertFalse(VersionMatcher.greaterThanOrEqualToMatch("1.0.0", true))
+            assertFalse(VersionMatcher.lessThanMatch("1.0.0", true))
+            assertFalse(VersionMatcher.lessThanOrEqualToMatch("1.0.0", true))
         }
 
         @Test
         fun `userValue가 Version타입이 아니면 false`() {
-            // given
-            val userValue = 1
-            val matchValue = "1.0.0"
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = VersionMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
+            assertFalse(VersionMatcher.inMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.containsMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.startsWithMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.endsWithMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.greaterThanMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.greaterThanOrEqualToMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.lessThanMatch(true, "1.0.0"))
+            assertFalse(VersionMatcher.lessThanOrEqualToMatch(true, "1.0.0"))
         }
 
         @Test
-        fun `userValue가 Versio타입이지만 matchValue가 Versio타입이 아니면 false`() {
-            // given
-            val userValue = "1.0.0"
-            val matchValue = 1
-            val operatorMatcher = mockk<OperatorMatcher>()
-
-            val sut = VersionMatcher
-
-            // when
-            val actual = sut.matches(operatorMatcher, userValue, matchValue)
-
-            // then
-            assertFalse(actual)
-            verify { operatorMatcher wasNot Called }
+        fun `지원하지 않는 연산자`() {
+            assertFalse(VersionMatcher.containsMatch("1.0.0", "1.0.0"))
+            assertFalse(VersionMatcher.startsWithMatch("1.0.0", "1.0.0"))
+            assertFalse(VersionMatcher.endsWithMatch("1.0.0", "1.0.0"))
         }
     }
-
 }
