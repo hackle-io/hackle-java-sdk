@@ -53,10 +53,10 @@ internal class Version private constructor(
         private val PATTERN: Pattern =
             Pattern.compile(
                 "^(0|[1-9]\\d*)" +
-                    "(?:\\.(0|[1-9]\\d*))?" +
-                    "(?:\\.(0|[1-9]\\d*))?" +
-                    "(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?" +
-                    "(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?\$"
+                        "(?:\\.(0|[1-9]\\d*))?" +
+                        "(?:\\.(0|[1-9]\\d*))?" +
+                        "(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?" +
+                        "(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?\$"
             )
 
         fun parseOrNull(version: String): Version? {
@@ -76,7 +76,7 @@ internal class Version private constructor(
             return Version(coreVersion, prerelease, build)
         }
 
-        fun parseOrNull(value: Any): Version? {
+        fun parseOrNull(value: Any?): Version? {
             return when (value) {
                 is Version -> value
                 !is String -> null

@@ -29,9 +29,11 @@ internal class UserConditionMatcherTest {
     private lateinit var sut: UserConditionMatcher
 
     @Test
-    fun `Key 에 해당하는 UserValue 가 없으면 match false`() {
+    fun `Key 에 해당하는 UserValue 가 없어도 operatorMatcher 결과로 매칭한다`() {
         // given
         every { userValueResolver.resolveOrNull(any(), any()) } returns null
+        every { valueOperatorMatcher.matches(any(), any()) } returns false
+
         val condition = condition {
             USER_PROPERTY("grade")
             IN("gold")
@@ -65,7 +67,7 @@ internal class UserConditionMatcherTest {
         // then
         assertTrue(actual)
         verify(exactly = 1) {
-            valueOperatorMatcher.matches("test_user_value", condition.match)
+            valueOperatorMatcher.matches(userValue, condition.match)
         }
     }
 }
