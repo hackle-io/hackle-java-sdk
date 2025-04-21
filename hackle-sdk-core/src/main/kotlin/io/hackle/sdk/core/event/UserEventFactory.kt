@@ -6,8 +6,10 @@ import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.internal.time.Clock
+import io.hackle.sdk.core.workspace.WorkspaceFetcher
 
 internal class UserEventFactory(
+    private val workspaceFetcher: WorkspaceFetcher,
     private val clock: Clock,
 ) {
 
@@ -44,6 +46,7 @@ internal class UserEventFactory(
                 properties.add(CONFIG_ID_PROPERTY_KEY, evaluation.config?.id)
                 properties.add(EXPERIMENT_VERSION_KEY, evaluation.experiment.version)
                 properties.add(EXECUTION_VERSION_KEY, evaluation.experiment.executionVersion)
+                properties.add(WORKSPACE_CONFIG_LAST_MODIFIED_AT_KEY, workspaceFetcher.lastModified)
                 UserEvent.exposure(
                     user = request.user,
                     evaluation = evaluation,
@@ -75,5 +78,6 @@ internal class UserEventFactory(
 
         private const val EXPERIMENT_VERSION_KEY = "\$experiment_version"
         private const val EXECUTION_VERSION_KEY = "\$execution_version"
+        private const val WORKSPACE_CONFIG_LAST_MODIFIED_AT_KEY = "\$config_last_modified_at"
     }
 }

@@ -12,6 +12,9 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.InAppMessages
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.experiment
+import io.hackle.sdk.core.workspace.Workspace
+import io.hackle.sdk.core.workspace.WorkspaceFetcher
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.hasSize
@@ -20,16 +23,24 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
 
 internal class UserEventFactoryTest {
-
+    
+    private lateinit var sut: UserEventFactory
+    
+    @BeforeEach
+    fun before() {
+        sut = UserEventFactory(
+            object : WorkspaceFetcher {
+                override val lastModified: String get() = "Tue, 16 Jan 2024 07:39:44 GMT"
+                override fun fetch(): Workspace? = null
+            },
+            object : Clock {
+                override fun currentMillis(): Long = 47
+                override fun tick(): Long = 48
+            }
+        )
+    }
     @Test
     fun `create`() {
-
-        val sut = UserEventFactory(object : Clock {
-            override fun currentMillis(): Long = 47
-            override fun tick(): Long = 48
-        })
-
-
         val context = Evaluators.context()
         val evaluation1 = ExperimentEvaluation(
             DecisionReason.TRAFFIC_ALLOCATED,
@@ -91,6 +102,7 @@ internal class UserEventFactoryTest {
                     "\$parameterConfigurationId" to 42L,
                     "\$experiment_version" to 1,
                     "\$execution_version" to 1,
+                    "\$config_last_modified_at" to "Tue, 16 Jan 2024 07:39:44 GMT"
                 )
             }
 
@@ -107,17 +119,13 @@ internal class UserEventFactoryTest {
                     "\$targetingRootId" to 1L,
                     "\$experiment_version" to 2,
                     "\$execution_version" to 3,
+                    "\$config_last_modified_at" to "Tue, 16 Jan 2024 07:39:44 GMT"
                 )
             }
     }
 
     @Test
     fun `create in-app message events`() {
-        val sut = UserEventFactory(object : Clock {
-            override fun currentMillis(): Long = 47
-            override fun tick(): Long = 48
-        })
-
         val context = Evaluators.context()
         val evaluation1 =
             ExperimentEvaluation(DecisionReason.TRAFFIC_ALLOCATED, listOf(), experiment(id = 1), 42, "B", null)
@@ -147,6 +155,7 @@ internal class UserEventFactoryTest {
                     "\$targetingRootId" to 1L,
                     "\$experiment_version" to 1,
                     "\$execution_version" to 1,
+                    "\$config_last_modified_at" to "Tue, 16 Jan 2024 07:39:44 GMT"
                 )
             }
     }

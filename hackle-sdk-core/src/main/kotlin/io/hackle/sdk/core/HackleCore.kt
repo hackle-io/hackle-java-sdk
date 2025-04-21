@@ -207,7 +207,7 @@ class HackleCore internal constructor(
                 remoteConfigEvaluator = remoteConfigEvaluator,
                 inAppMessageEvaluator = inAppMessageEvaluator,
                 workspaceFetcher = workspaceFetcher,
-                eventFactory = UserEventFactory(Clock.SYSTEM),
+                eventFactory = UserEventFactory(workspaceFetcher, Clock.SYSTEM),
                 eventProcessor = eventProcessor,
                 clock = Clock.SYSTEM,
             )

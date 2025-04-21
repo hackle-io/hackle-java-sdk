@@ -1,5 +1,10 @@
 package io.hackle.sdk.internal.workspace
 
+internal data class WorkspaceConfig(
+    val lastModified: String?,
+    val workspaceConfigDto: WorkspaceConfigDto
+)
+
 internal data class WorkspaceConfigDto(
     val workspace: WorkspaceDto,
     val experiments: List<ExperimentDto>,
