@@ -39,11 +39,12 @@ internal class UserEventTest {
             val user = HackleUser.of("test_id")
 
             // when
-            val actual = UserEvent.exposure(user, evaluation, mapOf("a" to "1"), 320)
+            val actual = UserEvent.exposure(user, evaluation, mapOf("a" to "1"), mapOf("internal" to "a"), 320)
 
             // then
             expectThat(actual).isA<UserEvent.Exposure>().and {
                 get { properties["a"] } isEqualTo "1"
+                get { internalProperties["internal"] } isEqualTo "a"
                 get { timestamp } isEqualTo 320
                 get { decisionReason } isEqualTo DecisionReason.TRAFFIC_ALLOCATED
             }
@@ -59,7 +60,8 @@ internal class UserEventTest {
                 variationId = 320,
                 variationKey = "B",
                 decisionReason = DecisionReason.TRAFFIC_ALLOCATED,
-                properties = mapOf("a" to "1")
+                properties = mapOf("a" to "1"),
+                internalProperties = mapOf("internal" to "a")
             )
             val user = HackleUser.builder().build()
             expectThat(event.with(user)) {
@@ -71,6 +73,7 @@ internal class UserEventTest {
                 get { variationKey } isEqualTo event.variationKey
                 get { decisionReason } isEqualTo event.decisionReason
                 get { properties } isEqualTo event.properties
+                get { internalProperties } isEqualTo event.internalProperties
             }
         }
     }
@@ -94,7 +97,8 @@ internal class UserEventTest {
             )
 
             // when
-            val remoteConfigEvent = UserEvent.remoteConfig(user, evaluation, mapOf("b" to "2"), 320)
+            val remoteConfigEvent =
+                UserEvent.remoteConfig(user, evaluation, mapOf("b" to "2"), mapOf("internal" to "b"), 320)
 
             // then
             expectThat(remoteConfigEvent)
@@ -104,6 +108,7 @@ internal class UserEventTest {
                     get { valueId } isEqualTo 42
                     get { decisionReason } isEqualTo DecisionReason.DEFAULT_RULE
                     get { properties["b"] } isEqualTo "2"
+                    get { internalProperties["internal"] } isEqualTo "b"
                 }
         }
 
@@ -116,7 +121,8 @@ internal class UserEventTest {
                 parameter = mockk(),
                 valueId = 320,
                 decisionReason = DecisionReason.DEFAULT_RULE,
-                properties = mapOf("1" to "2")
+                properties = mapOf("1" to "2"),
+                internalProperties = mapOf("internal" to "b")
             )
             val user = HackleUser.builder().build()
             expectThat(event.with(user)) {
@@ -127,6 +133,7 @@ internal class UserEventTest {
                 get { valueId } isEqualTo event.valueId
                 get { decisionReason } isEqualTo event.decisionReason
                 get { properties } isEqualTo event.properties
+                get { internalProperties } isEqualTo event.internalProperties
             }
         }
     }

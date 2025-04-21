@@ -1078,6 +1078,8 @@ internal class HackleCoreTest {
     }
 
     private class WorkspaceFetcherStub(private val workspace: Workspace) : WorkspaceFetcher {
+        override val lastModified: String?
+            get() = null
         override fun fetch(): Workspace {
             return workspace
         }

@@ -29,7 +29,8 @@ sealed class UserEvent {
         val variationId: Long?,
         val variationKey: String,
         val decisionReason: DecisionReason,
-        val properties: Map<String, Any>
+        val properties: Map<String, Any>,
+        val internalProperties: Map<String, Any>
     ) : UserEvent() {
         override fun with(user: HackleUser) = copy(user = user)
     }
@@ -52,6 +53,7 @@ sealed class UserEvent {
         val valueId: Long?,
         val decisionReason: DecisionReason,
         val properties: Map<String, Any>,
+        val internalProperties: Map<String, Any>
     ) : UserEvent() {
         override fun with(user: HackleUser) = copy(user = user)
     }
@@ -62,6 +64,7 @@ sealed class UserEvent {
             user: HackleUser,
             evaluation: ExperimentEvaluation,
             properties: Map<String, Any>,
+            internalProperties: Map<String, Any>,
             timestamp: Long
         ): UserEvent {
             return Exposure(
@@ -72,7 +75,8 @@ sealed class UserEvent {
                 variationId = evaluation.variationId,
                 variationKey = evaluation.variationKey,
                 decisionReason = evaluation.reason,
-                properties = properties
+                properties = properties,
+                internalProperties = internalProperties
             )
         }
 
@@ -90,6 +94,7 @@ sealed class UserEvent {
             user: HackleUser,
             evaluation: RemoteConfigEvaluation<*>,
             properties: Map<String, Any>,
+            internalProperties: Map<String, Any>,
             timestamp: Long
         ): UserEvent {
             return RemoteConfig(
@@ -99,7 +104,8 @@ sealed class UserEvent {
                 parameter = evaluation.parameter,
                 valueId = evaluation.valueId,
                 decisionReason = evaluation.reason,
-                properties = properties
+                properties = properties,
+                internalProperties = internalProperties
             )
         }
     }

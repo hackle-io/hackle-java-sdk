@@ -29,7 +29,7 @@ internal class HttpWorkspaceFetcher(
     private val url = URI(url(config, sdk))
     private var lastModified: String? = null
 
-    fun fetchIfModified(): Workspace? {
+    fun fetchIfModified(): WorkspaceConfig? {
         val request = createRequest()
         val response = execute(request)
         return response.use { handleResponse(it) }
@@ -47,7 +47,7 @@ internal class HttpWorkspaceFetcher(
         }
     }
 
-    private fun handleResponse(response: CloseableHttpResponse): Workspace? {
+    private fun handleResponse(response: CloseableHttpResponse): WorkspaceConfig? {
         if (response.isNotModified) {
             return null
         }
@@ -55,7 +55,7 @@ internal class HttpWorkspaceFetcher(
         lastModified = response.getFirstHeader(LAST_MODIFIED)?.value
         val body = response.body()
         val dto = body.parseJson<WorkspaceConfigDto>()
-        return DefaultWorkspace.from(dto)
+        return WorkspaceConfig(lastModified, dto)
     }
 
     companion object {

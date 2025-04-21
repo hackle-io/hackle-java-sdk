@@ -6,9 +6,12 @@ import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.internal.time.Clock
+import io.hackle.sdk.core.workspace.WorkspaceFetcher
 
 internal class UserEventFactory(
+    private val workspaceFetcher: WorkspaceFetcher,
     private val clock: Clock,
+    private val internalProperties: PropertiesBuilder = PropertiesBuilder(),
 ) {
 
     fun create(request: Evaluator.Request, evaluation: Evaluator.Evaluation): List<UserEvent> {
@@ -39,15 +42,19 @@ internal class UserEventFactory(
         timestamp: Long,
         properties: PropertiesBuilder,
     ): UserEvent? {
+        internalProperties.add(WORKSPACE_CONFIG_LAST_MODIFIED_AT_KEY, workspaceFetcher.lastModified)
+
         return when (evaluation) {
             is ExperimentEvaluation -> {
                 properties.add(CONFIG_ID_PROPERTY_KEY, evaluation.config?.id)
                 properties.add(EXPERIMENT_VERSION_KEY, evaluation.experiment.version)
                 properties.add(EXECUTION_VERSION_KEY, evaluation.experiment.executionVersion)
+
                 UserEvent.exposure(
                     user = request.user,
                     evaluation = evaluation,
                     properties = properties.build(),
+                    internalProperties = internalProperties.build(),
                     timestamp = timestamp
                 )
             }
@@ -58,6 +65,7 @@ internal class UserEventFactory(
                     user = request.user,
                     evaluation = evaluation,
                     properties = properties.build(),
+                    internalProperties = internalProperties.build(),
                     timestamp = timestamp
                 )
             }
@@ -75,5 +83,6 @@ internal class UserEventFactory(
 
         private const val EXPERIMENT_VERSION_KEY = "\$experiment_version"
         private const val EXECUTION_VERSION_KEY = "\$execution_version"
+        private const val WORKSPACE_CONFIG_LAST_MODIFIED_AT_KEY = "\$config_last_modified_at"
     }
 }

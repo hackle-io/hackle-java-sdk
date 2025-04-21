@@ -17,9 +17,11 @@ internal class PollingWorkspaceFetcher(
     private val pollingIntervalMillis: Long,
     private val scheduler: Scheduler
 ) : WorkspaceFetcher, AutoCloseable {
-
+    override val lastModified: String? get() = _lastModified
+            
     private val currentWorkspace = AtomicReference<Workspace>()
     private var pollingJob: ScheduledJob? = null
+    private var _lastModified: String? = null
 
     override fun fetch(): Workspace? {
         return currentWorkspace.get()
@@ -27,8 +29,9 @@ internal class PollingWorkspaceFetcher(
 
     private fun poll() {
         try {
-            val workspace = httpWorkspaceFetcher.fetchIfModified() ?: return
-            currentWorkspace.set(workspace)
+            val workspaceConfig = httpWorkspaceFetcher.fetchIfModified() ?: return
+            _lastModified = workspaceConfig.lastModified
+            currentWorkspace.set(DefaultWorkspace.from(workspaceConfig.workspaceConfigDto))
         } catch (e: Exception) {
             log.error { "Failed to poll workspace: $e" }
         }
