@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.user
 
 import io.hackle.sdk.core.model.Cohort
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -52,5 +53,25 @@ internal class HackleUserTest {
             )
         }
         expectThat(user.toBuilder().build()) isEqualTo user
+    }
+
+    @Test
+    fun `clearProperties should not affect identifiers, hackleProperties, cohorts, or targetEvents`() {
+        // Arrange
+        val builder = HackleUser.builder()
+        builder.identifiers(mapOf("id" to "123"))
+        builder.hackleProperty("key1", "value1")
+        builder.cohort(Cohort(0))
+        builder.properties(mapOf("key2" to "value2", "key3" to "value3"))
+
+        // Act
+        builder.clearProperties()
+        val hackleUser = builder.build()
+
+        // Assert
+        assertEquals(1, hackleUser.identifiers.size, "Identifiers should remain unchanged")
+        assertEquals(1, hackleUser.hackleProperties.size, "HackleProperties should remain unchanged")
+        assertEquals(1, hackleUser.cohorts.size, "Cohorts should remain unchanged")
+        assertEquals(0, hackleUser.properties.size, "Properties should be empty after clearProperties is called")
     }
 }
