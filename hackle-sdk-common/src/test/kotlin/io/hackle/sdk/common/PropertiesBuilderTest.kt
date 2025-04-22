@@ -167,6 +167,17 @@ internal class PropertiesBuilderTest {
     }
 
     @Test
+    fun clear() {
+        val properties = PropertiesBuilder()
+            .add("age", 42)
+            .add("grade", "GOLD")
+            .clear()
+            .build()
+
+        expectThat(properties).isEqualTo(emptyMap())
+    }
+
+    @Test
     fun `compute`() {
 
         val properties = PropertiesBuilder()
