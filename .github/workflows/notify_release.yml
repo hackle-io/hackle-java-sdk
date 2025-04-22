@@ -26,6 +26,6 @@ jobs:
         with:
           workflow: update core sdk
           repo: hackle-io/hackle-android-sdk
-          ref: master
+          ref: main
           token: ${{ secrets.PAT }}
           inputs: '{ "core_version": "${{ steps.version.outputs.java_sdk_version }}" }'
