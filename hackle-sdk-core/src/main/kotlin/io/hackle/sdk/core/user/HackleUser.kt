@@ -51,6 +51,7 @@ data class HackleUser internal constructor(
 
         fun properties(properties: Map<String, Any>) = apply { this.properties.add(properties) }
         fun property(key: String, value: Any) = apply { this.properties.add(key, value) }
+        fun clearProperties() = apply { this.properties.clear() }
 
         fun hackleProperties(properties: Map<String, Any>) = apply { this.hackleProperties.add(properties) }
         fun hackleProperty(key: String, value: Any) = apply { this.hackleProperties.add(key, value) }
