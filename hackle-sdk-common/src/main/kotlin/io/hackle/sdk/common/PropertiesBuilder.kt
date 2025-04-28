@@ -42,6 +42,10 @@ class PropertiesBuilder {
             remove(key)
         }
     }
+    
+    fun clear() = apply { 
+        properties.clear()
+    }
 
     fun compute(key: String, remapping: (Any?) -> Any?) = apply {
         // Do NOT use Map.compute() to support below Android 24 & JDK 1.8
