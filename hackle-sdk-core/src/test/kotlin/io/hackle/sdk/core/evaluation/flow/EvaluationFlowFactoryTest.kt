@@ -52,8 +52,11 @@ internal class EvaluationFlowFactoryTest {
             .isDecisionWith<DraftInAppMessageFlowEvaluator>()
             .isDecisionWith<PauseInAppMessageFlowEvaluator>()
             .isDecisionWith<PeriodInAppMessageFlowEvaluator>()
-            .isDecisionWith<HiddenInAppMessageFlowEvaluator>()
             .isDecisionWith<TargetInAppMessageFlowEvaluator>()
+            .isDecisionWith<ExperimentInAppMessageFlowEvaluator>()
+            .isDecisionWith<FrequencyCapInAppMessageFlowEvaluator>()
+            .isDecisionWith<HiddenInAppMessageFlowEvaluator>()
+            .isDecisionWith<MessageResolutionInAppMessageFlowEvaluator>()
             .isEnd()
     }
 }

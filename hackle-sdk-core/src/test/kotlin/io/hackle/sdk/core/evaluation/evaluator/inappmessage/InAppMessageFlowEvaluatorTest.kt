@@ -299,8 +299,8 @@ internal class InAppMessageFlowEvaluatorTest {
 
             // then
             expectThat(actual) {
-                get { message }.isNotNull()
-                get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_TARGET
+                get { this?.message }.isNotNull()
+                get { this?.reason ?: DecisionReason.INVALID_INPUT } isEqualTo DecisionReason.IN_APP_MESSAGE_TARGET
             }
         }
 
@@ -315,8 +315,8 @@ internal class InAppMessageFlowEvaluatorTest {
 
             // then
             expectThat(actual).and {
-                get { message }.isNull()
-                get { reason } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
+                get { this?.message }.isNull()
+                get { this?.reason ?: DecisionReason.INVALID_INPUT } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
             }
         }
     }

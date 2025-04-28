@@ -9,9 +9,9 @@ import io.hackle.sdk.core.model.InAppMessages
 import io.hackle.sdk.core.model.experiment
 import io.hackle.sdk.core.workspace.Workspaces
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,8 +25,14 @@ internal class InAppMessageResolverTest {
     @MockK
     private lateinit var evaluator: Evaluator
 
-    @InjectMockKs
     private lateinit var sut: InAppMessageResolver
+
+    @BeforeEach
+    fun setUp() { 
+        val inAppMessageExperimentEvaluator = InAppMessageResolver.InAppMessageExperimentEvaluator(evaluator)
+        val inAppMessageSelector = InAppMessageResolver.InAppMessageSelector()
+        sut = InAppMessageResolver(inAppMessageExperimentEvaluator, inAppMessageSelector)
+    }
 
     @Test
     fun `experiment not exist`() {
