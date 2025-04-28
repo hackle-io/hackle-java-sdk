@@ -202,7 +202,7 @@ internal class ExperimentInAppMessageFlowEvaluator(
     ): InAppMessageEvaluation? {
         val message = inAppMessageResolver.resolve(request, context)
         if(isUnExposedLayoutMessage(message)) {
-            return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_UNEXPOSED_LAYOUT)
+            return InAppMessageEvaluation.of(request, context, EXPERIMENT_CONTROL_GROUP)
         }
         
         return nextFlow.evaluate(request, context)
