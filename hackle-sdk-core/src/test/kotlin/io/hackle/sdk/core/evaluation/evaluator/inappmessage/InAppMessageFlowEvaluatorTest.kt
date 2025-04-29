@@ -5,6 +5,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.create
+import io.hackle.sdk.core.evaluation.target.InAppMessageFrequencyCapMatcher
 import io.hackle.sdk.core.evaluation.target.InAppMessageHiddenMatcher
 import io.hackle.sdk.core.evaluation.target.InAppMessageResolver
 import io.hackle.sdk.core.evaluation.target.InAppMessageTargetMatcher
@@ -317,6 +318,118 @@ internal class InAppMessageFlowEvaluatorTest {
             expectThat(actual).and {
                 get { this?.message }.isNull()
                 get { this?.reason ?: DecisionReason.INVALID_INPUT } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
+            }
+        }
+    }
+
+    @Nested
+    inner class FrequencyCapInAppMessageFlowEvaluatorTest {
+
+        @MockK
+        private lateinit var frequencyCapMatcher: InAppMessageFrequencyCapMatcher
+
+        @InjectMockKs
+        private lateinit var sut: FrequencyCapInAppMessageFlowEvaluator
+
+        @Test
+        fun `when frequency capped then evaluated as null`() {
+            // given
+            every { frequencyCapMatcher.matches(any(), any()) } returns true
+            val request = InAppMessages.request()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual).isNotNull().and {
+                get { message }.isNull()
+                get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_FREQUENCY_CAPPED
+            }
+        }
+
+        @Test
+        fun `when not frequency capped then evaluate next flow`() {
+            // given
+            every { frequencyCapMatcher.matches(any(), any()) } returns false
+            val request = InAppMessages.request()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual) isSameInstanceAs evaluation
+        }
+    }
+
+    @Nested
+    inner class ExperimentInAppMessageFlowEvaluatorTest {
+
+        @MockK
+        private lateinit var inAppMessageResolver: InAppMessageResolver
+
+        @InjectMockKs
+        private lateinit var sut: ExperimentInAppMessageFlowEvaluator
+
+        @Test
+        fun `when control group then evaluated as experiment control group`() {
+            // given
+            val message = mockk<InAppMessage.Message> {
+                every { layout } returns mockk {
+                    every { displayType } returns InAppMessage.DisplayType.NONE
+                }
+            }
+            every { inAppMessageResolver.resolve(any(), any()) } returns message
+            val request = InAppMessages.request()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual?.reason) isEqualTo DecisionReason.EXPERIMENT_CONTROL_GROUP
+        }
+
+        @Test
+        fun `when not control group then evaluate next flow`() {
+            // given
+            val message = mockk<InAppMessage.Message> {
+                every { layout } returns mockk {
+                    every { displayType } returns InAppMessage.DisplayType.MODAL
+                }
+            }
+            every { inAppMessageResolver.resolve(any(), any()) } returns message
+            val request = InAppMessages.request()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual) isSameInstanceAs evaluation
+        }
+    }
+
+    @Nested
+    inner class MessageResolutionInAppMessageFlowEvaluatorTest {
+
+        @MockK
+        private lateinit var inAppMessageResolver: InAppMessageResolver
+
+        @InjectMockKs
+        private lateinit var sut: MessageResolutionInAppMessageFlowEvaluator
+
+        @Test
+        fun `should resolve message and return evaluation`() {
+            // given
+            val message = mockk<InAppMessage.Message>()
+            every { inAppMessageResolver.resolve(any(), any()) } returns message
+            val request = InAppMessages.request()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual).isNotNull().and {
+                get { this.message } isSameInstanceAs message
+                get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_TARGET
             }
         }
     }
