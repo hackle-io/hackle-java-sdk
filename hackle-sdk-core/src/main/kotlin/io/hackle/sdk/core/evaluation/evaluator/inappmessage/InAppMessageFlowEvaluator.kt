@@ -47,7 +47,8 @@ internal class PlatformInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (!request.inAppMessage.supports(ANDROID)) {
+        val isAndroidSupport = request.inAppMessage.supports(ANDROID)
+        if (!isAndroidSupport) {
             return InAppMessageEvaluation.of(request, context, UNSUPPORTED_PLATFORM)
         }
         return nextFlow.evaluate(request, context)
@@ -68,7 +69,8 @@ internal class OverrideInAppMessageFlowEvaluator(
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (userOverrideMatcher.matches(request, context)) {
+        val isOverrideMatched = userOverrideMatcher.matches(request, context)
+        if (isOverrideMatched) {
             return inAppMessageResolver.resolve(request, context, OVERRIDDEN)
         }
         return nextFlow.evaluate(request, context)
@@ -86,7 +88,8 @@ internal class DraftInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (request.inAppMessage.status == DRAFT) {
+        val isDraft = request.inAppMessage.status == DRAFT
+        if (isDraft) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_DRAFT)
         }
         return nextFlow.evaluate(request, context)
@@ -104,7 +107,8 @@ internal class PauseInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (request.inAppMessage.status == PAUSE) {
+        val isPaused = request.inAppMessage.status == PAUSE
+        if (isPaused) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_PAUSED)
         }
         return nextFlow.evaluate(request, context)
@@ -122,7 +126,8 @@ internal class PeriodInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (request.timestamp !in request.inAppMessage.period) {
+        val isWithinPeriod = request.inAppMessage.period.contains(request.timestamp)
+        if (!isWithinPeriod) {
             return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_PERIOD)
         }
         return nextFlow.evaluate(request, context)
@@ -143,7 +148,8 @@ internal class HiddenInAppMessageFlowEvaluator(
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (hiddenMatcher.matches(request, context)) {
+        val isHidden = hiddenMatcher.matches(request, context)
+        if (isHidden) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_HIDDEN)
         }
         return nextFlow.evaluate(request, context)
@@ -163,7 +169,8 @@ internal class TargetInAppMessageFlowEvaluator(
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (targetMatcher.matches(request, context)) {
+        val isTargetMatched = targetMatcher.matches(request, context)
+        if (isTargetMatched) {
             return nextFlow.evaluate(request, context)
         }
         return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_TARGET)
@@ -181,7 +188,8 @@ internal class FrequencyCapInAppMessageFlowEvaluator(
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (frequencyCapMatcher.matches(request, context)) {
+        val isFrequencyCapped = frequencyCapMatcher.matches(request, context)
+        if (isFrequencyCapped) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_FREQUENCY_CAPPED)
         }
 
@@ -201,17 +209,13 @@ internal class ExperimentInAppMessageFlowEvaluator(
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
         val message = inAppMessageResolver.resolve(request, context)
-        if(isUnExposedLayoutMessage(message)) {
+        val isControllerGroup = message.layout.displayType == InAppMessage.DisplayType.NONE
+        if(isControllerGroup) {
             return InAppMessageEvaluation.of(request, context, EXPERIMENT_CONTROL_GROUP)
         }
         
         return nextFlow.evaluate(request, context)
     }
-
-    private fun isUnExposedLayoutMessage(message: InAppMessage.Message): Boolean {
-        return message.layout.displayType == InAppMessage.DisplayType.NONE
-    }
-
 }
 
 /**
