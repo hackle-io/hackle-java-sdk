@@ -14,19 +14,19 @@ internal class InAppMessageResolver(
 
     fun resolve(request: InAppMessageRequest, context: Evaluator.Context): InAppMessage.Message {
         val experiment = experiment(request)
-        if(experiment == null) {
+        if (experiment == null) {
             return messageSelector.select(request) { message ->
                 message.lang == request.inAppMessage.messageContext.defaultLang
             }
         }
-        
+
         val evaluation = this.experimentEvaluator.evaluate(request, context, experiment)
         return messageSelector.select(request) { message ->
             message.lang == request.inAppMessage.messageContext.defaultLang &&
                     evaluation.variationKey == message.variationKey
         }
     }
-    
+
     private fun experiment(request: InAppMessageRequest): Experiment? {
         val experimentContext = request.inAppMessage.messageContext.experimentContext ?: return null
         return requireNotNull(request.workspace.getExperimentOrNull(experimentContext.key)) { "Experiment[key=${experimentContext.key}]" }
@@ -44,14 +44,14 @@ internal class InAppMessageResolver(
 
     internal class InAppMessageExperimentEvaluator(
         evaluator: Evaluator
-    ): ExperimentContextualEvaluator(evaluator) {
+    ) : ExperimentContextualEvaluator(evaluator) {
         override fun decorate(
             request: Evaluator.Request,
             context: Evaluator.Context,
             evaluation: Evaluator.Evaluation
         ): ExperimentEvaluation {
             require(evaluation is ExperimentEvaluation) { "Unexpected evaluation [expected=ExperimentEvaluation, actual=${evaluation::class.java.simpleName}]" }
-            
+
             context.setProperty("experiment_id", evaluation.experiment.id)
             context.setProperty("experiment_key", evaluation.experiment.key)
             context.setProperty("variation_id", evaluation.variationId)
