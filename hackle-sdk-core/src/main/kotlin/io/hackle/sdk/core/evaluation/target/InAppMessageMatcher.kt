@@ -45,22 +45,22 @@ internal class InAppMessageFrequencyCapMatcher(
     }
 
     private fun isFrequencyCapped(inAppMessage: InAppMessage, user: HackleUser, timestamp: Long): Boolean {
-        val frequencyCap = inAppMessage.eventTrigger.frequencyCap ?: return true
+        val frequencyCap = inAppMessage.eventTrigger.frequencyCap ?: return false
 
         val contexts = createMatchContexts(frequencyCap)
         if (contexts.isEmpty()) {
-            return true
+            return false
         }
 
         val impressions = storage.get(inAppMessage)
         for (impression in impressions) {
             for (context in contexts) {
                 if (context.matches(user, timestamp, impression)) {
-                    return false
+                    return true
                 }
             }
         }
-        return true
+        return false
     }
 
     private fun createMatchContexts(frequencyCap: InAppMessage.EventTrigger.FrequencyCap): List<MatchContext> {

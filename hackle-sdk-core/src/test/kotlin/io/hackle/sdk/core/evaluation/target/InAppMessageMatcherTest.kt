@@ -160,7 +160,7 @@ class InAppMessageMatcherTest {
         private lateinit var sut: InAppMessageFrequencyCapMatcher
 
         @Test
-        fun `when frequency cap is null then returns true`() {
+        fun `when frequency cap is null then returns false`() {
             // given
             val inAppMessage = InAppMessages.create()
             val request = InAppMessages.request(inAppMessage = inAppMessage)
@@ -169,11 +169,11 @@ class InAppMessageMatcherTest {
             val actual = sut.matches(request, Evaluators.context())
 
             // then
-            expectThat(actual).isTrue()
+            expectThat(actual).isFalse()
         }
 
         @Test
-        fun `when no contexts then returns true`() {
+        fun `when no contexts then returns false`() {
             // given
             val inAppMessage = InAppMessages.create(
                 eventTrigger = InAppMessages.eventTrigger(
@@ -189,11 +189,11 @@ class InAppMessageMatcherTest {
             val actual = sut.matches(request, Evaluators.context())
 
             // then
-            expectThat(actual).isTrue()
+            expectThat(actual).isFalse()
         }
 
         @Test
-        fun `when no impressions then returns true`() {
+        fun `when no impressions then returns false`() {
             // given
             val inAppMessage = InAppMessages.create(
                 eventTrigger = InAppMessages.eventTrigger(
@@ -210,11 +210,11 @@ class InAppMessageMatcherTest {
             val actual = sut.matches(request, Evaluators.context())
 
             // then
-            expectThat(actual).isTrue()
+            expectThat(actual).isFalse()
         }
 
         @Test
-        fun `when identifier cap matched and threshold exceeded then returns false`() {
+        fun `when identifier cap matched and threshold exceeded then returns true`() {
             // given
             val user = HackleUser.builder().identifier(IdentifierType.ID, "test-id").build()
             val inAppMessage = InAppMessages.create(
@@ -241,11 +241,11 @@ class InAppMessageMatcherTest {
             val actual = sut.matches(request, Evaluators.context())
 
             // then
-            expectThat(actual).isFalse()
+            expectThat(actual).isTrue()
         }
 
         @Test
-        fun `when duration cap matched and threshold exceeded then returns false`() {
+        fun `when duration cap matched and threshold exceeded then returns true`() {
             // given
             val now = System.currentTimeMillis()
             val inAppMessage = InAppMessages.create(
@@ -273,7 +273,7 @@ class InAppMessageMatcherTest {
             val actual = sut.matches(request, Evaluators.context())
 
             // then
-            expectThat(actual).isFalse()
+            expectThat(actual).isTrue()
         }
 
         @Test
