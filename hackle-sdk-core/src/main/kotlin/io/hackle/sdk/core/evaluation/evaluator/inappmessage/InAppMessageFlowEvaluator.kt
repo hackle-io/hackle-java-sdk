@@ -5,11 +5,7 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.FlowEvaluator
-import io.hackle.sdk.core.evaluation.target.InAppMessageFrequencyCapMatcher
-import io.hackle.sdk.core.evaluation.target.InAppMessageHiddenMatcher
-import io.hackle.sdk.core.evaluation.target.InAppMessageTargetMatcher
-import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideMatcher
-import io.hackle.sdk.core.evaluation.target.InAppMessageResolver
+import io.hackle.sdk.core.evaluation.target.*
 import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.model.InAppMessage.PlatformType.ANDROID
 import io.hackle.sdk.core.model.InAppMessage.Status.DRAFT
@@ -19,7 +15,8 @@ import io.hackle.sdk.core.model.supports
 
 internal typealias InAppMessageFlow = EvaluationFlow<InAppMessageRequest, InAppMessageEvaluation>
 
-internal interface InAppMessageFlowEvaluator : FlowEvaluator<InAppMessageRequest, InAppMessageEvaluation> {
+internal interface InAppMessageFlowEvaluator :
+    FlowEvaluator<InAppMessageRequest, InAppMessageEvaluation> {
     override fun evaluate(
         request: InAppMessageRequest,
         context: Evaluator.Context,
@@ -170,10 +167,11 @@ internal class TargetInAppMessageFlowEvaluator(
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
         val isTargetMatched = targetMatcher.matches(request, context)
-        if (isTargetMatched) {
-            return nextFlow.evaluate(request, context)
+        if (!isTargetMatched) {
+            return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_TARGET)
         }
-        return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_TARGET)
+
+        return nextFlow.evaluate(request, context)
     }
 }
 
@@ -210,10 +208,10 @@ internal class ExperimentInAppMessageFlowEvaluator(
     ): InAppMessageEvaluation? {
         val message = inAppMessageResolver.resolve(request, context)
         val isControllerGroup = message.layout.displayType == InAppMessage.DisplayType.NONE
-        if(isControllerGroup) {
+        if (isControllerGroup) {
             return InAppMessageEvaluation.of(request, context, EXPERIMENT_CONTROL_GROUP)
         }
-        
+
         return nextFlow.evaluate(request, context)
     }
 }
