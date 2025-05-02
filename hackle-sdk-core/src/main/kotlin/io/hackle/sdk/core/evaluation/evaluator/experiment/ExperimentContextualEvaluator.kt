@@ -12,7 +12,11 @@ internal abstract class ExperimentContextualEvaluator internal constructor(
         evaluation: Evaluator.Evaluation
     ): ExperimentEvaluation
 
-    fun evaluate(request: Evaluator.Request, context: Evaluator.Context, experiment: Experiment): ExperimentEvaluation {
+    fun evaluate(
+        request: Evaluator.Request,
+        context: Evaluator.Context,
+        experiment: Experiment
+    ): ExperimentEvaluation {
         val evaluation = context[experiment] ?: evaluateInternal(request, context, experiment)
         return evaluation as ExperimentEvaluation
     }
