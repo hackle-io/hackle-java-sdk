@@ -14,11 +14,9 @@ internal class InAppMessageResolver(
 
     fun resolve(request: InAppMessageRequest, context: Evaluator.Context): InAppMessage.Message {
         val experiment = experiment(request)
-        if (experiment == null) {
-            return messageSelector.select(request) { message ->
+            ?: return messageSelector.select(request) { message ->
                 message.lang == request.inAppMessage.messageContext.defaultLang
             }
-        }
 
         val evaluation = this.experimentEvaluator.evaluate(request, context, experiment)
         return messageSelector.select(request) { message ->
