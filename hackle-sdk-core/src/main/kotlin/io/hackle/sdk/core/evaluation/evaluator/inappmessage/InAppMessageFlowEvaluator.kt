@@ -5,10 +5,8 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.FlowEvaluator
-import io.hackle.sdk.core.evaluation.target.InAppMessageHiddenMatcher
-import io.hackle.sdk.core.evaluation.target.InAppMessageResolver
-import io.hackle.sdk.core.evaluation.target.InAppMessageTargetMatcher
-import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideMatcher
+import io.hackle.sdk.core.evaluation.target.*
+import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.model.InAppMessage.PlatformType.ANDROID
 import io.hackle.sdk.core.model.InAppMessage.Status.DRAFT
 import io.hackle.sdk.core.model.InAppMessage.Status.PAUSE
@@ -17,7 +15,8 @@ import io.hackle.sdk.core.model.supports
 
 internal typealias InAppMessageFlow = EvaluationFlow<InAppMessageRequest, InAppMessageEvaluation>
 
-internal interface InAppMessageFlowEvaluator : FlowEvaluator<InAppMessageRequest, InAppMessageEvaluation> {
+internal interface InAppMessageFlowEvaluator :
+    FlowEvaluator<InAppMessageRequest, InAppMessageEvaluation> {
     override fun evaluate(
         request: InAppMessageRequest,
         context: Evaluator.Context,
@@ -45,7 +44,8 @@ internal class PlatformInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (!request.inAppMessage.supports(ANDROID)) {
+        val isAndroidSupport = request.inAppMessage.supports(ANDROID)
+        if (!isAndroidSupport) {
             return InAppMessageEvaluation.of(request, context, UNSUPPORTED_PLATFORM)
         }
         return nextFlow.evaluate(request, context)
@@ -55,7 +55,7 @@ internal class PlatformInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
 /**
  * Specific User Check
  *
- * 특정 유저가 타겟팅 된 경우 OVERRIDDEN
+ * 테스트 디바이스에서 사용
  */
 internal class OverrideInAppMessageFlowEvaluator(
     private val userOverrideMatcher: InAppMessageUserOverrideMatcher,
@@ -66,7 +66,8 @@ internal class OverrideInAppMessageFlowEvaluator(
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (userOverrideMatcher.matches(request, context)) {
+        val isOverrideMatched = userOverrideMatcher.matches(request, context)
+        if (isOverrideMatched) {
             return inAppMessageResolver.resolve(request, context, OVERRIDDEN)
         }
         return nextFlow.evaluate(request, context)
@@ -76,7 +77,7 @@ internal class OverrideInAppMessageFlowEvaluator(
 /**
  * Draft Check
  *
- * IAM이 초안인 경우 IN_APP_MESSAGE_DRAFT
+ * 초안인지 확인
  */
 internal class DraftInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     override fun evaluate(
@@ -84,7 +85,8 @@ internal class DraftInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (request.inAppMessage.status == DRAFT) {
+        val isDraft = request.inAppMessage.status == DRAFT
+        if (isDraft) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_DRAFT)
         }
         return nextFlow.evaluate(request, context)
@@ -94,7 +96,7 @@ internal class DraftInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
 /**
  * Pause Status Check
  *
- * 현재 Pause 상태인 경우 IN_APP_MESSAGE_PAUSED
+ * 진행중인지 확인
  */
 internal class PauseInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
     override fun evaluate(
@@ -102,7 +104,8 @@ internal class PauseInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (request.inAppMessage.status == PAUSE) {
+        val isPaused = request.inAppMessage.status == PAUSE
+        if (isPaused) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_PAUSED)
         }
         return nextFlow.evaluate(request, context)
@@ -120,7 +123,8 @@ internal class PeriodInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (request.timestamp !in request.inAppMessage.period) {
+        val isWithinPeriod = request.inAppMessage.period.contains(request.timestamp)
+        if (!isWithinPeriod) {
             return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_PERIOD)
         }
         return nextFlow.evaluate(request, context)
@@ -130,7 +134,7 @@ internal class PeriodInAppMessageFlowEvaluator : InAppMessageFlowEvaluator {
 /**
  * Hidden Check
  *
- * SDK에서 판단해서 숨겨야 하는 경우
+ * SDK 에서 판단해서 숨겨야 하는 경우
  * - 하루동안 가리기 설정된 경우
  */
 internal class HiddenInAppMessageFlowEvaluator(
@@ -141,7 +145,8 @@ internal class HiddenInAppMessageFlowEvaluator(
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
     ): InAppMessageEvaluation? {
-        if (hiddenMatcher.matches(request, context)) {
+        val isHidden = hiddenMatcher.matches(request, context)
+        if (isHidden) {
             return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_HIDDEN)
         }
         return nextFlow.evaluate(request, context)
@@ -154,17 +159,75 @@ internal class HiddenInAppMessageFlowEvaluator(
  * IAM 타겟팅이 된 경우
  */
 internal class TargetInAppMessageFlowEvaluator(
-    private val targetMatcher: InAppMessageTargetMatcher,
+    private val targetMatcher: InAppMessageTargetMatcher
+) : InAppMessageFlowEvaluator {
+    override fun evaluate(
+        request: InAppMessageRequest,
+        context: Evaluator.Context,
+        nextFlow: InAppMessageFlow
+    ): InAppMessageEvaluation? {
+        val isTargetMatched = targetMatcher.matches(request, context)
+        if (!isTargetMatched) {
+            return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_TARGET)
+        }
+
+        return nextFlow.evaluate(request, context)
+    }
+}
+
+/**
+ * 노출 빈도수 체크
+ */
+internal class FrequencyCapInAppMessageFlowEvaluator(
+    private val frequencyCapMatcher: InAppMessageFrequencyCapMatcher
+) : InAppMessageFlowEvaluator {
+    override fun evaluate(
+        request: InAppMessageRequest,
+        context: Evaluator.Context,
+        nextFlow: InAppMessageFlow
+    ): InAppMessageEvaluation? {
+        val isFrequencyCapped = frequencyCapMatcher.matches(request, context)
+        if (isFrequencyCapped) {
+            return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_FREQUENCY_CAPPED)
+        }
+
+        return nextFlow.evaluate(request, context)
+    }
+}
+
+/**
+ * IAM ABTest
+ */
+internal class ExperimentInAppMessageFlowEvaluator(
     private val inAppMessageResolver: InAppMessageResolver
 ) : InAppMessageFlowEvaluator {
     override fun evaluate(
         request: InAppMessageRequest,
         context: Evaluator.Context,
         nextFlow: InAppMessageFlow
-    ): InAppMessageEvaluation {
-        if (targetMatcher.matches(request, context)) {
-            return inAppMessageResolver.resolve(request, context, IN_APP_MESSAGE_TARGET)
+    ): InAppMessageEvaluation? {
+        val message = inAppMessageResolver.resolve(request, context)
+        val isControllerGroup = message.layout.displayType == InAppMessage.DisplayType.NONE
+        if (isControllerGroup) {
+            return InAppMessageEvaluation.of(request, context, EXPERIMENT_CONTROL_GROUP)
         }
-        return InAppMessageEvaluation.of(request, context, NOT_IN_IN_APP_MESSAGE_TARGET)
+
+        return nextFlow.evaluate(request, context)
+    }
+}
+
+/**
+ * IAM Message check
+ */
+internal class MessageResolutionInAppMessageFlowEvaluator(
+    private val inAppMessageResolver: InAppMessageResolver
+) : InAppMessageFlowEvaluator {
+    override fun evaluate(
+        request: InAppMessageRequest,
+        context: Evaluator.Context,
+        nextFlow: InAppMessageFlow
+    ): InAppMessageEvaluation? {
+        val message = inAppMessageResolver.resolve(request, context)
+        return InAppMessageEvaluation.of(request, context, IN_APP_MESSAGE_TARGET, message)
     }
 }
