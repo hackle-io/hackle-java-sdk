@@ -13,42 +13,37 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
  */
 internal class EvaluationFlowFactory(context: EvaluationContext) {
 
-    private val abTestFlow: ExperimentFlow
-    private val featureFlagFlow: ExperimentFlow
-    private val inAppMessageFlow: InAppMessageFlow
-
-
-    init {
-        abTestFlow = ExperimentFlow.of(
-            OverrideEvaluator(context.get()),
-            IdentifierEvaluator(),
-            ContainerEvaluator(context.get()),
-            ExperimentTargetEvaluator(context.get()),
-            DraftExperimentEvaluator(),
-            PausedExperimentEvaluator(),
-            CompletedExperimentEvaluator(),
-            TrafficAllocateEvaluator(context.get())
-        )
-        featureFlagFlow = EvaluationFlow.of(
-            DraftExperimentEvaluator(),
-            PausedExperimentEvaluator(),
-            CompletedExperimentEvaluator(),
-            OverrideEvaluator(context.get()),
-            IdentifierEvaluator(),
-            TargetRuleEvaluator(context.get(), context.get()),
-            DefaultRuleEvaluator(context.get())
-        )
-
-        inAppMessageFlow = InAppMessageFlow.of(
-            PlatformInAppMessageFlowEvaluator(),
-            OverrideInAppMessageFlowEvaluator(context.get(), context.get()),
-            DraftInAppMessageFlowEvaluator(),
-            PauseInAppMessageFlowEvaluator(),
-            PeriodInAppMessageFlowEvaluator(),
-            HiddenInAppMessageFlowEvaluator(context.get()),
-            TargetInAppMessageFlowEvaluator(context.get(), context.get())
-        )
-    }
+    private val abTestFlow: ExperimentFlow = ExperimentFlow.of(
+        OverrideEvaluator(context.get()),
+        IdentifierEvaluator(),
+        ContainerEvaluator(context.get()),
+        ExperimentTargetEvaluator(context.get()),
+        DraftExperimentEvaluator(),
+        PausedExperimentEvaluator(),
+        CompletedExperimentEvaluator(),
+        TrafficAllocateEvaluator(context.get())
+    )
+    private val featureFlagFlow: ExperimentFlow = EvaluationFlow.of(
+        DraftExperimentEvaluator(),
+        PausedExperimentEvaluator(),
+        CompletedExperimentEvaluator(),
+        OverrideEvaluator(context.get()),
+        IdentifierEvaluator(),
+        TargetRuleEvaluator(context.get(), context.get()),
+        DefaultRuleEvaluator(context.get())
+    )
+    private val inAppMessageFlow: InAppMessageFlow = InAppMessageFlow.of(
+        PlatformInAppMessageFlowEvaluator(),
+        OverrideInAppMessageFlowEvaluator(context.get(), context.get()),
+        DraftInAppMessageFlowEvaluator(),
+        PauseInAppMessageFlowEvaluator(),
+        PeriodInAppMessageFlowEvaluator(),
+        TargetInAppMessageFlowEvaluator(context.get()),
+        ExperimentInAppMessageFlowEvaluator(context.get()),
+        FrequencyCapInAppMessageFlowEvaluator(context.get()),
+        HiddenInAppMessageFlowEvaluator(context.get()),
+        MessageResolutionInAppMessageFlowEvaluator(context.get())
+    )
 
     fun experimentFlow(experimentType: Experiment.Type): ExperimentFlow {
         return when (experimentType) {
