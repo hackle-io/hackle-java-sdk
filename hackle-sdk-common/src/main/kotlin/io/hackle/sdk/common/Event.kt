@@ -4,10 +4,11 @@ package io.hackle.sdk.common
  * @author Yong
  */
 data class Event internal constructor(
-    val key: String,
-    val value: Double?,
-    val properties: Map<String, Any>
-) {
+    override val key: String,
+    override val value: Double?,
+    override val properties: Map<String, Any>
+): HackleCommonEvent {
+    override val internalProperties: Map<String, Any>? = null
 
     class Builder(private val key: String) {
         private var value: Double? = null

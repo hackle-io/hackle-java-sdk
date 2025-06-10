@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.event
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.HackleCommonEvent
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
@@ -40,7 +41,7 @@ sealed class UserEvent {
         override val timestamp: Long,
         override val user: HackleUser,
         val eventType: EventType,
-        val event: Event
+        val event: HackleCommonEvent
     ) : UserEvent() {
         override fun with(user: HackleUser) = copy(user = user)
     }
@@ -80,7 +81,7 @@ sealed class UserEvent {
             )
         }
 
-        internal fun track(eventType: EventType, event: Event, timestamp: Long, user: HackleUser): UserEvent {
+        internal fun track(eventType: EventType, event: HackleCommonEvent, timestamp: Long, user: HackleUser): UserEvent {
             return Track(
                 insertId = UUID.randomUUID().toString(),
                 timestamp = timestamp,

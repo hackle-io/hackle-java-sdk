@@ -1,6 +1,7 @@
 package io.hackle.sdk.core
 
 import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.HackleCommonEvent
 import io.hackle.sdk.common.ParameterConfig
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
@@ -122,7 +123,7 @@ class HackleCore internal constructor(
     }
 
 
-    fun track(event: Event, user: HackleUser, timestamp: Long) {
+    fun track(event: HackleCommonEvent, user: HackleUser, timestamp: Long) {
         val eventType = workspaceFetcher.fetch()?.getEventTypeOrNull(event.key) ?: EventType.Undefined(event.key)
         eventProcessor.process(UserEvent.track(eventType, event, timestamp, user))
     }
