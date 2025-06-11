@@ -1,6 +1,5 @@
 package io.hackle.sdk.core
 
-import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.HackleCommonEvent
 import io.hackle.sdk.common.ParameterConfig
 import io.hackle.sdk.common.Variation
@@ -193,7 +192,11 @@ class HackleCore internal constructor(
         ): HackleCore {
 
             val delegatingEvaluator = DelegatingEvaluator()
-            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()), Clock.SYSTEM)
+            context.initialize(
+                delegatingEvaluator,
+                DelegatingManualOverrideStorage(manualOverrideStorages.toList()),
+                Clock.SYSTEM
+            )
             val flowFactory = EvaluationFlowFactory(context)
 
             val experimentEvaluator = ExperimentEvaluator(flowFactory)
