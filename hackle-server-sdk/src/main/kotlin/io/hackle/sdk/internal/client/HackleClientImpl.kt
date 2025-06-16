@@ -123,20 +123,7 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updatePushSubscription(
-        globalStatus: HackleMarketingSubscriptionStatus,
-        user: User
-    ) {
-        updatePushSubscription(
-            HackleMarketingSubscriptionOperations
-                .builder()
-                .global(globalStatus)
-                .build(),
-            user
-        )
-    }
-
-    override fun updatePushSubscription(operations: HackleMarketingSubscriptionOperations, user: User) {
+    override fun updatePushSubscriptions(operations: HackleMarketingSubscriptionOperations, user: User) {
         try {
             val event = operations.toPushSubscriptionEvent()
             track(event, user)
@@ -146,20 +133,7 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateSmsSubscription(
-        globalStatus: HackleMarketingSubscriptionStatus,
-        user: User
-    ) {
-        updateSmsSubscription(
-            HackleMarketingSubscriptionOperations
-                .builder()
-                .global(globalStatus)
-                .build(),
-            user
-        )
-    }
-
-    override fun updateSmsSubscription(operations: HackleMarketingSubscriptionOperations, user: User) {
+    override fun updateSmsSubscriptions(operations: HackleMarketingSubscriptionOperations, user: User) {
         try {
             val event = operations.toSmsSubscriptionEvent()
             track(event, user)
@@ -169,20 +143,7 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateKakaoSubscription(
-        globalStatus: HackleMarketingSubscriptionStatus,
-        user: User
-    ) {
-        updateKakaoSubscription(
-            HackleMarketingSubscriptionOperations
-                .builder()
-                .global(globalStatus)
-                .build(),
-            user
-        )
-    }
-
-    override fun updateKakaoSubscription(operations: HackleMarketingSubscriptionOperations, user: User) {
+    override fun updateKakaoSubscriptions(operations: HackleMarketingSubscriptionOperations, user: User) {
         try {
             val event = operations.toKakaoSubscriptionEvent()
             track(event, user)
