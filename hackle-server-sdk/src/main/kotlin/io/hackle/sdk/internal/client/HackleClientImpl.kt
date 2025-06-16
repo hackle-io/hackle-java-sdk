@@ -124,12 +124,12 @@ internal class HackleClientImpl(
     }
 
     override fun updatePushSubscriptionStatus(
-        status: HackleMarketingSubscriptionStatus,
+        globalStatus: HackleMarketingSubscriptionStatus,
         user: User
     ) {
         try {
             val event = HackleMarketingSubscriptionOperations.builder()
-                .global(status)
+                .global(globalStatus)
                 .build()
                 .toPushSubscriptionEvent()
             track(event, user)
@@ -140,12 +140,12 @@ internal class HackleClientImpl(
     }
 
     override fun updateSmsSubscriptionStatus(
-        status: HackleMarketingSubscriptionStatus,
+        globalStatus: HackleMarketingSubscriptionStatus,
         user: User
     ) {
         try {
             val event = HackleMarketingSubscriptionOperations.builder()
-                .global(status)
+                .global(globalStatus)
                 .build()
                 .toSmsSubscriptionEvent()
             track(event, user)
@@ -156,12 +156,12 @@ internal class HackleClientImpl(
     }
 
     override fun updateKakaoSubscriptionStatus(
-        status: HackleMarketingSubscriptionStatus,
+        globalStatus: HackleMarketingSubscriptionStatus,
         user: User
     ) {
         try {
             val event = HackleMarketingSubscriptionOperations.builder()
-                .global(status)
+                .global(globalStatus)
                 .build()
                 .toKakaoSubscriptionEvent()
             track(event, user)

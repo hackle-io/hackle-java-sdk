@@ -187,26 +187,26 @@ interface HackleClient : AutoCloseable {
     /**
      * Updates the user's push subscription status.
      *
-     * @param status The new push subscription status.
+     * @param globalStatus The global push subscription status.
      * @param user The user whose push subscription status will be updated.
      */
-    fun updatePushSubscriptionStatus(status: HackleMarketingSubscriptionStatus, user: User)
+    fun updatePushSubscriptionStatus(globalStatus: HackleMarketingSubscriptionStatus, user: User)
 
     /**
      * Updates the user's sms subscription status.
      *
-     * @param status The new sms subscription status.
+     * @param globalStatus The global sms subscription status.
      * @param user The user whose sms subscription status will be updated.
      */
-    fun updateSmsSubscriptionStatus(status: HackleMarketingSubscriptionStatus, user: User)
+    fun updateSmsSubscriptionStatus(globalStatus: HackleMarketingSubscriptionStatus, user: User)
 
     /**
      * Updates the user's kakao subscription status.
      *
-     * @param status The new kakao subscription status.
+     * @param globalStatus The global kakao subscription status.
      * @param user The user whose kakao subscription status will be updated.
      */
-    fun updateKakaoSubscriptionStatus(status: HackleMarketingSubscriptionStatus, user: User)
+    fun updateKakaoSubscriptionStatus(globalStatus: HackleMarketingSubscriptionStatus, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.
