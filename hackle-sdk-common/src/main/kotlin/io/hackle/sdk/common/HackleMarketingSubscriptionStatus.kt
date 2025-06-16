@@ -1,5 +1,8 @@
 package io.hackle.sdk.common
 
+/**
+ * An enum that represents the status of a marketing subscription.
+ */
 enum class HackleMarketingSubscriptionStatus(val key: String) {
     /**
      * Subscribe push message

@@ -1,10 +1,9 @@
 package io.hackle.sdk.common
 
+/**
+ * Hackle marketing subscription operations.
+ */
 class HackleMarketingSubscriptionOperations private constructor(
-
-    /**
-     * MarketingSubscriptionStatus -> Status
-     */
     private val operations: Map<String, HackleMarketingSubscriptionStatus>,
 ) {
     val size: Int get() = operations.size
