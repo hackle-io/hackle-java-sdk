@@ -1,9 +1,6 @@
 package io.hackle.sdk.internal.client
 
-import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.PropertyOperations
-import io.hackle.sdk.common.User
-import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.*
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
@@ -320,6 +317,75 @@ internal class HackleClientImplTest {
                 sut.updateUserProperties(operations, user)
             } catch (e: Throwable) {
                 fail("fail")
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateMarketingStatus {
+        @Test
+        fun `update push subscription status`() {
+            val user = User.of("42")
+
+            sut.updatePushSubscriptionStatus(HackleMarketingSubscriptionStatus.SUBSCRIBED, user)
+
+            verify(exactly = 1) {
+                core.track(
+                    withArg {
+                        expectThat(it.key) isEqualTo "\$push_subscriptions"
+                        expectThat(it.properties.size) isEqualTo 1
+                        expectThat(it.properties["\$global"]) isEqualTo "SUBSCRIBED"
+                    },
+                    HackleUser.of("42"),
+                    any()
+                )
+            }
+            verify(exactly = 1) {
+                core.flush()
+            }
+        }
+
+        @Test
+        fun `update sms subscription status`() {
+            val user = User.of("42")
+
+            sut.updateSmsSubscriptionStatus(HackleMarketingSubscriptionStatus.UNKNOWN, user)
+
+            verify(exactly = 1) {
+                core.track(
+                    withArg {
+                        expectThat(it.key) isEqualTo "\$sms_subscriptions"
+                        expectThat(it.properties.size) isEqualTo 1
+                        expectThat(it.properties["\$global"]) isEqualTo "UNKNOWN"
+                    },
+                    HackleUser.of("42"),
+                    any()
+                )
+            }
+            verify(exactly = 1) {
+                core.flush()
+            }
+        }
+
+        @Test
+        fun `update kakao subscription status`() {
+            val user = User.of("42")
+
+            sut.updateKakaoSubscriptionStatus(HackleMarketingSubscriptionStatus.UNSUBSCRIBED, user)
+
+            verify(exactly = 1) {
+                core.track(
+                    withArg {
+                        expectThat(it.key) isEqualTo "\$kakao_subscriptions"
+                        expectThat(it.properties.size) isEqualTo 1
+                        expectThat(it.properties["\$global"]) isEqualTo "UNSUBSCRIBED"
+                    },
+                    HackleUser.of("42"),
+                    any()
+                )
+            }
+            verify(exactly = 1) {
+                core.flush()
             }
         }
     }
