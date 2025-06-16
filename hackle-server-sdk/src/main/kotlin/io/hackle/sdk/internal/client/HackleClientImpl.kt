@@ -12,6 +12,9 @@ import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.metrics.Timer
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.toEvent
+import io.hackle.sdk.core.model.toKakaoSubscriptionEvent
+import io.hackle.sdk.core.model.toPushSubscriptionEvent
+import io.hackle.sdk.core.model.toSmsSubscriptionEvent
 import io.hackle.sdk.internal.monitoring.metrics.DecisionMetrics
 import io.hackle.sdk.internal.user.HackleUserResolver
 
@@ -117,6 +120,54 @@ internal class HackleClientImpl(
             core.flush()
         } catch (e: Exception) {
             log.error { "Unexpected exception while update user properties: $e" }
+        }
+    }
+
+    override fun updatePushSubscriptionStatus(
+        status: HackleMarketingSubscriptionStatus,
+        user: User
+    ) {
+        try {
+            val event = HackleMarketingSubscriptionOperations.builder()
+                .global(status)
+                .build()
+                .toPushSubscriptionEvent()
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update push subscription status: $e" }
+        }
+    }
+
+    override fun updateSmsSubscriptionStatus(
+        status: HackleMarketingSubscriptionStatus,
+        user: User
+    ) {
+        try {
+            val event = HackleMarketingSubscriptionOperations.builder()
+                .global(status)
+                .build()
+                .toSmsSubscriptionEvent()
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update sms subscription status: $e" }
+        }
+    }
+
+    override fun updateKakaoSubscriptionStatus(
+        status: HackleMarketingSubscriptionStatus,
+        user: User
+    ) {
+        try {
+            val event = HackleMarketingSubscriptionOperations.builder()
+                .global(status)
+                .build()
+                .toKakaoSubscriptionEvent()
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update kakao subscription status: $e" }
         }
     }
 

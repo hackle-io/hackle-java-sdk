@@ -172,7 +172,7 @@ interface HackleClient : AutoCloseable {
     fun track(event: Event, user: User)
 
     /**
-     * Returns a instance of Hackle Remote Config.
+     * Returns an instance of Hackle Remote Config.
      */
     fun remoteConfig(user: User): HackleRemoteConfig
 
@@ -183,6 +183,30 @@ interface HackleClient : AutoCloseable {
      * @param user the user whose properties will be updated
      */
     fun updateUserProperties(operations: PropertyOperations, user: User)
+
+    /**
+     * Updates the user's push subscription status.
+     *
+     * @param status The new push subscription status.
+     * @param user The user whose push subscription status will be updated.
+     */
+    fun updatePushSubscriptionStatus(status: HackleMarketingSubscriptionStatus, user: User)
+
+    /**
+     * Updates the user's sms subscription status.
+     *
+     * @param status The new sms subscription status.
+     * @param user The user whose sms subscription status will be updated.
+     */
+    fun updateSmsSubscriptionStatus(status: HackleMarketingSubscriptionStatus, user: User)
+
+    /**
+     * Updates the user's kakao subscription status.
+     *
+     * @param status The new kakao subscription status.
+     * @param user The user whose kakao subscription status will be updated.
+     */
+    fun updateKakaoSubscriptionStatus(status: HackleMarketingSubscriptionStatus, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.
