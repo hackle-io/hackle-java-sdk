@@ -123,15 +123,22 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updatePushSubscriptionStatus(
+    override fun updatePushSubscription(
         globalStatus: HackleMarketingSubscriptionStatus,
         user: User
     ) {
-        try {
-            val event = HackleMarketingSubscriptionOperations.builder()
+        updatePushSubscription(
+            HackleMarketingSubscriptionOperations
+                .builder()
                 .global(globalStatus)
-                .build()
-                .toPushSubscriptionEvent()
+                .build(),
+            user
+        )
+    }
+
+    override fun updatePushSubscription(operations: HackleMarketingSubscriptionOperations, user: User) {
+        try {
+            val event = operations.toPushSubscriptionEvent()
             track(event, user)
             core.flush()
         } catch (e: Exception) {
@@ -139,15 +146,22 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateSmsSubscriptionStatus(
+    override fun updateSmsSubscription(
         globalStatus: HackleMarketingSubscriptionStatus,
         user: User
     ) {
-        try {
-            val event = HackleMarketingSubscriptionOperations.builder()
+        updateSmsSubscription(
+            HackleMarketingSubscriptionOperations
+                .builder()
                 .global(globalStatus)
-                .build()
-                .toSmsSubscriptionEvent()
+                .build(),
+            user
+        )
+    }
+
+    override fun updateSmsSubscription(operations: HackleMarketingSubscriptionOperations, user: User) {
+        try {
+            val event = operations.toSmsSubscriptionEvent()
             track(event, user)
             core.flush()
         } catch (e: Exception) {
@@ -155,15 +169,22 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateKakaoSubscriptionStatus(
+    override fun updateKakaoSubscription(
         globalStatus: HackleMarketingSubscriptionStatus,
         user: User
     ) {
-        try {
-            val event = HackleMarketingSubscriptionOperations.builder()
+        updateKakaoSubscription(
+            HackleMarketingSubscriptionOperations
+                .builder()
                 .global(globalStatus)
-                .build()
-                .toKakaoSubscriptionEvent()
+                .build(),
+            user
+        )
+    }
+
+    override fun updateKakaoSubscription(operations: HackleMarketingSubscriptionOperations, user: User) {
+        try {
+            val event = operations.toKakaoSubscriptionEvent()
             track(event, user)
             core.flush()
         } catch (e: Exception) {

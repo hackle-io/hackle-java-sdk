@@ -327,7 +327,7 @@ internal class HackleClientImplTest {
         fun `update push subscription status`() {
             val user = User.of("42")
 
-            sut.updatePushSubscriptionStatus(HackleMarketingSubscriptionStatus.SUBSCRIBED, user)
+            sut.updatePushSubscription(HackleMarketingSubscriptionStatus.SUBSCRIBED, user)
 
             verify(exactly = 1) {
                 core.track(
@@ -349,7 +349,7 @@ internal class HackleClientImplTest {
         fun `update sms subscription status`() {
             val user = User.of("42")
 
-            sut.updateSmsSubscriptionStatus(HackleMarketingSubscriptionStatus.UNKNOWN, user)
+            sut.updateSmsSubscription(HackleMarketingSubscriptionStatus.UNKNOWN, user)
 
             verify(exactly = 1) {
                 core.track(
@@ -371,7 +371,7 @@ internal class HackleClientImplTest {
         fun `update kakao subscription status`() {
             val user = User.of("42")
 
-            sut.updateKakaoSubscriptionStatus(HackleMarketingSubscriptionStatus.UNSUBSCRIBED, user)
+            sut.updateKakaoSubscription(HackleMarketingSubscriptionStatus.UNSUBSCRIBED, user)
 
             verify(exactly = 1) {
                 core.track(

@@ -190,7 +190,15 @@ interface HackleClient : AutoCloseable {
      * @param globalStatus The global push subscription status.
      * @param user The user whose push subscription status will be updated.
      */
-    fun updatePushSubscriptionStatus(globalStatus: HackleMarketingSubscriptionStatus, user: User)
+    fun updatePushSubscription(globalStatus: HackleMarketingSubscriptionStatus, user: User)
+
+    /**
+     * Updates the user's push subscription status.
+     *
+     * @param operations The push subscription operations.
+     * @param user The user whose push subscription status will be updated.
+     */
+    fun updatePushSubscription(operations: HackleMarketingSubscriptionOperations, user: User)
 
     /**
      * Updates the user's sms subscription status.
@@ -198,7 +206,15 @@ interface HackleClient : AutoCloseable {
      * @param globalStatus The global sms subscription status.
      * @param user The user whose sms subscription status will be updated.
      */
-    fun updateSmsSubscriptionStatus(globalStatus: HackleMarketingSubscriptionStatus, user: User)
+    fun updateSmsSubscription(globalStatus: HackleMarketingSubscriptionStatus, user: User)
+
+    /**
+     * Updates the user's sms subscription status.
+     *
+     * @param operations The sms subscription operations.
+     * @param user The user whose sms subscription status will be updated.
+     */
+    fun updateSmsSubscription(operations: HackleMarketingSubscriptionOperations, user: User)
 
     /**
      * Updates the user's kakao subscription status.
@@ -206,7 +222,15 @@ interface HackleClient : AutoCloseable {
      * @param globalStatus The global kakao subscription status.
      * @param user The user whose kakao subscription status will be updated.
      */
-    fun updateKakaoSubscriptionStatus(globalStatus: HackleMarketingSubscriptionStatus, user: User)
+    fun updateKakaoSubscription(globalStatus: HackleMarketingSubscriptionStatus, user: User)
+
+    /**
+     * Updates the user's kakao subscription status.
+     *
+     * @param operations The kakao subscription operations.
+     * @param user The user whose kakao subscription status will be updated.
+     */
+    fun updateKakaoSubscription(operations: HackleMarketingSubscriptionOperations, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.
