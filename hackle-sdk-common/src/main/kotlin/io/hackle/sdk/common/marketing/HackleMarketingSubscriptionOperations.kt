@@ -1,7 +1,7 @@
-package io.hackle.sdk.common
+package io.hackle.sdk.common.marketing
 
 /**
- * Hackle marketing subscription operations.
+ * Marketing subscription operations.
  */
 class HackleMarketingSubscriptionOperations private constructor(
     private val operations: Map<String, HackleMarketingSubscriptionStatus>,
@@ -16,8 +16,12 @@ class HackleMarketingSubscriptionOperations private constructor(
 
         private val operations = hashMapOf<String, HackleMarketingSubscriptionStatus>()
 
+        fun set(key: String, status: HackleMarketingSubscriptionStatus) = apply {
+            operations[key] = status
+        }
+
         fun global(status: HackleMarketingSubscriptionStatus) = apply {
-            operations[HackleMarketingSubscriptionType.GLOBAL.key] = status
+            set(HackleMarketingSubscriptionType.GLOBAL.key, status)
         }
 
         fun build(): HackleMarketingSubscriptionOperations {

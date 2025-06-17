@@ -1,7 +1,7 @@
-package io.hackle.sdk.common
+package io.hackle.sdk.common.marketing
 
 /**
- * Hackle marketing subscription type.
+ * Marketing subscription type.
  */
 enum class HackleMarketingSubscriptionType(val key: String) {
     GLOBAL("\$global");

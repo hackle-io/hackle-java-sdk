@@ -1,9 +1,15 @@
 package io.hackle.sdk.internal.client
 
-import io.hackle.sdk.common.*
+import io.hackle.sdk.common.Event
+import io.hackle.sdk.common.PropertyOperations
+import io.hackle.sdk.common.User
+import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
+import io.hackle.sdk.common.marketing.HackleMarketingChannel
+import io.hackle.sdk.common.marketing.HackleMarketingSubscriptionOperations
+import io.hackle.sdk.common.marketing.HackleMarketingSubscriptionStatus
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.toEvent
@@ -327,7 +333,8 @@ internal class HackleClientImplTest {
         fun `update push subscription status`() {
             val user = User.of("42")
 
-            sut.updatePushSubscriptions(
+            sut.updateMarketingSubscriptions(
+                HackleMarketingChannel.PUSH,
                 HackleMarketingSubscriptionOperations
                     .builder()
                     .global(HackleMarketingSubscriptionStatus.SUBSCRIBED)
@@ -354,7 +361,8 @@ internal class HackleClientImplTest {
         fun `update sms subscription status`() {
             val user = User.of("42")
 
-            sut.updateSmsSubscriptions(
+            sut.updateMarketingSubscriptions(
+                HackleMarketingChannel.SMS,
                 HackleMarketingSubscriptionOperations
                     .builder()
                     .global(HackleMarketingSubscriptionStatus.UNKNOWN)
@@ -381,7 +389,8 @@ internal class HackleClientImplTest {
         fun `update kakao subscription status`() {
             val user = User.of("42")
 
-            sut.updateKakaoSubscriptions(
+            sut.updateMarketingSubscriptions(
+                HackleMarketingChannel.KAKAO,
                 HackleMarketingSubscriptionOperations
                     .builder()
                     .global(HackleMarketingSubscriptionStatus.UNSUBSCRIBED)
