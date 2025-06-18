@@ -4,12 +4,11 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.PropertyOperations
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.channel.HackleSubscriptionOperations
+import io.hackle.sdk.common.channel.HackleSubscriptionStatus
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
-import io.hackle.sdk.common.marketing.HackleMarketingChannel
-import io.hackle.sdk.common.marketing.HackleMarketingSubscriptionOperations
-import io.hackle.sdk.common.marketing.HackleMarketingSubscriptionStatus
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.toEvent
@@ -333,11 +332,12 @@ internal class HackleClientImplTest {
         fun `update push subscription status`() {
             val user = User.of("42")
 
-            sut.updateMarketingSubscriptions(
-                HackleMarketingChannel.PUSH,
-                HackleMarketingSubscriptionOperations
+            sut.updatePushSubscriptions(
+                HackleSubscriptionOperations
                     .builder()
-                    .global(HackleMarketingSubscriptionStatus.SUBSCRIBED)
+                    .marketing(HackleSubscriptionStatus.UNSUBSCRIBED)
+                    .information(HackleSubscriptionStatus.SUBSCRIBED)
+                    .custom("custom_key", HackleSubscriptionStatus.UNKNOWN)
                     .build(), user
             )
 
@@ -345,8 +345,10 @@ internal class HackleClientImplTest {
                 core.track(
                     withArg {
                         expectThat(it.key) isEqualTo "\$push_subscriptions"
-                        expectThat(it.properties.size) isEqualTo 1
-                        expectThat(it.properties["\$global"]) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties.size) isEqualTo 3
+                        expectThat(it.properties["\$marketing"] as String) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties["\$information"] as String) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties["custom_key"] as String) isEqualTo "UNKNOWN"
                     },
                     HackleUser.of("42"),
                     any()
@@ -361,11 +363,12 @@ internal class HackleClientImplTest {
         fun `update sms subscription status`() {
             val user = User.of("42")
 
-            sut.updateMarketingSubscriptions(
-                HackleMarketingChannel.SMS,
-                HackleMarketingSubscriptionOperations
+            sut.updateSmsSubscriptions(
+                HackleSubscriptionOperations
                     .builder()
-                    .global(HackleMarketingSubscriptionStatus.UNKNOWN)
+                    .marketing(HackleSubscriptionStatus.UNSUBSCRIBED)
+                    .information(HackleSubscriptionStatus.SUBSCRIBED)
+                    .custom("custom_key", HackleSubscriptionStatus.UNKNOWN)
                     .build(), user
             )
 
@@ -373,8 +376,10 @@ internal class HackleClientImplTest {
                 core.track(
                     withArg {
                         expectThat(it.key) isEqualTo "\$sms_subscriptions"
-                        expectThat(it.properties.size) isEqualTo 1
-                        expectThat(it.properties["\$global"]) isEqualTo "UNKNOWN"
+                        expectThat(it.properties.size) isEqualTo 3
+                        expectThat(it.properties["\$marketing"] as String) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties["\$information"] as String) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties["custom_key"] as String) isEqualTo "UNKNOWN"
                     },
                     HackleUser.of("42"),
                     any()
@@ -389,11 +394,12 @@ internal class HackleClientImplTest {
         fun `update kakao subscription status`() {
             val user = User.of("42")
 
-            sut.updateMarketingSubscriptions(
-                HackleMarketingChannel.KAKAO,
-                HackleMarketingSubscriptionOperations
+            sut.updateKakaoSubscriptions(
+                HackleSubscriptionOperations
                     .builder()
-                    .global(HackleMarketingSubscriptionStatus.UNSUBSCRIBED)
+                    .marketing(HackleSubscriptionStatus.UNSUBSCRIBED)
+                    .information(HackleSubscriptionStatus.SUBSCRIBED)
+                    .custom("custom_key", HackleSubscriptionStatus.UNKNOWN)
                     .build(), user
             )
 
@@ -401,8 +407,10 @@ internal class HackleClientImplTest {
                 core.track(
                     withArg {
                         expectThat(it.key) isEqualTo "\$kakao_subscriptions"
-                        expectThat(it.properties.size) isEqualTo 1
-                        expectThat(it.properties["\$global"]) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties.size) isEqualTo 3
+                        expectThat(it.properties["\$marketing"] as String) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties["\$information"] as String) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties["custom_key"] as String) isEqualTo "UNKNOWN"
                     },
                     HackleUser.of("42"),
                     any()

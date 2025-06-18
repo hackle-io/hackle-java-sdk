@@ -2,19 +2,17 @@ package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.HackleClient
 import io.hackle.sdk.common.*
+import io.hackle.sdk.common.channel.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
 import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
 import io.hackle.sdk.common.decision.FeatureFlagDecision
-import io.hackle.sdk.common.marketing.HackleMarketingChannel
-import io.hackle.sdk.common.marketing.HackleMarketingSubscriptionOperations
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.metrics.Timer
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.toEvent
-import io.hackle.sdk.core.model.toSubscriptionEvent
 import io.hackle.sdk.internal.monitoring.metrics.DecisionMetrics
 import io.hackle.sdk.internal.user.HackleUserResolver
 
@@ -123,17 +121,42 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateMarketingSubscriptions(
-        channel: HackleMarketingChannel,
-        operations: HackleMarketingSubscriptionOperations,
+    override fun updatePushSubscriptions(
+        operations: HackleSubscriptionOperations,
         user: User
     ) {
         try {
-            val event = operations.toSubscriptionEvent(channel)
+            val event = operations.toEvent("\$push_subscriptions")
             track(event, user)
             core.flush()
         } catch (e: Exception) {
-            log.error { "Unexpected exception while update marketing subscription status: $e" }
+            log.error { "Unexpected exception while update push subscription status: $e" }
+        }
+    }
+
+    override fun updateSmsSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    ) {
+        try {
+            val event = operations.toEvent("\$sms_subscriptions")
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update sms subscription status: $e" }
+        }
+    }
+
+    override fun updateKakaoSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    ) {
+        try {
+            val event = operations.toEvent("\$kakao_subscriptions")
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update kakao subscription status: $e" }
         }
     }
 

@@ -1,10 +1,9 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.common.*
+import io.hackle.sdk.common.channel.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
-import io.hackle.sdk.common.marketing.HackleMarketingChannel
-import io.hackle.sdk.common.marketing.HackleMarketingSubscriptionOperations
 
 /**
  * The entry point of Hackle SDKs.
@@ -187,15 +186,35 @@ interface HackleClient : AutoCloseable {
     fun updateUserProperties(operations: PropertyOperations, user: User)
 
     /**
-     * Updates the user's marketing subscription status.
+     * Updates the user's push subscription status.
      *
-     * @param channel the channel that changes marketing subscription
-     * @param operations The marketing subscription operations.
-     * @param user The user whose marketing subscription status will be updated.
+     * @param operations The subscription operations.
+     * @param user The user whose subscription status will be updated.
      */
-    fun updateMarketingSubscriptions(
-        channel: HackleMarketingChannel,
-        operations: HackleMarketingSubscriptionOperations,
+    fun updatePushSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    )
+
+    /**
+     * Updates the user's sms subscription status.
+     *
+     * @param operations The subscription operations.
+     * @param user The user whose subscription status will be updated.
+     */
+    fun updateSmsSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    )
+
+    /**
+     * Updates the user's kakao talk subscription status.
+     *
+     * @param operations The subscription operations.
+     * @param user The user whose subscription status will be updated.
+     */
+    fun updateKakaoSubscriptions(
+        operations: HackleSubscriptionOperations,
         user: User
     )
 
