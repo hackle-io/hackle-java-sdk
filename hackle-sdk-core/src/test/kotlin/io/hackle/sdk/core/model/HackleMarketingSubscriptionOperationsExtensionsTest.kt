@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.model
 
-import io.hackle.sdk.common.channel.HackleSubscriptionOperations
-import io.hackle.sdk.common.channel.HackleSubscriptionStatus
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
+import io.hackle.sdk.common.subscription.HackleSubscriptionStatus
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo

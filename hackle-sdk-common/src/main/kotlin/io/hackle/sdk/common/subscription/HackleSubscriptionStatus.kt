@@ -1,4 +1,4 @@
-package io.hackle.sdk.common.channel
+package io.hackle.sdk.common.subscription
 
 /**
  * An enum that represents the status of a subscription.

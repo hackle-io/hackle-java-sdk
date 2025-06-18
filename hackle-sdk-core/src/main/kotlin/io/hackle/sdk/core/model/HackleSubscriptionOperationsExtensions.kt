@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.model
 
 import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.channel.HackleSubscriptionOperations
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 
 fun HackleSubscriptionOperations.toEvent(key: String): Event {
     val builder = Event.builder(key)

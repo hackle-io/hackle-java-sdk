@@ -1,7 +1,7 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.common.*
-import io.hackle.sdk.common.channel.HackleSubscriptionOperations
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 

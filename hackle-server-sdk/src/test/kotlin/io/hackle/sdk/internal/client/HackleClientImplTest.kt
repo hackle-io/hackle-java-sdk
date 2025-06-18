@@ -4,8 +4,8 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.PropertyOperations
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
-import io.hackle.sdk.common.channel.HackleSubscriptionOperations
-import io.hackle.sdk.common.channel.HackleSubscriptionStatus
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
+import io.hackle.sdk.common.subscription.HackleSubscriptionStatus
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision

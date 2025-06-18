@@ -2,7 +2,7 @@ package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.HackleClient
 import io.hackle.sdk.common.*
-import io.hackle.sdk.common.channel.HackleSubscriptionOperations
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
 import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
