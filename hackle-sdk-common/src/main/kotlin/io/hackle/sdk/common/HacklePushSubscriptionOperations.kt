@@ -1,6 +1,6 @@
 package io.hackle.sdk.common
 
-@Deprecated("Use HackleMarketingSubscriptionOperations instead")
+@Deprecated("Use HackleSubscriptionOperations instead")
 class HacklePushSubscriptionOperations private constructor(
 
     /**

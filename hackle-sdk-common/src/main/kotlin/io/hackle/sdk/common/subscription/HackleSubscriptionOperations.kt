@@ -1,5 +1,7 @@
 package io.hackle.sdk.common.subscription
 
+import java.util.*
+
 /**
  * subscription operations.
  */
@@ -29,7 +31,7 @@ class HackleSubscriptionOperations private constructor(
         }
 
         fun build(): HackleSubscriptionOperations {
-            return HackleSubscriptionOperations(operations)
+            return HackleSubscriptionOperations(Collections.unmodifiableMap(operations))
         }
     }
 

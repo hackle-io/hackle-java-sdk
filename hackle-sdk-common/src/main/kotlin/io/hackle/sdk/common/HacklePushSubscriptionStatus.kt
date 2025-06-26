@@ -3,7 +3,7 @@ package io.hackle.sdk.common
 /**
  * An enum that represents the status of a push subscription.
  */
-@Deprecated("Use HackleMarketingSubscriptionStatus instead")
+@Deprecated("Use HackleSubscriptionStatus instead")
 enum class HacklePushSubscriptionStatus(val key: String) {
 
     /**
