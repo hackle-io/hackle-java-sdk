@@ -4,6 +4,8 @@ import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.PropertyOperations
 import io.hackle.sdk.common.User
 import io.hackle.sdk.common.Variation
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
+import io.hackle.sdk.common.subscription.HackleSubscriptionStatus
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
@@ -320,6 +322,102 @@ internal class HackleClientImplTest {
                 sut.updateUserProperties(operations, user)
             } catch (e: Throwable) {
                 fail("fail")
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateMarketingStatus {
+        @Test
+        fun `update push subscription status`() {
+            val user = User.of("42")
+
+            sut.updatePushSubscriptions(
+                HackleSubscriptionOperations
+                    .builder()
+                    .marketing(HackleSubscriptionStatus.UNSUBSCRIBED)
+                    .information(HackleSubscriptionStatus.SUBSCRIBED)
+                    .custom("custom_key", HackleSubscriptionStatus.UNKNOWN)
+                    .build(), user
+            )
+
+            verify(exactly = 1) {
+                core.track(
+                    withArg {
+                        expectThat(it.key) isEqualTo "\$push_subscriptions"
+                        expectThat(it.properties.size) isEqualTo 3
+                        expectThat(it.properties["\$marketing"] as String) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties["\$information"] as String) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties["custom_key"] as String) isEqualTo "UNKNOWN"
+                    },
+                    HackleUser.of("42"),
+                    any()
+                )
+            }
+            verify(exactly = 1) {
+                core.flush()
+            }
+        }
+
+        @Test
+        fun `update sms subscription status`() {
+            val user = User.of("42")
+
+            sut.updateSmsSubscriptions(
+                HackleSubscriptionOperations
+                    .builder()
+                    .marketing(HackleSubscriptionStatus.UNSUBSCRIBED)
+                    .information(HackleSubscriptionStatus.SUBSCRIBED)
+                    .custom("custom_key", HackleSubscriptionStatus.UNKNOWN)
+                    .build(), user
+            )
+
+            verify(exactly = 1) {
+                core.track(
+                    withArg {
+                        expectThat(it.key) isEqualTo "\$sms_subscriptions"
+                        expectThat(it.properties.size) isEqualTo 3
+                        expectThat(it.properties["\$marketing"] as String) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties["\$information"] as String) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties["custom_key"] as String) isEqualTo "UNKNOWN"
+                    },
+                    HackleUser.of("42"),
+                    any()
+                )
+            }
+            verify(exactly = 1) {
+                core.flush()
+            }
+        }
+
+        @Test
+        fun `update kakao subscription status`() {
+            val user = User.of("42")
+
+            sut.updateKakaoSubscriptions(
+                HackleSubscriptionOperations
+                    .builder()
+                    .marketing(HackleSubscriptionStatus.UNSUBSCRIBED)
+                    .information(HackleSubscriptionStatus.SUBSCRIBED)
+                    .custom("custom_key", HackleSubscriptionStatus.UNKNOWN)
+                    .build(), user
+            )
+
+            verify(exactly = 1) {
+                core.track(
+                    withArg {
+                        expectThat(it.key) isEqualTo "\$kakao_subscriptions"
+                        expectThat(it.properties.size) isEqualTo 3
+                        expectThat(it.properties["\$marketing"] as String) isEqualTo "UNSUBSCRIBED"
+                        expectThat(it.properties["\$information"] as String) isEqualTo "SUBSCRIBED"
+                        expectThat(it.properties["custom_key"] as String) isEqualTo "UNKNOWN"
+                    },
+                    HackleUser.of("42"),
+                    any()
+                )
+            }
+            verify(exactly = 1) {
+                core.flush()
             }
         }
     }

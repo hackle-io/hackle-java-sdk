@@ -1,6 +1,7 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.common.*
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 
@@ -172,7 +173,7 @@ interface HackleClient : AutoCloseable {
     fun track(event: Event, user: User)
 
     /**
-     * Returns a instance of Hackle Remote Config.
+     * Returns an instance of Hackle Remote Config.
      */
     fun remoteConfig(user: User): HackleRemoteConfig
 
@@ -183,6 +184,39 @@ interface HackleClient : AutoCloseable {
      * @param user the user whose properties will be updated
      */
     fun updateUserProperties(operations: PropertyOperations, user: User)
+
+    /**
+     * Updates the user's push subscription status.
+     *
+     * @param operations The subscription operations.
+     * @param user The user whose subscription status will be updated.
+     */
+    fun updatePushSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    )
+
+    /**
+     * Updates the user's sms subscription status.
+     *
+     * @param operations The subscription operations.
+     * @param user The user whose subscription status will be updated.
+     */
+    fun updateSmsSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    )
+
+    /**
+     * Updates the user's kakao talk subscription status.
+     *
+     * @param operations The subscription operations.
+     * @param user The user whose subscription status will be updated.
+     */
+    fun updateKakaoSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    )
 
     /**
      * Shutdown the background task and release the resources used for the background task.
