@@ -60,6 +60,7 @@ internal class ValueOperatorMatcherFactory {
             Target.Match.Operator.LT -> LessThanMatcher
             Target.Match.Operator.LTE -> LessThanOrEqualToMatcher
             Target.Match.Operator.EXISTS -> ExistsMatcher
+            Target.Match.Operator.REGEX -> RegexMatcher
         }
     }
 }

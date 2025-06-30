@@ -65,3 +65,10 @@ internal object ExistsMatcher : OperatorMatcher {
         return userValue != null
     }
 }
+
+internal object RegexMatcher : OperatorMatcher {
+    override fun matches(valueMatcher: ValueMatcher, userValue: Any?, matchValues: List<Any>): Boolean {
+        if (userValue == null) return false
+        return matchValues.any { valueMatcher.regexMatch(userValue, it) }
+    }
+}

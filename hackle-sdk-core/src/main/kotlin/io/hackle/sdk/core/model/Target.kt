@@ -44,7 +44,8 @@ data class Target(
             GTE,
             LT,
             LTE,
-            EXISTS
+            EXISTS,
+            REGEX
         }
     }
 

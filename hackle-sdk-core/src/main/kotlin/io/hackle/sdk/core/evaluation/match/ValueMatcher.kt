@@ -15,6 +15,7 @@ internal interface ValueMatcher {
     fun greaterThanOrEqualToMatch(userValue: Any, matchValue: Any): Boolean
     fun lessThanMatch(userValue: Any, matchValue: Any): Boolean
     fun lessThanOrEqualToMatch(userValue: Any, matchValue: Any): Boolean
+    fun regexMatch(userValue: Any, matchValue: Any): Boolean
 }
 
 internal object StringMatcher : ValueMatcher {
@@ -65,6 +66,16 @@ internal object StringMatcher : ValueMatcher {
         val matchString = asStringOrNull(matchValue) ?: return false
         return userString <= matchString
     }
+
+    override fun regexMatch(userValue: Any, matchValue: Any): Boolean {
+        val userString = asStringOrNull(userValue) ?: return false
+        val matchString = asStringOrNull(matchValue) ?: return false
+        return try {
+            userString.contains(matchString.toRegex())
+        } catch (_: Exception) {
+            false
+        }
+    }
 }
 
 internal object NumberMatcher : ValueMatcher {
@@ -109,6 +120,10 @@ internal object NumberMatcher : ValueMatcher {
         val matchNumber = asDoubleOrNull(matchValue) ?: return false
         return userNumber <= matchNumber
     }
+
+    override fun regexMatch(userValue: Any, matchValue: Any): Boolean {
+        return false
+    }
 }
 
 internal object BooleanMatcher : ValueMatcher {
@@ -143,6 +158,10 @@ internal object BooleanMatcher : ValueMatcher {
     }
 
     override fun lessThanOrEqualToMatch(userValue: Any, matchValue: Any): Boolean {
+        return false
+    }
+
+    override fun regexMatch(userValue: Any, matchValue: Any): Boolean {
         return false
     }
 }
@@ -188,5 +207,9 @@ internal object VersionMatcher : ValueMatcher {
         val userVersion = asVersionOrNull(userValue) ?: return false
         val matchVersion = asVersionOrNull(matchValue) ?: return false
         return userVersion <= matchVersion
+    }
+
+    override fun regexMatch(userValue: Any, matchValue: Any): Boolean {
+        return false
     }
 }
