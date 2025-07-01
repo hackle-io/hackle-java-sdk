@@ -2,6 +2,7 @@ package io.hackle.sdk.internal.client
 
 import io.hackle.sdk.HackleClient
 import io.hackle.sdk.common.*
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.EXCEPTION
 import io.hackle.sdk.common.decision.DecisionReason.INVALID_INPUT
@@ -117,6 +118,45 @@ internal class HackleClientImpl(
             core.flush()
         } catch (e: Exception) {
             log.error { "Unexpected exception while update user properties: $e" }
+        }
+    }
+
+    override fun updatePushSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    ) {
+        try {
+            val event = operations.toEvent("\$push_subscriptions")
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update push subscription status: $e" }
+        }
+    }
+
+    override fun updateSmsSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    ) {
+        try {
+            val event = operations.toEvent("\$sms_subscriptions")
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update sms subscription status: $e" }
+        }
+    }
+
+    override fun updateKakaoSubscriptions(
+        operations: HackleSubscriptionOperations,
+        user: User
+    ) {
+        try {
+            val event = operations.toEvent("\$kakao_subscriptions")
+            track(event, user)
+            core.flush()
+        } catch (e: Exception) {
+            log.error { "Unexpected exception while update kakao subscription status: $e" }
         }
     }
 
