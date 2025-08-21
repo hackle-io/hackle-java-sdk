@@ -1,6 +1,6 @@
 package io.hackle.sdk.core.evaluation.evaluator
 
-internal abstract class AbstractEvaluatorRequest : Evaluator.Request {
+abstract class AbstractEvaluatorRequest : Evaluator.Request {
 
     final override fun equals(other: Any?): Boolean {
         return when {

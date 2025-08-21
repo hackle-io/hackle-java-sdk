@@ -2,9 +2,9 @@ package io.hackle.sdk.core.evaluation.evaluator
 
 internal class DelegatingEvaluator : Evaluator {
 
-    private val evaluators = mutableListOf<AbstractEvaluator<*, *>>()
+    private val evaluators = mutableListOf<ContextualEvaluator<*, *>>()
 
-    fun add(evaluator: AbstractEvaluator<*, *>) {
+    fun add(evaluator: ContextualEvaluator<*, *>) {
         evaluators.add(evaluator)
     }
 

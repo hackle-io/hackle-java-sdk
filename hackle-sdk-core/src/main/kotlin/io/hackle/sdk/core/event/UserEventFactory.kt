@@ -3,7 +3,6 @@ package io.hackle.sdk.core.event
 import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.internal.time.Clock
 
@@ -62,8 +61,7 @@ internal class UserEventFactory(
                 )
             }
 
-            is InAppMessageEvaluation -> null
-            else -> throw IllegalArgumentException("Unsupported Evaluation [${evaluation::class.java.simpleName}")
+            else -> null
         }
     }
 

@@ -35,6 +35,9 @@ object Schedulers {
         }
 
         private class Job(private val real: ScheduledFuture<*>) : ScheduledJob {
+            override val isActive: Boolean get() = !isCompleted
+            override val isCompleted: Boolean get() = real.isDone
+            override val isCancelled: Boolean get() = real.isCancelled
             override fun cancel() {
                 real.cancel(false)
             }

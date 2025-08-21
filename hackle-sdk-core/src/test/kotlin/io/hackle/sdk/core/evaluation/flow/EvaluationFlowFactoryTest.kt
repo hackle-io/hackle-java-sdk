@@ -2,7 +2,15 @@ package io.hackle.sdk.core.evaluation.flow
 
 import io.hackle.sdk.core.evaluation.EvaluationContext
 import io.hackle.sdk.core.evaluation.evaluator.experiment.*
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.*
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.DraftInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.FrequencyCapInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.HiddenInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.EligibleInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.OverrideInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.PauseInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.PeriodInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.PlatformInAppMessageEligibilityFlowEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.TargetInAppMessageEligibilityFlowEvaluator
 import io.hackle.sdk.core.model.Experiment
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -47,16 +55,15 @@ internal class EvaluationFlowFactoryTest {
     fun `IN_APP_MESSAGE`() {
         val flow = sut.inAppMessageFlow()
         expectThat(flow)
-            .isDecisionWith<PlatformInAppMessageFlowEvaluator>()
-            .isDecisionWith<OverrideInAppMessageFlowEvaluator>()
-            .isDecisionWith<DraftInAppMessageFlowEvaluator>()
-            .isDecisionWith<PauseInAppMessageFlowEvaluator>()
-            .isDecisionWith<PeriodInAppMessageFlowEvaluator>()
-            .isDecisionWith<TargetInAppMessageFlowEvaluator>()
-            .isDecisionWith<ExperimentInAppMessageFlowEvaluator>()
-            .isDecisionWith<FrequencyCapInAppMessageFlowEvaluator>()
-            .isDecisionWith<HiddenInAppMessageFlowEvaluator>()
-            .isDecisionWith<MessageResolutionInAppMessageFlowEvaluator>()
+            .isDecisionWith<PlatformInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<OverrideInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<DraftInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<PauseInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<PeriodInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<TargetInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<FrequencyCapInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<HiddenInAppMessageEligibilityFlowEvaluator>()
+            .isDecisionWith<EligibleInAppMessageEligibilityFlowEvaluator>()
             .isEnd()
     }
 }

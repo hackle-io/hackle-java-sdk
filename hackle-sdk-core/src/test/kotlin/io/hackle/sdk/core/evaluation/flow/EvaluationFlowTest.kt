@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentFlow
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageFlow
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityFlow
 import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
@@ -28,8 +28,8 @@ internal class EvaluationFlowTest {
         @Test
         fun `when flow meed decision then evaluate flow`() {
             val evaluation = InAppMessages.evaluation()
-            val flow: InAppMessageFlow = InAppMessageFlow.create(evaluation)
-            val actual = flow.evaluate(InAppMessages.request(), Evaluators.context())
+            val flow: InAppMessageEligibilityFlow = InAppMessageEligibilityFlow.create(evaluation)
+            val actual = flow.evaluate(InAppMessages.eligibilityRequest(), Evaluators.context())
             expectThat(actual) isSameInstanceAs evaluation
         }
     }

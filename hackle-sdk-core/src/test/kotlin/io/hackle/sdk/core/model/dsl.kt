@@ -3,10 +3,10 @@ package io.hackle.sdk.core.model
 import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.decision.InAppMessageDecision
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutRequest
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
@@ -421,6 +421,7 @@ internal object InAppMessages {
         status: InAppMessage.Status = InAppMessage.Status.ACTIVE,
         period: InAppMessage.Period = InAppMessage.Period.Always,
         eventTrigger: InAppMessage.EventTrigger = eventTrigger(),
+        evaluateContext: InAppMessage.EvaluateContext = InAppMessage.EvaluateContext(false),
         targetContext: InAppMessage.TargetContext = targetContext(),
         messageContext: InAppMessage.MessageContext = messageContext(),
     ): InAppMessage {
@@ -430,6 +431,7 @@ internal object InAppMessages {
             status = status,
             period = period,
             eventTrigger = eventTrigger,
+            evaluateContext = evaluateContext,
             targetContext = targetContext,
             messageContext = messageContext
         )
@@ -438,8 +440,9 @@ internal object InAppMessages {
     fun eventTrigger(
         rules: List<InAppMessage.EventTrigger.Rule> = listOf(InAppMessage.EventTrigger.Rule("test", emptyList())),
         frequencyCap: InAppMessage.EventTrigger.FrequencyCap? = null,
+        delay: InAppMessage.Delay = InAppMessage.Delay(InAppMessage.Delay.Type.IMMEDIATE, null),
     ): InAppMessage.EventTrigger {
-        return InAppMessage.EventTrigger(rules = rules, frequencyCap = frequencyCap)
+        return InAppMessage.EventTrigger(rules = rules, frequencyCap = frequencyCap, delay = delay)
     }
 
     fun frequencyCap(
@@ -572,13 +575,13 @@ internal object InAppMessages {
         )
     }
 
-    fun request(
+    fun eligibilityRequest(
         workspace: Workspace = workspace(),
         user: HackleUser = HackleUser.builder().identifier(IdentifierType.ID, "user").build(),
         inAppMessage: InAppMessage = create(),
         timestamp: Long = System.currentTimeMillis(),
-    ): InAppMessageRequest {
-        return InAppMessageRequest(
+    ): InAppMessageEligibilityRequest {
+        return InAppMessageEligibilityRequest(
             workspace = workspace,
             user = user,
             inAppMessage = inAppMessage,
@@ -586,28 +589,29 @@ internal object InAppMessages {
         )
     }
 
+    fun layoutRequest(
+        workspace: Workspace = workspace(),
+        user: HackleUser = HackleUser.builder().identifier(IdentifierType.ID, "user").build(),
+        inAppMessage: InAppMessage = create(),
+    ): InAppMessageLayoutRequest {
+        return InAppMessageLayoutRequest(
+            workspace = workspace,
+            user = user,
+            inAppMessage = inAppMessage
+        )
+    }
+
     fun evaluation(
         reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
         targetEvaluations: List<Evaluator.Evaluation> = emptyList(),
         inAppMessage: InAppMessage = create(),
-        message: InAppMessage.Message? = inAppMessage.messageContext.messages[0],
-        properties: Map<String, Any> = emptyMap(),
-    ): InAppMessageEvaluation {
-        return InAppMessageEvaluation(
+        isMatched: Boolean = true,
+    ): InAppMessageEligibilityEvaluation {
+        return InAppMessageEligibilityEvaluation(
             reason = reason,
             targetEvaluations = targetEvaluations,
             inAppMessage = inAppMessage,
-            message = message,
-            properties = properties
+            isEligible = isMatched
         )
-    }
-
-    fun decision(
-        inAppMessage: InAppMessage? = InAppMessages.create(),
-        message: InAppMessage.Message? = inAppMessage?.messageContext?.messages?.get(0),
-        reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
-        properties: Map<String, Any> = emptyMap(),
-    ): InAppMessageDecision {
-        return InAppMessageDecision(inAppMessage, message, reason, properties)
     }
 }

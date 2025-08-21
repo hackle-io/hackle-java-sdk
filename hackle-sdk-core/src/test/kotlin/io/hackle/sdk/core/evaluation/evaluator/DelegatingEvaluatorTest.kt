@@ -16,7 +16,7 @@ internal class DelegatingEvaluatorTest {
 
         val r1 = mockk<Evaluator.Request>()
         val e1 = mockk<Evaluator.Evaluation>()
-        val evaluator1 = mockk<AbstractEvaluator<Evaluator.Request, Evaluator.Evaluation>> {
+        val evaluator1 = mockk<ContextualEvaluator<Evaluator.Request, Evaluator.Evaluation>> {
             every { supports(eq(r1)) } returns true
             every { supports(neq(r1)) } returns false
             every { evaluate(r1, any()) } returns e1
@@ -28,7 +28,7 @@ internal class DelegatingEvaluatorTest {
 
         val r2 = mockk<Evaluator.Request>()
         val e2 = mockk<Evaluator.Evaluation>()
-        val evaluator2 = mockk<AbstractEvaluator<Evaluator.Request, Evaluator.Evaluation>> {
+        val evaluator2 = mockk<ContextualEvaluator<Evaluator.Request, Evaluator.Evaluation>> {
             every { supports(eq(r2)) } returns true
             every { supports(neq(r2)) } returns false
             every { evaluate(r2, any()) } returns e2

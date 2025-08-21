@@ -1,4 +1,4 @@
-package io.hackle.sdk.core.evaluation.evaluator.inappmessage
+package io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility
 
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
@@ -19,18 +19,18 @@ import strikt.api.expectThat
 import strikt.assertions.*
 
 @ExtendWith(MockKExtension::class)
-internal class InAppMessageEvaluatorTest {
+internal class InAppMessageEligibilityEvaluatorTest {
 
     @MockK
     private lateinit var evaluationFlowFactory: EvaluationFlowFactory
 
     @InjectMockKs
-    private lateinit var sut: InAppMessageEvaluator
+    private lateinit var sut: InAppMessageEligibilityEvaluator
 
     @Test
     fun `supports`() {
         expectThat(sut.supports(experimentRequest())).isFalse()
-        expectThat(sut.supports(InAppMessages.request())).isTrue()
+        expectThat(sut.supports(InAppMessages.eligibilityRequest())).isTrue()
     }
 
     @Nested
@@ -38,7 +38,7 @@ internal class InAppMessageEvaluatorTest {
 
         @Test
         fun `circular`() {
-            val request = InAppMessages.request()
+            val request = InAppMessages.eligibilityRequest()
             val context = Evaluators.context()
             context.add(request)
 
@@ -53,10 +53,10 @@ internal class InAppMessageEvaluatorTest {
         fun `flow - evaluation`() {
             // given
             val evaluation = InAppMessages.evaluation()
-            val evaluationFlow: InAppMessageFlow = EvaluationFlow.create(evaluation)
+            val evaluationFlow: InAppMessageEligibilityFlow = EvaluationFlow.create(evaluation)
             every { evaluationFlowFactory.inAppMessageFlow() } returns evaluationFlow
 
-            val request = InAppMessages.request()
+            val request = InAppMessages.eligibilityRequest()
             val context = Evaluators.context()
 
             // when
@@ -69,10 +69,10 @@ internal class InAppMessageEvaluatorTest {
         @Test
         fun `flow - default`() {
             // given
-            val evaluationFlow: InAppMessageFlow = EvaluationFlow.end()
+            val evaluationFlow: InAppMessageEligibilityFlow = EvaluationFlow.end()
             every { evaluationFlowFactory.inAppMessageFlow() } returns evaluationFlow
 
-            val request = InAppMessages.request()
+            val request = InAppMessages.eligibilityRequest()
             val context = Evaluators.context()
 
             // when
