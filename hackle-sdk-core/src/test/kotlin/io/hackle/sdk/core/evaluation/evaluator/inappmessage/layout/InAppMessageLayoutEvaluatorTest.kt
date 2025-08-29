@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout
 
 import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.core.evaluation.evaluator.EvaluationEventRecorder
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
@@ -10,7 +11,9 @@ import io.hackle.sdk.core.model.experiment
 import io.hackle.sdk.core.workspace.Workspaces
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -20,8 +23,12 @@ import strikt.assertions.*
 
 @ExtendWith(MockKExtension::class)
 class InAppMessageLayoutEvaluatorTest {
+
     @MockK
     private lateinit var evaluator: Evaluator
+
+    @RelaxedMockK
+    private lateinit var eventRecorder: EvaluationEventRecorder
 
     private lateinit var sut: InAppMessageLayoutEvaluator
 
@@ -29,7 +36,7 @@ class InAppMessageLayoutEvaluatorTest {
     fun setUp() {
         val experimentEvaluator = InAppMessageExperimentEvaluator(evaluator)
         val selector = InAppMessageLayoutSelector()
-        sut = InAppMessageLayoutEvaluator(experimentEvaluator, selector)
+        sut = InAppMessageLayoutEvaluator(experimentEvaluator, selector, eventRecorder)
     }
 
     @Test
@@ -157,6 +164,21 @@ class InAppMessageLayoutEvaluatorTest {
         // when & then
         assertThrows<IllegalArgumentException> {
             sut.evaluate(request, Evaluators.context())
+        }
+    }
+
+    @Test
+    fun `record`() {
+        // given
+        val request = InAppMessages.layoutRequest()
+        val evaluation = InAppMessages.layoutEvaluation()
+
+        // when
+        sut.record(request, evaluation)
+
+        // then
+        verify(exactly = 1) {
+            eventRecorder.record(request, evaluation)
         }
     }
 }

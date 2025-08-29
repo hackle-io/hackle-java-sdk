@@ -51,7 +51,7 @@ class ExperimentContextualEvaluatorTest {
         val context = Evaluators.context()
         val experiment = experiment()
 
-        val evaluation = InAppMessages.evaluation()
+        val evaluation = InAppMessages.eligibilityEvaluation()
         every { evaluator.evaluate(any(), any()) } returns evaluation
 
         assertThrows<IllegalArgumentException> {

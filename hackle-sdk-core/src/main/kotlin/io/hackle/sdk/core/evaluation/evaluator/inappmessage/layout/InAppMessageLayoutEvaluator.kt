@@ -1,13 +1,15 @@
 package io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout
 
-import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.EvaluationEventRecorder
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
 import io.hackle.sdk.core.model.InAppMessage
 
 class InAppMessageLayoutEvaluator(
     private val experimentEvaluator: InAppMessageExperimentEvaluator,
     private val selector: InAppMessageLayoutSelector,
-) : ContextualEvaluator<InAppMessageLayoutRequest, InAppMessageLayoutEvaluation>() {
+    private val eventRecorder: EvaluationEventRecorder,
+) : InAppMessageEvaluator<InAppMessageLayoutRequest, InAppMessageLayoutEvaluation>() {
     override fun supports(request: Evaluator.Request): Boolean {
         return request is InAppMessageLayoutRequest
     }
@@ -54,5 +56,9 @@ class InAppMessageLayoutEvaluator(
         override fun invoke(message: InAppMessage.Message): Boolean {
             return this.variationKey == message.variationKey
         }
+    }
+
+    override fun record(request: InAppMessageLayoutRequest, evaluation: InAppMessageLayoutEvaluation) {
+        eventRecorder.record(request, evaluation)
     }
 }

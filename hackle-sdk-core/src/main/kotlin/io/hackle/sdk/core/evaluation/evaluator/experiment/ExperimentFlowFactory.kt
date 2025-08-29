@@ -1,8 +1,6 @@
-package io.hackle.sdk.core.evaluation.flow
+package io.hackle.sdk.core.evaluation.evaluator.experiment
 
 import io.hackle.sdk.core.evaluation.EvaluationContext
-import io.hackle.sdk.core.evaluation.evaluator.experiment.*
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.*
 import io.hackle.sdk.core.evaluation.get
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -11,7 +9,7 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 /**
  * @author Yong
  */
-class EvaluationFlowFactory(context: EvaluationContext) {
+class ExperimentFlowFactory(context: EvaluationContext) {
 
     private val abTestFlow: ExperimentFlow = ExperimentFlow.of(
         OverrideEvaluator(context.get()),
@@ -23,7 +21,7 @@ class EvaluationFlowFactory(context: EvaluationContext) {
         CompletedExperimentEvaluator(),
         TrafficAllocateEvaluator(context.get())
     )
-    private val featureFlagFlow: ExperimentFlow = EvaluationFlow.of(
+    private val featureFlagFlow: ExperimentFlow = ExperimentFlow.of(
         DraftExperimentEvaluator(),
         PausedExperimentEvaluator(),
         CompletedExperimentEvaluator(),
@@ -32,26 +30,11 @@ class EvaluationFlowFactory(context: EvaluationContext) {
         TargetRuleEvaluator(context.get(), context.get()),
         DefaultRuleEvaluator(context.get())
     )
-    private val inAppMessageEligibilityFlow: InAppMessageEligibilityFlow = InAppMessageEligibilityFlow.of(
-        PlatformInAppMessageEligibilityFlowEvaluator(),
-        OverrideInAppMessageEligibilityFlowEvaluator(context.get()),
-        DraftInAppMessageEligibilityFlowEvaluator(),
-        PauseInAppMessageEligibilityFlowEvaluator(),
-        PeriodInAppMessageEligibilityFlowEvaluator(),
-        TargetInAppMessageEligibilityFlowEvaluator(context.get()),
-        FrequencyCapInAppMessageEligibilityFlowEvaluator(context.get()),
-        HiddenInAppMessageEligibilityFlowEvaluator(context.get()),
-        EligibleInAppMessageEligibilityFlowEvaluator()
-    )
 
     internal fun experimentFlow(experimentType: Experiment.Type): ExperimentFlow {
         return when (experimentType) {
             AB_TEST -> abTestFlow
             FEATURE_FLAG -> featureFlagFlow
         }
-    }
-
-    internal fun inAppMessageFlow(): InAppMessageEligibilityFlow {
-        return inAppMessageEligibilityFlow
     }
 }

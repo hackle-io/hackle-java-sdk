@@ -1,16 +1,16 @@
 package io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility
 
 import io.hackle.sdk.common.decision.DecisionReason
+import io.hackle.sdk.core.evaluation.evaluator.EvaluationEventRecorder
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
-import io.hackle.sdk.core.evaluation.flow.create
 import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -22,7 +22,10 @@ import strikt.assertions.*
 internal class InAppMessageEligibilityEvaluatorTest {
 
     @MockK
-    private lateinit var evaluationFlowFactory: EvaluationFlowFactory
+    private lateinit var evaluationFlow: InAppMessageEligibilityFlow
+
+    @RelaxedMockK
+    private lateinit var eventRecorder: EvaluationEventRecorder
 
     @InjectMockKs
     private lateinit var sut: InAppMessageEligibilityEvaluator
@@ -52,9 +55,8 @@ internal class InAppMessageEligibilityEvaluatorTest {
         @Test
         fun `flow - evaluation`() {
             // given
-            val evaluation = InAppMessages.evaluation()
-            val evaluationFlow: InAppMessageEligibilityFlow = EvaluationFlow.create(evaluation)
-            every { evaluationFlowFactory.inAppMessageFlow() } returns evaluationFlow
+            val evaluation = InAppMessages.eligibilityEvaluation()
+            every { evaluationFlow.evaluate(any(), any()) } returns evaluation
 
             val request = InAppMessages.eligibilityRequest()
             val context = Evaluators.context()
@@ -69,8 +71,7 @@ internal class InAppMessageEligibilityEvaluatorTest {
         @Test
         fun `flow - default`() {
             // given
-            val evaluationFlow: InAppMessageEligibilityFlow = EvaluationFlow.end()
-            every { evaluationFlowFactory.inAppMessageFlow() } returns evaluationFlow
+            every { evaluationFlow.evaluate(any(), any()) } returns null
 
             val request = InAppMessages.eligibilityRequest()
             val context = Evaluators.context()
@@ -80,6 +81,83 @@ internal class InAppMessageEligibilityEvaluatorTest {
 
             // then
             expectThat(actual.reason) isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TARGET
+        }
+    }
+
+    @Nested
+    inner class RecordTest {
+        @Test
+        fun `record EligibilityEvaluation`() {
+            // given
+            val request = InAppMessages.eligibilityRequest()
+            val evaluation = InAppMessages.eligibilityEvaluation()
+
+            // when
+            sut.record(request, evaluation)
+
+            // then
+            verify(exactly = 1) {
+                eventRecorder.record(request, evaluation)
+            }
+        }
+
+        @Test
+        fun `when eligible then do not record layout evaluation`() {
+            // given
+            val request = InAppMessages.eligibilityRequest()
+            val layoutEvaluation = InAppMessages.layoutEvaluation()
+            val evaluation = InAppMessages.eligibilityEvaluation(
+                isEligible = true,
+                layoutEvaluation = layoutEvaluation
+            )
+
+            // when
+            sut.record(request, evaluation)
+
+            // then
+            verify(exactly = 0) {
+                eventRecorder.record(any(), layoutEvaluation)
+            }
+        }
+
+        @Test
+        fun `when ineligible with no layout then do not record`() {
+            // given
+            val request = InAppMessages.eligibilityRequest()
+            val evaluation = InAppMessages.eligibilityEvaluation(
+                isEligible = false,
+                layoutEvaluation = null
+            )
+
+            // when
+            sut.record(request, evaluation)
+
+            // then
+            verify(exactly = 1) {
+                eventRecorder.record(any(), any())
+            }
+        }
+
+        @Test
+        fun `when ineligible with layout then record layout evaluation`() {
+            // given
+            val request = InAppMessages.eligibilityRequest()
+            val layoutEvaluation = InAppMessages.layoutEvaluation()
+            val evaluation = InAppMessages.eligibilityEvaluation(
+                isEligible = false,
+                layoutEvaluation = layoutEvaluation
+            )
+
+            // when
+            sut.record(request, evaluation)
+
+            // then
+            verify(exactly = 1) {
+                eventRecorder.record(request, evaluation)
+            }
+            verify(exactly = 1) {
+                eventRecorder.record(layoutEvaluation.request, layoutEvaluation)
+            }
         }
     }
 }

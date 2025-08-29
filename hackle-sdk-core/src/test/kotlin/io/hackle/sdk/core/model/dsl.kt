@@ -6,6 +6,7 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutRequest
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
@@ -589,6 +590,23 @@ internal object InAppMessages {
         )
     }
 
+
+    fun eligibilityEvaluation(
+        reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
+        targetEvaluations: List<Evaluator.Evaluation> = emptyList(),
+        inAppMessage: InAppMessage = create(),
+        isEligible: Boolean = true,
+        layoutEvaluation: InAppMessageLayoutEvaluation? = null,
+    ): InAppMessageEligibilityEvaluation {
+        return InAppMessageEligibilityEvaluation(
+            reason = reason,
+            targetEvaluations = targetEvaluations,
+            inAppMessage = inAppMessage,
+            isEligible = isEligible,
+            layoutEvaluation = layoutEvaluation
+        )
+    }
+
     fun layoutRequest(
         workspace: Workspace = workspace(),
         user: HackleUser = HackleUser.builder().identifier(IdentifierType.ID, "user").build(),
@@ -601,17 +619,19 @@ internal object InAppMessages {
         )
     }
 
-    fun evaluation(
+    fun layoutEvaluation(
+        request: InAppMessageLayoutRequest = layoutRequest(),
         reason: DecisionReason = DecisionReason.IN_APP_MESSAGE_TARGET,
         targetEvaluations: List<Evaluator.Evaluation> = emptyList(),
-        inAppMessage: InAppMessage = create(),
-        isMatched: Boolean = true,
-    ): InAppMessageEligibilityEvaluation {
-        return InAppMessageEligibilityEvaluation(
+        message: InAppMessage.Message = request.inAppMessage.messageContext.messages.first(),
+        properties: Map<String, Any> = emptyMap(),
+    ): InAppMessageLayoutEvaluation {
+        return InAppMessageLayoutEvaluation(
+            request = request,
             reason = reason,
             targetEvaluations = targetEvaluations,
-            inAppMessage = inAppMessage,
-            isEligible = isMatched
+            message = message,
+            properties = properties
         )
     }
 }

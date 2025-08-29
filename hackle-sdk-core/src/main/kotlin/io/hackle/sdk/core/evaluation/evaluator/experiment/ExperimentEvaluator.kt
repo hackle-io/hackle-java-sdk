@@ -3,10 +3,9 @@ package io.hackle.sdk.core.evaluation.evaluator.experiment
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 
 internal class ExperimentEvaluator(
-    private val evaluationFlowFactory: EvaluationFlowFactory,
+    private val evaluationFlowFactory: ExperimentFlowFactory,
 ) : ContextualEvaluator<ExperimentRequest, ExperimentEvaluation>() {
     override fun supports(request: Evaluator.Request): Boolean {
         return request is ExperimentRequest

@@ -2,6 +2,10 @@ package io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility
 
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutRequest
+import io.hackle.sdk.core.evaluation.evaluator.set
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.FlowEvaluator
 import io.hackle.sdk.core.evaluation.target.InAppMessageFrequencyCapMatcher
@@ -14,7 +18,7 @@ import io.hackle.sdk.core.model.InAppMessage.Status.PAUSE
 import io.hackle.sdk.core.model.contains
 import io.hackle.sdk.core.model.supports
 
-internal typealias InAppMessageEligibilityFlow = EvaluationFlow<InAppMessageEligibilityRequest, InAppMessageEligibilityEvaluation>
+typealias InAppMessageEligibilityFlow = EvaluationFlow<InAppMessageEligibilityRequest, InAppMessageEligibilityEvaluation>
 
 internal interface InAppMessageEligibilityFlowEvaluator :
     FlowEvaluator<InAppMessageEligibilityRequest, InAppMessageEligibilityEvaluation> {
@@ -123,28 +127,6 @@ internal class PeriodInAppMessageEligibilityFlowEvaluator : InAppMessageEligibil
 }
 
 /**
- * Hidden Check
- *
- * SDK 에서 판단해서 숨겨야 하는 경우
- * - 하루동안 가리기 설정된 경우
- */
-internal class HiddenInAppMessageEligibilityFlowEvaluator(
-    private val hiddenMatcher: InAppMessageHiddenMatcher,
-) : InAppMessageEligibilityFlowEvaluator {
-    override fun evaluate(
-        request: InAppMessageEligibilityRequest,
-        context: Evaluator.Context,
-        nextFlow: InAppMessageEligibilityFlow,
-    ): InAppMessageEligibilityEvaluation? {
-        val isHidden = hiddenMatcher.matches(request, context)
-        if (isHidden) {
-            return InAppMessageEligibilityEvaluation.ineligible(request, context, IN_APP_MESSAGE_HIDDEN)
-        }
-        return nextFlow.evaluate(request, context)
-    }
-}
-
-/**
  * Target Check
  *
  * IAM 타겟팅이 된 경우
@@ -166,6 +148,23 @@ internal class TargetInAppMessageEligibilityFlowEvaluator(
     }
 }
 
+internal class LayoutResolveInAppMessageEligibilityFlowEvaluator(
+    private val layoutEvaluator: InAppMessageLayoutEvaluator,
+) : InAppMessageEligibilityFlowEvaluator {
+    override fun evaluate(
+        request: InAppMessageEligibilityRequest,
+        context: Evaluator.Context,
+        nextFlow: InAppMessageEligibilityFlow,
+    ): InAppMessageEligibilityEvaluation? {
+
+        val layoutRequest = InAppMessageLayoutRequest.of(request)
+        val layoutEvaluation = layoutEvaluator.evaluate(layoutRequest, Evaluators.context())
+        context.set(layoutEvaluation)
+
+        return nextFlow.evaluate(request, context)
+    }
+}
+
 /**
  * 노출 빈도수 체크
  */
@@ -182,6 +181,28 @@ internal class FrequencyCapInAppMessageEligibilityFlowEvaluator(
             return InAppMessageEligibilityEvaluation.ineligible(request, context, IN_APP_MESSAGE_FREQUENCY_CAPPED)
         }
 
+        return nextFlow.evaluate(request, context)
+    }
+}
+
+/**
+ * Hidden Check
+ *
+ * SDK 에서 판단해서 숨겨야 하는 경우
+ * - 하루동안 가리기 설정된 경우
+ */
+internal class HiddenInAppMessageEligibilityFlowEvaluator(
+    private val hiddenMatcher: InAppMessageHiddenMatcher,
+) : InAppMessageEligibilityFlowEvaluator {
+    override fun evaluate(
+        request: InAppMessageEligibilityRequest,
+        context: Evaluator.Context,
+        nextFlow: InAppMessageEligibilityFlow,
+    ): InAppMessageEligibilityEvaluation? {
+        val isHidden = hiddenMatcher.matches(request, context)
+        if (isHidden) {
+            return InAppMessageEligibilityEvaluation.ineligible(request, context, IN_APP_MESSAGE_HIDDEN)
+        }
         return nextFlow.evaluate(request, context)
     }
 }

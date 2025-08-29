@@ -8,16 +8,18 @@ import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.evaluation.EvaluationContext
-import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentFlowFactory
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluatorEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluatorRequest
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.evaluation.get
 import io.hackle.sdk.core.evaluation.target.DelegatingManualOverrideStorage
 import io.hackle.sdk.core.evaluation.target.ManualOverrideStorage
@@ -144,14 +146,13 @@ class HackleCore internal constructor(
         return RemoteConfigDecision.of(evaluation.value, evaluation.reason) as RemoteConfigDecision<T>
     }
 
-    fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> evaluate(
+    fun <REQUEST : InAppMessageEvaluatorRequest, EVALUATION : InAppMessageEvaluatorEvaluation> inAppMessage(
         request: REQUEST,
         context: Evaluator.Context,
-        evaluator: ContextualEvaluator<REQUEST, EVALUATION>,
+        evaluator: InAppMessageEvaluator<REQUEST, EVALUATION>,
     ): EVALUATION {
         val evaluation = evaluator.evaluate(request, context)
-        val events = eventFactory.create(request, evaluation)
-        eventProcessor.process(events)
+        evaluator.record(request, evaluation)
         return evaluation
     }
 
@@ -168,6 +169,7 @@ class HackleCore internal constructor(
         fun create(
             context: EvaluationContext,
             workspaceFetcher: WorkspaceFetcher,
+            eventFactory: UserEventFactory,
             eventProcessor: EventProcessor,
             vararg manualOverrideStorages: ManualOverrideStorage,
         ): HackleCore {
@@ -176,10 +178,7 @@ class HackleCore internal constructor(
             val manualOverrideStorage = DelegatingManualOverrideStorage(manualOverrideStorages.toList())
             context.initialize(delegatingEvaluator, manualOverrideStorage, Clock.SYSTEM)
 
-            val flowFactory = EvaluationFlowFactory(context)
-            context.register(flowFactory)
-
-            val experimentEvaluator = ExperimentEvaluator(flowFactory)
+            val experimentEvaluator = ExperimentEvaluator(ExperimentFlowFactory(context))
             val remoteConfigEvaluator = RemoteConfigEvaluator<Any>(context.get())
 
             delegatingEvaluator.add(experimentEvaluator)
@@ -189,7 +188,7 @@ class HackleCore internal constructor(
                 experimentEvaluator = experimentEvaluator,
                 remoteConfigEvaluator = remoteConfigEvaluator,
                 workspaceFetcher = workspaceFetcher,
-                eventFactory = UserEventFactory(Clock.SYSTEM),
+                eventFactory = eventFactory,
                 eventProcessor = eventProcessor,
             )
         }

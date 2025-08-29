@@ -3,6 +3,9 @@ package io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
+import io.hackle.sdk.core.evaluation.evaluator.get
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutEvaluator
 import io.hackle.sdk.core.evaluation.flow.EvaluationFlow
 import io.hackle.sdk.core.evaluation.flow.create
 import io.hackle.sdk.core.evaluation.target.InAppMessageFrequencyCapMatcher
@@ -32,7 +35,7 @@ internal class InAppMessageEligibilityFlowEvaluatorTest {
 
     @BeforeEach
     fun beforeEach() {
-        evaluation = InAppMessages.evaluation()
+        evaluation = InAppMessages.eligibilityEvaluation()
         nextFlow = EvaluationFlow.create(evaluation)
         context = Evaluators.context()
     }
@@ -230,45 +233,6 @@ internal class InAppMessageEligibilityFlowEvaluatorTest {
     }
 
     @Nested
-    inner class HiddenInAppMessageEligibilityFlowEvaluatorTest {
-
-        @MockK
-        private lateinit var hiddenMatcher: InAppMessageHiddenMatcher
-
-        @InjectMockKs
-        private lateinit var sut: HiddenInAppMessageEligibilityFlowEvaluator
-
-        @Test
-        fun `when hide then evaluated as ineligible`() {
-            // given
-            every { hiddenMatcher.matches(any(), any()) } returns true
-            val request = InAppMessages.eligibilityRequest()
-
-            // when
-            val actual = sut.evaluate(request, context, nextFlow)
-
-            // then
-            expectThat(actual).isNotNull().and {
-                get { isEligible }.isFalse()
-                get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_HIDDEN
-            }
-        }
-
-        @Test
-        fun `when not hide then evaluate next flow`() {
-            // given
-            every { hiddenMatcher.matches(any(), any()) } returns false
-            val request = InAppMessages.eligibilityRequest()
-
-            // when
-            val actual = sut.evaluate(request, context, nextFlow)
-
-            // then
-            expectThat(actual) isSameInstanceAs evaluation
-        }
-    }
-
-    @Nested
     inner class TargetInAppMessageEligibilityFlowEvaluatorTest {
 
         @MockK
@@ -309,6 +273,33 @@ internal class InAppMessageEligibilityFlowEvaluatorTest {
     }
 
     @Nested
+    inner class LayoutResolveInAppMessageEligibilityFlowEvaluatorTest {
+
+        @MockK
+        private lateinit var layoutEvaluator: InAppMessageLayoutEvaluator
+
+        @InjectMockKs
+        private lateinit var sut: LayoutResolveInAppMessageEligibilityFlowEvaluator
+
+        @Test
+        fun `resolve layout`() {
+            // given
+            val layoutEvaluation = InAppMessages.layoutEvaluation()
+            every { layoutEvaluator.evaluate(any(), any()) } returns layoutEvaluation
+
+            val request = InAppMessages.eligibilityRequest()
+
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual) isSameInstanceAs evaluation
+            expectThat(context.get<InAppMessageLayoutEvaluation>()) isSameInstanceAs layoutEvaluation
+        }
+    }
+
+    @Nested
     inner class FrequencyCapInAppMessageEligibilityFlowEvaluatorTest {
 
         @MockK
@@ -337,6 +328,46 @@ internal class InAppMessageEligibilityFlowEvaluatorTest {
         fun `when not frequency capped then evaluate next flow`() {
             // given
             every { frequencyCapMatcher.matches(any(), any()) } returns false
+            val request = InAppMessages.eligibilityRequest()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual) isSameInstanceAs evaluation
+        }
+    }
+
+
+    @Nested
+    inner class HiddenInAppMessageEligibilityFlowEvaluatorTest {
+
+        @MockK
+        private lateinit var hiddenMatcher: InAppMessageHiddenMatcher
+
+        @InjectMockKs
+        private lateinit var sut: HiddenInAppMessageEligibilityFlowEvaluator
+
+        @Test
+        fun `when hide then evaluated as ineligible`() {
+            // given
+            every { hiddenMatcher.matches(any(), any()) } returns true
+            val request = InAppMessages.eligibilityRequest()
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual).isNotNull().and {
+                get { isEligible }.isFalse()
+                get { reason } isEqualTo DecisionReason.IN_APP_MESSAGE_HIDDEN
+            }
+        }
+
+        @Test
+        fun `when not hide then evaluate next flow`() {
+            // given
+            every { hiddenMatcher.matches(any(), any()) } returns false
             val request = InAppMessages.eligibilityRequest()
 
             // when

@@ -5,10 +5,10 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 /**
  * @author Yong
  */
-internal interface FlowEvaluator<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> {
+interface FlowEvaluator<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> {
     fun evaluate(
         request: REQUEST,
         context: Evaluator.Context,
-        nextFlow: EvaluationFlow<REQUEST, EVALUATION>
+        nextFlow: EvaluationFlow<REQUEST, EVALUATION>,
     ): EVALUATION?
 }

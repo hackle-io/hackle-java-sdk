@@ -6,7 +6,7 @@ import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.internal.time.Clock
 
-internal class UserEventFactory(
+class UserEventFactory(
     private val clock: Clock,
 ) {
 
