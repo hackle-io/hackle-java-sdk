@@ -53,5 +53,8 @@ interface Evaluator {
         fun add(evaluation: Evaluation)
 
         fun setProperty(key: String, value: Any?)
+
+        operator fun <T> get(key: Class<T>): T?
+        operator fun <T> set(key: Class<T>, value: T)
     }
 }

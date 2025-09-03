@@ -4,7 +4,7 @@ import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.remoteConfigRequest
 import io.hackle.sdk.core.internal.time.Clock
@@ -123,12 +123,12 @@ internal class UserEventFactoryTest {
             ExperimentEvaluation(DecisionReason.TRAFFIC_ALLOCATED, listOf(), experiment(id = 1), 42, "B", null)
         context.add(evaluation1)
 
-        val request = InAppMessages.request()
-        val evaluation = InAppMessageEvaluation.of(
+        val request = InAppMessages.eligibilityRequest()
+        val evaluation = InAppMessageEligibilityEvaluation.of(
             request,
             context,
             DecisionReason.IN_APP_MESSAGE_TARGET,
-            request.inAppMessage.messageContext.messages[0]
+            true
         )
 
         val events = sut.create(request, evaluation)

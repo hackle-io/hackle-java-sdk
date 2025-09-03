@@ -3,15 +3,15 @@ package io.hackle.sdk.core.evaluation.evaluator.remoteconfig
 import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
-import io.hackle.sdk.core.evaluation.evaluator.AbstractEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.target.RemoteConfigParameterTargetRuleDeterminer
 import io.hackle.sdk.core.model.RemoteConfigParameter
 import io.hackle.sdk.core.model.ValueType.*
 
 internal class RemoteConfigEvaluator<T : Any>(
-    private val targetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer
-) : AbstractEvaluator<RemoteConfigRequest<T>, RemoteConfigEvaluation<T>>() {
+    private val targetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer,
+) : ContextualEvaluator<RemoteConfigRequest<T>, RemoteConfigEvaluation<T>>() {
 
     override fun supports(request: Evaluator.Request): Boolean {
         return request is RemoteConfigRequest<*>
@@ -19,7 +19,7 @@ internal class RemoteConfigEvaluator<T : Any>(
 
     override fun evaluateInternal(
         request: RemoteConfigRequest<T>,
-        context: Evaluator.Context
+        context: Evaluator.Context,
     ): RemoteConfigEvaluation<T> {
         val propertiesBuilder = PropertiesBuilder()
             .add("requestValueType", request.requiredType.name)

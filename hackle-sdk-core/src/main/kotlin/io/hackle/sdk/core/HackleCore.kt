@@ -7,18 +7,19 @@ import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
-import io.hackle.sdk.core.decision.InAppMessageDecision
 import io.hackle.sdk.core.evaluation.EvaluationContext
 import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
+import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentFlowFactory
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluatorEvaluation
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluatorRequest
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.hackle.sdk.core.evaluation.get
 import io.hackle.sdk.core.evaluation.target.DelegatingManualOverrideStorage
 import io.hackle.sdk.core.evaluation.target.ManualOverrideStorage
@@ -45,11 +46,9 @@ import io.hackle.sdk.core.workspace.WorkspaceFetcher
 class HackleCore internal constructor(
     private val experimentEvaluator: ExperimentEvaluator,
     private val remoteConfigEvaluator: RemoteConfigEvaluator<Any>,
-    private val inAppMessageEvaluator: InAppMessageEvaluator,
     private val workspaceFetcher: WorkspaceFetcher,
     private val eventFactory: UserEventFactory,
     private val eventProcessor: EventProcessor,
-    private val clock: Clock,
 ) : AutoCloseable {
 
     fun experiment(experimentKey: Long, user: HackleUser, defaultVariation: Variation): Decision {
@@ -147,31 +146,14 @@ class HackleCore internal constructor(
         return RemoteConfigDecision.of(evaluation.value, evaluation.reason) as RemoteConfigDecision<T>
     }
 
-    /**
-     * 인앱메시지를 띄워야 하는지 판단합니다.
-     * @param inAppMessageKey
-     * @param user
-     * @return InAppMessageDecision
-     */
-    fun inAppMessage(inAppMessageKey: Long, user: HackleUser): InAppMessageDecision {
-        val workspace = workspaceFetcher.fetch() ?: return InAppMessageDecision.of(SDK_NOT_READY)
-
-        val inAppMessage = workspace.getInAppMessageOrNull(inAppMessageKey)
-            ?: return InAppMessageDecision.of(IN_APP_MESSAGE_NOT_FOUND)
-
-        val request = InAppMessageRequest(workspace, user, inAppMessage, timestamp = clock.currentMillis())
-
-        val evaluation = inAppMessageEvaluator.evaluate(request, Evaluators.context())
-
-        val events = eventFactory.create(request, evaluation)
-        eventProcessor.process(events)
-
-        return InAppMessageDecision.of(
-            evaluation.reason,
-            evaluation.inAppMessage,
-            evaluation.message,
-            evaluation.properties
-        )
+    fun <REQUEST : InAppMessageEvaluatorRequest, EVALUATION : InAppMessageEvaluatorEvaluation> inAppMessage(
+        request: REQUEST,
+        context: Evaluator.Context,
+        evaluator: InAppMessageEvaluator<REQUEST, EVALUATION>,
+    ): EVALUATION {
+        val evaluation = evaluator.evaluate(request, context)
+        evaluator.record(request, evaluation)
+        return evaluation
     }
 
     fun flush() {
@@ -187,17 +169,17 @@ class HackleCore internal constructor(
         fun create(
             context: EvaluationContext,
             workspaceFetcher: WorkspaceFetcher,
+            eventFactory: UserEventFactory,
             eventProcessor: EventProcessor,
-            vararg manualOverrideStorages: ManualOverrideStorage
+            vararg manualOverrideStorages: ManualOverrideStorage,
         ): HackleCore {
 
             val delegatingEvaluator = DelegatingEvaluator()
-            context.initialize(delegatingEvaluator, DelegatingManualOverrideStorage(manualOverrideStorages.toList()), Clock.SYSTEM)
-            val flowFactory = EvaluationFlowFactory(context)
+            val manualOverrideStorage = DelegatingManualOverrideStorage(manualOverrideStorages.toList())
+            context.initialize(delegatingEvaluator, manualOverrideStorage, Clock.SYSTEM)
 
-            val experimentEvaluator = ExperimentEvaluator(flowFactory)
+            val experimentEvaluator = ExperimentEvaluator(ExperimentFlowFactory(context))
             val remoteConfigEvaluator = RemoteConfigEvaluator<Any>(context.get())
-            val inAppMessageEvaluator = InAppMessageEvaluator(flowFactory)
 
             delegatingEvaluator.add(experimentEvaluator)
             delegatingEvaluator.add(remoteConfigEvaluator)
@@ -205,11 +187,9 @@ class HackleCore internal constructor(
             return HackleCore(
                 experimentEvaluator = experimentEvaluator,
                 remoteConfigEvaluator = remoteConfigEvaluator,
-                inAppMessageEvaluator = inAppMessageEvaluator,
                 workspaceFetcher = workspaceFetcher,
-                eventFactory = UserEventFactory(Clock.SYSTEM),
+                eventFactory = eventFactory,
                 eventProcessor = eventProcessor,
-                clock = Clock.SYSTEM,
             )
         }
     }
