@@ -1,21 +1,24 @@
 package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageRequest
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityRequest
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.user.HackleUser
 
 internal interface InAppMessageMatcher {
-    fun matches(request: InAppMessageRequest, context: Evaluator.Context): Boolean
+    fun matches(request: InAppMessageEligibilityRequest, context: Evaluator.Context): Boolean
 }
 
 internal class InAppMessageUserOverrideMatcher : InAppMessageMatcher {
-    override fun matches(request: InAppMessageRequest, context: Evaluator.Context): Boolean {
+    override fun matches(request: InAppMessageEligibilityRequest, context: Evaluator.Context): Boolean {
         return request.inAppMessage.targetContext.overrides.any { isUserOverridden(request, it) }
     }
 
-    private fun isUserOverridden(request: InAppMessageRequest, userOverride: InAppMessage.UserOverride): Boolean {
+    private fun isUserOverridden(
+        request: InAppMessageEligibilityRequest,
+        userOverride: InAppMessage.UserOverride,
+    ): Boolean {
         val identifier = request.user.identifiers[userOverride.identifierType] ?: return false
         return identifier in userOverride.identifiers
     }
@@ -24,7 +27,7 @@ internal class InAppMessageUserOverrideMatcher : InAppMessageMatcher {
 internal class InAppMessageTargetMatcher(
     private val targetMatcher: TargetMatcher,
 ) : InAppMessageMatcher {
-    override fun matches(request: InAppMessageRequest, context: Evaluator.Context): Boolean {
+    override fun matches(request: InAppMessageEligibilityRequest, context: Evaluator.Context): Boolean {
         return targetMatcher.anyMatches(request, context, request.inAppMessage.targetContext.targets)
     }
 }
@@ -32,15 +35,15 @@ internal class InAppMessageTargetMatcher(
 internal class InAppMessageHiddenMatcher(
     private val storage: InAppMessageHiddenStorage,
 ) : InAppMessageMatcher {
-    override fun matches(request: InAppMessageRequest, context: Evaluator.Context): Boolean {
+    override fun matches(request: InAppMessageEligibilityRequest, context: Evaluator.Context): Boolean {
         return storage.exist(request.inAppMessage, request.timestamp)
     }
 }
 
 internal class InAppMessageFrequencyCapMatcher(
-    private val storage: InAppMessageImpressionStorage
+    private val storage: InAppMessageImpressionStorage,
 ) : InAppMessageMatcher {
-    override fun matches(request: InAppMessageRequest, context: Evaluator.Context): Boolean {
+    override fun matches(request: InAppMessageEligibilityRequest, context: Evaluator.Context): Boolean {
         return isFrequencyCapped(request.inAppMessage, request.user, request.timestamp)
     }
 
@@ -94,7 +97,7 @@ internal class InAppMessageFrequencyCapMatcher(
     }
 
     class IdentifierCapPredicate(
-        private val identifierCap: InAppMessage.EventTrigger.IdentifierCap
+        private val identifierCap: InAppMessage.EventTrigger.IdentifierCap,
     ) : FrequencyCapPredicate {
         override val thresholdCount: Int get() = identifierCap.count
 
@@ -106,7 +109,7 @@ internal class InAppMessageFrequencyCapMatcher(
     }
 
     class DurationCapPredicate(
-        private val durationCap: InAppMessage.EventTrigger.DurationCap
+        private val durationCap: InAppMessage.EventTrigger.DurationCap,
     ) : FrequencyCapPredicate {
         override val thresholdCount: Int get() = durationCap.count
 

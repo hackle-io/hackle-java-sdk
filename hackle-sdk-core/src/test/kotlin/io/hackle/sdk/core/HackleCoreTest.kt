@@ -15,19 +15,19 @@ import io.hackle.sdk.core.evaluation.EvaluationContext
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
 import io.hackle.sdk.core.event.UserEventFactory
-import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.user.HackleUser
-import io.hackle.sdk.core.user.IdentifierType
-import io.hackle.sdk.core.workspace.*
+import io.hackle.sdk.core.workspace.Workspace
+import io.hackle.sdk.core.workspace.WorkspaceDsl
+import io.hackle.sdk.core.workspace.WorkspaceFetcher
+import io.hackle.sdk.core.workspace.workspace
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -53,9 +53,6 @@ internal class HackleCoreTest {
     private lateinit var remoteConfigEvaluator: RemoteConfigEvaluator<*>
 
     @MockK
-    private lateinit var inAppMessageEvaluator: InAppMessageEvaluator
-
-    @MockK
     private lateinit var workspaceFetcher: WorkspaceFetcher
 
     @MockK
@@ -64,16 +61,12 @@ internal class HackleCoreTest {
     @RelaxedMockK
     private lateinit var eventProcessor: EventProcessor
 
-    @MockK
-    private lateinit var clock: Clock
-
     @InjectMockKs
     private lateinit var sut: HackleCore
 
     @BeforeEach
     fun beforeEach() {
         every { eventFactory.create(any(), any()) } returns listOf(mockk())
-        every { clock.currentMillis() } returns 42L
     }
 
     @Nested
@@ -231,7 +224,7 @@ internal class HackleCoreTest {
             variationId: Long,
             variationKey: String,
             reason: DecisionReason,
-            config: ParameterConfiguration? = null
+            config: ParameterConfiguration? = null,
         ): Experiment {
 
             val experiment = mockk<Experiment> {
@@ -493,7 +486,7 @@ internal class HackleCoreTest {
             variationId: Long,
             variationKey: String,
             reason: DecisionReason,
-            config: ParameterConfiguration? = null
+            config: ParameterConfiguration? = null,
         ): Experiment {
 
             val experiment = mockk<Experiment> {
@@ -666,85 +659,6 @@ internal class HackleCoreTest {
         }
     }
 
-    @Nested
-    inner class InAppMessageTest {
-
-        @Test
-        fun `Workspace 를 가져오지 못하면 인앱 메시지를 보여주지 않는다`() {
-
-            every { workspaceFetcher.fetch() } returns null
-
-            val actual = sut.inAppMessage(
-                123L,
-                hackleUser("test")
-            )
-
-            expectThat(actual) {
-                get { reason } isEqualTo SDK_NOT_READY
-            }
-        }
-
-
-        @Test
-        fun `인앱 메시지를 Workspace 에서 가져오지 못하면 인앱 메시지를 보여주지 않는다`() {
-            val workspace = mockk<Workspace>()
-            every { workspaceFetcher.fetch() } returns workspace
-            every { workspace.getInAppMessageOrNull(any()) } returns null
-
-            val actual = sut.inAppMessage(
-                123L,
-                hackleUser("test")
-            )
-
-            expectThat(actual) {
-                get { reason } isEqualTo IN_APP_MESSAGE_NOT_FOUND
-            }
-        }
-
-        @Test
-        fun `인앱 메시지 evaluation 결과로 InAppMessageDecision 을 반환한다`() {
-
-            val workspace = mockk<Workspace>()
-            val inAppMessage = InAppMessages.create()
-            val message = inAppMessage.messageContext.messages[0]
-            val evaluation =
-                InAppMessages.evaluation(reason = IN_APP_MESSAGE_TARGET, inAppMessage = inAppMessage, message = message)
-            every { workspaceFetcher.fetch() } returns workspace
-            every { workspace.getInAppMessageOrNull(any()) } returns inAppMessage
-            every { inAppMessageEvaluator.evaluate(any(), any()) } returns evaluation
-
-            val actual = sut.inAppMessage(123L, hackleUser("test"))
-
-            expectThat(actual) {
-                get { reason } isEqualTo IN_APP_MESSAGE_TARGET
-                get { this.inAppMessage } isEqualTo inAppMessage
-                get { message } isEqualTo message
-            }
-        }
-
-        @Test
-        fun `평과 결과 이벤트를 처리한다`() {
-            val inAppMessage = InAppMessages.create(key = 42)
-            val workspace = Workspaces.create(inAppMessages = listOf(inAppMessage))
-            every { workspaceFetcher.fetch() } returns workspace
-
-            val evaluation = InAppMessages.evaluation(inAppMessage = inAppMessage)
-            every { inAppMessageEvaluator.evaluate(any(), any()) } returns evaluation
-            every { eventFactory.create(any(), evaluation) } returns listOf(mockk())
-
-            sut.inAppMessage(42, hackleUser("user"))
-
-            verify(exactly = 1) {
-                eventProcessor.process(any())
-            }
-        }
-
-        private fun hackleUser(
-            id: String
-        ): HackleUser {
-            return HackleUser.builder().identifier(IdentifierType.ID, id).build()
-        }
-    }
 
     @Nested
     inner class FlushTest {
@@ -780,7 +694,7 @@ internal class HackleCoreTest {
     fun `not found experiment`() {
         val workspaceFetcher = workspaceFetcher {}
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, EventProcessorStub)
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, EXPERIMENT_NOT_FOUND)
@@ -811,8 +725,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, EventProcessorStub)
-
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -877,8 +790,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, EventProcessorStub)
-
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -957,8 +869,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, EventProcessorStub)
-
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -1037,8 +948,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, EventProcessorStub)
-
+        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -1080,14 +990,6 @@ internal class HackleCoreTest {
     private class WorkspaceFetcherStub(private val workspace: Workspace) : WorkspaceFetcher {
         override fun fetch(): Workspace {
             return workspace
-        }
-    }
-
-    private object EventProcessorStub : EventProcessor {
-        override fun process(event: UserEvent) {
-        }
-
-        override fun flush() {
         }
     }
 }

@@ -19,6 +19,7 @@ object Evaluators {
         override val stack: List<Evaluator.Request> get() = ArrayList(_requests.toList())
         override val targetEvaluations: List<Evaluator.Evaluation> get() = ArrayList(_evaluations)
         override val properties: Map<String, Any> get() = _properties.build()
+        private val map = hashMapOf<Any, Any>()
 
         override fun contains(request: Evaluator.Request): Boolean {
             return _requests.contains(request)
@@ -43,5 +44,27 @@ object Evaluators {
         override fun setProperty(key: String, value: Any?) {
             _properties.add(key, value)
         }
+
+        override fun <T> get(key: Class<T>): T? {
+            val value = map[key] ?: return null
+            if (key.isInstance(value)) {
+                @Suppress("UNCHECKED_CAST")
+                return value as T
+            }
+            throw NoSuchElementException("Context does not contain a value of type ${key.name}")
+        }
+
+        override fun <T> set(key: Class<T>, value: T) {
+            map[key] = (value as Any)
+        }
     }
 }
+
+inline fun <reified T> Evaluator.Context.get(): T? {
+    return get(T::class.java)
+}
+
+inline fun <reified T> Evaluator.Context.set(value: T) {
+    set(T::class.java, value)
+}
+

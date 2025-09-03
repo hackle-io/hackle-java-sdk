@@ -1,8 +1,6 @@
-package io.hackle.sdk.core.evaluation.flow
+package io.hackle.sdk.core.evaluation.evaluator.experiment
 
 import io.hackle.sdk.core.evaluation.EvaluationContext
-import io.hackle.sdk.core.evaluation.evaluator.experiment.*
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.*
 import io.hackle.sdk.core.evaluation.get
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Experiment.Type.AB_TEST
@@ -11,7 +9,7 @@ import io.hackle.sdk.core.model.Experiment.Type.FEATURE_FLAG
 /**
  * @author Yong
  */
-internal class EvaluationFlowFactory(context: EvaluationContext) {
+class ExperimentFlowFactory(context: EvaluationContext) {
 
     private val abTestFlow: ExperimentFlow = ExperimentFlow.of(
         OverrideEvaluator(context.get()),
@@ -23,7 +21,7 @@ internal class EvaluationFlowFactory(context: EvaluationContext) {
         CompletedExperimentEvaluator(),
         TrafficAllocateEvaluator(context.get())
     )
-    private val featureFlagFlow: ExperimentFlow = EvaluationFlow.of(
+    private val featureFlagFlow: ExperimentFlow = ExperimentFlow.of(
         DraftExperimentEvaluator(),
         PausedExperimentEvaluator(),
         CompletedExperimentEvaluator(),
@@ -32,27 +30,11 @@ internal class EvaluationFlowFactory(context: EvaluationContext) {
         TargetRuleEvaluator(context.get(), context.get()),
         DefaultRuleEvaluator(context.get())
     )
-    private val inAppMessageFlow: InAppMessageFlow = InAppMessageFlow.of(
-        PlatformInAppMessageFlowEvaluator(),
-        OverrideInAppMessageFlowEvaluator(context.get(), context.get()),
-        DraftInAppMessageFlowEvaluator(),
-        PauseInAppMessageFlowEvaluator(),
-        PeriodInAppMessageFlowEvaluator(),
-        TargetInAppMessageFlowEvaluator(context.get()),
-        ExperimentInAppMessageFlowEvaluator(context.get()),
-        FrequencyCapInAppMessageFlowEvaluator(context.get()),
-        HiddenInAppMessageFlowEvaluator(context.get()),
-        MessageResolutionInAppMessageFlowEvaluator(context.get())
-    )
 
-    fun experimentFlow(experimentType: Experiment.Type): ExperimentFlow {
+    internal fun experimentFlow(experimentType: Experiment.Type): ExperimentFlow {
         return when (experimentType) {
             AB_TEST -> abTestFlow
             FEATURE_FLAG -> featureFlagFlow
         }
-    }
-
-    fun inAppMessageFlow(): InAppMessageFlow {
-        return inAppMessageFlow
     }
 }

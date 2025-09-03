@@ -3,19 +3,14 @@ package io.hackle.sdk.core.evaluation.evaluator.experiment
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.Experiment
 
-internal abstract class ExperimentContextualEvaluator internal constructor(
-    val evaluator: Evaluator
-) {
-    abstract fun decorate(
-        request: Evaluator.Request,
-        context: Evaluator.Context,
-        evaluation: Evaluator.Evaluation
-    ): ExperimentEvaluation
+abstract class ExperimentContextualEvaluator {
+
+    protected abstract val evaluator: Evaluator
 
     fun evaluate(
         request: Evaluator.Request,
         context: Evaluator.Context,
-        experiment: Experiment
+        experiment: Experiment,
     ): ExperimentEvaluation {
         val evaluation = context[experiment] ?: evaluateInternal(request, context, experiment)
         return evaluation as ExperimentEvaluation
@@ -24,13 +19,18 @@ internal abstract class ExperimentContextualEvaluator internal constructor(
     private fun evaluateInternal(
         request: Evaluator.Request,
         context: Evaluator.Context,
-        experiment: Experiment
+        experiment: Experiment,
     ): ExperimentEvaluation {
         val experimentRequest = ExperimentRequest.of(request, experiment)
         val evaluation = evaluator.evaluate(experimentRequest, context)
-        val decoratedEvaluation = decorate(request, context, evaluation)
-
-        context.add(decoratedEvaluation)
-        return decoratedEvaluation
+        require(evaluation is ExperimentEvaluation) { "Unexpected evaluation [expected=ExperimentEvaluation, actual=${evaluation::class.java.simpleName}]" }
+        return resolve(request, context, evaluation)
+            .also { context.add(it) }
     }
+
+    protected abstract fun resolve(
+        request: Evaluator.Request,
+        context: Evaluator.Context,
+        evaluation: ExperimentEvaluation,
+    ): ExperimentEvaluation
 }

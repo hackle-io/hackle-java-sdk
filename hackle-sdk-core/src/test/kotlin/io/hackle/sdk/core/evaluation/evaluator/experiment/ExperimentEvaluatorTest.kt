@@ -3,7 +3,6 @@ package io.hackle.sdk.core.evaluation.evaluator.experiment
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
-import io.hackle.sdk.core.evaluation.flow.EvaluationFlowFactory
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -25,7 +24,7 @@ import strikt.assertions.startsWith
 internal class ExperimentEvaluatorTest {
 
     @MockK
-    private lateinit var evaluationFlowFactory: EvaluationFlowFactory
+    private lateinit var evaluationFlowFactory: ExperimentFlowFactory
 
     @InjectMockKs
     private lateinit var sut: ExperimentEvaluator

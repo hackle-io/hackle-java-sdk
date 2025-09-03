@@ -10,6 +10,7 @@ data class InAppMessage(
     val status: Status,
     val period: Period,
     val eventTrigger: EventTrigger,
+    val evaluateContext: EvaluateContext,
     val targetContext: TargetContext,
     val messageContext: MessageContext,
 ) : HackleInAppMessage {
@@ -80,6 +81,7 @@ data class InAppMessage(
     data class EventTrigger(
         val rules: List<Rule>,
         val frequencyCap: FrequencyCap?,
+        val delay: Delay,
     ) {
         data class Rule(
             val eventKey: String,
@@ -102,6 +104,27 @@ data class InAppMessage(
         )
     }
 
+    data class Delay(
+        val type: Type,
+        val afterCondition: AfterCondition?,
+    ) {
+
+        enum class Type {
+            IMMEDIATE, AFTER;
+        }
+
+        data class AfterCondition(
+            val durationMillis: Long,
+        )
+
+        fun deliverAt(startedAt: Long): Long {
+            return when (type) {
+                Type.IMMEDIATE -> startedAt
+                Type.AFTER -> startedAt + requireNotNull(afterCondition).durationMillis
+            }
+        }
+    }
+
     data class TargetContext(
         val targets: List<Target>,
         val overrides: List<UserOverride>,
@@ -110,6 +133,10 @@ data class InAppMessage(
     data class UserOverride(
         val identifierType: String,
         val identifiers: List<String>,
+    )
+
+    data class EvaluateContext(
+        val atDeliverTime: Boolean,
     )
 
     data class ExperimentContext(
@@ -245,6 +272,10 @@ data class InAppMessage(
         override val url: String,
         override val shouldCloseAfterLink: Boolean,
     ) : HackleInAppMessageAction.Link
+
+    override fun toString(): String {
+        return "InAppMessage(id=$id, key=$key, status=$status)"
+    }
 }
 
 internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
