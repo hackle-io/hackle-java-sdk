@@ -1,16 +1,16 @@
-package io.hackle.sdk.core.evaluation.flow
+package io.hackle.sdk.core.evaluation.evaluator.experiment
 
 import io.hackle.sdk.core.evaluation.EvaluationContext
-import io.hackle.sdk.core.evaluation.evaluator.experiment.*
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.*
+import io.hackle.sdk.core.evaluation.flow.isDecisionWith
+import io.hackle.sdk.core.evaluation.flow.isEnd
 import io.hackle.sdk.core.model.Experiment
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 
-internal class EvaluationFlowFactoryTest {
+internal class ExperimentFlowFactoryTest {
 
-    val sut = EvaluationFlowFactory(EvaluationContext().also {
+    val sut = ExperimentFlowFactory(EvaluationContext().also {
         it.initialize(mockk(), mockk(), mockk())
     })
 
@@ -40,23 +40,6 @@ internal class EvaluationFlowFactoryTest {
             .isDecisionWith<IdentifierEvaluator>()
             .isDecisionWith<TargetRuleEvaluator>()
             .isDecisionWith<DefaultRuleEvaluator>()
-            .isEnd()
-    }
-
-    @Test
-    fun `IN_APP_MESSAGE`() {
-        val flow = sut.inAppMessageFlow()
-        expectThat(flow)
-            .isDecisionWith<PlatformInAppMessageFlowEvaluator>()
-            .isDecisionWith<OverrideInAppMessageFlowEvaluator>()
-            .isDecisionWith<DraftInAppMessageFlowEvaluator>()
-            .isDecisionWith<PauseInAppMessageFlowEvaluator>()
-            .isDecisionWith<PeriodInAppMessageFlowEvaluator>()
-            .isDecisionWith<TargetInAppMessageFlowEvaluator>()
-            .isDecisionWith<ExperimentInAppMessageFlowEvaluator>()
-            .isDecisionWith<FrequencyCapInAppMessageFlowEvaluator>()
-            .isDecisionWith<HiddenInAppMessageFlowEvaluator>()
-            .isDecisionWith<MessageResolutionInAppMessageFlowEvaluator>()
             .isEnd()
     }
 }

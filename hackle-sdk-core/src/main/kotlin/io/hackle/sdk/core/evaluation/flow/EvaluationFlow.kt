@@ -5,20 +5,27 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 /**
  * @author Yong
  */
-internal sealed class EvaluationFlow<in REQUEST : Evaluator.Request, out EVALUATION : Evaluator.Evaluation> {
+sealed class EvaluationFlow<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> {
 
     class End<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> :
         EvaluationFlow<REQUEST, EVALUATION>()
 
     class Decision<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation>(
         val flowEvaluator: FlowEvaluator<REQUEST, EVALUATION>,
-        val nextFlow: EvaluationFlow<REQUEST, EVALUATION>
+        val nextFlow: EvaluationFlow<REQUEST, EVALUATION>,
     ) : EvaluationFlow<REQUEST, EVALUATION>()
 
     fun evaluate(request: REQUEST, context: Evaluator.Context): EVALUATION? {
         return when (this) {
             is End<REQUEST, EVALUATION> -> null
             is Decision<REQUEST, EVALUATION> -> flowEvaluator.evaluate(request, context, nextFlow)
+        }
+    }
+
+    operator fun plus(flow: EvaluationFlow<REQUEST, EVALUATION>): EvaluationFlow<REQUEST, EVALUATION> {
+        return when (this) {
+            is End -> flow
+            is Decision -> Decision(flowEvaluator, nextFlow + flow)
         }
     }
 
@@ -33,13 +40,13 @@ internal sealed class EvaluationFlow<in REQUEST : Evaluator.Request, out EVALUAT
 
         fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> decision(
             evaluator: FlowEvaluator<REQUEST, EVALUATION>,
-            nextFlow: EvaluationFlow<REQUEST, EVALUATION>
+            nextFlow: EvaluationFlow<REQUEST, EVALUATION>,
         ): EvaluationFlow<REQUEST, EVALUATION> {
             return Decision(evaluator, nextFlow)
         }
 
         fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> of(
-            vararg evaluators: FlowEvaluator<REQUEST, EVALUATION>
+            vararg evaluators: FlowEvaluator<REQUEST, EVALUATION>,
         ): EvaluationFlow<REQUEST, EVALUATION> {
             var flow: EvaluationFlow<REQUEST, EVALUATION> = end()
             for (evaluator in evaluators.reversed()) {

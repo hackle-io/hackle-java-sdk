@@ -6,13 +6,13 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.Variation
 
-internal class ExperimentEvaluation internal constructor(
+class ExperimentEvaluation internal constructor(
     override val reason: DecisionReason,
     override val targetEvaluations: List<Evaluator.Evaluation>,
     val experiment: Experiment,
     val variationId: Long?,
     val variationKey: String,
-    val config: ParameterConfiguration?
+    val config: ParameterConfiguration?,
 ) : Evaluator.Evaluation {
 
     fun with(reason: DecisionReason): ExperimentEvaluation {
@@ -25,7 +25,7 @@ internal class ExperimentEvaluation internal constructor(
             request: ExperimentRequest,
             context: Evaluator.Context,
             variation: Variation,
-            reason: DecisionReason
+            reason: DecisionReason,
         ): ExperimentEvaluation {
             val parameterConfigurationId = variation.parameterConfigurationId
             val parameterConfiguration = parameterConfigurationId?.let {
@@ -45,7 +45,7 @@ internal class ExperimentEvaluation internal constructor(
         fun ofDefault(
             request: ExperimentRequest,
             context: Evaluator.Context,
-            reason: DecisionReason
+            reason: DecisionReason,
         ): ExperimentEvaluation {
             val variation = request.experiment.getVariationOrNull(request.defaultVariationKey)
             return if (variation != null) {

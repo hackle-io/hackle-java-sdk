@@ -54,7 +54,6 @@ internal class EvaluationContextTest {
         expectThat(sut.getOrNull<ExperimentTargetRuleDeterminer>()).isNotNull()
         expectThat(sut.getOrNull<RemoteConfigParameterTargetRuleDeterminer.Matcher>()).isNotNull()
         expectThat(sut.getOrNull<RemoteConfigParameterTargetRuleDeterminer>()).isNotNull()
-        expectThat(sut.getOrNull<InAppMessageResolver>()).isNotNull()
         expectThat(sut.getOrNull<InAppMessageUserOverrideMatcher>()).isNotNull()
         expectThat(sut.getOrNull<InAppMessageTargetMatcher>()).isNotNull()
         expectThat(sut.getOrNull<InAppMessageHiddenMatcher>()).isNotNull()

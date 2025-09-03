@@ -7,8 +7,6 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.match.ConditionMatcherFactory
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.target.*
-import io.hackle.sdk.core.evaluation.target.InAppMessageResolver.InAppMessageSelector
-import io.hackle.sdk.core.evaluation.target.InAppMessageResolver.InAppMessageExperimentEvaluator
 import io.hackle.sdk.core.internal.time.Clock
 
 class EvaluationContext internal constructor() {
@@ -43,9 +41,6 @@ class EvaluationContext internal constructor() {
         register(ExperimentTargetRuleDeterminer(get()))
         register(RemoteConfigParameterTargetRuleDeterminer.Matcher(get(), get()))
         register(RemoteConfigParameterTargetRuleDeterminer(get()))
-        register(InAppMessageExperimentEvaluator(get()))
-        register(InAppMessageSelector())
-        register(InAppMessageResolver(get(), get()))
         register(InAppMessageUserOverrideMatcher())
         register(InAppMessageTargetMatcher(get()))
 
