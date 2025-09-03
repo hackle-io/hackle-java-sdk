@@ -30,7 +30,7 @@ class InAppMessageMatcherTest {
         fun `when override info is empty then returns false`() {
             // given
             val inAppMessage = InAppMessages.create()
-            val request = InAppMessages.request(inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage)
 
             // when
             val actual = sut.matches(request, Evaluators.context())
@@ -51,7 +51,7 @@ class InAppMessageMatcherTest {
                     )
                 )
             )
-            val request = InAppMessages.request(user = user, inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(user = user, inAppMessage = inAppMessage)
 
             // when
             val actual = sut.matches(request, Evaluators.context())
@@ -72,7 +72,7 @@ class InAppMessageMatcherTest {
                     )
                 )
             )
-            val request = InAppMessages.request(user = user, inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(user = user, inAppMessage = inAppMessage)
 
             // when
             val actual = sut.matches(request, Evaluators.context())
@@ -97,7 +97,7 @@ class InAppMessageMatcherTest {
             every { targetMatcher.anyMatches(any(), any(), any()) } returns true
 
             // when
-            val actual = sut.matches(InAppMessages.request(), Evaluators.context())
+            val actual = sut.matches(InAppMessages.eligibilityRequest(), Evaluators.context())
 
             // then
             expectThat(actual).isTrue()
@@ -109,7 +109,7 @@ class InAppMessageMatcherTest {
             every { targetMatcher.anyMatches(any(), any(), any()) } returns false
 
             // when
-            val actual = sut.matches(InAppMessages.request(), Evaluators.context())
+            val actual = sut.matches(InAppMessages.eligibilityRequest(), Evaluators.context())
 
             // then
             expectThat(actual).isFalse()
@@ -131,7 +131,7 @@ class InAppMessageMatcherTest {
             every { storage.exist(any(), any()) } returns true
 
             // when
-            val actual = sut.matches(InAppMessages.request(), Evaluators.context())
+            val actual = sut.matches(InAppMessages.eligibilityRequest(), Evaluators.context())
 
             // then
             expectThat(actual).isTrue()
@@ -143,7 +143,7 @@ class InAppMessageMatcherTest {
             every { storage.exist(any(), any()) } returns false
 
             // when
-            val actual = sut.matches(InAppMessages.request(), Evaluators.context())
+            val actual = sut.matches(InAppMessages.eligibilityRequest(), Evaluators.context())
 
             // then
             expectThat(actual).isFalse()
@@ -163,7 +163,7 @@ class InAppMessageMatcherTest {
         fun `when frequency cap is null then returns false`() {
             // given
             val inAppMessage = InAppMessages.create()
-            val request = InAppMessages.request(inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage)
 
             // when
             val actual = sut.matches(request, Evaluators.context())
@@ -183,7 +183,7 @@ class InAppMessageMatcherTest {
                     )
                 )
             )
-            val request = InAppMessages.request(inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage)
 
             // when
             val actual = sut.matches(request, Evaluators.context())
@@ -203,7 +203,7 @@ class InAppMessageMatcherTest {
                     )
                 )
             )
-            val request = InAppMessages.request(inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage)
             every { storage.get(any()) } returns emptyList()
 
             // when
@@ -230,7 +230,7 @@ class InAppMessageMatcherTest {
                     )
                 )
             )
-            val request = InAppMessages.request(user = user, inAppMessage = inAppMessage)
+            val request = InAppMessages.eligibilityRequest(user = user, inAppMessage = inAppMessage)
             val impression = InAppMessageImpression(
                 timestamp = System.currentTimeMillis(),
                 identifiers = mapOf(IdentifierType.ID.key to "test-id")
@@ -259,7 +259,7 @@ class InAppMessageMatcherTest {
                     )
                 )
             )
-            val request = InAppMessages.request(
+            val request = InAppMessages.eligibilityRequest(
                 inAppMessage = inAppMessage,
                 timestamp = now
             )

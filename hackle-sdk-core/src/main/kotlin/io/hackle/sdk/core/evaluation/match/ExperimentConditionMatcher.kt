@@ -3,11 +3,13 @@ package io.hackle.sdk.core.evaluation.match
 import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentContextualEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target
-import io.hackle.sdk.core.model.Target.Key.Type.*
+import io.hackle.sdk.core.model.Target.Key.Type.AB_TEST
+import io.hackle.sdk.core.model.Target.Key.Type.FEATURE_FLAG
 
 internal class ExperimentConditionMatcher(
     private val abTestMatcher: AbTestConditionMatcher,
@@ -18,40 +20,24 @@ internal class ExperimentConditionMatcher(
         return when (condition.key.type) {
             AB_TEST -> abTestMatcher.matches(request, context, condition)
             FEATURE_FLAG -> featureFlagMatcher.matches(request, context, condition)
-            USER_ID, USER_PROPERTY, HACKLE_PROPERTY, SEGMENT, EVENT_PROPERTY, COHORT, NUMBER_OF_EVENTS_IN_DAYS, NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS  -> throw IllegalArgumentException("Unsupported Target.Key.Type[${condition.key.type}]")
+            else -> throw IllegalArgumentException("Unsupported Target.Key.Type[${condition.key.type}]")
         }
     }
 }
 
-internal abstract class ExperimentMatcher {
+internal abstract class ExperimentMatcher : ExperimentContextualEvaluator() {
 
-    protected abstract val evaluator: Evaluator
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
 
     fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
         val key =
             requireNotNull(condition.key.name.toLongOrNull()) { "Invalid key [${condition.key.type}, ${condition.key.name}]" }
         val experiment = experiment(request, key) ?: return false
-        val evaluation = context[experiment] ?: evaluate(request, context, experiment)
-        require(evaluation is ExperimentEvaluation) { "Unexpected evaluation [expected=ExperimentEvaluation, actual=${evaluation::class.java.simpleName}]" }
+        val evaluation = evaluate(request, context, experiment)
         return matches(evaluation, condition)
     }
 
-    private fun evaluate(
-        request: Evaluator.Request,
-        context: Evaluator.Context,
-        experiment: Experiment
-    ): Evaluator.Evaluation {
-        val experimentRequest = ExperimentRequest.of(requestedBy = request, experiment = experiment)
-        val evaluation = evaluator.evaluate(experimentRequest, context)
-        require(evaluation is ExperimentEvaluation) { "Unexpected evaluation [expected=ExperimentEvaluation, actual=${evaluation::class.java.simpleName}]" }
-        return resolve(request, evaluation)
-            .also { context.add(it) }
-    }
-
     protected abstract fun experiment(request: Evaluator.Request, key: Long): Experiment?
-
-    protected abstract fun resolve(request: Evaluator.Request, evaluation: ExperimentEvaluation): ExperimentEvaluation
 
     protected abstract fun matches(evaluation: ExperimentEvaluation, condition: Target.Condition): Boolean
 }
@@ -59,13 +45,17 @@ internal abstract class ExperimentMatcher {
 
 internal class AbTestConditionMatcher(
     override val evaluator: Evaluator,
-    override val valueOperatorMatcher: ValueOperatorMatcher
+    override val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ExperimentMatcher() {
     override fun experiment(request: Evaluator.Request, key: Long): Experiment? {
         return request.workspace.getExperimentOrNull(key)
     }
 
-    override fun resolve(request: Evaluator.Request, evaluation: ExperimentEvaluation): ExperimentEvaluation {
+    override fun resolve(
+        request: Evaluator.Request,
+        context: Evaluator.Context,
+        evaluation: ExperimentEvaluation,
+    ): ExperimentEvaluation {
         if (request is ExperimentRequest && evaluation.reason == TRAFFIC_ALLOCATED) {
             return evaluation.with(TRAFFIC_ALLOCATED_BY_TARGETING)
         }
@@ -92,13 +82,17 @@ internal class AbTestConditionMatcher(
 
 internal class FeatureFlagConditionMatcher(
     override val evaluator: Evaluator,
-    override val valueOperatorMatcher: ValueOperatorMatcher
+    override val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ExperimentMatcher() {
     override fun experiment(request: Evaluator.Request, key: Long): Experiment? {
         return request.workspace.getFeatureFlagOrNull(key)
     }
 
-    override fun resolve(request: Evaluator.Request, evaluation: ExperimentEvaluation): ExperimentEvaluation {
+    override fun resolve(
+        request: Evaluator.Request,
+        context: Evaluator.Context,
+        evaluation: ExperimentEvaluation,
+    ): ExperimentEvaluation {
         return evaluation
     }
 

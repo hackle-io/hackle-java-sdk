@@ -2,12 +2,14 @@ package io.hackle.sdk
 
 import io.hackle.sdk.core.HackleCore
 import io.hackle.sdk.core.evaluation.EvaluationContext
+import io.hackle.sdk.core.event.UserEventFactory
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.log.metrics.MetricLoggerFactory
 import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.internal.scheduler.Schedulers
 import io.hackle.sdk.core.internal.threads.NamedThreadFactory
 import io.hackle.sdk.core.internal.threads.PoolingExecutors
+import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.internal.client.HackleClientImpl
 import io.hackle.sdk.internal.event.DefaultEventProcessor
 import io.hackle.sdk.internal.event.EventDispatcher
@@ -46,6 +48,7 @@ object HackleClients {
     private fun createHackleClient(sdkKey: String, config: HackleConfig): HackleClient {
         loggerConfiguration()
 
+        val clock = Clock.SYSTEM
         val sdk = Sdk.load(sdkKey)
         val httpClient = httpClient(sdk)
 
@@ -88,9 +91,14 @@ object HackleClients {
             shutdownTimeoutMillis = 10 * 1000
         )
 
+        val eventFactory = UserEventFactory(
+            clock = clock
+        )
+
         val core = HackleCore.create(
             context = EvaluationContext.GLOBAL,
             workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
+            eventFactory = eventFactory,
             eventProcessor = defaultEventProcessor.apply { start() }
         )
 

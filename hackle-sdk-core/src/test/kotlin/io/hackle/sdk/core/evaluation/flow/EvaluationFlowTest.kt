@@ -4,7 +4,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentFlow
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.InAppMessageFlow
+import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityFlow
 import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
@@ -27,9 +27,9 @@ internal class EvaluationFlowTest {
 
         @Test
         fun `when flow meed decision then evaluate flow`() {
-            val evaluation = InAppMessages.evaluation()
-            val flow: InAppMessageFlow = InAppMessageFlow.create(evaluation)
-            val actual = flow.evaluate(InAppMessages.request(), Evaluators.context())
+            val evaluation = InAppMessages.eligibilityEvaluation()
+            val flow: InAppMessageEligibilityFlow = InAppMessageEligibilityFlow.create(evaluation)
+            val actual = flow.evaluate(InAppMessages.eligibilityRequest(), Evaluators.context())
             expectThat(actual) isSameInstanceAs evaluation
         }
     }
@@ -47,6 +47,27 @@ internal class EvaluationFlowTest {
             .isDecisionWith(f1)
             .isDecisionWith(f2)
             .isDecisionWith(f3)
+            .isEnd()
+    }
+
+
+    @Test
+    fun `plus`() {
+        val fe1 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
+        val fe2 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
+        val fe3 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
+        val fe4 = mockk<FlowEvaluator<Evaluator.Request, Evaluator.Evaluation>>()
+
+        val f1 = EvaluationFlow.of(fe1, fe2)
+        val f2 = EvaluationFlow.of(fe3, fe4)
+
+        val f = f1 + f2
+
+        expectThat(f)
+            .isDecisionWith(fe1)
+            .isDecisionWith(fe2)
+            .isDecisionWith(fe3)
+            .isDecisionWith(fe4)
             .isEnd()
     }
 }
