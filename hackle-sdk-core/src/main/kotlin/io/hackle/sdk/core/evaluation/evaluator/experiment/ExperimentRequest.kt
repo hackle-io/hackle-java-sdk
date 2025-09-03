@@ -7,11 +7,11 @@ import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
-internal class ExperimentRequest private constructor(
+class ExperimentRequest private constructor(
     override val workspace: Workspace,
     override val user: HackleUser,
     val experiment: Experiment,
-    val defaultVariationKey: String
+    val defaultVariationKey: String,
 ) : AbstractEvaluatorRequest() {
 
     override val key: Evaluator.Key = Evaluator.Key(Evaluator.Type.EXPERIMENT, experiment.id)
@@ -26,7 +26,7 @@ internal class ExperimentRequest private constructor(
             workspace: Workspace,
             user: HackleUser,
             experiment: Experiment,
-            defaultVariation: Variation
+            defaultVariation: Variation,
         ): ExperimentRequest {
             return ExperimentRequest(
                 workspace = workspace,
