@@ -8,7 +8,9 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -51,3 +53,27 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: Convert Prerelease to Release
+        if: ${{ github.event_name == 'release' && github.event.release.prerelease }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releaseId = ${{ github.event.release.id }};
+            const tagName = '${{ github.event.release.tag_name }}';
+            
+            try {
+              const response = await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: releaseId,
+                prerelease: false
+              });
+              
+              console.log(`Successfully converted prerelease to release: ${tagName}`);
+              console.log(`Release URL: ${response.data.html_url}`);
+              
+            } catch (error) {
+              console.error(`Failed to convert prerelease to release: ${error.message}`);
+              throw error;
+            }
