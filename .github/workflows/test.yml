@@ -6,25 +6,38 @@ on:
 jobs:
   java-sdk-test:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        module: [hackle-sdk-common, hackle-sdk-core, hackle-server-sdk]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+          distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.2
-      - name: Test
-        run: gradle test --stacktrace --info
-      - name: Coverage
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.3
+
+      - name: Test ${{ matrix.module }}
+        run: gradle :${{ matrix.module }}:test --stacktrace --info
+        
+      - name: Test Report ${{ matrix.module }}
+        uses: dorny/test-reporter@v1
+        if: always()
         with:
-          paths: |
-            ${{ github.workspace }}/hackle-sdk-common/build/reports/jacoco/test/jacocoTestReport.xml,
-            ${{ github.workspace }}/hackle-sdk-core/build/reports/jacoco/test/jacocoTestReport.xml,
-            ${{ github.workspace }}/hackle-server-sdk/build/reports/jacoco/test/jacocoTestReport.xml
+          name: Test Results
+          path: '${{ github.workspace }}/${{ matrix.module }}/build/test-results/testDebugUnitTest/TEST-*.xml'
+          reporter: java-junit
+          fail-on-error: true
+
+      - name: Coverage for ${{ matrix.module }}
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: ${{ github.workspace }}/${{ matrix.module }}/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: Coverage
+          title: 'Coverage: ${{ matrix.module }}'
+          update-comment: true
