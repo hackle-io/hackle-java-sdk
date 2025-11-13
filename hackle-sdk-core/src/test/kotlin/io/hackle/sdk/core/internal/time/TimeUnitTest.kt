@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.internal.time
 
+import io.hackle.sdk.core.model.DayOfWeek
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit.*
@@ -7,7 +8,7 @@ import java.util.concurrent.TimeUnit.*
 internal class TimeUnitTest {
 
     @Test
-    fun `convert`() {
+    fun convert() {
         assertEquals(1.0, NANOSECONDS.convert(1.0, NANOSECONDS))
         assertEquals(1.0, MICROSECONDS.convert(1.0, MICROSECONDS))
         assertEquals(1.0, MILLISECONDS.convert(1.0, MILLISECONDS))
@@ -29,7 +30,7 @@ internal class TimeUnitTest {
     }
 
     @Test
-    fun `micros`() {
+    fun micros() {
         assertEquals(1.0 * (1L * 1_000L), microsToUnit(1.0, NANOSECONDS))
         assertEquals(1.0 * (1L), microsToUnit(1.0, MICROSECONDS))
         assertEquals(1.0 / (1L * 1_000L), microsToUnit(1.0, MILLISECONDS))
@@ -40,7 +41,7 @@ internal class TimeUnitTest {
     }
 
     @Test
-    fun `millis`() {
+    fun millis() {
         assertEquals(1.0 * (1L * 1_000_000L), millisToUnit(1.0, NANOSECONDS))
         assertEquals(1.0 * (1L * 1_000L), millisToUnit(1.0, MICROSECONDS))
         assertEquals(1.0 * (1L), millisToUnit(1.0, MILLISECONDS))
@@ -51,7 +52,7 @@ internal class TimeUnitTest {
     }
 
     @Test
-    fun `seconds`() {
+    fun seconds() {
         assertEquals(1.0 * (1L * 1_000_000_000L), secondsToUnit(1.0, NANOSECONDS))
         assertEquals(1.0 * (1L * 1_000_000L), secondsToUnit(1.0, MICROSECONDS))
         assertEquals(1.0 * (1L * 1_000L), secondsToUnit(1.0, MILLISECONDS))
@@ -62,7 +63,7 @@ internal class TimeUnitTest {
     }
 
     @Test
-    fun `minutes`() {
+    fun minutes() {
         assertEquals(1.0 * (1L * 1_000_000_000L * 60L), minutesToUnit(1.0, NANOSECONDS))
         assertEquals(1.0 * (1L * 1_000_000L * 60L), minutesToUnit(1.0, MICROSECONDS))
         assertEquals(1.0 * (1L * 1_000L * 60L), minutesToUnit(1.0, MILLISECONDS))
@@ -73,7 +74,7 @@ internal class TimeUnitTest {
     }
 
     @Test
-    fun `hours`() {
+    fun hours() {
         assertEquals(1.0 * (1L * 1_000_000_000L * 60L * 60L), hoursToUnit(1.0, NANOSECONDS))
         assertEquals(1.0 * (1L * 1_000_000L * 60L * 60L), hoursToUnit(1.0, MICROSECONDS))
         assertEquals(1.0 * (1L * 1_000L * 60L * 60L), hoursToUnit(1.0, MILLISECONDS))
@@ -84,7 +85,7 @@ internal class TimeUnitTest {
     }
 
     @Test
-    fun `days`() {
+    fun days() {
         assertEquals(1.0 * (1L * 1_000_000_000L * 60L * 60L * 24L), daysToUnit(1.0, NANOSECONDS))
         assertEquals(1.0 * (1L * 1_000_000L * 60L * 60L * 24L), daysToUnit(1.0, MICROSECONDS))
         assertEquals(1.0 * (1L * 1_000L * 60L * 60L * 24L), daysToUnit(1.0, MILLISECONDS))
@@ -92,5 +93,37 @@ internal class TimeUnitTest {
         assertEquals(1.0 * (1L * 60L * 24L), daysToUnit(1.0, MINUTES))
         assertEquals(1.0 * (1L * 24L), daysToUnit(1.0, HOURS))
         assertEquals(1.0 * (1L), daysToUnit(1.0, DAYS))
+    }
+
+    @Test
+    fun dayOfWeek() {
+        // 2025-11-03T00:00:00.000Z
+        assertEquals(DayOfWeek.MONDAY, 1762128000000L.dayOfWeek())
+        // 2025-11-04T00:00:00.000Z
+        assertEquals(DayOfWeek.TUESDAY, 1762214400000L.dayOfWeek())
+        // 2025-11-05T00:00:00.000Z
+        assertEquals(DayOfWeek.WEDNESDAY, 1762300800000L.dayOfWeek())
+        // 2025-11-06T00:00:00.000Z
+        assertEquals(DayOfWeek.THURSDAY, 1762387200000L.dayOfWeek())
+        // 2025-11-07T00:00:00.000Z
+        assertEquals(DayOfWeek.FRIDAY, 1762473600000L.dayOfWeek())
+        // 2025-11-08T00:00:00.000Z
+        assertEquals(DayOfWeek.SATURDAY, 1762560000000L.dayOfWeek())
+        // 2025-11-09T00:00:00.000Z
+        assertEquals(DayOfWeek.SUNDAY, 1762646400000L.dayOfWeek())
+        // 2025-11-09T23:59:59.999Z
+        assertEquals(DayOfWeek.SUNDAY, 1762732799999L.dayOfWeek())
+        // 2025-11-10T00:00:00.000Z
+        assertEquals(DayOfWeek.MONDAY, 1762732800000L.dayOfWeek())
+    }
+
+    @Test
+    fun midnight() {
+        // 2025-11-09T00:00:00.000Z
+        assertEquals(1762646400000L, 1762646400000L.midnight())
+        // 2025-11-09T23:59:59.999Z
+        assertEquals(1762646400000L, 1762732799999L.midnight())
+        // 2025-11-10T00:00:00.000Z
+        assertEquals(1762732800000L, 1762732800000L.midnight())
     }
 }
