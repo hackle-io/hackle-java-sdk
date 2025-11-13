@@ -23,19 +23,20 @@ jobs:
 
       - name: Test ${{ matrix.module }}
         run: gradle :${{ matrix.module }}:test --stacktrace --info
-        
+          
       - name: Test Report ${{ matrix.module }}
-        uses: dorny/test-reporter@v1
-        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: success() || failure()
         with:
-          name: Test Results
-          path: '${{ github.workspace }}/${{ matrix.module }}/build/test-results/test/TEST-*.xml'
-          reporter: java-junit
-          fail-on-error: true
+          files: '${{ github.workspace }}/${{ matrix.module }}/build/test-results/test/TEST-*.xml'
+          check_name: 'Test Results ${{ matrix.module }}'
+          comment_title: 'Test Results ${{ matrix.module }}'
+          comment_mode: changes
 
-      - name: Coverage for ${{ matrix.module }}
+      - name: Coverage ${{ matrix.module }}
         id: jacoco
         uses: madrapps/jacoco-report@v1.7.2
+        if: success() || failure()
         with:
           paths: ${{ github.workspace }}/${{ matrix.module }}/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
