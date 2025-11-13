@@ -29,7 +29,7 @@ jobs:
         if: always()
         with:
           name: Test Results
-          path: '${{ github.workspace }}/${{ matrix.module }}/build/test-results/testDebugUnitTest/TEST-*.xml'
+          path: '${{ github.workspace }}/${{ matrix.module }}/build/test-results/test/TEST-*.xml'
           reporter: java-junit
           fail-on-error: true
 
