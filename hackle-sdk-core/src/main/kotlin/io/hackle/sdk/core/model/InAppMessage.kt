@@ -3,12 +3,15 @@ package io.hackle.sdk.core.model
 import io.hackle.sdk.common.HackleInAppMessage
 import io.hackle.sdk.common.HackleInAppMessageAction
 import io.hackle.sdk.common.HackleInAppMessageActionType
+import io.hackle.sdk.core.internal.time.dayOfWeek
+import io.hackle.sdk.core.internal.time.midnight
 
 data class InAppMessage(
     val id: Long,
     override val key: Long,
     val status: Status,
     val period: Period,
+    val timetable: Timetable,
     val eventTrigger: EventTrigger,
     val evaluateContext: EvaluateContext,
     val targetContext: TargetContext,
@@ -76,6 +79,37 @@ data class InAppMessage(
             val startMillisInclusive: Long,
             val endMillisExclusive: Long,
         ) : Period()
+    }
+
+    sealed class Timetable {
+        fun within(timestamp: Long): Boolean {
+            return when (this) {
+                is All -> true
+                is Custom -> slots.any { it.within(timestamp) }
+            }
+        }
+
+        object All : Timetable()
+        class Custom(
+            val slots: List<TimetableSlot>,
+        ) : Timetable()
+    }
+
+    data class TimetableSlot(
+        val dayOfWeek: DayOfWeek,
+        val startMillisInclusive: Long,
+        val endMillisExclusive: Long,
+    ) {
+        fun within(timestamp: Long): Boolean {
+            val dayOfWeek = timestamp.dayOfWeek()
+            if (this.dayOfWeek != dayOfWeek) {
+                return false
+            }
+            val midnight = timestamp.midnight()
+            val startTimestampInclusive = midnight + startMillisInclusive
+            val endTimestampExclusive = midnight + endMillisExclusive
+            return timestamp in startTimestampInclusive until endTimestampExclusive
+        }
     }
 
     data class EventTrigger(

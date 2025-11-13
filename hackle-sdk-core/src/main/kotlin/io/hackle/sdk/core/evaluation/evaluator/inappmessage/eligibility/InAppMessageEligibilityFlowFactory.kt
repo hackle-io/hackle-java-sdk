@@ -12,6 +12,7 @@ class InAppMessageEligibilityFlowFactory(context: EvaluationContext, layoutEvalu
         DraftInAppMessageEligibilityFlowEvaluator(),
         PauseInAppMessageEligibilityFlowEvaluator(),
         PeriodInAppMessageEligibilityFlowEvaluator(),
+        TimetableInAppMessageEligibilityFlowEvaluator(),
         TargetInAppMessageEligibilityFlowEvaluator(context.get()),
     )
 
