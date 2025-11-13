@@ -23,22 +23,46 @@ jobs:
 
       - name: Test ${{ matrix.module }}
         run: gradle :${{ matrix.module }}:test --stacktrace --info
-          
-      - name: Test Report ${{ matrix.module }}
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: success() || failure()
+
+      - name: Upload Test Results (${{ matrix.module }})
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          files: '${{ github.workspace }}/${{ matrix.module }}/build/test-results/test/TEST-*.xml'
-          check_name: 'Test Results ${{ matrix.module }}'
-          comment_title: 'Test Results ${{ matrix.module }}'
+          name: test-results-${{ matrix.module }}
+          path: ${{ github.workspace }}/${{ matrix.module }}/build/test-results/test/TEST-*.xml
+          retention-days: 1
+
+      - name: Upload Jacoco Report (${{ matrix.module }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report-${{ matrix.module }}
+          path: ${{ github.workspace }}/${{ matrix.module }}/build/reports/jacoco/test/jacocoTestReport.xml
+          retention-days: 1
+
+  report:
+    runs-on: ubuntu-22.04
+    needs: java-sdk-test
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: 'artifacts/test-results-*/*.xml'
+          check_name: 'Test Results'
+          comment_title: 'Test Results'
           comment_mode: changes
 
-      - name: Coverage ${{ matrix.module }}
+      - name: Coverage
         id: jacoco
         uses: madrapps/jacoco-report@v1.7.2
-        if: success() || failure()
         with:
-          paths: ${{ github.workspace }}/${{ matrix.module }}/build/reports/jacoco/test/jacocoTestReport.xml
+          paths: artifacts/jacoco-report-*/*.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'Coverage: ${{ matrix.module }}'
+          title: 'Coverage'
           update-comment: true
