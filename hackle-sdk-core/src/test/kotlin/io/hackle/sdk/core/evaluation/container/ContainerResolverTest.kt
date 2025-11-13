@@ -5,13 +5,11 @@ import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,11 +26,6 @@ internal class ContainerResolverTest {
     private lateinit var sut: ContainerResolver
 
     private val user = HackleUser.of("test_id")
-
-    @AfterEach
-    fun tearDown() {
-        clearAllMocks()
-    }
 
     @Test
     fun `식별자가 없으면 false`() {
