@@ -3,8 +3,7 @@ package io.hackle.sdk.core.model
 import io.hackle.sdk.common.HackleInAppMessage
 import io.hackle.sdk.common.HackleInAppMessageAction
 import io.hackle.sdk.common.HackleInAppMessageActionType
-import io.hackle.sdk.core.internal.time.dayOfWeek
-import io.hackle.sdk.core.internal.time.midnight
+import io.hackle.sdk.core.internal.time.TimeUtil
 
 data class InAppMessage(
     val id: Long,
@@ -101,11 +100,11 @@ data class InAppMessage(
         val endMillisExclusive: Long,
     ) {
         fun within(timestamp: Long): Boolean {
-            val dayOfWeek = timestamp.dayOfWeek()
+            val dayOfWeek = TimeUtil.dayOfWeek(timestamp)
             if (this.dayOfWeek != dayOfWeek) {
                 return false
             }
-            val midnight = timestamp.midnight()
+            val midnight = TimeUtil.midnight(timestamp)
             val startTimestampInclusive = midnight + startMillisInclusive
             val endTimestampExclusive = midnight + endMillisExclusive
             return timestamp in startTimestampInclusive until endTimestampExclusive

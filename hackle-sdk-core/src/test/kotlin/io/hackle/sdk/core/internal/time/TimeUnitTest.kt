@@ -98,32 +98,32 @@ internal class TimeUnitTest {
     @Test
     fun dayOfWeek() {
         // 2025-11-03T00:00:00.000Z
-        assertEquals(DayOfWeek.MONDAY, 1762128000000L.dayOfWeek())
+        assertEquals(DayOfWeek.MONDAY, TimeUtil.dayOfWeek(1762128000000L))
         // 2025-11-04T00:00:00.000Z
-        assertEquals(DayOfWeek.TUESDAY, 1762214400000L.dayOfWeek())
+        assertEquals(DayOfWeek.TUESDAY, TimeUtil.dayOfWeek(1762214400000L))
         // 2025-11-05T00:00:00.000Z
-        assertEquals(DayOfWeek.WEDNESDAY, 1762300800000L.dayOfWeek())
+        assertEquals(DayOfWeek.WEDNESDAY, TimeUtil.dayOfWeek(1762300800000L))
         // 2025-11-06T00:00:00.000Z
-        assertEquals(DayOfWeek.THURSDAY, 1762387200000L.dayOfWeek())
+        assertEquals(DayOfWeek.THURSDAY, TimeUtil.dayOfWeek(1762387200000L))
         // 2025-11-07T00:00:00.000Z
-        assertEquals(DayOfWeek.FRIDAY, 1762473600000L.dayOfWeek())
+        assertEquals(DayOfWeek.FRIDAY, TimeUtil.dayOfWeek(1762473600000L))
         // 2025-11-08T00:00:00.000Z
-        assertEquals(DayOfWeek.SATURDAY, 1762560000000L.dayOfWeek())
+        assertEquals(DayOfWeek.SATURDAY, TimeUtil.dayOfWeek(1762560000000L))
         // 2025-11-09T00:00:00.000Z
-        assertEquals(DayOfWeek.SUNDAY, 1762646400000L.dayOfWeek())
+        assertEquals(DayOfWeek.SUNDAY, TimeUtil.dayOfWeek(1762646400000L))
         // 2025-11-09T23:59:59.999Z
-        assertEquals(DayOfWeek.SUNDAY, 1762732799999L.dayOfWeek())
+        assertEquals(DayOfWeek.SUNDAY, TimeUtil.dayOfWeek(1762732799999L))
         // 2025-11-10T00:00:00.000Z
-        assertEquals(DayOfWeek.MONDAY, 1762732800000L.dayOfWeek())
+        assertEquals(DayOfWeek.MONDAY, TimeUtil.dayOfWeek(1762732800000L))
     }
 
     @Test
     fun midnight() {
         // 2025-11-09T00:00:00.000Z
-        assertEquals(1762646400000L, 1762646400000L.midnight())
+        assertEquals(1762646400000L, TimeUtil.midnight(1762646400000L))
         // 2025-11-09T23:59:59.999Z
-        assertEquals(1762646400000L, 1762732799999L.midnight())
+        assertEquals(1762646400000L, TimeUtil.midnight(1762732799999L))
         // 2025-11-10T00:00:00.000Z
-        assertEquals(1762732800000L, 1762732800000L.midnight())
+        assertEquals(1762732800000L, TimeUtil.midnight(1762732800000L))
     }
 }

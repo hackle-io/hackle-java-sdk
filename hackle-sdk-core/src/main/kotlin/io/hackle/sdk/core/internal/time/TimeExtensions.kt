@@ -1,8 +1,5 @@
 package io.hackle.sdk.core.internal.time
 
-import io.hackle.sdk.core.model.DayOfWeek
-import java.util.Calendar
-import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 private const val C0 = 1L
@@ -12,7 +9,6 @@ private const val C3 = C2 * 1000L
 private const val C4 = C3 * 60L
 private const val C5 = C4 * 60L
 private const val C6 = C5 * 24L
-private val utcTimeZone = TimeZone.getTimeZone("UTC")
 
 internal fun TimeUnit.convert(sourceAmount: Double, sourceUnit: TimeUnit): Double {
     return when (sourceUnit) {
@@ -108,31 +104,4 @@ internal fun daysToUnit(days: Double, destinationUnit: TimeUnit): Double {
         TimeUnit.HOURS -> days * (C6 / C5)
         TimeUnit.DAYS -> days
     }
-}
-
-internal fun Long.dayOfWeek(): DayOfWeek {
-    val calendar = Calendar.getInstance(utcTimeZone)
-    calendar.timeInMillis = this
-    return when (val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)) {
-        Calendar.MONDAY -> DayOfWeek.MONDAY
-        Calendar.TUESDAY -> DayOfWeek.TUESDAY
-        Calendar.WEDNESDAY -> DayOfWeek.WEDNESDAY
-        Calendar.THURSDAY -> DayOfWeek.THURSDAY
-        Calendar.FRIDAY -> DayOfWeek.FRIDAY
-        Calendar.SATURDAY -> DayOfWeek.SATURDAY
-        Calendar.SUNDAY -> DayOfWeek.SUNDAY
-        else -> throw IllegalStateException("Invalid Calendar day value: $dayOfWeek")
-    }
-}
-
-internal fun Long.midnight(): Long {
-    val calendar = Calendar.getInstance(utcTimeZone)
-    calendar.timeInMillis = this
-
-    calendar.set(Calendar.HOUR_OF_DAY, 0)
-    calendar.set(Calendar.MINUTE, 0)
-    calendar.set(Calendar.SECOND, 0)
-    calendar.set(Calendar.MILLISECOND, 0)
-
-    return calendar.timeInMillis
 }
