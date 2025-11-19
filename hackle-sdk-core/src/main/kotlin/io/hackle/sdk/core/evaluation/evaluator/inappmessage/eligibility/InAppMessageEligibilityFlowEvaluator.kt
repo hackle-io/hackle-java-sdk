@@ -127,6 +127,29 @@ internal class PeriodInAppMessageEligibilityFlowEvaluator : InAppMessageEligibil
 }
 
 /**
+ * Timetable Check
+ *
+ * IAM의 시간표에 포함되지 않는 경우 NOT_IN_IN_APP_MESSAGE_TIMETABLE
+ */
+internal class TimetableInAppMessageEligibilityFlowEvaluator : InAppMessageEligibilityFlowEvaluator {
+    override fun evaluate(
+        request: InAppMessageEligibilityRequest,
+        context: Evaluator.Context,
+        nextFlow: InAppMessageEligibilityFlow,
+    ): InAppMessageEligibilityEvaluation? {
+        val isWithinTimetable = request.inAppMessage.timetable.within(request.timestamp)
+        if (!isWithinTimetable) {
+            return InAppMessageEligibilityEvaluation.ineligible(
+                request,
+                context,
+                NOT_IN_IN_APP_MESSAGE_TIMETABLE
+            )
+        }
+        return nextFlow.evaluate(request, context)
+    }
+}
+
+/**
  * Target Check
  *
  * IAM 타겟팅이 된 경우
