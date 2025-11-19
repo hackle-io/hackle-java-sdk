@@ -2,7 +2,6 @@ package io.hackle.sdk.core.internal.time
 
 import java.util.concurrent.TimeUnit
 
-
 private const val C0 = 1L
 private const val C1 = C0 * 1000L
 private const val C2 = C1 * 1000L

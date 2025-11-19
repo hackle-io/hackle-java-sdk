@@ -118,7 +118,7 @@ internal class ContainerResolverTest {
             every { bucketId } returns 1
             every { getGroupOrNull(any()) } returns ContainerGroup(22, listOf(23L))
         }
-        val experiment = experiment(containerId = 1)
+        val experiment = experiment(id = 99, containerId = 1)
         every { bucketer.bucketing(bucket, any()) } returns slot
 
         val request = experimentRequest(workspace, user, experiment)
