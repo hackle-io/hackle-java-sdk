@@ -12,6 +12,7 @@ import io.hackle.sdk.core.evaluation.target.InAppMessageFrequencyCapMatcher
 import io.hackle.sdk.core.evaluation.target.InAppMessageHiddenMatcher
 import io.hackle.sdk.core.evaluation.target.InAppMessageTargetMatcher
 import io.hackle.sdk.core.evaluation.target.InAppMessageUserOverrideMatcher
+import io.hackle.sdk.core.model.DayOfWeek
 import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.every
@@ -223,6 +224,68 @@ internal class InAppMessageEligibilityFlowEvaluatorTest {
             // given
             val inAppMessage = InAppMessages.create(period = InAppMessage.Period.Custom(42, 100))
             val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage, timestamp = 99)
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual) isSameInstanceAs evaluation
+        }
+    }
+
+    @Nested
+    inner class TimetableInAppMessageEligibilityFlowEvaluatorTest {
+        @InjectMockKs
+        private lateinit var sut: TimetableInAppMessageEligibilityFlowEvaluator
+
+        @Test
+        fun `when timestamp is not in inAppMessage timetable then evaluate as ineligible`() {
+            // given
+            val timetableSlot = InAppMessage.TimetableSlot(
+                dayOfWeek = DayOfWeek.MONDAY,
+                startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
+                endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
+            )
+            val timetable = InAppMessage.Timetable.Custom(listOf(timetableSlot))
+            val inAppMessage = InAppMessages.create(timestamp = timetable)
+            // 2025-11-03T08:00:00.000Z (Monday 08:00 - outside timetable)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage, timestamp = 1762156800000L)
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual).isNotNull().and {
+                get { reason } isEqualTo DecisionReason.NOT_IN_IN_APP_MESSAGE_TIMETABLE
+                get { isEligible }.isFalse()
+            }
+        }
+
+        @Test
+        fun `when timestamp is in inAppMessage timetable then evaluate next flow`() {
+            // given
+            val timetableSlot = InAppMessage.TimetableSlot(
+                dayOfWeek = DayOfWeek.MONDAY,
+                startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
+                endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
+            )
+            val timetable = InAppMessage.Timetable.Custom(listOf(timetableSlot))
+            val inAppMessage = InAppMessages.create(timestamp = timetable)
+            // 2025-11-03T12:00:00.000Z (Monday 12:00 - inside timetable)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage, timestamp = 1762171200000L)
+
+            // when
+            val actual = sut.evaluate(request, context, nextFlow)
+
+            // then
+            expectThat(actual) isSameInstanceAs evaluation
+        }
+
+        @Test
+        fun `when timetable is All then always evaluate next flow`() {
+            // given
+            val inAppMessage = InAppMessages.create(timestamp = InAppMessage.Timetable.All)
+            val request = InAppMessages.eligibilityRequest(inAppMessage = inAppMessage, timestamp = 1762171200000L)
 
             // when
             val actual = sut.evaluate(request, context, nextFlow)
