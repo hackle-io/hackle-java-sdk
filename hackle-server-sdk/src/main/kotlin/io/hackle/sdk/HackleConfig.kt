@@ -7,12 +7,14 @@ class HackleConfig private constructor(builder: Builder) {
     val sdkUrl: String = builder.sdkUrl
     val eventUrl: String = builder.eventUrl
     val monitoringUrl: String = builder.monitoringUrl
+    val enableMonitoring: Boolean = builder.enableMonitoring
 
     class Builder {
 
         internal var sdkUrl: String = HackleRegion.DEFAULT.sdkUrl
         internal var eventUrl: String = HackleRegion.DEFAULT.eventUrl
         internal var monitoringUrl: String = HackleRegion.DEFAULT.monitoringUrl
+        internal var enableMonitoring: Boolean = true
 
         fun sdkUrl(sdkUrl: String) = apply {
             this.sdkUrl = sdkUrl
@@ -24,6 +26,10 @@ class HackleConfig private constructor(builder: Builder) {
 
         fun monitoringUrl(monitoringUrl: String) = apply {
             this.monitoringUrl = monitoringUrl
+        }
+
+        fun enableMonitoring(enableMonitoring: Boolean) = apply {
+            this.enableMonitoring = enableMonitoring
         }
 
         fun region(region: HackleRegion) = apply {
