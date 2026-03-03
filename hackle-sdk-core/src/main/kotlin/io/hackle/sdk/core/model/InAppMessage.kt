@@ -35,7 +35,7 @@ data class InAppMessage(
     }
 
     enum class DisplayType {
-        NONE, MODAL, BANNER, BOTTOM_SHEET;
+        NONE, MODAL, BANNER, BOTTOM_SHEET, HTML;
     }
 
     enum class LayoutType {
@@ -197,6 +197,7 @@ data class InAppMessage(
         val action: Action?,
         val outerButtons: List<PositionalButton>,
         val innerButtons: List<PositionalButton>,
+        val html: Html?,
     ) {
         data class Alignment(
             val horizontal: Horizontal,
@@ -262,6 +263,18 @@ data class InAppMessage(
         data class Background(
             val color: String,
         )
+
+        data class Html(
+            val resourceType: ResourceType,
+            val text: String?,
+            val path: String?,
+        ) {
+
+            enum class ResourceType {
+                TEXT,
+                PATH
+            }
+        }
     }
 
     data class Action(
