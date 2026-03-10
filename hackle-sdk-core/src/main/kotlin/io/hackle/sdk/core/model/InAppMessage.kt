@@ -51,10 +51,14 @@ data class InAppMessage(
     }
 
     enum class ActionType {
-        WEB_LINK,
         CLOSE,
         HIDDEN,
-        LINK_AND_CLOSE;
+        WEB_LINK,
+        LINK_AND_CLOSE,
+        LINK_NEW_TAB,
+        LINK_NEW_TAB_AND_CLOSE,
+        LINK_NEW_WINDOW,
+        LINK_NEW_WINDOW_AND_CLOSE;
     }
 
     enum class ActionArea {
@@ -285,23 +289,50 @@ data class InAppMessage(
 
         override val type: HackleInAppMessageActionType
             get() = when (actionType) {
-                ActionType.CLOSE, ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
-                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK
+                ActionType.CLOSE,
+                ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
+
+                ActionType.WEB_LINK,
+                ActionType.LINK_AND_CLOSE,
+                ActionType.LINK_NEW_TAB,
+                ActionType.LINK_NEW_TAB_AND_CLOSE,
+                ActionType.LINK_NEW_WINDOW,
+                ActionType.LINK_NEW_WINDOW_AND_CLOSE -> HackleInAppMessageActionType.LINK
             }
 
         override val close: HackleInAppMessageAction.Close? by lazy {
             when (actionType) {
-                ActionType.CLOSE -> InAppMessageCloseAction(null)
-                ActionType.HIDDEN -> InAppMessageCloseAction(DEFAULT_HIDE_DURATION_MILLIS)
-                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> null
+                ActionType.CLOSE,
+                ActionType.LINK_AND_CLOSE,
+                ActionType.LINK_NEW_TAB_AND_CLOSE,
+                ActionType.LINK_NEW_WINDOW_AND_CLOSE,
+                    -> InAppMessageCloseAction(null)
+
+                ActionType.HIDDEN,
+                    -> InAppMessageCloseAction(DEFAULT_HIDE_DURATION_MILLIS)
+
+                ActionType.WEB_LINK,
+                ActionType.LINK_NEW_TAB,
+                ActionType.LINK_NEW_WINDOW,
+                    -> null
             }
         }
 
         override val link: HackleInAppMessageAction.Link? by lazy {
             when (actionType) {
-                ActionType.CLOSE, ActionType.HIDDEN -> null
-                ActionType.WEB_LINK -> InAppMessageLinkAction(requireNotNull(value), false)
-                ActionType.LINK_AND_CLOSE -> InAppMessageLinkAction(requireNotNull(value), true)
+                ActionType.CLOSE,
+                ActionType.HIDDEN
+                    -> null
+
+                ActionType.WEB_LINK,
+                ActionType.LINK_NEW_TAB,
+                ActionType.LINK_NEW_WINDOW,
+                    -> InAppMessageLinkAction(requireNotNull(value), false)
+
+                ActionType.LINK_AND_CLOSE,
+                ActionType.LINK_NEW_TAB_AND_CLOSE,
+                ActionType.LINK_NEW_WINDOW_AND_CLOSE,
+                    -> InAppMessageLinkAction(requireNotNull(value), true)
             }
         }
 

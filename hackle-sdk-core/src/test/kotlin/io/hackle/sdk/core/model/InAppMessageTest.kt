@@ -16,10 +16,14 @@ class InAppMessageTest {
         fun `public type`() {
             fun expectedType(actionType: InAppMessage.ActionType): HackleInAppMessageActionType {
                 return when (actionType) {
-                    InAppMessage.ActionType.WEB_LINK -> HackleInAppMessageActionType.LINK
-                    InAppMessage.ActionType.CLOSE -> HackleInAppMessageActionType.CLOSE
+                    InAppMessage.ActionType.CLOSE,
                     InAppMessage.ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
-                    InAppMessage.ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK
+                    InAppMessage.ActionType.WEB_LINK,
+                    InAppMessage.ActionType.LINK_AND_CLOSE,
+                    InAppMessage.ActionType.LINK_NEW_TAB,
+                    InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE,
+                    InAppMessage.ActionType.LINK_NEW_WINDOW,
+                    InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE -> HackleInAppMessageActionType.LINK
                 }
             }
 
@@ -58,7 +62,45 @@ class InAppMessageTest {
                     "value"
                 )
             ) {
+                get { close }.isNotNull().and {
+                    get { hideDurationMillis }.isNull()
+                }
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isTrue()
+                }
+            }
+            // LINK_NEW_TAB: link without close
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB, "value")) {
                 get { close }.isNull()
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isFalse()
+                }
+            }
+            // LINK_NEW_TAB_AND_CLOSE: close + link
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE, "value")) {
+                get { close }.isNotNull().and {
+                    get { hideDurationMillis }.isNull()
+                }
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isTrue()
+                }
+            }
+            // LINK_NEW_WINDOW: link without close
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW, "value")) {
+                get { close }.isNull()
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isFalse()
+                }
+            }
+            // LINK_NEW_WINDOW_AND_CLOSE: close + link
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE, "value")) {
+                get { close }.isNotNull().and {
+                    get { hideDurationMillis }.isNull()
+                }
                 get { link }.isNotNull().and {
                     get { url } isEqualTo "value"
                     get { shouldCloseAfterLink }.isTrue()
@@ -73,6 +115,18 @@ class InAppMessageTest {
             }
             expectThrows<IllegalArgumentException> {
                 InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_AND_CLOSE, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE, null).link
             }
         }
     }
