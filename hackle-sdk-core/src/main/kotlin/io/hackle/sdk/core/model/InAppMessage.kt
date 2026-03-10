@@ -268,11 +268,17 @@ data class InAppMessage(
             val color: String,
         )
 
-        data class Html(
-            val resourceType: ResourceType,
-            val text: String?,
-            val path: String?,
-        ) {
+        sealed class Html {
+
+            abstract val resourceType: ResourceType
+
+            data class TextHtml(val text: String) : Html() {
+                override val resourceType: ResourceType get() = ResourceType.TEXT
+            }
+
+            data class PathHtml(val path: String) : Html() {
+                override val resourceType: ResourceType get() = ResourceType.PATH
+            }
 
             enum class ResourceType {
                 TEXT,
