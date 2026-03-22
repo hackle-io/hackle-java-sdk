@@ -50,15 +50,18 @@ data class InAppMessage(
         CLICK
     }
 
-    enum class ActionType {
-        CLOSE,
-        HIDDEN,
-        WEB_LINK,
-        LINK_AND_CLOSE,
-        LINK_NEW_TAB,
-        LINK_NEW_TAB_AND_CLOSE,
-        LINK_NEW_WINDOW,
-        LINK_NEW_WINDOW_AND_CLOSE;
+    enum class ActionType(
+        val shouldClose: Boolean,
+        val shouldLink: Boolean,
+    ) {
+        CLOSE(shouldClose = true, shouldLink = false),
+        HIDDEN(shouldClose = true, shouldLink = false),
+        WEB_LINK(shouldClose = false, shouldLink = true),
+        LINK_AND_CLOSE(shouldClose = true, shouldLink = true),
+        LINK_NEW_TAB(shouldClose = false, shouldLink = true),
+        LINK_NEW_TAB_AND_CLOSE(shouldClose = true, shouldLink = true),
+        LINK_NEW_WINDOW(shouldClose = false, shouldLink = true),
+        LINK_NEW_WINDOW_AND_CLOSE(shouldClose = true, shouldLink = true);
     }
 
     enum class ActionArea {
@@ -296,50 +299,32 @@ data class InAppMessage(
         override val type: HackleInAppMessageActionType
             get() = when (actionType) {
                 ActionType.CLOSE,
-                ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
+                ActionType.HIDDEN,
+                    -> HackleInAppMessageActionType.CLOSE
 
                 ActionType.WEB_LINK,
                 ActionType.LINK_AND_CLOSE,
                 ActionType.LINK_NEW_TAB,
                 ActionType.LINK_NEW_TAB_AND_CLOSE,
                 ActionType.LINK_NEW_WINDOW,
-                ActionType.LINK_NEW_WINDOW_AND_CLOSE -> HackleInAppMessageActionType.LINK
+                ActionType.LINK_NEW_WINDOW_AND_CLOSE,
+                    -> HackleInAppMessageActionType.LINK
+            }
+
+        val hideDurationMillis: Long?
+            get() {
+                if (actionType != ActionType.HIDDEN) return null
+                return value?.toLongOrNull() ?: DEFAULT_HIDE_DURATION_MILLIS
             }
 
         override val close: HackleInAppMessageAction.Close? by lazy {
-            when (actionType) {
-                ActionType.CLOSE,
-                ActionType.LINK_AND_CLOSE,
-                ActionType.LINK_NEW_TAB_AND_CLOSE,
-                ActionType.LINK_NEW_WINDOW_AND_CLOSE,
-                    -> InAppMessageCloseAction(null)
-
-                ActionType.HIDDEN,
-                    -> InAppMessageCloseAction(DEFAULT_HIDE_DURATION_MILLIS)
-
-                ActionType.WEB_LINK,
-                ActionType.LINK_NEW_TAB,
-                ActionType.LINK_NEW_WINDOW,
-                    -> null
-            }
+            if (!actionType.shouldClose) return@lazy null
+            InAppMessageCloseAction(hideDurationMillis)
         }
 
         override val link: HackleInAppMessageAction.Link? by lazy {
-            when (actionType) {
-                ActionType.CLOSE,
-                ActionType.HIDDEN
-                    -> null
-
-                ActionType.WEB_LINK,
-                ActionType.LINK_NEW_TAB,
-                ActionType.LINK_NEW_WINDOW,
-                    -> InAppMessageLinkAction(requireNotNull(value), false)
-
-                ActionType.LINK_AND_CLOSE,
-                ActionType.LINK_NEW_TAB_AND_CLOSE,
-                ActionType.LINK_NEW_WINDOW_AND_CLOSE,
-                    -> InAppMessageLinkAction(requireNotNull(value), true)
-            }
+            if (!actionType.shouldLink) return@lazy null
+            InAppMessageLinkAction(requireNotNull(value), actionType.shouldClose)
         }
 
         companion object {
