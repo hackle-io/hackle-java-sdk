@@ -311,21 +311,27 @@ data class InAppMessage(
                     -> HackleInAppMessageActionType.LINK
             }
 
-        val hideDurationMillis: Long?
-            get() {
-                if (actionType != ActionType.HIDDEN) return null
-                return value?.toLongOrNull() ?: DEFAULT_HIDE_DURATION_MILLIS
-            }
-
         override val close: HackleInAppMessageAction.Close? by lazy {
-            if (!actionType.shouldClose) return@lazy null
+            if (!actionType.shouldClose) {
+                return@lazy null
+            }
             InAppMessageCloseAction(hideDurationMillis)
         }
 
         override val link: HackleInAppMessageAction.Link? by lazy {
-            if (!actionType.shouldLink) return@lazy null
+            if (!actionType.shouldLink) {
+                return@lazy null
+            }
             InAppMessageLinkAction(requireNotNull(value), actionType.shouldClose)
         }
+
+        val hideDurationMillis: Long?
+            get() {
+                if (actionType != ActionType.HIDDEN) {
+                    return null
+                }
+                return value?.toLongOrNull() ?: DEFAULT_HIDE_DURATION_MILLIS
+            }
 
         companion object {
             const val DEFAULT_HIDE_DURATION_MILLIS: Long = 1000 * 60 * 60 * 24 // 24H
