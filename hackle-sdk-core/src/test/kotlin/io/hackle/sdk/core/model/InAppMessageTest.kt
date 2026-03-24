@@ -16,10 +16,14 @@ class InAppMessageTest {
         fun `public type`() {
             fun expectedType(actionType: InAppMessage.ActionType): HackleInAppMessageActionType {
                 return when (actionType) {
-                    InAppMessage.ActionType.WEB_LINK -> HackleInAppMessageActionType.LINK
-                    InAppMessage.ActionType.CLOSE -> HackleInAppMessageActionType.CLOSE
+                    InAppMessage.ActionType.CLOSE,
                     InAppMessage.ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
-                    InAppMessage.ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK
+                    InAppMessage.ActionType.WEB_LINK,
+                    InAppMessage.ActionType.LINK_AND_CLOSE,
+                    InAppMessage.ActionType.LINK_NEW_TAB,
+                    InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE,
+                    InAppMessage.ActionType.LINK_NEW_WINDOW,
+                    InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE -> HackleInAppMessageActionType.LINK
                 }
             }
 
@@ -58,12 +62,97 @@ class InAppMessageTest {
                     "value"
                 )
             ) {
-                get { close }.isNull()
+                get { close }.isNotNull().and {
+                    get { hideDurationMillis }.isNull()
+                }
                 get { link }.isNotNull().and {
                     get { url } isEqualTo "value"
                     get { shouldCloseAfterLink }.isTrue()
                 }
             }
+            // LINK_NEW_TAB: link without close
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB, "value")) {
+                get { close }.isNull()
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isFalse()
+                }
+            }
+            // LINK_NEW_TAB_AND_CLOSE: close + link
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE, "value")) {
+                get { close }.isNotNull().and {
+                    get { hideDurationMillis }.isNull()
+                }
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isTrue()
+                }
+            }
+            // LINK_NEW_WINDOW: link without close
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW, "value")) {
+                get { close }.isNull()
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isFalse()
+                }
+            }
+            // LINK_NEW_WINDOW_AND_CLOSE: close + link
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE, "value")) {
+                get { close }.isNotNull().and {
+                    get { hideDurationMillis }.isNull()
+                }
+                get { link }.isNotNull().and {
+                    get { url } isEqualTo "value"
+                    get { shouldCloseAfterLink }.isTrue()
+                }
+            }
+        }
+
+        @Test
+        fun `hideDurationMillis`() {
+            // non-HIDDEN: null
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.CLOSE, null))
+                .get { hideDurationMillis }.isNull()
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.WEB_LINK, "url"))
+                .get { hideDurationMillis }.isNull()
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_AND_CLOSE, "url"))
+                .get { hideDurationMillis }.isNull()
+
+            // HIDDEN with null value: default 24H
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.HIDDEN, null))
+                .get { hideDurationMillis }.isEqualTo(1000L * 60 * 60 * 24)
+
+            // HIDDEN with non-numeric value: default 24H
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.HIDDEN, "invalid"))
+                .get { hideDurationMillis }.isEqualTo(1000L * 60 * 60 * 24)
+
+            // HIDDEN with custom duration
+            expectThat(InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.HIDDEN, "100000"))
+                .get { hideDurationMillis }.isEqualTo(100000L)
+        }
+
+        @Test
+        fun `ActionType shouldClose`() {
+            expectThat(InAppMessage.ActionType.CLOSE.shouldClose).isTrue()
+            expectThat(InAppMessage.ActionType.HIDDEN.shouldClose).isTrue()
+            expectThat(InAppMessage.ActionType.WEB_LINK.shouldClose).isFalse()
+            expectThat(InAppMessage.ActionType.LINK_AND_CLOSE.shouldClose).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_NEW_TAB.shouldClose).isFalse()
+            expectThat(InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE.shouldClose).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_NEW_WINDOW.shouldClose).isFalse()
+            expectThat(InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE.shouldClose).isTrue()
+        }
+
+        @Test
+        fun `ActionType shouldLink`() {
+            expectThat(InAppMessage.ActionType.CLOSE.shouldLink).isFalse()
+            expectThat(InAppMessage.ActionType.HIDDEN.shouldLink).isFalse()
+            expectThat(InAppMessage.ActionType.WEB_LINK.shouldLink).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_AND_CLOSE.shouldLink).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_NEW_TAB.shouldLink).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE.shouldLink).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_NEW_WINDOW.shouldLink).isTrue()
+            expectThat(InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE.shouldLink).isTrue()
         }
 
         @Test
@@ -73,6 +162,18 @@ class InAppMessageTest {
             }
             expectThrows<IllegalArgumentException> {
                 InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_AND_CLOSE, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_TAB_AND_CLOSE, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW, null).link
+            }
+            expectThrows<IllegalArgumentException> {
+                InAppMessage.Action(InAppMessage.Behavior.CLICK, InAppMessage.ActionType.LINK_NEW_WINDOW_AND_CLOSE, null).link
             }
         }
     }
