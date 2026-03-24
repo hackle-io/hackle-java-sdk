@@ -35,7 +35,7 @@ data class InAppMessage(
     }
 
     enum class DisplayType {
-        NONE, MODAL, BANNER, BOTTOM_SHEET;
+        NONE, MODAL, BANNER, BOTTOM_SHEET, HTML;
     }
 
     enum class LayoutType {
@@ -50,11 +50,18 @@ data class InAppMessage(
         CLICK
     }
 
-    enum class ActionType {
-        WEB_LINK,
-        CLOSE,
-        HIDDEN,
-        LINK_AND_CLOSE;
+    enum class ActionType(
+        val shouldClose: Boolean,
+        val shouldLink: Boolean,
+    ) {
+        CLOSE(shouldClose = true, shouldLink = false),
+        HIDDEN(shouldClose = true, shouldLink = false),
+        WEB_LINK(shouldClose = false, shouldLink = true),
+        LINK_AND_CLOSE(shouldClose = true, shouldLink = true),
+        LINK_NEW_TAB(shouldClose = false, shouldLink = true),
+        LINK_NEW_TAB_AND_CLOSE(shouldClose = true, shouldLink = true),
+        LINK_NEW_WINDOW(shouldClose = false, shouldLink = true),
+        LINK_NEW_WINDOW_AND_CLOSE(shouldClose = true, shouldLink = true);
     }
 
     enum class ActionArea {
@@ -197,6 +204,7 @@ data class InAppMessage(
         val action: Action?,
         val outerButtons: List<PositionalButton>,
         val innerButtons: List<PositionalButton>,
+        val html: Html?,
     ) {
         data class Alignment(
             val horizontal: Horizontal,
@@ -262,6 +270,24 @@ data class InAppMessage(
         data class Background(
             val color: String,
         )
+
+        sealed class Html {
+
+            abstract val resourceType: ResourceType
+
+            data class TextHtml(val text: String) : Html() {
+                override val resourceType: ResourceType get() = ResourceType.TEXT
+            }
+
+            data class PathHtml(val path: String) : Html() {
+                override val resourceType: ResourceType get() = ResourceType.PATH
+            }
+
+            enum class ResourceType {
+                TEXT,
+                PATH
+            }
+        }
     }
 
     data class Action(
@@ -272,25 +298,40 @@ data class InAppMessage(
 
         override val type: HackleInAppMessageActionType
             get() = when (actionType) {
-                ActionType.CLOSE, ActionType.HIDDEN -> HackleInAppMessageActionType.CLOSE
-                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> HackleInAppMessageActionType.LINK
+                ActionType.CLOSE,
+                ActionType.HIDDEN,
+                    -> HackleInAppMessageActionType.CLOSE
+
+                ActionType.WEB_LINK,
+                ActionType.LINK_AND_CLOSE,
+                ActionType.LINK_NEW_TAB,
+                ActionType.LINK_NEW_TAB_AND_CLOSE,
+                ActionType.LINK_NEW_WINDOW,
+                ActionType.LINK_NEW_WINDOW_AND_CLOSE,
+                    -> HackleInAppMessageActionType.LINK
             }
 
         override val close: HackleInAppMessageAction.Close? by lazy {
-            when (actionType) {
-                ActionType.CLOSE -> InAppMessageCloseAction(null)
-                ActionType.HIDDEN -> InAppMessageCloseAction(DEFAULT_HIDE_DURATION_MILLIS)
-                ActionType.WEB_LINK, ActionType.LINK_AND_CLOSE -> null
+            if (!actionType.shouldClose) {
+                return@lazy null
             }
+            InAppMessageCloseAction(hideDurationMillis)
         }
 
         override val link: HackleInAppMessageAction.Link? by lazy {
-            when (actionType) {
-                ActionType.CLOSE, ActionType.HIDDEN -> null
-                ActionType.WEB_LINK -> InAppMessageLinkAction(requireNotNull(value), false)
-                ActionType.LINK_AND_CLOSE -> InAppMessageLinkAction(requireNotNull(value), true)
+            if (!actionType.shouldLink) {
+                return@lazy null
             }
+            InAppMessageLinkAction(requireNotNull(value), actionType.shouldClose)
         }
+
+        val hideDurationMillis: Long?
+            get() {
+                if (actionType != ActionType.HIDDEN) {
+                    return null
+                }
+                return value?.toLongOrNull() ?: DEFAULT_HIDE_DURATION_MILLIS
+            }
 
         companion object {
             const val DEFAULT_HIDE_DURATION_MILLIS: Long = 1000 * 60 * 60 * 24 // 24H

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.internal.time.Clock
+import io.hackle.sdk.core.internal.time.TimeUtil
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
@@ -18,6 +19,7 @@ import strikt.assertions.isEqualTo
 import java.util.concurrent.TimeUnit
 
 class TargetEventConditionMatcherTest {
+    private var midnight: Long = TimeUtil.midnight(Clock.SYSTEM.currentMillis())
     private val testClock = TestClock() // default KST 09:00:00
 
     private val numberOfEventsInDaysMatcher = NumberOfEventsInDaysMatcher(ValueOperatorMatcher(ValueOperatorMatcherFactory()), testClock)
@@ -26,6 +28,7 @@ class TargetEventConditionMatcherTest {
 
     @BeforeEach
     fun resetClock() {
+        midnight = TimeUtil.midnight(Clock.SYSTEM.currentMillis())
         testClock.setKstTime(9)
     }
 
@@ -438,10 +441,8 @@ class TargetEventConditionMatcherTest {
      * @return timestamp
      */
     private fun getTimeStamp(daysAgo: Int): Long {
-        val currentMillis = Clock.SYSTEM.currentMillis()
         val daysAgoMillis = TimeUnit.DAYS.toMillis(daysAgo.toLong())
-        val timestamp = currentMillis - (currentMillis % (24 * 60 * 60 * 1000L)) - daysAgoMillis
-        return timestamp
+        return midnight - daysAgoMillis
     }
 
     private fun getKeyString(eventKey: String, days: Int): String {
@@ -457,7 +458,7 @@ class TargetEventConditionMatcherTest {
     /**
      * 오늘 기준으로 특정 KST의 UTC+0 timestamp를 반환하는 Clock
      */
-    class TestClock(
+    inner class TestClock(
         private var kstTime: Int = 9
     ) : Clock {
         override fun currentMillis(): Long {
@@ -467,7 +468,7 @@ class TargetEventConditionMatcherTest {
 
             val dayMillis = 24 * 60 * 60 * 1000L
             val kstOffset = 9 * 60 * 60 * 1000L // UTC+9 오프셋
-            return (Clock.SYSTEM.currentMillis() + kstOffset) / dayMillis * dayMillis - kstOffset + kstTime * 60 * 60 * 1000L
+            return (midnight + kstOffset) / dayMillis * dayMillis - kstOffset + kstTime * 60 * 60 * 1000L
         }
 
         override fun tick(): Long {
