@@ -35,4 +35,9 @@ out/
 .DS_Store
 .java-version
 
-.qodo
+docs
+.claude
+.ocr
+.serena
+AGENTS.md
+CLAUDE.md
