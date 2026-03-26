@@ -6,6 +6,10 @@ import io.hackle.sdk.core.evaluation.get
 
 class InAppMessageEligibilityFlowFactory(context: EvaluationContext, layoutEvaluator: InAppMessageLayoutEvaluator) {
 
+    private val overrideFlow: InAppMessageEligibilityFlow = InAppMessageEligibilityFlow.of(
+        OverrideInAppMessageEligibilityFlowEvaluator(context.get())
+    )
+
     private val evaluateFlow: InAppMessageEligibilityFlow = InAppMessageEligibilityFlow.of(
         PlatformInAppMessageEligibilityFlowEvaluator(),
         OverrideInAppMessageEligibilityFlowEvaluator(context.get()),
@@ -31,7 +35,7 @@ class InAppMessageEligibilityFlowFactory(context: EvaluationContext, layoutEvalu
 
     private val triggerFlow: InAppMessageEligibilityFlow = evaluateFlow + layoutFlow + deduplicateFlow + eligibleFlow
 
-    private val deliverFlow: InAppMessageEligibilityFlow = deduplicateFlow + eligibleFlow
+    private val deliverFlow: InAppMessageEligibilityFlow = overrideFlow + deduplicateFlow + eligibleFlow
     private val deliverReEvaluateFlow: InAppMessageEligibilityFlow = evaluateFlow + deduplicateFlow + eligibleFlow
 
 
