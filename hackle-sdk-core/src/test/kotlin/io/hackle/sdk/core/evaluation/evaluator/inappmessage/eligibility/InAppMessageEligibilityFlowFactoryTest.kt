@@ -32,6 +32,7 @@ class InAppMessageEligibilityFlowFactoryTest {
             .isEnd()
 
         expectThat(sut.deliverFlow(false))
+            .isDecisionWith<OverrideInAppMessageEligibilityFlowEvaluator>()
             .isDecisionWith<FrequencyCapInAppMessageEligibilityFlowEvaluator>()
             .isDecisionWith<HiddenInAppMessageEligibilityFlowEvaluator>()
             .isDecisionWith<EligibleInAppMessageEligibilityFlowEvaluator>()
