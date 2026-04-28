@@ -45,6 +45,7 @@ jobs:
       - name: Create prerelease
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.PAT }} 	
           script: |
             const tagName = '${{ steps.validate_tag.outputs.version }}';
             
@@ -54,14 +55,13 @@ jobs:
                 repo: context.repo.repo,
                 tag_name: tagName,
                 name: tagName,
-                generate_release_notes: true,
                 prerelease: true,
-                draft: false
+                generate_release_notes: true,
               });
               
               console.log(`Prerelease created successfully: ${response.data.html_url}`);
               console.log(`Release ID: ${response.data.id}`);
-              
+              console.log(`Release URL: ${response.data.html_url}`);
             } catch (error) {
               if (error.status === 422 && error.response.data.errors?.[0]?.code === 'already_exists') {
                 console.log(`Release for tag ${tagName} already exists`);
