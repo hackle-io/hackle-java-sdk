@@ -1,5 +1,7 @@
 package io.hackle.sdk.common
 
+import java.util.Locale.getDefault
+
 /**
  * @author Yong
  */
@@ -16,7 +18,8 @@ enum class Variation {
         @JvmField
         val CONTROL = A
 
-        private val VARIATIONS = values().flatMap { listOf(it.name to it, it.name.toLowerCase() to it) }.toMap()
+        private val VARIATIONS =
+            Variation.entries.flatMap { listOf(it.name to it, it.name.lowercase(getDefault()) to it) }.toMap()
 
         @JvmStatic
         fun from(key: String): Variation {
