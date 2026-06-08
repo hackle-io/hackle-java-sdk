@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.9.25"
     `java-library`
     `maven-publish`
     signing
@@ -37,11 +37,16 @@ subprojects {
         testImplementation("io.strikt:strikt-core:0.32.0")
     }
 
+    configure<JavaPluginExtension> {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     tasks {
         compileKotlin {
             kotlinOptions {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
-                jvmTarget = "1.6"
+                jvmTarget = "1.8"
             }
         }
         compileTestKotlin {
@@ -64,13 +69,13 @@ subprojects {
     }
 
     jacoco {
-        toolVersion = "0.8.5"
+        toolVersion = "0.8.12"
     }
 
     tasks.jacocoTestReport {
         reports {
-            xml.isEnabled = true
-            html.isEnabled = true
+            xml.required.set(true)
+            html.required.set(true)
         }
         finalizedBy("jacocoTestCoverageVerification")
     }
