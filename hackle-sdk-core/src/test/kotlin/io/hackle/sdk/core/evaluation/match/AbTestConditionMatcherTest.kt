@@ -3,11 +3,8 @@ package io.hackle.sdk.core.evaluation.match
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.remoteConfigRequest
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.remoteconfig.remoteConfigRequest
 import io.hackle.sdk.core.model.Experiment
 import io.hackle.sdk.core.model.Target.Key.Type.AB_TEST
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
@@ -45,7 +42,7 @@ internal class AbTestConditionMatcherTest {
     private lateinit var valueOperatorMatcher: ValueOperatorMatcher
 
     @InjectMockKs
-    private lateinit var sut: AbTestConditionMatcher
+    private lateinit var sut: AbTestReferenceLocalEvaluateMatcher
 
     lateinit var context: Evaluator.Context
 
@@ -155,7 +152,7 @@ internal class AbTestConditionMatcherTest {
 
         assertTrue(actual)
         verify { evaluator wasNot Called }
-        expectThat(context.targetEvaluations).hasSize(1)
+        expectThat(context.references).hasSize(1)
     }
 
     @Test

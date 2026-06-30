@@ -2,7 +2,7 @@ package io.hackle.sdk.core.evaluation.match
 
 import com.google.gson.Gson
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.internal.time.TimeUtil
 import io.hackle.sdk.core.model.*

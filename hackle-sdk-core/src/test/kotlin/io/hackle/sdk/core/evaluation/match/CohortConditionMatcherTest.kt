@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
 import io.hackle.sdk.core.model.Cohort
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.COHORT

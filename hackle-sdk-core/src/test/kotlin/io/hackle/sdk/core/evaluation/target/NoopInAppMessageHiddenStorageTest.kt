@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.target
 
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.NoopInAppMessageHiddenStorage
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat

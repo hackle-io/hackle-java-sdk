@@ -1,16 +1,18 @@
 package io.hackle.sdk.core.evaluation.evaluator
 
-internal class DelegatingEvaluator : Evaluator {
+import io.hackle.sdk.core.evaluation.EvaluateRequest
+import io.hackle.sdk.core.evaluation.EvaluateResponse
 
-    private val evaluators = mutableListOf<ContextualEvaluator<*, *>>()
-
-    fun add(evaluator: ContextualEvaluator<*, *>) {
-        evaluators.add(evaluator)
+class DelegatingEvaluator(
+    private val evaluatorFactory: EvaluatorFactory,
+) : Evaluator<EvaluateRequest, EvaluateResponse> {
+    override fun evaluate(request: EvaluateRequest, context: Evaluator.Context): EvaluateResponse {
+        val evaluator = evaluatorFactory.get(request)
+        return evaluator.evaluate(request, context)
     }
 
-    override fun evaluate(request: Evaluator.Request, context: Evaluator.Context): Evaluator.Evaluation {
-        val evaluator = evaluators.find { it.supports(request) }
-            ?: throw IllegalArgumentException("Unsupported Evaluator.Request [${request::class.java.simpleName}]")
-        return evaluator.evaluate(request, context)
+    override fun record(request: EvaluateRequest, response: EvaluateResponse) {
+        val evaluator = evaluatorFactory.get(request)
+        evaluator.record(request, response)
     }
 }

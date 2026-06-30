@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.target
 
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.NoopInAppMessageImpressionStorage
 import io.hackle.sdk.core.model.InAppMessages
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

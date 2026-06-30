@@ -11,22 +11,18 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
-import io.hackle.sdk.core.evaluation.EvaluationContext
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluator
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluator
+import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluator
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.event.EventProcessor
 import io.hackle.sdk.core.event.UserEvent
-import io.hackle.sdk.core.event.UserEventFactory
+import io.hackle.sdk.core.evaluation.event.EvaluationEventFactory
 import io.hackle.sdk.core.internal.utils.tryClose
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 import io.hackle.sdk.core.workspace.WorkspaceDsl
-import io.hackle.sdk.core.workspace.WorkspaceFetcher
 import io.hackle.sdk.core.workspace.workspace
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
@@ -56,7 +52,7 @@ internal class HackleCoreTest {
     private lateinit var workspaceFetcher: WorkspaceFetcher
 
     @MockK
-    private lateinit var eventFactory: UserEventFactory
+    private lateinit var eventFactory: EvaluationEventFactory
 
     @RelaxedMockK
     private lateinit var eventProcessor: EventProcessor
@@ -694,7 +690,7 @@ internal class HackleCoreTest {
     fun `not found experiment`() {
         val workspaceFetcher = workspaceFetcher {}
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, EXPERIMENT_NOT_FOUND)
@@ -725,7 +721,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -790,7 +786,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -869,7 +865,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)
@@ -948,7 +944,7 @@ internal class HackleCoreTest {
             }
         }
 
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         core.experiment(1, HackleUser.of(User.builder("a").property("grade", "SILVER").build()), Variation.A)
             .expect(Variation.A, OVERRIDDEN)

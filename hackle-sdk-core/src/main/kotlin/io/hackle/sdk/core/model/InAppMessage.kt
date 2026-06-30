@@ -5,17 +5,14 @@ import io.hackle.sdk.common.HackleInAppMessageAction
 import io.hackle.sdk.common.HackleInAppMessageActionType
 import io.hackle.sdk.core.internal.time.TimeUtil
 
-data class InAppMessage(
-    val id: Long,
-    override val key: Long,
-    val status: Status,
-    val period: Period,
-    val timetable: Timetable,
-    val eventTrigger: EventTrigger,
-    val evaluateContext: EvaluateContext,
-    val targetContext: TargetContext,
-    val messageContext: MessageContext,
-) : HackleInAppMessage {
+interface InAppMessage : Entity, HackleInAppMessage {
+    override val id: Long
+    override val key: Long
+    val period: Period
+    val timetable: Timetable
+    val eventTrigger: EventTrigger
+    val evaluateContext: EvaluateContext
+    val messageContext: MessageContext
 
     enum class Status {
         INITIALIZED,
@@ -80,11 +77,7 @@ data class InAppMessage(
         }
 
         object Always : Period()
-
-        class Custom(
-            val startMillisInclusive: Long,
-            val endMillisExclusive: Long,
-        ) : Period()
+        class Custom(val startMillisInclusive: Long, val endMillisExclusive: Long) : Period()
     }
 
     sealed class Timetable {
@@ -96,25 +89,23 @@ data class InAppMessage(
         }
 
         object All : Timetable()
-        class Custom(
-            val slots: List<TimetableSlot>,
-        ) : Timetable()
-    }
+        class Custom(val slots: List<Slot>) : Timetable()
 
-    data class TimetableSlot(
-        val dayOfWeek: DayOfWeek,
-        val startMillisInclusive: Long,
-        val endMillisExclusive: Long,
-    ) {
-        fun within(timestamp: Long): Boolean {
-            val dayOfWeek = TimeUtil.dayOfWeek(timestamp)
-            if (this.dayOfWeek != dayOfWeek) {
-                return false
+        data class Slot(
+            val dayOfWeek: DayOfWeek,
+            val startMillisInclusive: Long,
+            val endMillisExclusive: Long,
+        ) {
+            fun within(timestamp: Long): Boolean {
+                val dayOfWeek = TimeUtil.dayOfWeek(timestamp)
+                if (this.dayOfWeek != dayOfWeek) {
+                    return false
+                }
+                val midnight = TimeUtil.midnight(timestamp)
+                val startTimestampInclusive = midnight + startMillisInclusive
+                val endTimestampExclusive = midnight + endMillisExclusive
+                return timestamp in startTimestampInclusive until endTimestampExclusive
             }
-            val midnight = TimeUtil.midnight(timestamp)
-            val startTimestampInclusive = midnight + startMillisInclusive
-            val endTimestampExclusive = midnight + endMillisExclusive
-            return timestamp in startTimestampInclusive until endTimestampExclusive
         }
     }
 
@@ -346,16 +337,19 @@ data class InAppMessage(
         override val url: String,
         override val shouldCloseAfterLink: Boolean,
     ) : HackleInAppMessageAction.Link
+}
+
+abstract class AbstractInAppMessage : AbstractEntity(), InAppMessage {
+    final override val serviceType: ServiceType get() = ServiceType.IN_APP_MESSAGE
 
     override fun toString(): String {
-        return "InAppMessage(id=$id, key=$key, status=$status)"
+        return "InAppMessage(id=$id, key=$key)"
     }
 }
 
 internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
     return platform in messageContext.platformTypes
 }
-
 
 internal operator fun InAppMessage.Period.contains(timestamp: Long): Boolean {
     return within(timestamp)

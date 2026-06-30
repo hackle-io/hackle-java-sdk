@@ -1,5 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.EvaluateRequest
+import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Target
@@ -7,13 +9,13 @@ import io.hackle.sdk.core.model.Target.Key.Type.*
 
 internal interface ConditionMatcher {
     fun matches(
-        request: Evaluator.Request,
+        request: EvaluateRequest,
         context: Evaluator.Context,
-        condition: Target.Condition
+        condition: Target.Condition,
     ): Boolean
 }
 
-internal class ConditionMatcherFactory(evaluator: Evaluator, clock: Clock) {
+internal class ConditionMatcherFactory(evaluator: DelegatingEvaluator, clock: Clock) {
 
     private val userConditionMatcher: ConditionMatcher
     private val segmentConditionMatcher: ConditionMatcher
@@ -27,8 +29,8 @@ internal class ConditionMatcherFactory(evaluator: Evaluator, clock: Clock) {
         this.userConditionMatcher = UserConditionMatcher(UserValueResolver(), valueOperatorMatcher)
         this.segmentConditionMatcher = SegmentConditionMatcher(SegmentMatcher(this.userConditionMatcher))
         this.experimentConditionMatcher = ExperimentConditionMatcher(
-            AbTestConditionMatcher(evaluator, valueOperatorMatcher),
-            FeatureFlagConditionMatcher(evaluator, valueOperatorMatcher)
+            AbTestReferenceLocalEvaluateMatcher(evaluator, valueOperatorMatcher),
+            FeatureFlagReferenceLocalEvaluateMatcher(evaluator, valueOperatorMatcher)
         )
         this.eventConditionMatcher = EventConditionMatcher(
             EventValueResolver(),

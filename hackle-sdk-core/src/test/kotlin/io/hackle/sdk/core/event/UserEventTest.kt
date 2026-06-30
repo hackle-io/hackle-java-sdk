@@ -2,9 +2,6 @@ package io.hackle.sdk.core.event
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigEvaluation
-import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.model.ParameterConfiguration
 import io.hackle.sdk.core.model.RemoteConfigParameter
 import io.hackle.sdk.core.model.experiment

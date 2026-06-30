@@ -8,7 +8,7 @@ import strikt.api.expectThrows
 import strikt.assertions.*
 
 class InAppMessageTest {
-    
+
     @Nested
     inner class ActionTest {
 
@@ -261,7 +261,7 @@ class InAppMessageTest {
     }
 
     @Nested
-    inner class TimetableSlotTest {
+    inner class SlotTest {
         @Test
         fun `slot should match when timestamp is within day and time range`() {
             val slot = InAppMessage.TimetableSlot(

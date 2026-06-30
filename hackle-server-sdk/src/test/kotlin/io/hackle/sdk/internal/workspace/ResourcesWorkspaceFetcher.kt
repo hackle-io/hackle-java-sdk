@@ -1,7 +1,6 @@
 package io.hackle.sdk.internal.workspace
 
 import io.hackle.sdk.core.workspace.Workspace
-import io.hackle.sdk.core.workspace.WorkspaceFetcher
 import io.hackle.sdk.internal.utils.parseJson
 import java.nio.file.Files
 import java.nio.file.Paths

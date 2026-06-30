@@ -2,8 +2,8 @@ package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.remoteconfig.RemoteConfigRequest
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
+import io.hackle.sdk.core.evaluation.service.remoteconfig.match.RemoteConfigParameterTargetRuleDeterminer
 import io.hackle.sdk.core.model.Bucket
 import io.hackle.sdk.core.model.RemoteConfigParameter
 import io.hackle.sdk.core.model.Target

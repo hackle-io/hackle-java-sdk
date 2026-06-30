@@ -2,7 +2,6 @@ package io.hackle.sdk.internal.event
 
 import io.hackle.sdk.common.Event
 import io.hackle.sdk.core.event.UserEvent
-import io.hackle.sdk.core.model.EventType
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.user.IdentifierType
 import java.util.*

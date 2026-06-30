@@ -2,6 +2,13 @@ package io.hackle.sdk.core.evaluation.target
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageFrequencyCapMatcher
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageHiddenMatcher
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageHiddenStorage
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageImpression
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageImpressionStorage
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageTargetMatcher
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageUserOverrideMatcher
 import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.model.InAppMessages
 import io.hackle.sdk.core.user.HackleUser

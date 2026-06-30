@@ -1,17 +1,13 @@
 package io.hackle.sdk.core.model
 
-data class RemoteConfigParameter(
-    val id: Long,
-    val key: String,
-    val type: ValueType,
-    val identifierType: String,
-    val targetRules: List<TargetRule>,
-    val defaultValue: Value
-) {
+interface RemoteConfigParameter : Entity {
+    override val id: Long
+    val key: String
+    val type: ValueType
 
     data class Value(
         val id: Long,
-        val rawValue: Any
+        val rawValue: Any,
     )
 
     data class TargetRule(
@@ -19,18 +15,30 @@ data class RemoteConfigParameter(
         val name: String,
         val target: Target,
         val bucketId: Long,
-        val value: Value
+        val value: Value,
     )
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other !is RemoteConfigParameter -> false
-            else -> id == other.id
+    companion object {
+        fun <T : Any> cast(type: ValueType, value: Any): T? {
+            @Suppress("UNCHECKED_CAST")
+            return when (type) {
+                ValueType.STRING -> value as? String
+                ValueType.NUMBER -> value as? Number
+                ValueType.BOOLEAN -> value as? Boolean
+                ValueType.VERSION, ValueType.JSON -> null
+            } as? T
         }
     }
+}
 
-    override fun hashCode(): Int {
-        return id.hashCode()
+abstract class AbstractRemoteConfigParameter : AbstractEntity(), RemoteConfigParameter {
+    final override val serviceType: ServiceType get() = ServiceType.REMOTE_CONFIG
+
+    override fun toString(): String {
+        return "RemoteConfigParameterConfig(id=$id, key=$key)"
     }
+}
+
+fun <T : Any> ValueType.cast(value: RemoteConfigParameter.Value): T? {
+    return RemoteConfigParameter.cast(this, value)
 }

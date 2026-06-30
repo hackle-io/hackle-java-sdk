@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
@@ -20,10 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 internal class ExperimentConditionMatcherTest {
 
     @MockK
-    private lateinit var abTestMatcher: AbTestConditionMatcher
+    private lateinit var abTestMatcher: AbTestReferenceLocalEvaluateMatcher
 
     @MockK
-    private lateinit var featureFlagMatcher: FeatureFlagConditionMatcher
+    private lateinit var featureFlagMatcher: FeatureFlagReferenceLocalEvaluateMatcher
 
     @InjectMockKs
     private lateinit var sut: ExperimentConditionMatcher

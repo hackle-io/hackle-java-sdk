@@ -4,10 +4,6 @@ import io.hackle.sdk.common.Variation.A
 import io.hackle.sdk.common.Variation.B
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutEvaluation
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.layout.InAppMessageLayoutRequest
 import io.hackle.sdk.core.model.Target.Key.Type.USER_ID
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH

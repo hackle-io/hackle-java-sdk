@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
 import io.hackle.sdk.core.model.Target.Key.Type.USER_PROPERTY
 import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.condition

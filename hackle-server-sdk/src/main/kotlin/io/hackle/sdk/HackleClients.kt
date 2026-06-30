@@ -1,8 +1,12 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.core.HackleCore
-import io.hackle.sdk.core.evaluation.EvaluationContext
-import io.hackle.sdk.core.event.UserEventFactory
+import io.hackle.sdk.core.HackleCoreContext
+import io.hackle.sdk.core.decision.LocalDecisionProcessor
+import io.hackle.sdk.core.evaluation.EvaluateProcessor
+import io.hackle.sdk.core.evaluation.service.experiment.match.NoopExperimentManualOverrideStorage
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.NoopInAppMessageHiddenStorage
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.NoopInAppMessageImpressionStorage
 import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.log.metrics.MetricLoggerFactory
 import io.hackle.sdk.core.internal.metrics.Metrics
@@ -17,8 +21,8 @@ import io.hackle.sdk.internal.http.SdkHeaderInterceptor
 import io.hackle.sdk.internal.log.Slf4jLogger
 import io.hackle.sdk.internal.monitoring.metrics.MonitoringMetricRegistry
 import io.hackle.sdk.internal.user.HackleUserResolver
-import io.hackle.sdk.internal.workspace.HttpWorkspaceFetcher
-import io.hackle.sdk.internal.workspace.PollingWorkspaceFetcher
+import io.hackle.sdk.internal.workspace.HttpWorkspaceConfigFetcher
+import io.hackle.sdk.internal.workspace.PollingWorkspaceConfigFetcher
 import io.hackle.sdk.internal.workspace.Sdk
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.CloseableHttpClient
@@ -56,34 +60,30 @@ object HackleClients {
             metricConfiguration(config, httpClient)
         }
 
-        val httpWorkspaceFetcher = HttpWorkspaceFetcher(
-            config = config,
-            sdk = sdk,
-            httpClient = httpClient
-        )
-
-        val pollingWorkspaceFetcher = PollingWorkspaceFetcher(
-            httpWorkspaceFetcher = httpWorkspaceFetcher,
+        val workspaceFetcher = PollingWorkspaceConfigFetcher(
+            fetcher = HttpWorkspaceConfigFetcher(
+                config = config,
+                sdk = sdk,
+                httpClient = httpClient
+            ),
             pollingIntervalMillis = 10 * 1000,
             scheduler = Schedulers.executor(
                 newSingleThreadScheduledExecutor(NamedThreadFactory("Hackle-WorkspacePolling-", true))
             )
         )
 
-        val eventDispatcher = EventDispatcher(
-            config = config,
-            httpClient = httpClient,
-            dispatcherExecutor = PoolingExecutors.newThreadPool(
-                poolSize = 4,
-                workQueueCapacity = 10000,
-                threadFactory = NamedThreadFactory("Hackle-EventDispatcher-", true)
-            ),
-            shutdownTimeoutMillis = 10 * 1000
-        )
-
-        val defaultEventProcessor = DefaultEventProcessor(
+        val eventProcessor = DefaultEventProcessor(
             queue = ArrayBlockingQueue(10000),
-            eventDispatcher = eventDispatcher,
+            eventDispatcher = EventDispatcher(
+                config = config,
+                httpClient = httpClient,
+                dispatcherExecutor = PoolingExecutors.newThreadPool(
+                    poolSize = 4,
+                    workQueueCapacity = 10000,
+                    threadFactory = NamedThreadFactory("Hackle-EventDispatcher-", true)
+                ),
+                shutdownTimeoutMillis = 10 * 1000
+            ),
             eventDispatchSize = 100,
             flushScheduler = Schedulers.executor(
                 newSingleThreadScheduledExecutor(NamedThreadFactory("Hackle-EventFlush-", true))
@@ -93,15 +93,22 @@ object HackleClients {
             shutdownTimeoutMillis = 10 * 1000
         )
 
-        val eventFactory = UserEventFactory(
-            clock = clock
+        val decisionProcessor = LocalDecisionProcessor(
+            workspaceFetcher = workspaceFetcher,
+            evaluateProcessor = EvaluateProcessor.create(
+                context = HackleCoreContext.GLOBAL,
+                clock = clock,
+                eventProcessor = eventProcessor,
+                overrideStorage = NoopExperimentManualOverrideStorage,
+                impressionStorage = NoopInAppMessageImpressionStorage,
+                hiddenStorage = NoopInAppMessageHiddenStorage
+            )
         )
 
-        val core = HackleCore.create(
-            context = EvaluationContext.GLOBAL,
-            workspaceFetcher = pollingWorkspaceFetcher.apply { start() },
-            eventFactory = eventFactory,
-            eventProcessor = defaultEventProcessor.apply { start() }
+        val core = HackleCore(
+            workspaceFetcher = workspaceFetcher.apply { start() },
+            decisionProcessor = decisionProcessor,
+            eventProcessor = eventProcessor.apply { start() }
         )
 
         return HackleClientImpl(

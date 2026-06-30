@@ -2,9 +2,9 @@ package io.hackle.sdk.core.evaluation.flow
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentFlow
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
-import io.hackle.sdk.core.evaluation.evaluator.inappmessage.eligibility.InAppMessageEligibilityFlow
+import io.hackle.sdk.core.evaluation.service.experiment.flow.ExperimentLocalEvaluationFlow
+import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
+import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.flow.InAppMessageEligibilityFlow
 import io.hackle.sdk.core.model.InAppMessages
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
@@ -20,7 +20,7 @@ internal class EvaluationFlowTest {
 
         @Test
         fun `when end of flow then returns null`() {
-            val flow: ExperimentFlow = EvaluationFlow.end()
+            val flow: ExperimentLocalEvaluationFlow = EvaluationFlow.end()
             val actual = flow.evaluate(experimentRequest(), Evaluators.context())
             expectThat(actual).isNull()
         }

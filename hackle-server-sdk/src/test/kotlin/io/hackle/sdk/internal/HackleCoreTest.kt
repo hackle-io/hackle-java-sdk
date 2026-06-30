@@ -5,9 +5,9 @@ import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.common.decision.RemoteConfigDecision
 import io.hackle.sdk.core.HackleCore
-import io.hackle.sdk.core.evaluation.EvaluationContext
+import io.hackle.sdk.core.HackleContext
 import io.hackle.sdk.core.event.UserEvent
-import io.hackle.sdk.core.event.UserEventFactory
+import io.hackle.sdk.core.evaluation.event.EvaluationEventFactory
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.ValueType
 import io.hackle.sdk.core.user.HackleUser
@@ -39,9 +39,9 @@ internal class HackleCoreTest {
     @Test
     fun `target_experiment`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment.json")
-        val eventFactory = UserEventFactory(Clock.SYSTEM)
+        val eventFactory = EvaluationEventFactory(Clock.SYSTEM)
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         val user = HackleUser.builder().identifier(IdentifierType.ID, "user").build()
         val decision = core.remoteConfig("rc", user, ValueType.STRING, "42")
@@ -81,9 +81,9 @@ internal class HackleCoreTest {
     @Test
     fun `target_experiment_circular`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment_circular.json")
-        val eventFactory = UserEventFactory(Clock.SYSTEM)
+        val eventFactory = EvaluationEventFactory(Clock.SYSTEM)
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         val user = HackleUser.builder().identifier(IdentifierType.ID, "a").build()
         val exception = assertThrows<IllegalArgumentException> {
@@ -107,9 +107,9 @@ internal class HackleCoreTest {
     @Test
     fun `container`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("container.json")
-        val eventFactory = UserEventFactory(Clock.SYSTEM)
+        val eventFactory = EvaluationEventFactory(Clock.SYSTEM)
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         val decision = List(10000) {
             val user = HackleUser.builder().identifier(IdentifierType.ID, UUID.randomUUID().toString()).build()
@@ -128,9 +128,9 @@ internal class HackleCoreTest {
     @Test
     fun `dto`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("target_experiment.json")
-        val eventFactory = UserEventFactory(Clock.SYSTEM)
+        val eventFactory = EvaluationEventFactory(Clock.SYSTEM)
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
 
         val user = HackleUser.builder()
@@ -158,9 +158,9 @@ internal class HackleCoreTest {
     @Test
     fun `segment_match`() {
         val workspaceFetcher = ResourcesWorkspaceFetcher("segment_match.json")
-        val eventFactory = UserEventFactory(Clock.SYSTEM)
+        val eventFactory = EvaluationEventFactory(Clock.SYSTEM)
         val eventProcessor = InMemoryEventProcessor()
-        val core = HackleCore.create(EvaluationContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
+        val core = HackleCore.create(HackleContext.GLOBAL, workspaceFetcher, eventFactory, eventProcessor)
 
         val user1 = HackleUser.builder().identifier(IdentifierType.ID, "matched_id").build()
         val decision1 = core.experiment(1, user1, Variation.A)

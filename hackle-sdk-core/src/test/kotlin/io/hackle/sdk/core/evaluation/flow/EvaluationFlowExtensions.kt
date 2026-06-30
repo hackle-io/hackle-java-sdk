@@ -23,7 +23,7 @@ internal fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> As
     evaluator: FlowEvaluator<REQUEST, EVALUATION>
 ): Assertion.Builder<EvaluationFlow<REQUEST, EVALUATION>> {
 
-    return isA<EvaluationFlow.Decision<REQUEST, EVALUATION>>()
+    return isA<EvaluationFlow.Step<REQUEST, EVALUATION>>()
         .and { get { flowEvaluator } isSameInstanceAs evaluator }
         .get { nextFlow }
 }
@@ -34,7 +34,7 @@ internal fun Assertion.Builder<out EvaluationFlow<*, *>>.isEnd() {
 
 internal inline fun <reified EVALUATOR : FlowEvaluator<*, *>> Assertion.Builder<out EvaluationFlow<*, *>>.isDecisionWith(): Assertion.Builder<out EvaluationFlow<*, *>> {
 
-    return isA<EvaluationFlow.Decision<*, *>>()
+    return isA<EvaluationFlow.Step<*, *>>()
         .and { get { flowEvaluator }.isA<EVALUATOR>() }
         .get { nextFlow }
 }

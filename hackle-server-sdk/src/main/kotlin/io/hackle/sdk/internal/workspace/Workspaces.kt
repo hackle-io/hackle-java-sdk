@@ -4,22 +4,27 @@ import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.utils.enumValueOfOrNull
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
+import io.hackle.sdk.core.workspace.config.entity.ExperimentConfig
+import io.hackle.sdk.core.workspace.config.entity.RemoteConfigParameterConfig
 
 
-private val log = Logger<DefaultWorkspace>()
+private val log = Logger<DefaultWorkspaceConfig>()
 
 // Experiment
-internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment? {
-    return Experiment(
+internal fun ExperimentDto.toExperimentOrNull(
+    type: Experiment.Type,
+    configurations: Map<Long, ParameterConfiguration>,
+): ExperimentConfig? {
+    return ExperimentConfig(
         id = id,
         key = key,
         name = name,
         type = type,
         identifierType = identifierType,
-        status = Experiment.Status.fromExecutionStatusOrNull(execution.status) ?: return null,
+        status = ExperimentConfig.statusOrNull(execution.status) ?: return null,
         version = version,
         executionVersion = execution.version,
-        variations = variations.map { it.toVariation() },
+        variations = variations.map { it.toVariation(configurations) },
         userOverrides = execution.userOverrides.associate { it.userId to it.variationId },
         segmentOverrides = execution.segmentOverrides.mapNotNull { it.toTargetRuleOrNull(TargetingType.IDENTIFIER) },
         targetAudiences = execution.targetAudiences.mapNotNull { it.toTargetOrNull(TargetingType.PROPERTY) },
@@ -30,11 +35,11 @@ internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment
     )
 }
 
-internal fun VariationDto.toVariation() = Variation(
+internal fun VariationDto.toVariation(configurations: Map<Long, ParameterConfiguration>) = Variation(
     id = id,
     key = key,
     isDropped = status == "DROPPED",
-    parameterConfigurationId = parameterConfigurationId,
+    parameterConfiguration = configurations[id],
 )
 
 internal fun TargetDto.toTargetOrNull(targetingType: TargetingType): Target? {
@@ -117,9 +122,6 @@ internal fun SlotDto.toSlot() = Slot(
     variationId = variationId
 )
 
-// EventType
-internal fun EventTypeDto.toEventType() = EventType.Custom(id, key)
-
 // Segment
 internal fun SegmentDto.toSegmentOrNull(): Segment? {
     return Segment(
@@ -147,8 +149,8 @@ internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterCon
 )
 
 
-internal fun RemoteConfigParameterDto.toRemoteConfigParameterOrNull(): RemoteConfigParameter? {
-    return RemoteConfigParameter(
+internal fun RemoteConfigParameterDto.toRemoteConfigParameterOrNull(): RemoteConfigParameterConfig? {
+    return RemoteConfigParameterConfig(
         id = id,
         key = key,
         type = parseEnumOrNull<ValueType>(type) ?: return null,
