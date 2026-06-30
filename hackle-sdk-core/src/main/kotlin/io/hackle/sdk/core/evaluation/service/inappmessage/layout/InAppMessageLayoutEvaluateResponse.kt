@@ -21,7 +21,7 @@ class InAppMessageLayoutEvaluateResponse(
             context: Evaluator.Context,
             result: InAppMessageLayoutEvaluateResult,
         ): InAppMessageLayoutEvaluateResponse {
-            val experimentEvaluation = request.entity.experimentContext?.key
+            val experimentEvaluation = request.entity.messageContext.experimentContext?.key
                 ?.let { request.workspace.getExperimentOrNull(it) }
                 ?.let { context[it] as? ExperimentEvaluation }
             return InAppMessageLayoutEvaluateResponse(

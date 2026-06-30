@@ -27,7 +27,7 @@ class InAppMessageLayoutLocalEvaluator(
         request: InAppMessageLayoutLocalEvaluateRequest,
         context: Evaluator.Context,
     ): InAppMessageLayoutEvaluateResponse {
-        val experimentContext = request.entity.experimentContext
+        val experimentContext = request.entity.messageContext.experimentContext
         val message = if (experimentContext != null) {
             evaluateExperiment(request, context, experimentContext)
         } else {
