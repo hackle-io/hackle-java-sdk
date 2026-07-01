@@ -3,6 +3,7 @@ package io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.mode.remo
 import io.hackle.sdk.core.evaluation.mode.remote.RemoteEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.InAppMessageEvaluateScope
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessageEligibilityEvaluateRequest
+import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.evaluation.WorkspaceEvaluation
 import io.hackle.sdk.core.workspace.evaluation.entity.InAppMessageEligibilityRemoteEvaluateResult
@@ -13,9 +14,9 @@ class InAppMessageEligibilityRemoteEvaluateRequest private constructor(
     override val user: HackleUser,
     override val record: Boolean,
     override val scope: InAppMessageEvaluateScope,
+    override val platformType: InAppMessage.PlatformType,
     override val timestamp: Long,
 ) : RemoteEvaluateRequest(), InAppMessageEligibilityEvaluateRequest {
-
     override val inAppMessage: InAppMessageEligibilityRemoteEvaluateResult get() = entity
 
     companion object {
@@ -24,16 +25,18 @@ class InAppMessageEligibilityRemoteEvaluateRequest private constructor(
             entity: InAppMessageEligibilityRemoteEvaluateResult,
             user: HackleUser,
             scope: InAppMessageEvaluateScope,
+            platformType: InAppMessage.PlatformType,
             timestamp: Long,
             record: Boolean = true,
         ): InAppMessageEligibilityRemoteEvaluateRequest {
             return InAppMessageEligibilityRemoteEvaluateRequest(
-                workspace,
-                entity,
-                user,
-                record,
-                scope,
-                timestamp
+                workspace = workspace,
+                entity = entity,
+                user = user,
+                record = record,
+                scope = scope,
+                platformType = platformType,
+                timestamp = timestamp
             )
         }
     }

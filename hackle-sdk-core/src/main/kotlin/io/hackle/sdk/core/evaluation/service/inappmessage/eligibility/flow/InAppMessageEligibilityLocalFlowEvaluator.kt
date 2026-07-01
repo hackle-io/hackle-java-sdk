@@ -11,7 +11,6 @@ import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAp
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.mode.local.InAppMessageEligibilityLocalEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.local.InAppMessageLayoutLocalEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.local.InAppMessageLayoutLocalEvaluator
-import io.hackle.sdk.core.model.InAppMessage.PlatformType.ANDROID
 import io.hackle.sdk.core.model.InAppMessage.Status.DRAFT
 import io.hackle.sdk.core.model.InAppMessage.Status.PAUSE
 import io.hackle.sdk.core.model.supports
@@ -38,7 +37,7 @@ class PlatformInAppMessageEligibilityLocalFlowEvaluator : InAppMessageEligibilit
         context: Evaluator.Context,
         nextFlow: InAppMessageEligibilityLocalEvaluationFlow,
     ): InAppMessageEligibilityEvaluateResult? {
-        val isAndroidSupport = request.inAppMessage.supports(ANDROID)
+        val isAndroidSupport = request.inAppMessage.supports(request.platformType)
         if (!isAndroidSupport) {
             return InAppMessageEligibilityEvaluateResult.ineligible(UNSUPPORTED_PLATFORM)
         }
