@@ -1,34 +1,28 @@
 package io.hackle.sdk.core.evaluation.service.remoteconfig
 
-import io.hackle.sdk.common.PropertiesBuilder
 import io.hackle.sdk.core.evaluation.EvaluateResponse
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.Workspace
 
-class RemoteConfigEvaluateResponse<out T>(
+class RemoteConfigEvaluateResponse(
     override val user: HackleUser,
     override val workspace: Workspace,
-    override val evaluation: RemoteConfigEvaluation<T>,
+    override val evaluation: RemoteConfigEvaluation,
     override val references: List<Evaluation>,
 ) : EvaluateResponse {
 
     companion object {
-        fun <T : Any> of(
-            request: RemoteConfigEvaluateRequest<T>,
+        fun of(
+            request: RemoteConfigEvaluateRequest,
             context: Evaluator.Context,
-            result: RemoteConfigEvaluateResult<T>,
-        ): RemoteConfigEvaluateResponse<T> {
-            val properties = PropertiesBuilder()
-                .add("requestValueType", request.requiredType.name)
-                .add("requestDefaultValue", request.defaultValue)
-                .add("returnValue", result.value)
-                .build()
+            result: RemoteConfigEvaluateResult,
+        ): RemoteConfigEvaluateResponse {
             return RemoteConfigEvaluateResponse(
                 user = request.user,
                 workspace = request.workspace,
-                evaluation = RemoteConfigEvaluation(entity = request.entity, result = result, properties = properties),
+                evaluation = RemoteConfigEvaluation(entity = request.entity, result = result),
                 references = context.references
             )
         }

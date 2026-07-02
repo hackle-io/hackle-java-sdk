@@ -4,8 +4,7 @@ import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.model.RemoteConfigParameter
 import io.hackle.sdk.core.model.ValueType
 
-interface RemoteConfigEvaluateRequest<out T : Any> : EvaluateRequest {
+interface RemoteConfigEvaluateRequest : EvaluateRequest {
     override val entity: RemoteConfigParameter
     val requiredType: ValueType
-    val defaultValue: T
 }

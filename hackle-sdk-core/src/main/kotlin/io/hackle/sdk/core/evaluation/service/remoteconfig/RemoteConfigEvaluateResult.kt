@@ -2,20 +2,19 @@ package io.hackle.sdk.core.evaluation.service.remoteconfig
 
 import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.EvaluateResult
+import io.hackle.sdk.core.model.RemoteConfigParameter
 
-interface RemoteConfigEvaluateResult<out T> : EvaluateResult {
-    val value: T
-    val valueId: Long?
-
-    private class DefaultRemoteConfigEvaluateResult<out T>(
-        override val reason: DecisionReason,
-        override val value: T,
-        override val valueId: Long?,
-    ) : RemoteConfigEvaluateResult<T>
+interface RemoteConfigEvaluateResult : EvaluateResult {
+    val value: RemoteConfigParameter.Value?
 
     companion object {
-        fun <T : Any> of(reason: DecisionReason, value: T, valueId: Long?): RemoteConfigEvaluateResult<T> {
-            return DefaultRemoteConfigEvaluateResult(reason = reason, value = value, valueId = valueId)
+        fun of(reason: DecisionReason, value: RemoteConfigParameter.Value?): RemoteConfigEvaluateResult {
+            return DefaultRemoteConfigEvaluateResult(reason = reason, value = value)
         }
     }
 }
+
+private class DefaultRemoteConfigEvaluateResult(
+    override val reason: DecisionReason,
+    override val value: RemoteConfigParameter.Value?,
+) : RemoteConfigEvaluateResult

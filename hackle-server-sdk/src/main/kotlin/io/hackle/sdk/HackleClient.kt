@@ -1,9 +1,9 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.common.*
-import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 
 /**
  * The entry point of Hackle SDKs.
@@ -43,20 +43,6 @@ interface HackleClient : AutoCloseable {
     fun variation(experimentKey: Long, user: User): Variation
 
     /**
-     * Decide the variation to expose to the user for experiment.
-     * Returns the default variation if the variation cannot be decided.
-     *
-     * This method does not block the calling thread.
-     *
-     * @param experimentKey    the unique key for the experiment.
-     * @param user             the user to participate in the experiment. MUST NOT be null.
-     * @param defaultVariation the default variation of the experiment. MUST NOT be null.
-     *
-     * @return the decided variation for the user, or the default variation.
-     */
-    fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation
-
-    /**
      * Decide the variation to expose to the user for experiment, and returns an object that
      * describes the way the variation was decided.
      *
@@ -77,18 +63,6 @@ interface HackleClient : AutoCloseable {
      * @return a [Decision] object
      */
     fun variationDetail(experimentKey: Long, user: User): Decision
-
-    /**
-     * Decide the variation to expose to the user for experiment, and returns an object that
-     * describes the way the variation was decided.
-     *
-     * @param experimentKey    the unique key for the experiment.
-     * @param user             the user to participate in the experiment. MUST NOT be null.
-     * @param defaultVariation the default variation of the experiment. MUST NOT be null.
-     *
-     * @return a [Decision] object
-     */
-    fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
     /**
      * Decide whether the feature is turned on to the user.
@@ -193,7 +167,7 @@ interface HackleClient : AutoCloseable {
      */
     fun updatePushSubscriptions(
         operations: HackleSubscriptionOperations,
-        user: User
+        user: User,
     )
 
     /**
@@ -204,7 +178,7 @@ interface HackleClient : AutoCloseable {
      */
     fun updateSmsSubscriptions(
         operations: HackleSubscriptionOperations,
-        user: User
+        user: User,
     )
 
     /**
@@ -215,7 +189,7 @@ interface HackleClient : AutoCloseable {
      */
     fun updateKakaoSubscriptions(
         operations: HackleSubscriptionOperations,
-        user: User
+        user: User,
     )
 
     /**

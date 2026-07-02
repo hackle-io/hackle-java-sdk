@@ -156,10 +156,7 @@ internal fun RemoteConfigParameterDto.toRemoteConfigParameterOrNull(): RemoteCon
         type = parseEnumOrNull<ValueType>(type) ?: return null,
         identifierType = identifierType,
         targetRules = targetRules.mapNotNull { it.toTargetRuleOrNull() },
-        defaultValue = RemoteConfigParameter.Value(
-            id = defaultValue.id,
-            rawValue = defaultValue.value
-        )
+        defaultValue = defaultValue.toValue()
     )
 }
 
@@ -169,9 +166,13 @@ internal fun RemoteConfigParameterDto.TargetRuleDto.toTargetRuleOrNull(): Remote
         name = name,
         target = target.toTargetOrNull(TargetingType.PROPERTY) ?: return null,
         bucketId = bucketId,
-        value = RemoteConfigParameter.Value(
-            id = value.id,
-            rawValue = value.value
-        )
+        value = value.toValue()
+    )
+}
+
+internal fun RemoteConfigParameterDto.ValueDto.toValue(): RemoteConfigParameter.Value {
+    return RemoteConfigParameter.Value(
+        id = id,
+        rawValue = value
     )
 }

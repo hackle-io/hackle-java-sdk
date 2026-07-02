@@ -47,7 +47,7 @@ class EvaluateProcessor(
         return evaluate(evaluator, request)
     }
 
-    fun <T : Any> remoteConfig(request: RemoteConfigEvaluateRequest<T>): RemoteConfigEvaluateResponse<T> {
+    fun remoteConfig(request: RemoteConfigEvaluateRequest): RemoteConfigEvaluateResponse {
         val evaluator = evaluatorFactory.remoteConfig(request)
         return evaluate(evaluator, request)
     }
@@ -115,7 +115,7 @@ class EvaluateProcessor(
                 ),
                 eventRecorder = eventRecorder
             )
-            val remoteConfigLocalEvaluator = RemoteConfigLocalEvaluator<Any>(
+            val remoteConfigLocalEvaluator = RemoteConfigLocalEvaluator(
                 targetRuleDeterminer = RemoteConfigParameterTargetRuleDeterminer(
                     matcher = RemoteConfigParameterTargetRuleMatcher(
                         targetMatcher = targetMatcher,
@@ -152,7 +152,7 @@ class EvaluateProcessor(
                 eventRecorder = eventRecorder
             )
 
-            val remoteConfigRemoteEvaluator = RemoteConfigRemoteEvaluator<Any>(
+            val remoteConfigRemoteEvaluator = RemoteConfigRemoteEvaluator(
                 eventRecorder = eventRecorder
             )
             val inAppMessageLayoutRemoteEvaluator = InAppMessageLayoutRemoteEvaluator(

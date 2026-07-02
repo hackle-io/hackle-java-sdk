@@ -17,13 +17,13 @@ class LocalDecisionProcessor(
     private val workspaceFetcher: WorkspaceConfigFetcher,
     private val evaluateProcessor: EvaluateProcessor,
 ) : DecisionProcessor {
-    override fun experiment(experimentKey: Long, user: HackleUser, defaultVariation: Variation): Decision {
+    override fun experiment(experimentKey: Long, user: HackleUser): Decision {
         val workspace = workspaceFetcher.workspace(user)
-            ?: return Decision.of(defaultVariation, SDK_NOT_READY)
+            ?: return Decision.of(Variation.CONTROL, SDK_NOT_READY)
         val experiment = workspace.getExperimentOrNull(experimentKey)
-            ?: return Decision.of(defaultVariation, EXPERIMENT_NOT_FOUND)
+            ?: return Decision.of(Variation.CONTROL, EXPERIMENT_NOT_FOUND)
 
-        val request = ExperimentLocalEvaluateRequest.of(workspace, experiment, user, defaultVariation)
+        val request = ExperimentLocalEvaluateRequest.of(workspace, experiment, user)
         val response = evaluateProcessor.experiment(request)
 
         return response.evaluation.toDecision()
@@ -34,7 +34,7 @@ class LocalDecisionProcessor(
         val workspace = workspaceFetcher.workspace(user) ?: return decisions
         for (experiment in workspace.experiments) {
             val request =
-                ExperimentLocalEvaluateRequest.of(workspace, experiment, user, Variation.CONTROL, record = false)
+                ExperimentLocalEvaluateRequest.of(workspace, experiment, user, record = false)
             val response = evaluateProcessor.experiment(request)
             decisions[experiment] = response.evaluation.toDecision()
         }
@@ -47,7 +47,7 @@ class LocalDecisionProcessor(
         val featureFlag = workspace.getFeatureFlagOrNull(featureKey)
             ?: return FeatureFlagDecision.off(FEATURE_FLAG_NOT_FOUND)
 
-        val request = ExperimentLocalEvaluateRequest.of(workspace, featureFlag, user, Variation.CONTROL)
+        val request = ExperimentLocalEvaluateRequest.of(workspace, featureFlag, user)
         val response = evaluateProcessor.experiment(request)
 
         return response.evaluation.toFeatureFlagDecision()
@@ -58,7 +58,7 @@ class LocalDecisionProcessor(
         val workspace = workspaceFetcher.workspace(user) ?: return decisions
         for (featureFlag in workspace.featureFlags) {
             val request =
-                ExperimentLocalEvaluateRequest.of(workspace, featureFlag, user, Variation.CONTROL, record = false)
+                ExperimentLocalEvaluateRequest.of(workspace, featureFlag, user, record = false)
             val response = evaluateProcessor.experiment(request)
             decisions[featureFlag] = response.evaluation.toFeatureFlagDecision()
         }
@@ -76,9 +76,9 @@ class LocalDecisionProcessor(
         val parameter = workspace.getRemoteConfigParameterOrNull(parameterKey)
             ?: return RemoteConfigDecision.of(defaultValue, REMOTE_CONFIG_PARAMETER_NOT_FOUND)
 
-        val request = RemoteConfigLocalEvaluateRequest.of(workspace, parameter, user, requiredType, defaultValue)
+        val request = RemoteConfigLocalEvaluateRequest.of(workspace, parameter, user, requiredType)
         val response = evaluateProcessor.remoteConfig(request)
 
-        return response.evaluation.toDecision()
+        return response.evaluation.toDecision(requiredType, defaultValue)
     }
 }

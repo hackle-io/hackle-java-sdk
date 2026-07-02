@@ -45,14 +45,13 @@ class EvaluationEventFactory(
     ): UserEvent? {
         return when (evaluation) {
             is ExperimentEvaluation -> {
-                properties.add(CONFIG_ID_PROPERTY_KEY, evaluation.result.parameterConfiguration?.id)
+                properties.add(CONFIG_ID_PROPERTY_KEY, evaluation.result.variation.parameterConfiguration?.id)
                 properties.add(EXPERIMENT_VERSION_KEY, evaluation.entity.version)
                 properties.add(EXECUTION_VERSION_KEY, evaluation.entity.executionVersion)
                 UserEvent.exposure(timestamp, user, workspace, evaluation, properties.build())
             }
 
-            is RemoteConfigEvaluation<*> -> {
-                properties.add(evaluation.properties)
+            is RemoteConfigEvaluation -> {
                 UserEvent.remoteConfig(timestamp, user, workspace, evaluation, properties.build())
             }
 

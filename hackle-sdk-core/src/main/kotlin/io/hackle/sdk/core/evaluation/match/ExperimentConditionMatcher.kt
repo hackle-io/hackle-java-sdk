@@ -73,7 +73,7 @@ internal class AbTestReferenceLocalEvaluateMatcher(
         if (evaluation.result.reason !in AB_TEST_MATCHED_REASONS) {
             return false
         }
-        return valueOperatorMatcher.matches(evaluation.result.variationKey, condition.match)
+        return valueOperatorMatcher.matches(evaluation.result.variation.key, condition.match)
     }
 
     companion object {
@@ -103,7 +103,7 @@ internal class FeatureFlagReferenceLocalEvaluateMatcher(
     }
 
     override fun matches(evaluation: ExperimentEvaluation, condition: Target.Condition): Boolean {
-        val on = Variation.from(evaluation.result.variationKey).isOn
+        val on = Variation.from(evaluation.result.variation.key).isOn
         return valueOperatorMatcher.matches(on, condition.match)
     }
 

@@ -7,25 +7,23 @@ import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.workspace.config.WorkspaceConfig
 import io.hackle.sdk.core.workspace.config.entity.RemoteConfigParameterConfig
 
-class RemoteConfigLocalEvaluateRequest<out T : Any> private constructor(
+class RemoteConfigLocalEvaluateRequest private constructor(
     override val workspace: WorkspaceConfig,
     override val entity: RemoteConfigParameterConfig,
     override val user: HackleUser,
     override val record: Boolean,
     override val requiredType: ValueType,
-    override val defaultValue: T,
-) : LocalEvaluateRequest(), RemoteConfigEvaluateRequest<T> {
+) : LocalEvaluateRequest(), RemoteConfigEvaluateRequest {
 
     companion object {
-        fun <T : Any> of(
+        fun of(
             workspace: WorkspaceConfig,
             parameter: RemoteConfigParameterConfig,
             user: HackleUser,
             requiredType: ValueType,
-            defaultValue: T,
             record: Boolean = true,
-        ): RemoteConfigLocalEvaluateRequest<T> {
-            return RemoteConfigLocalEvaluateRequest(workspace, parameter, user, record, requiredType, defaultValue)
+        ): RemoteConfigLocalEvaluateRequest {
+            return RemoteConfigLocalEvaluateRequest(workspace, parameter, user, record, requiredType)
         }
     }
 }

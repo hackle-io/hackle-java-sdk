@@ -50,7 +50,7 @@ internal class DraftExperimentLocalFlowEvaluator : ExperimentLocalFlowEvaluator 
         nextFlow: ExperimentLocalEvaluationFlow,
     ): ExperimentEvaluateResult? {
         return if (request.experiment.status == DRAFT) {
-            ExperimentEvaluateResult.ofDefault(EXPERIMENT_DRAFT, request)
+            ExperimentEvaluateResult.ofControl(EXPERIMENT_DRAFT, request)
         } else {
             nextFlow.evaluate(request, context)
         }
@@ -65,8 +65,8 @@ internal class PausedExperimentLocalFlowEvaluator : ExperimentLocalFlowEvaluator
     ): ExperimentEvaluateResult? {
         return if (request.experiment.status == PAUSED) {
             when (request.experiment.type) {
-                AB_TEST -> ExperimentEvaluateResult.ofDefault(EXPERIMENT_PAUSED, request)
-                FEATURE_FLAG -> ExperimentEvaluateResult.ofDefault(FEATURE_FLAG_INACTIVE, request)
+                AB_TEST -> ExperimentEvaluateResult.ofControl(EXPERIMENT_PAUSED, request)
+                FEATURE_FLAG -> ExperimentEvaluateResult.ofControl(FEATURE_FLAG_INACTIVE, request)
             }
         } else {
             nextFlow.evaluate(request, context)
@@ -104,7 +104,7 @@ internal class TargetExperimentLocalFlowEvaluator(
         return if (isUserInExperimentTarget) {
             nextFlow.evaluate(request, context)
         } else {
-            ExperimentEvaluateResult.ofDefault(NOT_IN_EXPERIMENT_TARGET, request)
+            ExperimentEvaluateResult.ofControl(NOT_IN_EXPERIMENT_TARGET, request)
         }
     }
 }
@@ -124,10 +124,10 @@ internal class TrafficAllocateExperimentLocalFlowEvaluator(
 
         val defaultRule = experiment.defaultRule
         val variation = actionResolver.resolveOrNull(request, defaultRule)
-            ?: return ExperimentEvaluateResult.ofDefault(TRAFFIC_NOT_ALLOCATED, request)
+            ?: return ExperimentEvaluateResult.ofControl(TRAFFIC_NOT_ALLOCATED, request)
 
         if (variation.isDropped) {
-            return ExperimentEvaluateResult.ofDefault(VARIATION_DROPPED, request)
+            return ExperimentEvaluateResult.ofControl(VARIATION_DROPPED, request)
         }
 
         return ExperimentEvaluateResult.of(TRAFFIC_ALLOCATED, variation)
@@ -177,7 +177,7 @@ internal class DefaultRuleExperimentLocalFlowEvaluator(
         require(experiment.type == FEATURE_FLAG) { "experiment type must be FEATURE_FLAG [${experiment.id}]" }
 
         if (request.user.identifiers[experiment.identifierType] == null) {
-            return ExperimentEvaluateResult.ofDefault(DEFAULT_RULE, request)
+            return ExperimentEvaluateResult.ofControl(DEFAULT_RULE, request)
         }
 
         val variation = requireNotNull(actionResolver.resolveOrNull(request, experiment.defaultRule)) {
@@ -202,7 +202,7 @@ internal class ContainerExperimentLocalFlowEvaluator(
         return if (containerResolver.isUserInContainerGroup(request, container)) {
             nextFlow.evaluate(request, context)
         } else {
-            ExperimentEvaluateResult.ofDefault(NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT, request)
+            ExperimentEvaluateResult.ofControl(NOT_IN_MUTUAL_EXCLUSION_EXPERIMENT, request)
         }
     }
 }
@@ -216,7 +216,7 @@ internal class IdentifierExperimentLocalFlowEvaluator : ExperimentLocalFlowEvalu
         return if (request.user.identifiers[request.experiment.identifierType] != null) {
             nextFlow.evaluate(request, context)
         } else {
-            ExperimentEvaluateResult.ofDefault(IDENTIFIER_NOT_FOUND, request)
+            ExperimentEvaluateResult.ofControl(IDENTIFIER_NOT_FOUND, request)
         }
     }
 }

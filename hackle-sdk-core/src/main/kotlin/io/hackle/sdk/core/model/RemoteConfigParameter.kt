@@ -40,5 +40,9 @@ abstract class AbstractRemoteConfigParameter : AbstractEntity(), RemoteConfigPar
 }
 
 fun <T : Any> ValueType.cast(value: RemoteConfigParameter.Value): T? {
-    return RemoteConfigParameter.cast(this, value)
+    return RemoteConfigParameter.cast(this, value.rawValue)
+}
+
+fun ValueType.isInstance(value: RemoteConfigParameter.Value): Boolean {
+    return cast<Any>(value) != null
 }

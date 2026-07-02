@@ -11,7 +11,7 @@ internal class RemoteConfigParameterTargetRuleDeterminer(
 ) {
 
     fun determine(
-        request: RemoteConfigLocalEvaluateRequest<*>,
+        request: RemoteConfigLocalEvaluateRequest,
         context: Evaluator.Context,
     ): RemoteConfigParameter.TargetRule? {
         return request.entity.targetRules.find { matcher.matches(request, context, it) }
@@ -23,7 +23,7 @@ internal class RemoteConfigParameterTargetRuleMatcher(
     private val bucketer: Bucketer,
 ) {
     fun matches(
-        request: RemoteConfigLocalEvaluateRequest<*>,
+        request: RemoteConfigLocalEvaluateRequest,
         context: Evaluator.Context,
         rule: RemoteConfigParameter.TargetRule,
     ): Boolean {

@@ -25,7 +25,7 @@ class ExperimentLocalEvaluator(
     ): ExperimentEvaluateResponse {
         val flow = evaluationFlowFactory.flow(request.entity.type)
         val result = flow.evaluate(request, context)
-            ?: ExperimentEvaluateResult.ofDefault(DecisionReason.TRAFFIC_NOT_ALLOCATED, request)
+            ?: ExperimentEvaluateResult.ofControl(DecisionReason.TRAFFIC_NOT_ALLOCATED, request)
         return ExperimentEvaluateResponse.of(request, context, result)
     }
 

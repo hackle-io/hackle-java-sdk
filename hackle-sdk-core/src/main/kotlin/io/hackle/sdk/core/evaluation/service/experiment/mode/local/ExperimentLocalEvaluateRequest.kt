@@ -1,6 +1,5 @@
 package io.hackle.sdk.core.evaluation.service.experiment.mode.local
 
-import io.hackle.sdk.common.Variation
 import io.hackle.sdk.core.evaluation.mode.local.LocalEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluateRequest
 import io.hackle.sdk.core.user.HackleUser
@@ -12,7 +11,6 @@ class ExperimentLocalEvaluateRequest(
     override val entity: ExperimentConfig,
     override val user: HackleUser,
     override val record: Boolean,
-    val defaultVariationKey: String,
 ) : LocalEvaluateRequest(), ExperimentEvaluateRequest {
     val experiment: ExperimentConfig get() = entity
 
@@ -21,10 +19,9 @@ class ExperimentLocalEvaluateRequest(
             workspace: WorkspaceConfig,
             experiment: ExperimentConfig,
             user: HackleUser,
-            defaultVariation: Variation,
             record: Boolean = true,
         ): ExperimentLocalEvaluateRequest {
-            return ExperimentLocalEvaluateRequest(workspace, experiment, user, record, defaultVariation.name)
+            return ExperimentLocalEvaluateRequest(workspace, experiment, user, record)
         }
 
         fun of(request: LocalEvaluateRequest, experiment: ExperimentConfig): ExperimentLocalEvaluateRequest {
@@ -33,7 +30,6 @@ class ExperimentLocalEvaluateRequest(
                 entity = experiment,
                 user = request.user,
                 record = request.record,
-                defaultVariationKey = Variation.CONTROL.name,
             )
         }
     }

@@ -77,8 +77,8 @@ sealed class UserEvent {
                 properties = properties,
                 internalProperties = workspace.toProperties(),
                 experiment = evaluation.entity,
-                variationId = evaluation.result.variationId,
-                variationKey = evaluation.result.variationKey,
+                variationId = evaluation.result.variation.id,
+                variationKey = evaluation.result.variation.key,
                 decisionReason = evaluation.result.reason
             )
         }
@@ -102,7 +102,7 @@ sealed class UserEvent {
             timestamp: Long,
             user: HackleUser,
             workspace: Workspace,
-            evaluation: RemoteConfigEvaluation<*>,
+            evaluation: RemoteConfigEvaluation,
             properties: Map<String, Any>,
         ): UserEvent {
             return RemoteConfig(
@@ -112,7 +112,7 @@ sealed class UserEvent {
                 properties = properties,
                 internalProperties = workspace.toProperties(),
                 parameter = evaluation.entity,
-                valueId = evaluation.result.valueId,
+                valueId = evaluation.result.value?.id,
                 decisionReason = evaluation.result.reason,
             )
         }

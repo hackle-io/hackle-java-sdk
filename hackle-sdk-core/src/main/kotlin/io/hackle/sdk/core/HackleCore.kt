@@ -1,7 +1,6 @@
 package io.hackle.sdk.core
 
 import io.hackle.sdk.common.Event
-import io.hackle.sdk.common.Variation
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
 import io.hackle.sdk.common.decision.RemoteConfigDecision
@@ -28,8 +27,8 @@ class HackleCore(
     private val eventProcessor: EventProcessor,
 ) : AutoCloseable {
 
-    fun experiment(experimentKey: Long, user: HackleUser, defaultVariation: Variation): Decision {
-        return decisionProcessor.experiment(experimentKey, user, defaultVariation)
+    fun experiment(experimentKey: Long, user: HackleUser): Decision {
+        return decisionProcessor.experiment(experimentKey, user)
     }
 
     fun experiments(user: HackleUser): Map<Experiment, Decision> {

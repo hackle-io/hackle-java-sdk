@@ -52,7 +52,7 @@ class InAppMessageLayoutLocalEvaluator(
         val experimentEvaluation = experimentEvaluator.evaluate(request, context, experiment)
 
         val langCondition = LangCondition(request.entity.messageContext.defaultLang)
-        val experimentCondition = ExperimentCondition(experimentEvaluation.result.variationKey)
+        val experimentCondition = ExperimentCondition(experimentEvaluation.result.variation.key)
         return selector.select(request.entity) { langCondition(it) && experimentCondition(it) }
     }
 

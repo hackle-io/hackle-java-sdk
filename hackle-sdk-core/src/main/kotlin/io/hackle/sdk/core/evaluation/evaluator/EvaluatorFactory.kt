@@ -30,9 +30,9 @@ class EvaluatorFactory {
         return get(request) as ExperimentEvaluator<ExperimentEvaluateRequest>
     }
 
-    fun <T : Any> remoteConfig(request: RemoteConfigEvaluateRequest<T>): RemoteConfigEvaluator<T, RemoteConfigEvaluateRequest<T>> {
+    fun remoteConfig(request: RemoteConfigEvaluateRequest): RemoteConfigEvaluator<RemoteConfigEvaluateRequest> {
         @Suppress("UNCHECKED_CAST")
-        return get(request) as RemoteConfigEvaluator<T, RemoteConfigEvaluateRequest<T>>
+        return get(request) as RemoteConfigEvaluator<RemoteConfigEvaluateRequest>
     }
 
     fun inAppMessage(request: InAppMessageEligibilityEvaluateRequest): InAppMessageEligibilityEvaluator<InAppMessageEligibilityEvaluateRequest> {

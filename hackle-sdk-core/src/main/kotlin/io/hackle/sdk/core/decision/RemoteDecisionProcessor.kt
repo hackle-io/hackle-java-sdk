@@ -17,12 +17,12 @@ class RemoteDecisionProcessor(
     private val workspaceFetcher: WorkspaceEvaluationFetcher,
     private val evaluateProcessor: EvaluateProcessor,
 ) : DecisionProcessor {
-    override fun experiment(experimentKey: Long, user: HackleUser, defaultVariation: Variation): Decision {
+    override fun experiment(experimentKey: Long, user: HackleUser): Decision {
         val workspace = workspaceFetcher.workspace(user)
-            ?: return Decision.of(defaultVariation, DecisionReason.SDK_NOT_READY)
+            ?: return Decision.of(Variation.CONTROL, DecisionReason.SDK_NOT_READY)
 
         val experiment = workspace.getExperimentOrNull(experimentKey)
-            ?: return Decision.of(defaultVariation, DecisionReason.EXPERIMENT_NOT_FOUND)
+            ?: return Decision.of(Variation.CONTROL, DecisionReason.EXPERIMENT_NOT_FOUND)
 
         val request = ExperimentRemoteEvaluateRequest.of(workspace, experiment, user)
         val response = evaluateProcessor.experiment(request)
@@ -75,9 +75,9 @@ class RemoteDecisionProcessor(
         val parameter = workspace.getRemoteConfigParameterOrNull(parameterKey)
             ?: return RemoteConfigDecision.of(defaultValue, DecisionReason.REMOTE_CONFIG_PARAMETER_NOT_FOUND)
 
-        val request = RemoteConfigRemoteEvaluateRequest.of(workspace, parameter, user, requiredType, defaultValue)
+        val request = RemoteConfigRemoteEvaluateRequest.of(workspace, parameter, user, requiredType)
         val response = evaluateProcessor.remoteConfig(request)
 
-        return response.evaluation.toDecision()
+        return response.evaluation.toDecision(requiredType, defaultValue)
     }
 }

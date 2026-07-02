@@ -1,7 +1,7 @@
 package io.hackle.sdk.core.evaluation.service.remoteconfig.mode.local
 
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.common.decision.DecisionReason.IDENTIFIER_NOT_FOUND
+import io.hackle.sdk.common.decision.DecisionReason.*
 import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.event.EvaluationEventRecorder
@@ -11,53 +11,51 @@ import io.hackle.sdk.core.evaluation.service.remoteconfig.RemoteConfigEvaluateRe
 import io.hackle.sdk.core.evaluation.service.remoteconfig.RemoteConfigEvaluator
 import io.hackle.sdk.core.evaluation.service.remoteconfig.match.RemoteConfigParameterTargetRuleDeterminer
 import io.hackle.sdk.core.model.RemoteConfigParameter
-import io.hackle.sdk.core.model.cast
+import io.hackle.sdk.core.model.isInstance
 
-internal class RemoteConfigLocalEvaluator<T : Any>(
+internal class RemoteConfigLocalEvaluator(
     private val targetRuleDeterminer: RemoteConfigParameterTargetRuleDeterminer,
     private val eventRecorder: EvaluationEventRecorder,
-) : LocalEvaluator<RemoteConfigLocalEvaluateRequest<T>, RemoteConfigEvaluateResponse<T>>(),
-    RemoteConfigEvaluator<T, RemoteConfigLocalEvaluateRequest<T>> {
+) : LocalEvaluator<RemoteConfigLocalEvaluateRequest, RemoteConfigEvaluateResponse>(),
+    RemoteConfigEvaluator<RemoteConfigLocalEvaluateRequest> {
     override fun supports(request: EvaluateRequest): Boolean {
-        return request is RemoteConfigLocalEvaluateRequest<*>
+        return request is RemoteConfigLocalEvaluateRequest
     }
 
     override fun doEvaluate(
-        request: RemoteConfigLocalEvaluateRequest<T>,
+        request: RemoteConfigLocalEvaluateRequest,
         context: Evaluator.Context,
-    ): RemoteConfigEvaluateResponse<T> {
-
+    ): RemoteConfigEvaluateResponse {
         if (request.user.identifiers[request.entity.identifierType] == null) {
-            val result = RemoteConfigEvaluateResult.of(IDENTIFIER_NOT_FOUND, request.defaultValue, null)
+            val result = RemoteConfigEvaluateResult.of(IDENTIFIER_NOT_FOUND, null)
             return RemoteConfigEvaluateResponse.of(request, context, result)
         }
 
         val targetRule = targetRuleDeterminer.determine(request, context)
         if (targetRule != null) {
-            val result = result(request, targetRule.value, DecisionReason.TARGET_RULE_MATCH)
+            val result = result(request, targetRule.value, TARGET_RULE_MATCH)
             return RemoteConfigEvaluateResponse.of(request, context, result)
         }
 
-        val result = result(request, request.entity.defaultValue, DecisionReason.DEFAULT_RULE)
+        val result = result(request, request.entity.defaultValue, DEFAULT_RULE)
         return RemoteConfigEvaluateResponse.of(request, context, result)
     }
 
-    private fun <T : Any> result(
-        request: RemoteConfigLocalEvaluateRequest<T>,
+    private fun result(
+        request: RemoteConfigLocalEvaluateRequest,
         value: RemoteConfigParameter.Value,
         reason: DecisionReason,
-    ): RemoteConfigEvaluateResult<T> {
-        val typedValue = request.requiredType.cast<T>(value)
-        return if (typedValue != null) {
-            RemoteConfigEvaluateResult.of(reason, typedValue, value.id)
+    ): RemoteConfigEvaluateResult {
+        return if (request.requiredType.isInstance(value)) {
+            RemoteConfigEvaluateResult.of(reason, value)
         } else {
-            RemoteConfigEvaluateResult.of(DecisionReason.TYPE_MISMATCH, request.defaultValue, null)
+            RemoteConfigEvaluateResult.of(TYPE_MISMATCH, value)
         }
     }
 
     override fun record(
-        request: RemoteConfigLocalEvaluateRequest<T>,
-        response: RemoteConfigEvaluateResponse<T>,
+        request: RemoteConfigLocalEvaluateRequest,
+        response: RemoteConfigEvaluateResponse,
     ) {
         eventRecorder.record(response)
     }
