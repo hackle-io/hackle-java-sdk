@@ -27,6 +27,6 @@ interface WorkspaceConfig : Workspace {
     fun getContainerOrNull(containerId: Long): Container?
 
     interface Metadata : Workspace.Metadata {
-        val lastModified: String?
+        val modifiedAt: String?
     }
 }
