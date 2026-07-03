@@ -14,7 +14,7 @@ internal data class WorkspaceConfigDto(
 
 internal data class WorkspaceDto(
     val id: Long,
-    val environment: EnvironmentDto
+    val environment: EnvironmentDto,
 )
 
 internal data class EnvironmentDto(
@@ -31,7 +31,7 @@ internal data class ExperimentDto(
     val execution: ExecutionDto,
     val winnerVariationId: Long?,
     val identifierType: String,
-    val containerId: Long?
+    val containerId: Long?,
 )
 
 internal data class VariationDto(
@@ -75,35 +75,35 @@ internal data class EventTypeDto(
 )
 
 internal data class TargetDto(
-    val conditions: List<ConditionDto>
+    val conditions: List<ConditionDto>,
 ) {
     data class ConditionDto(
         val key: KeyDto,
-        val match: MatchDto
+        val match: MatchDto,
     )
 
     data class KeyDto(
         val type: String,
-        val name: String
+        val name: String,
     )
 
     data class MatchDto(
         val type: String,
         val operator: String,
         val valueType: String,
-        val values: List<Any>
+        val values: List<Any>,
     )
 }
 
 internal data class TargetActionDto(
     val type: String,
     val variationId: Long?,
-    val bucketId: Long?
+    val bucketId: Long?,
 )
 
 internal data class TargetRuleDto(
     val target: TargetDto,
-    val action: TargetActionDto
+    val action: TargetActionDto,
 )
 
 internal data class SegmentDto(
@@ -117,18 +117,19 @@ internal data class ContainerDto(
     val id: Long,
     val environmentId: Long,
     val bucketId: Long,
-    val groups: List<ContainerGroupDto>
+    val groups: List<ContainerGroupDto>,
 )
 
 internal data class ContainerGroupDto(
     val id: Long,
-    val experiments: List<Long>
+    val experiments: List<Long>,
 )
 
 
 internal data class ParameterConfigurationDto(
     val id: Long,
-    val parameters: List<ParameterDto>
+    val revision: String,
+    val parameters: List<ParameterDto>,
 ) {
     data class ParameterDto(
         val key: String,
@@ -150,11 +151,12 @@ internal data class RemoteConfigParameterDto(
         val name: String,
         val target: TargetDto,
         val bucketId: Long,
-        val value: ValueDto
+        val value: ValueDto,
     )
 
     data class ValueDto(
         val id: Long,
-        val value: Any
+        val revision: String,
+        val value: Any,
     )
 }

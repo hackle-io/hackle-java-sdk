@@ -22,7 +22,7 @@ class EvaluatorFactory {
 
     fun get(request: EvaluateRequest): Evaluator<EvaluateRequest, EvaluateResponse> {
         val evaluator = evaluators.find { it.supports(request) }
-        return requireNotNull(evaluator)
+        return requireNotNull(evaluator) { "Not Found Evaluator (request=${request.javaClass.simpleName})" }
     }
 
     fun experiment(request: ExperimentEvaluateRequest): ExperimentEvaluator<ExperimentEvaluateRequest> {

@@ -35,7 +35,6 @@ class HackleCore(
         return decisionProcessor.experiments(user)
     }
 
-
     fun featureFlag(featureKey: Long, user: HackleUser): FeatureFlagDecision {
         return decisionProcessor.featureFlag(featureKey, user)
     }

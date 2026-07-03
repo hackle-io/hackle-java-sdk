@@ -145,6 +145,7 @@ internal fun ContainerGroupDto.toContainerGroup() = ContainerGroup(
 
 internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterConfiguration(
     id = id,
+    revision = revision,
     parameters = parameters.associate { it.key to it.value }
 )
 
@@ -173,6 +174,7 @@ internal fun RemoteConfigParameterDto.TargetRuleDto.toTargetRuleOrNull(): Remote
 internal fun RemoteConfigParameterDto.ValueDto.toValue(): RemoteConfigParameter.Value {
     return RemoteConfigParameter.Value(
         id = id,
+        revision = revision,
         rawValue = value
     )
 }
