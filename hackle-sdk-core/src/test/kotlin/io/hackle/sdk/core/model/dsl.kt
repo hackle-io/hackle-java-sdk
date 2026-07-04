@@ -475,7 +475,7 @@ internal object InAppMessages {
     fun messageContext(
         defaultLang: String = "ko",
         experimentContext: InAppMessage.ExperimentContext? = null,
-        platformTypes: List<InAppMessage.PlatformType> = listOf(InAppMessage.PlatformType.ANDROID),
+        platformTypes: List<PlatformType> = listOf(PlatformType.ANDROID),
         orientations: List<InAppMessage.Orientation> = listOf(InAppMessage.Orientation.VERTICAL),
         messages: List<InAppMessage.Message> = listOf(message()),
     ): InAppMessage.MessageContext {

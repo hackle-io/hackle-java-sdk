@@ -23,10 +23,6 @@ interface InAppMessage : Entity, HackleInAppMessage {
         ARCHIVED;
     }
 
-    enum class PlatformType {
-        ANDROID, IOS, WEB;
-    }
-
     enum class Orientation {
         VERTICAL, HORIZONTAL;
     }
@@ -347,7 +343,7 @@ abstract class AbstractInAppMessage : AbstractEntity(), InAppMessage {
     }
 }
 
-internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
+internal fun InAppMessage.supports(platform: PlatformType): Boolean {
     return platform in messageContext.platformTypes
 }
 
