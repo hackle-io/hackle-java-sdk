@@ -19,6 +19,10 @@ class HackleCoreContext private constructor() {
 
     companion object {
         val GLOBAL = HackleCoreContext()
+
+        fun create(): HackleCoreContext {
+            return HackleCoreContext()
+        }
     }
 }
 
