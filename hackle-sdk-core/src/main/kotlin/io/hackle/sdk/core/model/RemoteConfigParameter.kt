@@ -7,7 +7,6 @@ interface RemoteConfigParameter : Entity {
 
     data class Value(
         val id: Long,
-        val revision: String,
         val rawValue: Any,
     )
 

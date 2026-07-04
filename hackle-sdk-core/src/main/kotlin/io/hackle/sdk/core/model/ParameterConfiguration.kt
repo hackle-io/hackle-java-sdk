@@ -4,7 +4,6 @@ import io.hackle.sdk.common.ParameterConfig
 
 data class ParameterConfiguration(
     val id: Long,
-    val revision: String,
     override val parameters: Map<String, Any>,
 ) : ParameterConfig {
 
