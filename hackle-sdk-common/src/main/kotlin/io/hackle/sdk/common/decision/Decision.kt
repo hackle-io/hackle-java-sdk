@@ -139,7 +139,7 @@ enum class DecisionReason {
 
         @JvmStatic
         fun from(reason: String): DecisionReason {
-            return entries.find { it.name == reason } ?: UNKNOWN
+            return values().find { it.name == reason } ?: UNKNOWN
         }
     }
 }

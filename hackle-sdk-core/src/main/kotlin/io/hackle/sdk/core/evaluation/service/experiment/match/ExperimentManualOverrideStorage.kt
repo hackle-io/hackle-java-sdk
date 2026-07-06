@@ -12,7 +12,13 @@ class DelegatingExperimentManualOverrideStorage(
     private val storages: List<ExperimentManualOverrideStorage>,
 ) : ExperimentManualOverrideStorage {
     override fun get(experiment: ExperimentConfig, user: HackleUser): Variation? {
-        return storages.firstNotNullOfOrNull { it[experiment, user] }
+        for (storage in storages) {
+            val variation = storage[experiment, user]
+            if (variation != null) {
+                return variation
+            }
+        }
+        return null
     }
 }
 
