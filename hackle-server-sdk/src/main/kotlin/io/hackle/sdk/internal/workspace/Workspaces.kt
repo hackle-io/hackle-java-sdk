@@ -35,12 +35,18 @@ internal fun ExperimentDto.toExperimentOrNull(
     )
 }
 
-internal fun VariationDto.toVariation(configurations: Map<Long, ParameterConfiguration>) = Variation(
-    id = id,
-    key = key,
-    isDropped = status == "DROPPED",
-    parameterConfiguration = configurations[id],
-)
+internal fun VariationDto.toVariation(configurations: Map<Long, ParameterConfiguration>): Variation {
+    return toVariation(parameterConfigurationId?.let { configurations[it] })
+}
+
+internal fun VariationDto.toVariation(configuration: ParameterConfiguration?): Variation {
+    return Variation(
+        id = id,
+        key = key,
+        isDropped = status == "DROPPED",
+        parameterConfiguration = configuration,
+    )
+}
 
 internal fun TargetDto.toTargetOrNull(targetingType: TargetingType): Target? {
     val conditions = conditions.mapNotNull { it.toConditionOrNull(targetingType) }
