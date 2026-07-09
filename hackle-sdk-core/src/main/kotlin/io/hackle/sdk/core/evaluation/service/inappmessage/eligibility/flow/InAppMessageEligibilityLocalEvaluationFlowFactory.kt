@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.flow
 
+import io.hackle.sdk.core.evaluation.EvaluationPhase
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
 import io.hackle.sdk.core.evaluation.service.inappmessage.InAppMessageEvaluateScope
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.*
@@ -13,19 +14,32 @@ class InAppMessageEligibilityLocalEvaluationFlowFactory(
     layoutEvaluator: InAppMessageLayoutLocalEvaluator,
 ) {
 
+    // Source Flow
+
+    private val platformFlow: InAppMessageEligibilityLocalEvaluationFlow =
+        InAppMessageEligibilityLocalEvaluationFlow.of(
+            PlatformInAppMessageEligibilityLocalFlowEvaluator(),
+        )
+
     private val overrideFlow: InAppMessageEligibilityLocalEvaluationFlow =
         InAppMessageEligibilityLocalEvaluationFlow.of(
             OverrideInAppMessageEligibilityLocalFlowEvaluator(InAppMessageUserOverrideMatcher())
         )
 
-    private val evaluateFlow: InAppMessageEligibilityLocalEvaluationFlow =
+    private val statusFlow: InAppMessageEligibilityLocalEvaluationFlow =
         InAppMessageEligibilityLocalEvaluationFlow.of(
-            PlatformInAppMessageEligibilityLocalFlowEvaluator(),
-            OverrideInAppMessageEligibilityLocalFlowEvaluator(InAppMessageUserOverrideMatcher()),
             DraftInAppMessageEligibilityLocalFlowEvaluator(),
             PauseInAppMessageEligibilityLocalFlowEvaluator(),
+        )
+
+    private val timeFlow: InAppMessageEligibilityLocalEvaluationFlow =
+        InAppMessageEligibilityLocalEvaluationFlow.of(
             PeriodInAppMessageEligibilityFlowEvaluator(),
             TimetableInAppMessageEligibilityFlowEvaluator(),
+        )
+
+    private val targetFlow: InAppMessageEligibilityLocalEvaluationFlow =
+        InAppMessageEligibilityLocalEvaluationFlow.of(
             TargetInAppMessageEligibilityLocalFlowEvaluator(InAppMessageTargetMatcher(targetMatcher)),
         )
 
@@ -33,7 +47,7 @@ class InAppMessageEligibilityLocalEvaluationFlowFactory(
         LayoutResolveInAppMessageEligibilityLocalFlowEvaluator(layoutEvaluator)
     )
 
-    private val deduplicateFlow: InAppMessageEligibilityLocalEvaluationFlow =
+    private val dedupFlow: InAppMessageEligibilityLocalEvaluationFlow =
         InAppMessageEligibilityLocalEvaluationFlow.of(
             FrequencyCapInAppMessageEligibilityFlowEvaluator(InAppMessageFrequencyCapMatcher(impressionStorage)),
             HiddenInAppMessageEligibilityFlowEvaluator(InAppMessageHiddenMatcher(hiddenStorage)),
@@ -44,18 +58,57 @@ class InAppMessageEligibilityLocalEvaluationFlowFactory(
             EligibleInAppMessageEligibilityFlowEvaluator()
         )
 
+    // Runtime Flow
+
     private val triggerFlow: InAppMessageEligibilityLocalEvaluationFlow =
-        evaluateFlow + layoutFlow + deduplicateFlow + eligibleFlow
+        InAppMessageEligibilityLocalEvaluationFlow.concat(
+            platformFlow,
+            overrideFlow,
+            statusFlow,
+            timeFlow,
+            targetFlow,
+            layoutFlow,
+            dedupFlow,
+            eligibleFlow
+        )
 
-    private val deliverFlow: InAppMessageEligibilityLocalEvaluationFlow = overrideFlow + deduplicateFlow + eligibleFlow
+    private val deliverFlow: InAppMessageEligibilityLocalEvaluationFlow =
+        InAppMessageEligibilityLocalEvaluationFlow.concat(
+            overrideFlow,
+            dedupFlow,
+            eligibleFlow
+        )
+
     private val deliverReEvaluateFlow: InAppMessageEligibilityLocalEvaluationFlow =
-        evaluateFlow + deduplicateFlow + eligibleFlow
+        InAppMessageEligibilityLocalEvaluationFlow.concat(
+            platformFlow,
+            overrideFlow,
+            statusFlow,
+            timeFlow,
+            targetFlow,
+            dedupFlow,
+            eligibleFlow
+        )
 
+    // Sync Flow
+
+    private val syncFlow: InAppMessageEligibilityLocalEvaluationFlow =
+        InAppMessageEligibilityLocalEvaluationFlow.concat(
+            layoutFlow,
+            platformFlow,
+            overrideFlow,
+            statusFlow,
+            targetFlow,
+            eligibleFlow,
+        )
 
     fun get(request: InAppMessageEligibilityLocalEvaluateRequest): InAppMessageEligibilityLocalEvaluationFlow {
-        return when (request.scope) {
-            InAppMessageEvaluateScope.TRIGGER -> triggerFlow
-            InAppMessageEvaluateScope.DELIVER -> if (request.entity.evaluateContext.atDeliverTime) deliverReEvaluateFlow else deliverFlow
+        return when (request.phase) {
+            EvaluationPhase.SYNC -> syncFlow
+            EvaluationPhase.RUNTIME -> when (request.scope) {
+                InAppMessageEvaluateScope.TRIGGER -> triggerFlow
+                InAppMessageEvaluateScope.DELIVER -> if (request.entity.evaluateContext.atDeliverTime) deliverReEvaluateFlow else deliverFlow
+            }
         }
     }
 }

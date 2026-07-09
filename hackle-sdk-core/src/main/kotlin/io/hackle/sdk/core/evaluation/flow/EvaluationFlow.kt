@@ -52,5 +52,14 @@ sealed class EvaluationFlow<REQUEST : EvaluateRequest, RESULT : EvaluateResult> 
             }
             return flow
         }
+
+        fun <REQUEST : EvaluateRequest, RESULT : EvaluateResult> concat(
+            vararg flows: EvaluationFlow<REQUEST, RESULT>,
+        ): EvaluationFlow<REQUEST, RESULT> {
+            if (flows.isEmpty()) {
+                return end()
+            }
+            return flows.reduce { acc, flow -> acc + flow }
+        }
     }
 }
