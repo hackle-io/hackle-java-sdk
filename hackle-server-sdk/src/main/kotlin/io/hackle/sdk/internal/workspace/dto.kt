@@ -24,6 +24,7 @@ internal data class EnvironmentDto(
 internal data class ExperimentDto(
     val id: Long,
     val key: Long,
+    val order: Long,
     val name: String?,
     val status: String,
     val version: Int,

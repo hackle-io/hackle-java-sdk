@@ -11,6 +11,7 @@ import io.hackle.sdk.core.model.InAppMessage
 class InAppMessageLayoutRemoteEvaluateResult(
     override val id: Long,
     override val key: Long,
+    override val order: Long,
     override val period: InAppMessage.Period,
     override val timetable: InAppMessage.Timetable,
     override val eventTrigger: InAppMessage.EventTrigger,

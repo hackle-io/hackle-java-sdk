@@ -8,6 +8,7 @@ import io.hackle.sdk.core.internal.time.TimeUtil
 interface InAppMessage : Entity, HackleInAppMessage {
     override val id: Long
     override val key: Long
+    val order: Long
     val period: Period
     val timetable: Timetable
     val eventTrigger: EventTrigger
@@ -65,6 +66,7 @@ interface InAppMessage : Entity, HackleInAppMessage {
     }
 
     sealed class Period {
+        abstract val type: Type
         fun within(timestamp: Long): Boolean {
             return when (this) {
                 is Always -> true
@@ -72,11 +74,22 @@ interface InAppMessage : Entity, HackleInAppMessage {
             }
         }
 
-        object Always : Period()
-        class Custom(val startMillisInclusive: Long, val endMillisExclusive: Long) : Period()
+        enum class Type {
+            IMMEDIATE,
+            CUSTOM
+        }
+
+        object Always : Period() {
+            override val type: Type get() = Type.IMMEDIATE
+        }
+
+        class Custom(val startMillisInclusive: Long, val endMillisExclusive: Long) : Period() {
+            override val type: Type get() = Type.CUSTOM
+        }
     }
 
     sealed class Timetable {
+        abstract val type: Type
         fun within(timestamp: Long): Boolean {
             return when (this) {
                 is All -> true
@@ -84,8 +97,18 @@ interface InAppMessage : Entity, HackleInAppMessage {
             }
         }
 
-        object All : Timetable()
-        class Custom(val slots: List<Slot>) : Timetable()
+        enum class Type {
+            ALL,
+            CUSTOM
+        }
+
+        object All : Timetable() {
+            override val type: Type get() = Type.ALL
+        }
+
+        class Custom(val slots: List<Slot>) : Timetable() {
+            override val type: Type get() = Type.CUSTOM
+        }
 
         data class Slot(
             val dayOfWeek: DayOfWeek,

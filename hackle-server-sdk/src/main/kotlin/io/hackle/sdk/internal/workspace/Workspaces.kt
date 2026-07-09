@@ -18,6 +18,7 @@ internal fun ExperimentDto.toExperimentOrNull(
     return ExperimentConfig(
         id = id,
         key = key,
+        order = order,
         name = name,
         type = type,
         identifierType = identifierType,

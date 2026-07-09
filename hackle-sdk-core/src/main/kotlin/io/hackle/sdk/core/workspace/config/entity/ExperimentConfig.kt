@@ -7,6 +7,7 @@ class ExperimentConfig(
     override val id: Long,
     override val key: Long,
     override val version: Int,
+    override val order: Long,
     override val type: Experiment.Type,
     override val executionVersion: Int,
     val name: String?,

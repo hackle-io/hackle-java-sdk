@@ -9,8 +9,8 @@ import io.hackle.sdk.core.workspace.evaluation.entity.RemoteConfigParameterRemot
 import io.hackle.sdk.core.workspace.evaluation.entity.RemoteEvaluateResult
 
 interface WorkspaceEvaluation : Workspace {
-
     val evaluatedAt: Long
+    val fullEvaluatedAt: Long
     override val metadata: WorkspaceConfig.Metadata
 
     override val experiments: List<ExperimentRemoteEvaluateResult>

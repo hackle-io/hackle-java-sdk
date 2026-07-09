@@ -6,6 +6,7 @@ interface Experiment : Entity, HackleExperiment {
     override val id: Long
     override val key: Long
     override val version: Int
+    val order: Long
     val type: Type
     val executionVersion: Int
 
