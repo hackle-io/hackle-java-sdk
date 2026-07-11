@@ -9,9 +9,7 @@ import io.hackle.sdk.core.workspace.evaluation.entity.RemoteConfigParameterRemot
 import io.hackle.sdk.core.workspace.evaluation.entity.RemoteEvaluateResult
 
 interface WorkspaceEvaluation : Workspace {
-    val evaluatedAt: Long
-    val fullEvaluatedAt: Long
-    override val metadata: WorkspaceConfig.Metadata
+    override val metadata: Metadata
 
     override val experiments: List<ExperimentRemoteEvaluateResult>
     override val featureFlags: List<ExperimentRemoteEvaluateResult>
@@ -24,4 +22,8 @@ interface WorkspaceEvaluation : Workspace {
     override fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessageEligibilityRemoteEvaluateResult?
 
     fun result(entity: Entity): RemoteEvaluateResult?
+
+    interface Metadata : WorkspaceConfig.Metadata {
+        val evaluatedAt: Long
+    }
 }
