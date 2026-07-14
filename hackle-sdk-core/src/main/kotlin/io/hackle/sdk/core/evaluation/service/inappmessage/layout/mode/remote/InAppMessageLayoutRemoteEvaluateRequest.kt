@@ -24,7 +24,13 @@ class InAppMessageLayoutRemoteEvaluateRequest private constructor(
             scope: InAppMessageEvaluateScope,
             record: Boolean = true,
         ): InAppMessageLayoutRemoteEvaluateRequest {
-            return InAppMessageLayoutRemoteEvaluateRequest(workspace, entity, user, scope, record)
+            return InAppMessageLayoutRemoteEvaluateRequest(
+                workspace = workspace,
+                entity = entity,
+                user = user,
+                scope = scope,
+                record = record
+            )
         }
 
         fun of(

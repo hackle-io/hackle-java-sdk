@@ -11,8 +11,8 @@ class RemoteConfigRemoteEvaluateRequest private constructor(
     override val workspace: WorkspaceEvaluation,
     override val entity: RemoteConfigParameterRemoteEvaluateResult,
     override val user: HackleUser,
-    override val record: Boolean,
     override val requiredType: ValueType,
+    override val record: Boolean,
 ) : RemoteEvaluateRequest(), RemoteConfigEvaluateRequest {
     companion object {
         fun of(
@@ -22,7 +22,13 @@ class RemoteConfigRemoteEvaluateRequest private constructor(
             requiredType: ValueType,
             record: Boolean = true,
         ): RemoteConfigRemoteEvaluateRequest {
-            return RemoteConfigRemoteEvaluateRequest(workspace, parameter, user, record, requiredType)
+            return RemoteConfigRemoteEvaluateRequest(
+                workspace = workspace,
+                entity = parameter,
+                user = user,
+                requiredType = requiredType,
+                record = record
+            )
         }
     }
 }

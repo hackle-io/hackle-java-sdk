@@ -19,7 +19,12 @@ class ExperimentRemoteEvaluateRequest(
             user: HackleUser,
             record: Boolean = true,
         ): ExperimentRemoteEvaluateRequest {
-            return ExperimentRemoteEvaluateRequest(workspace, experiment, user, record)
+            return ExperimentRemoteEvaluateRequest(
+                workspace = workspace,
+                entity = experiment,
+                user = user,
+                record = record
+            )
         }
 
         fun of(

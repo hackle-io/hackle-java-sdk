@@ -10,6 +10,7 @@ import io.hackle.sdk.core.workspace.config.WorkspaceConfig
 import io.hackle.sdk.core.workspace.config.entity.InAppMessageConfig
 
 class InAppMessageEligibilityLocalEvaluateRequest private constructor(
+    override val phase: EvaluationPhase,
     override val workspace: WorkspaceConfig,
     override val entity: InAppMessageConfig,
     override val user: HackleUser,
@@ -17,7 +18,6 @@ class InAppMessageEligibilityLocalEvaluateRequest private constructor(
     override val scope: InAppMessageEvaluateScope,
     override val platformType: PlatformType,
     override val timestamp: Long,
-    val phase: EvaluationPhase,
 ) : LocalEvaluateRequest(), InAppMessageEligibilityEvaluateRequest {
     override val inAppMessage: InAppMessageConfig get() = entity
 
@@ -29,18 +29,18 @@ class InAppMessageEligibilityLocalEvaluateRequest private constructor(
             scope: InAppMessageEvaluateScope,
             platformType: PlatformType,
             timestamp: Long,
-            record: Boolean = true,
             phase: EvaluationPhase = EvaluationPhase.RUNTIME,
+            record: Boolean = true,
         ): InAppMessageEligibilityLocalEvaluateRequest {
             return InAppMessageEligibilityLocalEvaluateRequest(
+                phase = phase,
                 workspace = workspace,
                 entity = entity,
                 user = user,
                 record = record,
                 scope = scope,
                 platformType = platformType,
-                timestamp = timestamp,
-                phase = phase
+                timestamp = timestamp
             )
         }
     }
