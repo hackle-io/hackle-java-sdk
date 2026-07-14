@@ -20,7 +20,7 @@ class RemoteConfigLocalEvaluateRequest private constructor(
     companion object {
         fun of(
             workspace: WorkspaceConfig,
-            parameter: RemoteConfigParameterConfig,
+            entity: RemoteConfigParameterConfig,
             user: HackleUser,
             requiredType: ValueType,
             phase: EvaluationPhase = EvaluationPhase.RUNTIME,
@@ -29,7 +29,7 @@ class RemoteConfigLocalEvaluateRequest private constructor(
             return RemoteConfigLocalEvaluateRequest(
                 phase = phase,
                 workspace = workspace,
-                entity = parameter,
+                entity = entity,
                 user = user,
                 requiredType = requiredType,
                 record = record,

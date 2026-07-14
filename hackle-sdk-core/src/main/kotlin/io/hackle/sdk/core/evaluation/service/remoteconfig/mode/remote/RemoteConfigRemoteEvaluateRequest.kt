@@ -17,14 +17,14 @@ class RemoteConfigRemoteEvaluateRequest private constructor(
     companion object {
         fun of(
             workspace: WorkspaceEvaluation,
-            parameter: RemoteConfigParameterRemoteEvaluateResult,
+            entity: RemoteConfigParameterRemoteEvaluateResult,
             user: HackleUser,
             requiredType: ValueType,
             record: Boolean = true,
         ): RemoteConfigRemoteEvaluateRequest {
             return RemoteConfigRemoteEvaluateRequest(
                 workspace = workspace,
-                entity = parameter,
+                entity = entity,
                 user = user,
                 requiredType = requiredType,
                 record = record

@@ -19,7 +19,7 @@ class ExperimentLocalEvaluateRequest(
     companion object {
         fun of(
             workspace: WorkspaceConfig,
-            experiment: ExperimentConfig,
+            entity: ExperimentConfig,
             user: HackleUser,
             phase: EvaluationPhase = EvaluationPhase.RUNTIME,
             record: Boolean = true,
@@ -27,7 +27,7 @@ class ExperimentLocalEvaluateRequest(
             return ExperimentLocalEvaluateRequest(
                 phase = phase,
                 workspace = workspace,
-                entity = experiment,
+                entity = entity,
                 user = user,
                 record = record
             )

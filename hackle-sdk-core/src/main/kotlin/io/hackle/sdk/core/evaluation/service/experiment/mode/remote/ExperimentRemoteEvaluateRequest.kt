@@ -15,13 +15,13 @@ class ExperimentRemoteEvaluateRequest(
     companion object {
         fun of(
             workspace: WorkspaceEvaluation,
-            experiment: ExperimentRemoteEvaluateResult,
+            entity: ExperimentRemoteEvaluateResult,
             user: HackleUser,
             record: Boolean = true,
         ): ExperimentRemoteEvaluateRequest {
             return ExperimentRemoteEvaluateRequest(
                 workspace = workspace,
-                entity = experiment,
+                entity = entity,
                 user = user,
                 record = record
             )
