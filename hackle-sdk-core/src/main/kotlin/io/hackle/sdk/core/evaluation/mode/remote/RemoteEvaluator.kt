@@ -4,6 +4,8 @@ import io.hackle.sdk.core.evaluation.EvaluateResponse
 import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.internal.log.Logger
+import io.hackle.sdk.core.internal.metrics.Metrics
 import io.hackle.sdk.core.workspace.evaluation.entity.RemoteEvaluateResult
 
 abstract class RemoteEvaluator<REQUEST : RemoteEvaluateRequest, RESPONSE : EvaluateResponse> :
@@ -16,16 +18,31 @@ abstract class RemoteEvaluator<REQUEST : RemoteEvaluateRequest, RESPONSE : Evalu
         return remoteEvaluate(request, context)
     }
 
+
     private fun resolveReferences(request: REQUEST, context: Evaluator.Context) {
         for (reference in request.entity.references) {
             if (context[reference] != null) continue
-            val referenceResult = request.workspace.result(reference) ?: continue
-            val evaluation = resolveReference(request, referenceResult)
-            context.add(evaluation)
+
+            val referenceResult = request.workspace.result(reference)
+            if (referenceResult == null) {
+                val tags = hashMapOf(
+                    "service.type" to reference.serviceType.name,
+                    "entity.id" to reference.id.toString()
+                )
+                Metrics.counter("workspace.evaluation.reference.unresolved", tags).increment()
+                log.warn { "Reference result not found (reference=$reference, root=${request.entity})" }
+                continue
+            }
+
+            context.add(resolveReference(request, referenceResult))
         }
     }
 
     protected open fun resolveReference(request: REQUEST, result: RemoteEvaluateResult): Evaluation {
         return result.toEvaluation()
+    }
+
+    companion object {
+        private val log = Logger<RemoteEvaluator<*, *>>()
     }
 }
