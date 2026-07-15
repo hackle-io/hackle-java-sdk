@@ -50,6 +50,9 @@ object HackleClients {
     }
 
     private fun createHackleClient(sdkKey: String, config: HackleConfig): HackleClient {
+
+        val coreContext = HackleCoreContext.create()
+
         loggerConfiguration()
 
         val clock = Clock.SYSTEM
@@ -96,7 +99,7 @@ object HackleClients {
         val decisionProcessor = LocalDecisionProcessor(
             workspaceFetcher = workspaceFetcher,
             evaluateProcessor = EvaluateProcessor.create(
-                context = HackleCoreContext.GLOBAL,
+                context = coreContext,
                 clock = clock,
                 eventProcessor = eventProcessor,
                 overrideStorage = NoopExperimentManualOverrideStorage,
