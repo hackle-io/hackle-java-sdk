@@ -35,7 +35,7 @@ abstract class AbstractRemoteConfigParameter : AbstractEntity(), RemoteConfigPar
     final override val serviceType: ServiceType get() = ServiceType.REMOTE_CONFIG
 
     override fun toString(): String {
-        return "RemoteConfigParameterConfig(id=$id, key=$key)"
+        return "RemoteConfigParameter(id=$id, key=$key)"
     }
 }
 

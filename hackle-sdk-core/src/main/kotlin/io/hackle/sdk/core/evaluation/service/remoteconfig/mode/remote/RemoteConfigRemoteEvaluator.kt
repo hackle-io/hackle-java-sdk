@@ -5,6 +5,7 @@ import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.event.EvaluationEventRecorder
 import io.hackle.sdk.core.evaluation.mode.remote.RemoteEvaluator
 import io.hackle.sdk.core.evaluation.service.remoteconfig.RemoteConfigEvaluateResponse
+import io.hackle.sdk.core.evaluation.service.remoteconfig.RemoteConfigEvaluateResult
 import io.hackle.sdk.core.evaluation.service.remoteconfig.RemoteConfigEvaluator
 
 class RemoteConfigRemoteEvaluator(
@@ -20,7 +21,8 @@ class RemoteConfigRemoteEvaluator(
         request: RemoteConfigRemoteEvaluateRequest,
         context: Evaluator.Context,
     ): RemoteConfigEvaluateResponse {
-        return RemoteConfigEvaluateResponse.of(request, context, request.entity)
+        val result = RemoteConfigEvaluateResult.of(request, request.entity.value, request.entity.reason)
+        return RemoteConfigEvaluateResponse.of(request, context, result)
     }
 
     override fun record(
