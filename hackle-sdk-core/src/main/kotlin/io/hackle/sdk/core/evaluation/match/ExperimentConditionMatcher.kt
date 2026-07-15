@@ -6,9 +6,9 @@ import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.mode.local.LocalEvaluateRequest
-import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluateResponse
 import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluation
+import io.hackle.sdk.core.evaluation.service.experiment.ExperimentReference
 import io.hackle.sdk.core.evaluation.service.experiment.mode.local.ExperimentReferenceLocalEvaluator
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.AB_TEST
@@ -49,7 +49,6 @@ internal abstract class ExperimentReferenceLocalEvaluateMatcher : ExperimentRefe
     protected abstract fun matches(evaluation: ExperimentEvaluation, condition: Target.Condition): Boolean
 }
 
-
 internal class AbTestReferenceLocalEvaluateMatcher(
     override val evaluator: DelegatingEvaluator,
     override val valueOperatorMatcher: ValueOperatorMatcher,
@@ -62,11 +61,7 @@ internal class AbTestReferenceLocalEvaluateMatcher(
         sourceRequest: LocalEvaluateRequest,
         experimentResponse: ExperimentEvaluateResponse,
     ): ExperimentEvaluation {
-        val evaluation = experimentResponse.evaluation
-        if (sourceRequest is ExperimentEvaluateRequest && evaluation.result.reason == TRAFFIC_ALLOCATED) {
-            return ExperimentEvaluation(evaluation.entity, evaluation.result.with(TRAFFIC_ALLOCATED_BY_TARGETING))
-        }
-        return evaluation
+        return ExperimentReference.resolve(sourceRequest, experimentResponse.evaluation)
     }
 
     override fun matches(evaluation: ExperimentEvaluation, condition: Target.Condition): Boolean {

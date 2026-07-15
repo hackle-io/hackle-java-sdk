@@ -1,8 +1,10 @@
 package io.hackle.sdk.core.evaluation.mode.remote
 
 import io.hackle.sdk.core.evaluation.EvaluateResponse
+import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.workspace.evaluation.entity.RemoteEvaluateResult
 
 abstract class RemoteEvaluator<REQUEST : RemoteEvaluateRequest, RESPONSE : EvaluateResponse> :
     ContextualEvaluator<REQUEST, RESPONSE>() {
@@ -17,9 +19,13 @@ abstract class RemoteEvaluator<REQUEST : RemoteEvaluateRequest, RESPONSE : Evalu
     private fun resolveReferences(request: REQUEST, context: Evaluator.Context) {
         for (reference in request.entity.references) {
             if (context[reference] != null) continue
-            val result = request.workspace.result(reference) ?: continue
-            val evaluation = result.toEvaluation()
+            val referenceResult = request.workspace.result(reference) ?: continue
+            val evaluation = resolveReference(request, referenceResult)
             context.add(evaluation)
         }
+    }
+
+    protected open fun resolveReference(request: REQUEST, result: RemoteEvaluateResult): Evaluation {
+        return result.toEvaluation()
     }
 }
