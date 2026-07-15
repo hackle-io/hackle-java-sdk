@@ -5,7 +5,6 @@ internal data class WorkspaceConfigDto(
     val experiments: List<ExperimentDto>,
     val featureFlags: List<ExperimentDto>,
     val buckets: List<BucketDto>,
-    val events: List<EventTypeDto>,
     val segments: List<SegmentDto>,
     val containers: List<ContainerDto>,
     val parameterConfigurations: List<ParameterConfigurationDto>,
@@ -68,11 +67,6 @@ internal data class SlotDto(
     val startInclusive: Int,
     val endExclusive: Int,
     val variationId: Long,
-)
-
-internal data class EventTypeDto(
-    val id: Long,
-    val key: String,
 )
 
 internal data class TargetDto(
