@@ -14,16 +14,24 @@ class InAppMessageEligibilityRemoteEvaluationFlowFactory(
     layoutEvaluator: InAppMessageLayoutRemoteEvaluator,
 ) {
 
+
+    private val platformFlow: InAppMessageEligibilityRemoteEvaluationFlow =
+        InAppMessageEligibilityRemoteEvaluationFlow.of(
+            PlatformInAppMessageEligibilityFlowEvaluator()
+        )
+
     private val overrideFlow: InAppMessageEligibilityRemoteEvaluationFlow =
         InAppMessageEligibilityRemoteEvaluationFlow.of(
             OverrideInAppMessageEligibilityRemoteFlowEvaluator()
         )
 
-    private val evaluationFlow: InAppMessageEligibilityRemoteEvaluationFlow =
+    private val ineligibleFlow: InAppMessageEligibilityRemoteEvaluationFlow =
         InAppMessageEligibilityRemoteEvaluationFlow.of(
-            PlatformInAppMessageEligibilityRemoteFlowEvaluator(),
-            OverrideInAppMessageEligibilityRemoteFlowEvaluator(),
-            IneligibleInAppMessageEligibilityRemoteFlowEvaluator(),
+            IneligibleInAppMessageEligibilityRemoteFlowEvaluator()
+        )
+
+    private val timeFlow: InAppMessageEligibilityRemoteEvaluationFlow =
+        InAppMessageEligibilityRemoteEvaluationFlow.of(
             PeriodInAppMessageEligibilityFlowEvaluator(),
             TimetableInAppMessageEligibilityFlowEvaluator(),
         )
@@ -33,7 +41,7 @@ class InAppMessageEligibilityRemoteEvaluationFlowFactory(
             LayoutResolveInAppMessageEligibilityRemoteFlowEvaluator(layoutEvaluator)
         )
 
-    private val deduplicateFlow: InAppMessageEligibilityRemoteEvaluationFlow =
+    private val dedupFlow: InAppMessageEligibilityRemoteEvaluationFlow =
         InAppMessageEligibilityRemoteEvaluationFlow.of(
             FrequencyCapInAppMessageEligibilityFlowEvaluator(InAppMessageFrequencyCapMatcher(impressionStorage)),
             HiddenInAppMessageEligibilityFlowEvaluator(InAppMessageHiddenMatcher(hiddenStorage)),
@@ -44,12 +52,34 @@ class InAppMessageEligibilityRemoteEvaluationFlowFactory(
             EligibleInAppMessageEligibilityFlowEvaluator()
         )
 
-    private val triggerFlow: InAppMessageEligibilityRemoteEvaluationFlow =
-        evaluationFlow + layoutFlow + deduplicateFlow + eligibleFlow
+    // Runtime Flow
 
-    private val deliverFlow: InAppMessageEligibilityRemoteEvaluationFlow = overrideFlow + deduplicateFlow + eligibleFlow
+    private val triggerFlow: InAppMessageEligibilityRemoteEvaluationFlow =
+        InAppMessageEligibilityRemoteEvaluationFlow.concat(
+            platformFlow,
+            overrideFlow,
+            ineligibleFlow,
+            timeFlow,
+            layoutFlow,
+            dedupFlow,
+            eligibleFlow
+        )
+
+    private val deliverFlow: InAppMessageEligibilityRemoteEvaluationFlow =
+        InAppMessageEligibilityRemoteEvaluationFlow.concat(
+            overrideFlow,
+            dedupFlow,
+            eligibleFlow
+        )
     private val deliverReEvaluationFlow: InAppMessageEligibilityRemoteEvaluationFlow =
-        evaluationFlow + deduplicateFlow + eligibleFlow
+        InAppMessageEligibilityRemoteEvaluationFlow.concat(
+            platformFlow,
+            overrideFlow,
+            ineligibleFlow,
+            timeFlow,
+            dedupFlow,
+            eligibleFlow
+        )
 
     fun get(request: InAppMessageEligibilityRemoteEvaluateRequest): InAppMessageEligibilityRemoteEvaluationFlow {
         return when (request.scope) {

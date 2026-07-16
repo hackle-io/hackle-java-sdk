@@ -9,7 +9,6 @@ import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessa
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.mode.remote.InAppMessageEligibilityRemoteEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.remote.InAppMessageLayoutRemoteEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.remote.InAppMessageLayoutRemoteEvaluator
-import io.hackle.sdk.core.model.supports
 
 typealias InAppMessageEligibilityRemoteEvaluationFlow = EvaluationFlow<InAppMessageEligibilityRemoteEvaluateRequest, InAppMessageEligibilityEvaluateResult>
 
@@ -20,22 +19,6 @@ interface InAppMessageEligibilityRemoteFlowEvaluator :
         context: Evaluator.Context,
         nextFlow: InAppMessageEligibilityRemoteEvaluationFlow,
     ): InAppMessageEligibilityEvaluateResult?
-}
-
-class PlatformInAppMessageEligibilityRemoteFlowEvaluator : InAppMessageEligibilityRemoteFlowEvaluator {
-    override fun evaluate(
-        request: InAppMessageEligibilityRemoteEvaluateRequest,
-        context: Evaluator.Context,
-        nextFlow: InAppMessageEligibilityRemoteEvaluationFlow,
-    ): InAppMessageEligibilityEvaluateResult? {
-        if (!request.inAppMessage.supports(request.platformType)) {
-            return InAppMessageEligibilityEvaluateResult.ineligible(DecisionReason.UNSUPPORTED_PLATFORM)
-        }
-        if (request.entity.reason == DecisionReason.UNSUPPORTED_PLATFORM) {
-            return InAppMessageEligibilityEvaluateResult.ineligible(DecisionReason.UNSUPPORTED_PLATFORM)
-        }
-        return nextFlow.evaluate(request, context)
-    }
 }
 
 class OverrideInAppMessageEligibilityRemoteFlowEvaluator : InAppMessageEligibilityRemoteFlowEvaluator {

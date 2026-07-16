@@ -16,7 +16,7 @@ class InAppMessageEligibilityLocalEvaluateRequest private constructor(
     override val user: HackleUser,
     override val record: Boolean,
     override val scope: InAppMessageEvaluateScope,
-    override val platformType: PlatformType,
+    override val platformType: PlatformType?,
     override val timestamp: Long,
 ) : LocalEvaluateRequest(), InAppMessageEligibilityEvaluateRequest {
     override val inAppMessage: InAppMessageConfig get() = entity
@@ -27,7 +27,7 @@ class InAppMessageEligibilityLocalEvaluateRequest private constructor(
             entity: InAppMessageConfig,
             user: HackleUser,
             scope: InAppMessageEvaluateScope,
-            platformType: PlatformType,
+            platformType: PlatformType?,
             timestamp: Long,
             phase: EvaluationPhase = EvaluationPhase.RUNTIME,
             record: Boolean = true,

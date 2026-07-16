@@ -13,7 +13,6 @@ import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.local.InAp
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.local.InAppMessageLayoutLocalEvaluator
 import io.hackle.sdk.core.model.InAppMessage.Status.DRAFT
 import io.hackle.sdk.core.model.InAppMessage.Status.PAUSE
-import io.hackle.sdk.core.model.supports
 
 typealias InAppMessageEligibilityLocalEvaluationFlow = EvaluationFlow<InAppMessageEligibilityLocalEvaluateRequest, InAppMessageEligibilityEvaluateResult>
 
@@ -26,30 +25,6 @@ interface InAppMessageEligibilityLocalFlowEvaluator :
     ): InAppMessageEligibilityEvaluateResult?
 }
 
-/**
- * Android platform check
- *
- * 안드로이드를 지원안하면 UNSUPPORTED_PLATFORM
- */
-class PlatformInAppMessageEligibilityLocalFlowEvaluator : InAppMessageEligibilityLocalFlowEvaluator {
-    override fun evaluate(
-        request: InAppMessageEligibilityLocalEvaluateRequest,
-        context: Evaluator.Context,
-        nextFlow: InAppMessageEligibilityLocalEvaluationFlow,
-    ): InAppMessageEligibilityEvaluateResult? {
-        val isAndroidSupport = request.inAppMessage.supports(request.platformType)
-        if (!isAndroidSupport) {
-            return InAppMessageEligibilityEvaluateResult.ineligible(UNSUPPORTED_PLATFORM)
-        }
-        return nextFlow.evaluate(request, context)
-    }
-}
-
-/**
- * Specific User Check
- *
- * 테스트 디바이스에서 사용
- */
 class OverrideInAppMessageEligibilityLocalFlowEvaluator(
     private val userOverrideMatcher: InAppMessageUserOverrideMatcher,
 ) : InAppMessageEligibilityLocalFlowEvaluator {
@@ -66,11 +41,6 @@ class OverrideInAppMessageEligibilityLocalFlowEvaluator(
     }
 }
 
-/**
- * Draft Check
- *
- * 초안인지 확인
- */
 class DraftInAppMessageEligibilityLocalFlowEvaluator : InAppMessageEligibilityLocalFlowEvaluator {
     override fun evaluate(
         request: InAppMessageEligibilityLocalEvaluateRequest,
@@ -85,12 +55,6 @@ class DraftInAppMessageEligibilityLocalFlowEvaluator : InAppMessageEligibilityLo
     }
 }
 
-
-/**
- * Pause Status Check
- *
- * 진행중인지 확인
- */
 class PauseInAppMessageEligibilityLocalFlowEvaluator : InAppMessageEligibilityLocalFlowEvaluator {
     override fun evaluate(
         request: InAppMessageEligibilityLocalEvaluateRequest,
@@ -105,11 +69,6 @@ class PauseInAppMessageEligibilityLocalFlowEvaluator : InAppMessageEligibilityLo
     }
 }
 
-/**
- * Target Check
- *
- * IAM 타겟팅이 된 경우
- */
 class TargetInAppMessageEligibilityLocalFlowEvaluator(
     private val targetMatcher: InAppMessageTargetMatcher,
 ) : InAppMessageEligibilityLocalFlowEvaluator {

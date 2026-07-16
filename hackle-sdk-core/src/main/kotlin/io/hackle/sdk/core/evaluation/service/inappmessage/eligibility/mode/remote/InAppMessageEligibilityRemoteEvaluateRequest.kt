@@ -14,7 +14,7 @@ class InAppMessageEligibilityRemoteEvaluateRequest private constructor(
     override val user: HackleUser,
     override val record: Boolean,
     override val scope: InAppMessageEvaluateScope,
-    override val platformType: PlatformType,
+    override val platformType: PlatformType?,
     override val timestamp: Long,
 ) : RemoteEvaluateRequest(), InAppMessageEligibilityEvaluateRequest {
     override val inAppMessage: InAppMessageEligibilityRemoteEvaluateResult get() = entity
@@ -25,7 +25,7 @@ class InAppMessageEligibilityRemoteEvaluateRequest private constructor(
             entity: InAppMessageEligibilityRemoteEvaluateResult,
             user: HackleUser,
             scope: InAppMessageEvaluateScope,
-            platformType: PlatformType,
+            platformType: PlatformType?,
             timestamp: Long,
             record: Boolean = true,
         ): InAppMessageEligibilityRemoteEvaluateRequest {

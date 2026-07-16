@@ -18,7 +18,7 @@ class InAppMessageEligibilityLocalEvaluationFlowFactory(
 
     private val platformFlow: InAppMessageEligibilityLocalEvaluationFlow =
         InAppMessageEligibilityLocalEvaluationFlow.of(
-            PlatformInAppMessageEligibilityLocalFlowEvaluator(),
+            PlatformInAppMessageEligibilityFlowEvaluator(),
         )
 
     private val overrideFlow: InAppMessageEligibilityLocalEvaluationFlow =
@@ -95,7 +95,6 @@ class InAppMessageEligibilityLocalEvaluationFlowFactory(
     private val syncFlow: InAppMessageEligibilityLocalEvaluationFlow =
         InAppMessageEligibilityLocalEvaluationFlow.concat(
             layoutFlow,
-            platformFlow,
             overrideFlow,
             statusFlow,
             targetFlow,

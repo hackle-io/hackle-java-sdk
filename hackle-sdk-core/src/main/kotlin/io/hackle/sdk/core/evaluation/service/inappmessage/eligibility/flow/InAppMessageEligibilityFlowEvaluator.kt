@@ -9,6 +9,7 @@ import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessa
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageFrequencyCapMatcher
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.match.InAppMessageHiddenMatcher
 import io.hackle.sdk.core.model.contains
+import io.hackle.sdk.core.model.supports
 
 
 interface InAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibilityEvaluateRequest> :
@@ -20,11 +21,22 @@ interface InAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibility
     ): InAppMessageEligibilityEvaluateResult?
 }
 
-/**
- * Period Check
- *
- * IAM의 기간에 포함되지 않는 경우 NOT_IN_IN_APP_MESSAGE_PERIOD
- */
+class PlatformInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibilityEvaluateRequest> :
+    InAppMessageEligibilityFlowEvaluator<REQUEST> {
+    override fun evaluate(
+        request: REQUEST,
+        context: Evaluator.Context,
+        nextFlow: EvaluationFlow<REQUEST, InAppMessageEligibilityEvaluateResult>,
+    ): InAppMessageEligibilityEvaluateResult? {
+        val platformType = requireNotNull(request.platformType) { "platformType" }
+        if (!request.inAppMessage.supports(platformType)) {
+            return InAppMessageEligibilityEvaluateResult.ineligible(UNSUPPORTED_PLATFORM)
+        }
+
+        return nextFlow.evaluate(request, context)
+    }
+}
+
 class PeriodInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibilityEvaluateRequest> :
     InAppMessageEligibilityFlowEvaluator<REQUEST> {
     override fun evaluate(
@@ -40,11 +52,6 @@ class PeriodInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibili
     }
 }
 
-/**
- * Timetable Check
- *
- * IAM의 시간표에 포함되지 않는 경우 NOT_IN_IN_APP_MESSAGE_TIMETABLE
- */
 class TimetableInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibilityEvaluateRequest> :
     InAppMessageEligibilityFlowEvaluator<REQUEST> {
     override fun evaluate(
@@ -60,9 +67,6 @@ class TimetableInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligib
     }
 }
 
-/**
- * 노출 빈도수 체크
- */
 class FrequencyCapInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibilityEvaluateRequest>(
     private val frequencyCapMatcher: InAppMessageFrequencyCapMatcher,
 ) : InAppMessageEligibilityFlowEvaluator<REQUEST> {
@@ -80,12 +84,6 @@ class FrequencyCapInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEli
     }
 }
 
-/**
- * Hidden Check
- *
- * SDK 에서 판단해서 숨겨야 하는 경우
- * - 하루동안 가리기 설정된 경우
- */
 class HiddenInAppMessageEligibilityFlowEvaluator<REQUEST : InAppMessageEligibilityEvaluateRequest>(
     private val hiddenMatcher: InAppMessageHiddenMatcher,
 ) : InAppMessageEligibilityFlowEvaluator<REQUEST> {

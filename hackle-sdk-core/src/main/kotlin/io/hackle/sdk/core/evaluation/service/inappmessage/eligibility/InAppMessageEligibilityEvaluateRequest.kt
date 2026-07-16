@@ -8,7 +8,7 @@ import io.hackle.sdk.core.model.PlatformType
 interface InAppMessageEligibilityEvaluateRequest : EvaluateRequest {
     override val entity: InAppMessage
     val scope: InAppMessageEvaluateScope
-    val platformType: PlatformType
+    val platformType: PlatformType?
     val timestamp: Long
     val inAppMessage: InAppMessage get() = entity
 }
