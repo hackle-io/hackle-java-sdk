@@ -53,15 +53,13 @@ enum class HackleProperty(
     companion object {
         private val VALUES = values().associateBy { it.key }
 
-        fun from(key: String): HackleProperty? {
-            return VALUES[key]
+        fun supports(key: String, phase: EvaluationPhase): Boolean {
+            val property = from(key) ?: return false
+            return property.supports(phase)
         }
 
-        fun from(key: Target.Key): HackleProperty? {
-            if (key.type != Target.Key.Type.HACKLE_PROPERTY) {
-                return null
-            }
-            return from(key.name)
+        fun from(key: String): HackleProperty? {
+            return VALUES[key]
         }
     }
 }

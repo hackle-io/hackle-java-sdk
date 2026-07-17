@@ -12,8 +12,7 @@ internal class UserConditionMatcher(
     private val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ConditionMatcher {
     override fun matches(request: EvaluateRequest, context: Evaluator.Context, condition: Target.Condition): Boolean {
-        val hackleProperty = HackleProperty.from(condition.key)
-        if (hackleProperty != null && !hackleProperty.supports(request.phase)) {
+        if (condition.key.type == HACKLE_PROPERTY && !HackleProperty.supports(condition.key.name, request.phase)) {
             return false
         }
 
