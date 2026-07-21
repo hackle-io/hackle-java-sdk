@@ -6,6 +6,7 @@ interface Experiment : Entity, HackleExperiment {
     override val id: Long
     override val key: Long
     override val version: Int
+    val status: Status
     val order: Long
     val type: Type
     val executionVersion: Int
@@ -27,6 +28,6 @@ abstract class AbstractExperiment : AbstractEntity(), Experiment {
         }
 
     override fun toString(): String {
-        return "Experiment(id=$id, key=$key, type=$type, version=$version)"
+        return "Experiment(id=$id, key=$key, type=$type, version=$version, status=$status)"
     }
 }

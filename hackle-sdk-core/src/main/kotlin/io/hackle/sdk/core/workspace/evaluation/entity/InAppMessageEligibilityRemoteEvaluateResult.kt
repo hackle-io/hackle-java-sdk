@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.workspace.evaluation.entity
 
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessageEligibilityEvaluateResult
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessageEligibilityEvaluation
 import io.hackle.sdk.core.model.AbstractInAppMessage
@@ -24,7 +23,7 @@ class InAppMessageEligibilityRemoteEvaluateResult(
 ) : AbstractInAppMessage(),
     InAppMessageEligibilityEvaluateResult,
     RemoteEvaluateResult {
-    override fun toEvaluation(): Evaluation {
+    override fun toEvaluation(): InAppMessageEligibilityEvaluation {
         return InAppMessageEligibilityEvaluation(this, this)
     }
 }

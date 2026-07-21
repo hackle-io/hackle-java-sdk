@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.workspace.evaluation.entity
 
 import io.hackle.sdk.common.decision.DecisionReason
-import io.hackle.sdk.core.evaluation.Evaluation
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluateResult
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluation
 import io.hackle.sdk.core.model.AbstractInAppMessage
@@ -23,7 +22,7 @@ class InAppMessageLayoutRemoteEvaluateResult(
 ) : AbstractInAppMessage(),
     InAppMessageLayoutEvaluateResult,
     RemoteEvaluateResult {
-    override fun toEvaluation(): Evaluation {
+    override fun toEvaluation(): InAppMessageLayoutEvaluation {
         return InAppMessageLayoutEvaluation(this, this)
     }
 }
