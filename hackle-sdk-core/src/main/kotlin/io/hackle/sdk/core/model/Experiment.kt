@@ -17,6 +17,19 @@ interface Experiment : Entity, HackleExperiment {
 
     enum class Status {
         DRAFT, RUNNING, PAUSED, COMPLETED;
+
+        companion object {
+            private val STATUSES = mapOf(
+                "READY" to DRAFT,
+                "RUNNING" to RUNNING,
+                "PAUSED" to PAUSED,
+                "STOPPED" to COMPLETED
+            )
+
+            fun from(executionStatus: String): Status? {
+                return STATUSES[executionStatus]
+            }
+        }
     }
 }
 

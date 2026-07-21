@@ -19,7 +19,7 @@ internal fun ExperimentDto.toExperimentOrNull(
         id = id,
         key = key,
         version = version,
-        status = ExperimentConfig.statusOrNull(execution.status) ?: return null,
+        status = Experiment.Status.from(execution.status) ?: return null,
         order = order,
         name = name,
         type = type,

@@ -37,17 +37,4 @@ class ExperimentConfig(
     override fun toString(): String {
         return "Experiment(id=$id, key=$key, version=$version, status=$status)"
     }
-
-    companion object {
-        private val STATUSES = mapOf(
-            "READY" to Experiment.Status.DRAFT,
-            "RUNNING" to Experiment.Status.RUNNING,
-            "PAUSED" to Experiment.Status.PAUSED,
-            "STOPPED" to Experiment.Status.COMPLETED
-        )
-
-        fun statusOrNull(executionStatus: String): Experiment.Status? {
-            return STATUSES[executionStatus]
-        }
-    }
 }
