@@ -1,8 +1,9 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.EvaluateRequest
-import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.evaluation.evaluator.EvaluatorFactory
+import io.hackle.sdk.core.evaluation.service.experiment.mode.local.ExperimentReferenceLocalEvaluator
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
@@ -15,7 +16,7 @@ internal interface ConditionMatcher {
     ): Boolean
 }
 
-internal class ConditionMatcherFactory(evaluator: DelegatingEvaluator, clock: Clock) {
+internal class ConditionMatcherFactory(evaluatorFactory: EvaluatorFactory, clock: Clock) {
 
     private val userConditionMatcher: ConditionMatcher
     private val segmentConditionMatcher: ConditionMatcher
@@ -25,12 +26,13 @@ internal class ConditionMatcherFactory(evaluator: DelegatingEvaluator, clock: Cl
     private val targetEventConditionMatcher: TargetEventConditionMatcher
 
     init {
+        val experimentReferenceLocalEvaluator = ExperimentReferenceLocalEvaluator(evaluatorFactory)
         val valueOperatorMatcher = ValueOperatorMatcher(ValueOperatorMatcherFactory())
         this.userConditionMatcher = UserConditionMatcher(UserValueResolver(), valueOperatorMatcher)
         this.segmentConditionMatcher = SegmentConditionMatcher(SegmentMatcher(this.userConditionMatcher))
         this.experimentConditionMatcher = ExperimentConditionMatcher(
-            AbTestReferenceLocalEvaluateMatcher(evaluator, valueOperatorMatcher),
-            FeatureFlagReferenceLocalEvaluateMatcher(evaluator, valueOperatorMatcher)
+            AbTestReferenceLocalEvaluateMatcher(experimentReferenceLocalEvaluator, valueOperatorMatcher),
+            FeatureFlagReferenceLocalEvaluateMatcher(experimentReferenceLocalEvaluator, valueOperatorMatcher)
         )
         this.eventConditionMatcher = EventConditionMatcher(
             EventValueResolver(),

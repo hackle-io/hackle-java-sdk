@@ -4,7 +4,6 @@ import io.hackle.sdk.common.decision.DecisionReason
 import io.hackle.sdk.core.evaluation.event.EvaluationEventRecorder
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.service.inappmessage.layout.match.InAppMessageLayoutExperimentEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.match.InAppMessageLayoutSelector
 import io.hackle.sdk.core.model.InAppMessage
 import io.hackle.sdk.core.model.InAppMessages

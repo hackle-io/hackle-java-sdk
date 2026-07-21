@@ -5,15 +5,15 @@ import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.event.EvaluationEventRecorder
 import io.hackle.sdk.core.evaluation.mode.local.LocalEvaluator
+import io.hackle.sdk.core.evaluation.service.experiment.mode.local.ExperimentReferenceLocalEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluateResponse
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluateResult
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluator
-import io.hackle.sdk.core.evaluation.service.inappmessage.layout.match.InAppMessageLayoutExperimentEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.match.InAppMessageLayoutSelector
 import io.hackle.sdk.core.model.InAppMessage
 
 class InAppMessageLayoutLocalEvaluator(
-    private val experimentEvaluator: InAppMessageLayoutExperimentEvaluator,
+    private val experimentEvaluator: ExperimentReferenceLocalEvaluator,
     private val selector: InAppMessageLayoutSelector,
     private val eventRecorder: EvaluationEventRecorder,
 ) : LocalEvaluator<InAppMessageLayoutLocalEvaluateRequest, InAppMessageLayoutEvaluateResponse>(),

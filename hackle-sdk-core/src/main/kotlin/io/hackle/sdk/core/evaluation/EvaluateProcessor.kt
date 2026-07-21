@@ -2,7 +2,6 @@ package io.hackle.sdk.core.evaluation
 
 import io.hackle.sdk.core.HackleCoreContext
 import io.hackle.sdk.core.evaluation.bucket.Bucketer
-import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.EvaluatorFactory
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
@@ -15,6 +14,7 @@ import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluateRespon
 import io.hackle.sdk.core.evaluation.service.experiment.flow.ExperimentLocalEvaluationFlowFactory
 import io.hackle.sdk.core.evaluation.service.experiment.match.ExperimentManualOverrideStorage
 import io.hackle.sdk.core.evaluation.service.experiment.mode.local.ExperimentLocalEvaluator
+import io.hackle.sdk.core.evaluation.service.experiment.mode.local.ExperimentReferenceLocalEvaluator
 import io.hackle.sdk.core.evaluation.service.experiment.mode.remote.ExperimentRemoteEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessageEligibilityEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.InAppMessageEligibilityEvaluateResponse
@@ -26,7 +26,6 @@ import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.mode.local
 import io.hackle.sdk.core.evaluation.service.inappmessage.eligibility.mode.remote.InAppMessageEligibilityRemoteEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.InAppMessageLayoutEvaluateResponse
-import io.hackle.sdk.core.evaluation.service.inappmessage.layout.match.InAppMessageLayoutExperimentEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.match.InAppMessageLayoutSelector
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.local.InAppMessageLayoutLocalEvaluator
 import io.hackle.sdk.core.evaluation.service.inappmessage.layout.mode.remote.InAppMessageLayoutRemoteEvaluator
@@ -83,7 +82,6 @@ class EvaluateProcessor(
             hiddenStorage: InAppMessageHiddenStorage,
         ): EvaluateProcessor {
             val evaluatorFactory = EvaluatorFactory()
-            val delegatingEvaluator = DelegatingEvaluator(evaluatorFactory)
 
             val eventFactory = EvaluationEventFactory(
                 clock = clock
@@ -96,7 +94,7 @@ class EvaluateProcessor(
 
             val targetMatcher = TargetMatcher(
                 conditionMatcherFactory = ConditionMatcherFactory(
-                    evaluator = delegatingEvaluator,
+                    evaluatorFactory = evaluatorFactory,
                     clock = clock
                 )
             )
@@ -125,8 +123,8 @@ class EvaluateProcessor(
                 eventRecorder = eventRecorder
             )
             val inAppMessageLayoutLocalEvaluator = InAppMessageLayoutLocalEvaluator(
-                experimentEvaluator = InAppMessageLayoutExperimentEvaluator(
-                    evaluator = delegatingEvaluator
+                experimentEvaluator = ExperimentReferenceLocalEvaluator(
+                    evaluatorFactory = evaluatorFactory
                 ),
                 selector = InAppMessageLayoutSelector(),
                 eventRecorder = eventRecorder

@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.evaluation.service
 
 import io.hackle.sdk.core.evaluation.evaluator.ContextualEvaluator
-import io.hackle.sdk.core.evaluation.evaluator.DelegatingEvaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.mockk.every
