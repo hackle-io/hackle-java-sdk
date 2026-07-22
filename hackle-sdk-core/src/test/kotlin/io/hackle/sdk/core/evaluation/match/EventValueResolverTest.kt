@@ -22,7 +22,7 @@ class EventValueResolverTest {
     fun `이벤트 프로퍼티 타입을 받아 프로퍼티를 가져온다`() {
         val track = mockk<UserEvent.Track>()
         val key = mockk<Target.Key>()
-        every { track.event.properties[any()] } returns "targetPropertyValue"
+        every { track.properties } returns mapOf("targetPropertyName" to "targetPropertyValue")
         every { key.name } returns "targetPropertyName"
         every { key.type } returns Target.Key.Type.EVENT_PROPERTY
 
@@ -33,7 +33,7 @@ class EventValueResolverTest {
     fun `이벤트 프로퍼티가 아닌 경우 Exception 을 발생 시킨다`() {
         val track = mockk<UserEvent.Track>()
 
-        every { track.event.properties[any()] } returns "targetPropertyValue"
+        every { track.properties } returns mapOf("targetPropertyName" to "targetPropertyValue")
 
         val key = mockk<Target.Key>()
         every { key.name } returns "targetPropertyName"

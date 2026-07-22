@@ -2,7 +2,6 @@ package io.hackle.sdk.core.evaluation.service.experiment.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.match.TargetMatcher
-import io.hackle.sdk.core.evaluation.service.experiment.ExperimentEvaluateRequest
 import io.hackle.sdk.core.evaluation.service.experiment.mode.local.ExperimentLocalEvaluateRequest
 import io.hackle.sdk.core.model.Variation
 
@@ -18,10 +17,7 @@ internal class ExperimentOverrideResolver(
             ?: resolveSegmentOverride(request, context)
     }
 
-    private fun resolveManualOverride(request: ExperimentEvaluateRequest): Variation? {
-        if (request !is ExperimentLocalEvaluateRequest) {
-            return null
-        }
+    private fun resolveManualOverride(request: ExperimentLocalEvaluateRequest): Variation? {
         return manualOverrideStorage[request.entity, request.user]
     }
 

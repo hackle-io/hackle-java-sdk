@@ -165,10 +165,7 @@ interface HackleClient : AutoCloseable {
      * @param operations The subscription operations.
      * @param user The user whose subscription status will be updated.
      */
-    fun updatePushSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User,
-    )
+    fun updatePushSubscriptions(operations: HackleSubscriptionOperations, user: User)
 
     /**
      * Updates the user's sms subscription status.
@@ -176,10 +173,7 @@ interface HackleClient : AutoCloseable {
      * @param operations The subscription operations.
      * @param user The user whose subscription status will be updated.
      */
-    fun updateSmsSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User,
-    )
+    fun updateSmsSubscriptions(operations: HackleSubscriptionOperations, user: User)
 
     /**
      * Updates the user's kakao talk subscription status.
@@ -187,10 +181,7 @@ interface HackleClient : AutoCloseable {
      * @param operations The subscription operations.
      * @param user The user whose subscription status will be updated.
      */
-    fun updateKakaoSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User,
-    )
+    fun updateKakaoSubscriptions(operations: HackleSubscriptionOperations, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.

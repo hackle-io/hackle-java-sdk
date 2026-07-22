@@ -9,16 +9,16 @@ import java.util.*
 object UserEvents {
 
     fun track(key: String): UserEvent.Track {
-        return track(eventType = EventType.Custom(42, key), event = Event.of(key))
+        return track(event = Event.of(key))
     }
 
     fun track(
         insertId: String = UUID.randomUUID().toString(),
         timestamp: Long = 42,
         user: HackleUser = HackleUser.builder().identifier(IdentifierType.ID, "user").build(),
-        eventType: EventType = EventType.Custom(1, "test_key"),
+        internalProperties: Map<String, Any> = emptyMap(),
         event: Event = Event.of("test_key")
     ): UserEvent.Track {
-        return UserEvent.Track(insertId, timestamp, user, eventType, event)
+        return UserEvent.Track(insertId, timestamp, user, internalProperties, event)
     }
 }

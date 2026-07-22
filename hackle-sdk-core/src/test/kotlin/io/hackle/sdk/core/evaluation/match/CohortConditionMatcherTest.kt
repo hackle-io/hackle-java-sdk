@@ -1,7 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.service.experiment.experimentRequest
 import io.hackle.sdk.core.model.Cohort
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.COHORT
@@ -10,7 +9,8 @@ import io.hackle.sdk.core.model.Target.Match.Operator.IN
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
 import io.hackle.sdk.core.model.Target.Match.Type.NOT_MATCH
 import io.hackle.sdk.core.model.ValueType.NUMBER
-import io.hackle.sdk.core.model.condition
+import io.hackle.sdk.core.support.Experiments
+import io.hackle.sdk.core.support.Targets
 import io.hackle.sdk.core.user.HackleUser
 import io.hackle.sdk.core.user.IdentifierType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,11 +27,11 @@ class CohortConditionMatcherTest {
     @Test
     fun `when condition key type is not COHORT then throw exception`() {
         // given
-        val request = experimentRequest()
-        val condition = condition {
-            USER_PROPERTY("age")
-            IN(42)
-        }
+        val request = Experiments.localRequest()
+        val condition = Targets.condition(
+            key = Targets.key(USER_PROPERTY, "age"),
+            match = Targets.match(values = listOf(42))
+        )
 
         // when
         val actual = assertThrows<IllegalArgumentException> {
@@ -43,7 +43,6 @@ class CohortConditionMatcherTest {
             .isNotNull()
             .isEqualTo("Unsupported Target.Key.Type [USER_PROPERTY]")
     }
-
 
     @Test
     fun `matches`() {
@@ -136,17 +135,17 @@ class CohortConditionMatcherTest {
     }
 
     private fun verify(type: Target.Match.Type, userCohorts: List<Long>, cohorts: List<Long>, expected: Boolean) {
-        val request = experimentRequest(
+        val request = Experiments.localRequest(
             user = HackleUser.builder()
                 .identifier(IdentifierType.ID, "user")
                 .cohorts(userCohorts.map { Cohort(it) })
                 .build()
         )
 
-        val condition = condition {
-            key(COHORT, "COHORT")
-            match(type, IN, NUMBER, cohorts)
-        }
+        val condition = Targets.condition(
+            key = Targets.key(COHORT, "COHORT"),
+            match = Targets.match(type, IN, NUMBER, cohorts)
+        )
 
         val actual = sut.matches(request, Evaluators.context(), condition)
 
