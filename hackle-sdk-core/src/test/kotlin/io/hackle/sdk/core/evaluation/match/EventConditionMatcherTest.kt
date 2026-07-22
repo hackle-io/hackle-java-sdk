@@ -1,5 +1,6 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
 import io.hackle.sdk.core.model.Target
@@ -39,7 +40,7 @@ internal class EventConditionMatcherTest {
 
     @Test
     fun `eventRequest 가 아닌 경우는 false 를 리턴한다`() {
-        val request = mockk<Evaluator.Request>()
+        val request = mockk<EvaluateRequest>()
         val condition = mockk<Target.Condition>()
 
 
@@ -51,7 +52,7 @@ internal class EventConditionMatcherTest {
 
     @Test
     fun `eventValueResolver 는 이벤트 프로퍼티 타입만 처리한다`() {
-        val request = mockk<Evaluator.EventRequest>()
+        val request = mockk<EventEvaluateRequest>()
         val condition = mockk<Target.Condition>()
 
         every { condition.key.type } returns Target.Key.Type.USER_ID
@@ -74,7 +75,7 @@ internal class EventConditionMatcherTest {
 
     @Test
     fun `이벤트 프로퍼티 값이 맞으면 true를 리턴한다`() {
-        val request = mockk<Evaluator.EventRequest>()
+        val request = mockk<EventEvaluateRequest>()
         val condition = mockk<Target.Condition>()
 
         every { condition.key.type } returns Target.Key.Type.EVENT_PROPERTY

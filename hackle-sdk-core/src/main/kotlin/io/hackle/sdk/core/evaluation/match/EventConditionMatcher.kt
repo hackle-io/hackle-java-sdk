@@ -1,22 +1,21 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.event.UserEvent
-import io.hackle.sdk.core.event.properties
 import io.hackle.sdk.core.model.Target
-
 
 internal class EventConditionMatcher(
     private val eventValueResolver: EventValueResolver,
-    private val valueOperatorMatcher: ValueOperatorMatcher
+    private val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ConditionMatcher {
 
     override fun matches(
-        request: Evaluator.Request,
+        request: EvaluateRequest,
         context: Evaluator.Context,
-        condition: Target.Condition
+        condition: Target.Condition,
     ): Boolean {
-        if (request !is Evaluator.EventRequest) {
+        if (request !is EventEvaluateRequest) {
             return false
         }
         val eventValue = eventValueResolver.resolveOrNull(request.event, condition.key)
@@ -37,7 +36,12 @@ internal class EventValueResolver {
             Target.Key.Type.FEATURE_FLAG,
             Target.Key.Type.COHORT,
             Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS,
-            Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> throw IllegalArgumentException("Unsupported target key Type for EventValueResolver [${key.type}]")
+            Target.Key.Type.NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS,
+                -> throw IllegalArgumentException("Unsupported target key Type for EventValueResolver [${key.type}]")
         }
     }
+}
+
+interface EventEvaluateRequest : EvaluateRequest {
+    val event: UserEvent
 }

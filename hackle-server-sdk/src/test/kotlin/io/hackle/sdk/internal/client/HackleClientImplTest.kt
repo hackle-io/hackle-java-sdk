@@ -49,7 +49,7 @@ internal class HackleClientImplTest {
         @Test
         fun `key, userId`() {
             // given
-            every { core.experiment(any(), any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            every { core.experiment(any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
 
             // when
             val actual = sut.variation(42, "42")
@@ -57,14 +57,14 @@ internal class HackleClientImplTest {
             // then
             expectThat(actual) isEqualTo Variation.G
             verify(exactly = 1) {
-                core.experiment(42, HackleUser.of("42"), Variation.A)
+                core.experiment(42, HackleUser.of("42"))
             }
         }
 
         @Test
         fun `key, user`() {
             // given
-            every { core.experiment(any(), any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
+            every { core.experiment(any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
             val user = User.of("42")
 
             // when
@@ -73,23 +73,7 @@ internal class HackleClientImplTest {
             // then
             expectThat(actual) isEqualTo Variation.G
             verify(exactly = 1) {
-                core.experiment(42, HackleUser.of(user), Variation.A)
-            }
-        }
-
-        @Test
-        fun `key, user, defaultVariation`() {
-            // given
-            every { core.experiment(any(), any(), any()) } returns Decision.of(Variation.G, TRAFFIC_ALLOCATED)
-            val user = User.of("42")
-
-            // when
-            val actual = sut.variation(42, user, Variation.C)
-
-            // then
-            expectThat(actual) isEqualTo Variation.G
-            verify(exactly = 1) {
-                core.experiment(42, HackleUser.of(user), Variation.C)
+                core.experiment(42, HackleUser.of(user))
             }
         }
     }
@@ -101,7 +85,7 @@ internal class HackleClientImplTest {
         fun `key, userId`() {
             // given
             val decision = Decision.of(Variation.G, TRAFFIC_ALLOCATED)
-            every { core.experiment(any(), any(), any()) } returns decision
+            every { core.experiment(any(), any()) } returns decision
 
             // when
             val actual = sut.variationDetail(42, "42")
@@ -109,15 +93,15 @@ internal class HackleClientImplTest {
             // then
             expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                core.experiment(42, HackleUser.of("42"), Variation.A)
+                core.experiment(42, HackleUser.of("42"))
             }
         }
 
         @Test
-        fun `key, user`() {
+        fun `core 의 experiment 를 호출하고 리턴받은 값을 바로 리턴한다`() {
             // given
             val decision = Decision.of(Variation.G, TRAFFIC_ALLOCATED)
-            every { core.experiment(any(), any(), any()) } returns decision
+            every { core.experiment(any(), any()) } returns decision
             val user = User.of("42")
 
             // when
@@ -126,41 +110,32 @@ internal class HackleClientImplTest {
             // then
             expectThat(actual) isSameInstanceAs decision
             verify(exactly = 1) {
-                core.experiment(42, HackleUser.of(user), Variation.A)
+                core.experiment(42, HackleUser.of(user))
             }
         }
 
         @Test
-        fun `core 의 experiment 를 호출하고 리턴받은 값을 바로 리턴한다`() {
-            // given
-            val user = User.of("42")
-            val decision = Decision.of(Variation.G, TRAFFIC_ALLOCATED)
-            every { core.experiment(any(), any(), any()) } returns decision
-
+        fun `유효하지 않은 user 면 Control Variation 으로 결정하고 평가하지 않는다`() {
             // when
-            val actual = sut.variationDetail(42L, user, Variation.J)
+            val actual = sut.variationDetail(42, User.builder().build())
 
-            //then
-            expectThat(actual) isSameInstanceAs decision
-            verify(exactly = 1) {
-                core.experiment(42L, HackleUser.of("42"), Variation.J)
-            }
+            // then
+            expectThat(actual) isEqualTo Decision.of(Variation.CONTROL, INVALID_INPUT)
+            verify { core wasNot Called }
         }
 
         @Test
-        fun `core에서 예외가 발생하면 defaultVariation을 리턴한다`() {
+        fun `core에서 예외가 발생하면 Control Variation을 리턴한다`() {
             // given
-            every { core.experiment(any(), any(), any()) } throws IllegalArgumentException()
-
-            val defaultVariation = Variation.I
+            every { core.experiment(any(), any()) } throws IllegalArgumentException()
 
             // when
-            val actual = sut.variationDetail(42, User.of("42"), defaultVariation)
+            val actual = sut.variationDetail(42, User.of("42"))
 
             //then
             expectThat(actual) {
                 get { reason } isEqualTo EXCEPTION
-                get { variation } isSameInstanceAs defaultVariation
+                get { variation } isEqualTo Variation.CONTROL
             }
         }
     }
@@ -237,6 +212,16 @@ internal class HackleClientImplTest {
             verify(exactly = 1) {
                 core.featureFlag(42, HackleUser.of(user))
             }
+        }
+
+        @Test
+        fun `유효하지 않은 user 면 off 로 결정하고 평가하지 않는다`() {
+            // when
+            val actual = sut.featureFlagDetail(42, User.builder().build())
+
+            // then
+            expectThat(actual) isEqualTo FeatureFlagDecision.off(INVALID_INPUT)
+            verify { core wasNot Called }
         }
 
         @Test

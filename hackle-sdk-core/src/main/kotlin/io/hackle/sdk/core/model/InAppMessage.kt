@@ -5,17 +5,15 @@ import io.hackle.sdk.common.HackleInAppMessageAction
 import io.hackle.sdk.common.HackleInAppMessageActionType
 import io.hackle.sdk.core.internal.time.TimeUtil
 
-data class InAppMessage(
-    val id: Long,
-    override val key: Long,
-    val status: Status,
-    val period: Period,
-    val timetable: Timetable,
-    val eventTrigger: EventTrigger,
-    val evaluateContext: EvaluateContext,
-    val targetContext: TargetContext,
-    val messageContext: MessageContext,
-) : HackleInAppMessage {
+interface InAppMessage : Entity, HackleInAppMessage {
+    override val id: Long
+    override val key: Long
+    val order: Long
+    val period: Period
+    val timetable: Timetable
+    val eventTrigger: EventTrigger
+    val evaluateContext: EvaluateContext
+    val messageContext: MessageContext
 
     enum class Status {
         INITIALIZED,
@@ -24,10 +22,6 @@ data class InAppMessage(
         PAUSE,
         FINISH,
         ARCHIVED;
-    }
-
-    enum class PlatformType {
-        ANDROID, IOS, WEB;
     }
 
     enum class Orientation {
@@ -72,6 +66,7 @@ data class InAppMessage(
     }
 
     sealed class Period {
+        abstract val type: Type
         fun within(timestamp: Long): Boolean {
             return when (this) {
                 is Always -> true
@@ -79,15 +74,22 @@ data class InAppMessage(
             }
         }
 
-        object Always : Period()
+        enum class Type {
+            IMMEDIATE,
+            CUSTOM
+        }
 
-        class Custom(
-            val startMillisInclusive: Long,
-            val endMillisExclusive: Long,
-        ) : Period()
+        object Always : Period() {
+            override val type: Type get() = Type.IMMEDIATE
+        }
+
+        class Custom(val startMillisInclusive: Long, val endMillisExclusive: Long) : Period() {
+            override val type: Type get() = Type.CUSTOM
+        }
     }
 
     sealed class Timetable {
+        abstract val type: Type
         fun within(timestamp: Long): Boolean {
             return when (this) {
                 is All -> true
@@ -95,26 +97,34 @@ data class InAppMessage(
             }
         }
 
-        object All : Timetable()
-        class Custom(
-            val slots: List<TimetableSlot>,
-        ) : Timetable()
-    }
+        enum class Type {
+            ALL,
+            CUSTOM
+        }
 
-    data class TimetableSlot(
-        val dayOfWeek: DayOfWeek,
-        val startMillisInclusive: Long,
-        val endMillisExclusive: Long,
-    ) {
-        fun within(timestamp: Long): Boolean {
-            val dayOfWeek = TimeUtil.dayOfWeek(timestamp)
-            if (this.dayOfWeek != dayOfWeek) {
-                return false
+        object All : Timetable() {
+            override val type: Type get() = Type.ALL
+        }
+
+        class Custom(val slots: List<Slot>) : Timetable() {
+            override val type: Type get() = Type.CUSTOM
+        }
+
+        data class Slot(
+            val dayOfWeek: DayOfWeek,
+            val startMillisInclusive: Long,
+            val endMillisExclusive: Long,
+        ) {
+            fun within(timestamp: Long): Boolean {
+                val dayOfWeek = TimeUtil.dayOfWeek(timestamp)
+                if (this.dayOfWeek != dayOfWeek) {
+                    return false
+                }
+                val midnight = TimeUtil.midnight(timestamp)
+                val startTimestampInclusive = midnight + startMillisInclusive
+                val endTimestampExclusive = midnight + endMillisExclusive
+                return timestamp in startTimestampInclusive until endTimestampExclusive
             }
-            val midnight = TimeUtil.midnight(timestamp)
-            val startTimestampInclusive = midnight + startMillisInclusive
-            val endTimestampExclusive = midnight + endMillisExclusive
-            return timestamp in startTimestampInclusive until endTimestampExclusive
         }
     }
 
@@ -346,16 +356,19 @@ data class InAppMessage(
         override val url: String,
         override val shouldCloseAfterLink: Boolean,
     ) : HackleInAppMessageAction.Link
+}
+
+abstract class AbstractInAppMessage : AbstractEntity(), InAppMessage {
+    final override val serviceType: ServiceType get() = ServiceType.IN_APP_MESSAGE
 
     override fun toString(): String {
-        return "InAppMessage(id=$id, key=$key, status=$status)"
+        return "InAppMessage(id=$id, key=$key)"
     }
 }
 
-internal fun InAppMessage.supports(platform: InAppMessage.PlatformType): Boolean {
+internal fun InAppMessage.supports(platform: PlatformType): Boolean {
     return platform in messageContext.platformTypes
 }
-
 
 internal operator fun InAppMessage.Period.contains(timestamp: Long): Boolean {
     return within(timestamp)

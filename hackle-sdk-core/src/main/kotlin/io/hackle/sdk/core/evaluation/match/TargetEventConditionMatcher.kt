@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import com.google.gson.Gson
+import io.hackle.sdk.core.evaluation.EvaluateRequest
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.model.Target
@@ -14,9 +15,9 @@ import java.util.concurrent.TimeUnit
  */
 internal class TargetEventConditionMatcher(
     private val numberOfEventsInDaysMatcher: NumberOfEventsInDaysMatcher,
-    private val numberOfEventsWithPropertyInDaysMatcher: NumberOfEventsWithPropertyInDaysMatcher
-): ConditionMatcher {
-    override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
+    private val numberOfEventsWithPropertyInDaysMatcher: NumberOfEventsWithPropertyInDaysMatcher,
+) : ConditionMatcher {
+    override fun matches(request: EvaluateRequest, context: Evaluator.Context, condition: Target.Condition): Boolean {
         return when (condition.key.type) {
             NUMBER_OF_EVENTS_IN_DAYS -> numberOfEventsInDaysMatcher.match(request.user.targetEvents, condition)
             NUMBER_OF_EVENTS_WITH_PROPERTY_IN_DAYS -> numberOfEventsWithPropertyInDaysMatcher.match(request.user.targetEvents, condition)
@@ -28,7 +29,7 @@ internal class TargetEventConditionMatcher(
 /**
  * TargetSegmentationExpressionMatcher
  */
-internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegmentationExpression> {
+internal abstract class TargetSegmentationExpressionMatcher<T : Target.TargetSegmentationExpression> {
 
     protected abstract val valueOperatorMatcher: ValueOperatorMatcher
     internal val gson = Gson()
@@ -42,7 +43,7 @@ internal abstract class TargetSegmentationExpressionMatcher<T: Target.TargetSegm
 /**
  * NumberOfEventInDayMatcher
  */
-internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationExpression.NumberOfEventInDay>:
+internal abstract class NumberOfEventInDayMatcher<T : Target.TargetSegmentationExpression.NumberOfEventInDay> :
     TargetSegmentationExpressionMatcher<T>() {
 
     protected abstract val clock: Clock
@@ -82,8 +83,8 @@ internal abstract class NumberOfEventInDayMatcher<T: Target.TargetSegmentationEx
  */
 internal class NumberOfEventsInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher,
-    override val clock: Clock
-): NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays>() {
+    override val clock: Clock,
+) : NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays>() {
 
     override fun match(targetEvent: TargetEvent, numberOfEventInDay: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsInDays): Boolean {
         return targetEvent.eventKey == numberOfEventInDay.eventKey && targetEvent.property == null
@@ -101,12 +102,12 @@ internal class NumberOfEventsInDaysMatcher(
  */
 internal class NumberOfEventsWithPropertyInDaysMatcher(
     override val valueOperatorMatcher: ValueOperatorMatcher,
-    override val clock: Clock
-): NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays>()  {
+    override val clock: Clock,
+) : NumberOfEventInDayMatcher<Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays>() {
 
     override fun match(
         targetEvent: TargetEvent,
-        numberOfEventInDay: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays
+        numberOfEventInDay: Target.TargetSegmentationExpression.NumberOfEventInDay.NumberOfEventsWithPropertyInDays,
     ): Boolean {
         return targetEvent.eventKey == numberOfEventInDay.eventKey && propertyMatch(targetEvent.property, numberOfEventInDay.propertyFilter)
     }

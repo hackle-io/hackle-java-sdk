@@ -8,7 +8,7 @@ import strikt.api.expectThrows
 import strikt.assertions.*
 
 class InAppMessageTest {
-    
+
     @Nested
     inner class ActionTest {
 
@@ -217,12 +217,12 @@ class InAppMessageTest {
 
         @Test
         fun `custom timetable should return true when timestamp matches any slot`() {
-            val mondaySlot = InAppMessage.TimetableSlot(
+            val mondaySlot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
                 endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
             )
-            val tuesdaySlot = InAppMessage.TimetableSlot(
+            val tuesdaySlot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.TUESDAY,
                 startMillisInclusive = 10 * 60 * 60 * 1000L, // 10:00
                 endMillisExclusive = 17 * 60 * 60 * 1000L    // 17:00
@@ -237,7 +237,7 @@ class InAppMessageTest {
 
         @Test
         fun `custom timetable should return false when timestamp matches no slots`() {
-            val mondaySlot = InAppMessage.TimetableSlot(
+            val mondaySlot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
                 endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
@@ -261,10 +261,10 @@ class InAppMessageTest {
     }
 
     @Nested
-    inner class TimetableSlotTest {
+    inner class SlotTest {
         @Test
         fun `slot should match when timestamp is within day and time range`() {
-            val slot = InAppMessage.TimetableSlot(
+            val slot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
                 endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
@@ -280,7 +280,7 @@ class InAppMessageTest {
 
         @Test
         fun `slot should not match when timestamp is outside time range`() {
-            val slot = InAppMessage.TimetableSlot(
+            val slot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
                 endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
@@ -296,7 +296,7 @@ class InAppMessageTest {
 
         @Test
         fun `slot should not match when day of week is different`() {
-            val slot = InAppMessage.TimetableSlot(
+            val slot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 9 * 60 * 60 * 1000L, // 09:00
                 endMillisExclusive = 18 * 60 * 60 * 1000L    // 18:00
@@ -310,7 +310,7 @@ class InAppMessageTest {
 
         @Test
         fun `slot should handle midnight boundary correctly`() {
-            val slot = InAppMessage.TimetableSlot(
+            val slot = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 0L, // 00:00
                 endMillisExclusive = 24 * 60 * 60 * 1000L    // 24:00 (next day 00:00)
@@ -324,12 +324,12 @@ class InAppMessageTest {
 
         @Test
         fun `multiple slots on different days should work correctly`() {
-            val mondayMorning = InAppMessage.TimetableSlot(
+            val mondayMorning = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 9 * 60 * 60 * 1000L,
                 endMillisExclusive = 12 * 60 * 60 * 1000L
             )
-            val mondayAfternoon = InAppMessage.TimetableSlot(
+            val mondayAfternoon = InAppMessage.Timetable.Slot(
                 dayOfWeek = DayOfWeek.MONDAY,
                 startMillisInclusive = 14 * 60 * 60 * 1000L,
                 endMillisExclusive = 18 * 60 * 60 * 1000L

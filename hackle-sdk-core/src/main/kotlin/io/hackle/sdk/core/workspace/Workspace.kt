@@ -1,37 +1,27 @@
 package io.hackle.sdk.core.workspace
 
-import io.hackle.sdk.core.model.*
+import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.model.InAppMessage
+import io.hackle.sdk.core.model.RemoteConfigParameter
 
-/**
- * @author Yong
- */
 interface Workspace {
 
-    val id: Long
-
-    val environmentId: Long
+    val metadata: Metadata
 
     val experiments: List<Experiment>
-
     val featureFlags: List<Experiment>
-
+    val remoteConfigParameters: List<RemoteConfigParameter>
     val inAppMessages: List<InAppMessage>
 
     fun getExperimentOrNull(experimentKey: Long): Experiment?
-
     fun getFeatureFlagOrNull(featureKey: Long): Experiment?
-
-    fun getEventTypeOrNull(eventTypeKey: String): EventType?
-
-    fun getBucketOrNull(bucketId: Long): Bucket?
-
-    fun getSegmentOrNull(segmentKey: String): Segment?
-
-    fun getContainerOrNull(containerId: Long): Container?
-
-    fun getParameterConfigurationOrNull(parameterConfigurationId: Long): ParameterConfiguration?
-
     fun getRemoteConfigParameterOrNull(parameterKey: String): RemoteConfigParameter?
-
     fun getInAppMessageOrNull(inAppMessageKey: Long): InAppMessage?
+
+    fun toProperties(): Map<String, Any>
+
+    interface Metadata {
+        val id: Long
+        val environmentId: Long
+    }
 }
