@@ -348,4 +348,38 @@ class InAppMessageTest {
             expectThat(mondayAfternoon.within(1762174800000L)).isFalse()
         }
     }
+
+    @Nested
+    inner class DelayTest {
+
+        @Test
+        fun `IMMEDIATE - startedAt 을 그대로 리턴한다`() {
+            val delay = InAppMessage.Delay(InAppMessage.Delay.Type.IMMEDIATE, afterCondition = null)
+
+            expectThat(delay.deliverAt(startedAt = 42L)) isEqualTo 42L
+        }
+
+        @Test
+        fun `AFTER - startedAt 에 durationMillis 를 더해 리턴한다`() {
+            val delay = InAppMessage.Delay(
+                type = InAppMessage.Delay.Type.AFTER,
+                afterCondition = InAppMessage.Delay.AfterCondition(durationMillis = 1000L)
+            )
+
+            expectThat(delay) {
+                get { type } isEqualTo InAppMessage.Delay.Type.AFTER
+                get { afterCondition } isEqualTo InAppMessage.Delay.AfterCondition(durationMillis = 1000L)
+            }
+            expectThat(delay.deliverAt(startedAt = 42L)) isEqualTo 1042L
+        }
+
+        @Test
+        fun `AFTER - afterCondition 이 없으면 예외 발생`() {
+            val delay = InAppMessage.Delay(InAppMessage.Delay.Type.AFTER, afterCondition = null)
+
+            expectThrows<IllegalArgumentException> {
+                delay.deliverAt(startedAt = 42L)
+            }
+        }
+    }
 }

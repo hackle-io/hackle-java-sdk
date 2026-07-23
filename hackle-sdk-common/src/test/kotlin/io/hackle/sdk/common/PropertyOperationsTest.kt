@@ -3,6 +3,7 @@ package io.hackle.sdk.common
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isSameInstanceAs
 import strikt.assertions.isTrue
 
 internal class PropertyOperationsTest {
@@ -20,6 +21,34 @@ internal class PropertyOperationsTest {
             get { size } isEqualTo 1
             get { contains(PropertyOperation.CLEAR_ALL) }.isTrue()
         }
+    }
+
+    @Test
+    fun `set - properties 로 SET operation 을 생성한다`() {
+        val operations = PropertyOperations.set(mapOf("age" to 42, "grade" to "GOLD"))
+
+        expectThat(operations) {
+            get { size } isEqualTo 1
+            get { this[PropertyOperation.SET] } isEqualTo mapOf("age" to 42, "grade" to "GOLD")
+        }
+    }
+
+    @Test
+    fun `set - 빈 properties 면 empty 를 리턴한다`() {
+        expectThat(PropertyOperations.set(emptyMap())) isSameInstanceAs PropertyOperations.empty()
+    }
+
+    @Test
+    fun `asMap - operation 별 properties 를 리턴한다`() {
+        val operations = PropertyOperations.builder()
+            .set("age", 42)
+            .unset("grade")
+            .build()
+
+        expectThat(operations.asMap()) isEqualTo mapOf(
+            PropertyOperation.SET to mapOf<String, Any>("age" to 42),
+            PropertyOperation.UNSET to mapOf<String, Any>("grade" to "-")
+        )
     }
 
     @Test

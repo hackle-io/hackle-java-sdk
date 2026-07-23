@@ -3,6 +3,7 @@ package io.hackle.sdk.core.evaluation.evaluator
 import io.hackle.sdk.core.support.Experiments
 import io.hackle.sdk.core.support.RemoteConfigs
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
@@ -75,5 +76,17 @@ internal class DefaultContextTest {
 
         context.set("world")
         expectThat(context.get<String>()) isEqualTo "world"
+    }
+
+    @Test
+    fun `class key 에 저장된 값의 타입이 key 와 다르면 예외 발생`() {
+        val context = Evaluators.context()
+
+        @Suppress("UNCHECKED_CAST")
+        context.set(Long::class.javaObjectType as Class<Any>, "not a long")
+
+        assertThrows<NoSuchElementException> {
+            context.get(Long::class.javaObjectType)
+        }
     }
 }

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import strikt.api.expectThat
+import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isSameInstanceAs
 import strikt.assertions.isTrue
@@ -38,7 +39,7 @@ internal class HackleClientImplTest {
 
     @BeforeEach
     fun beforeEach() {
-        core = mockk()
+        core = mockk(relaxed = true)
         userResolver = HackleUserResolver()
         sut = HackleClientImpl(core, userResolver)
     }
@@ -270,6 +271,37 @@ internal class HackleClientImplTest {
                 core.track(event, HackleUser.of(user), any())
             }
         }
+
+        @Test
+        fun `유효하지 않은 user 면 추적하지 않는다`() {
+            sut.track(Event.of("key"), User.builder().build())
+
+            verify(exactly = 0) {
+                core.track(any(), any(), any())
+            }
+        }
+
+        @Test
+        fun `core 에서 예외가 발생해도 무시한다`() {
+            every { core.track(any(), any(), any()) } throws IllegalArgumentException("fail")
+
+            try {
+                sut.track(Event.of("key"), User.of("42"))
+            } catch (e: Throwable) {
+                fail("fail")
+            }
+        }
+    }
+
+    @Nested
+    inner class RemoteConfig {
+
+        @Test
+        fun `HackleRemoteConfig 를 리턴한다`() {
+            val actual = sut.remoteConfig(User.of("42"))
+
+            expectThat(actual).isA<HackleRemoteConfigImpl>()
+        }
     }
 
     @Nested
@@ -403,6 +435,23 @@ internal class HackleClientImplTest {
             }
             verify(exactly = 1) {
                 core.flush()
+            }
+        }
+
+        @Test
+        fun `예외 발생해도 무시한다`() {
+            every { core.flush() } throws IllegalArgumentException("fail")
+            val operations = HackleSubscriptionOperations.builder()
+                .marketing(HackleSubscriptionStatus.SUBSCRIBED)
+                .build()
+            val user = User.of("42")
+
+            try {
+                sut.updatePushSubscriptions(operations, user)
+                sut.updateSmsSubscriptions(operations, user)
+                sut.updateKakaoSubscriptions(operations, user)
+            } catch (e: Throwable) {
+                fail("fail")
             }
         }
     }
