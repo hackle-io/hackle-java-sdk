@@ -119,6 +119,25 @@ internal class EvaluationEventFactoryTest {
     }
 
     @Test
+    fun `create - 이벤트를 생성할 수 없는 reference 는 제외한다`() {
+        // given
+        val user = HackleUser.builder().identifier(IdentifierType.ID, "user").build()
+        val response = RemoteConfigs.response(
+            user = user,
+            workspace = Workspaces.config(),
+            // Experiment / RemoteConfig 평가가 아니므로 이벤트가 생성되지 않는 reference
+            references = listOf(InAppMessages.eligibilityEvaluation())
+        )
+
+        // when
+        val events = sut.create(response)
+
+        // then: root(RemoteConfig) 이벤트만 생성되고, 이벤트를 만들 수 없는 reference 는 제외된다
+        expectThat(events).hasSize(1)
+        expectThat(events[0]).isA<UserEvent.RemoteConfig>()
+    }
+
+    @Test
     fun `create in-app message events`() {
         // given
         val user = HackleUser.builder().identifier(IdentifierType.ID, "user").build()

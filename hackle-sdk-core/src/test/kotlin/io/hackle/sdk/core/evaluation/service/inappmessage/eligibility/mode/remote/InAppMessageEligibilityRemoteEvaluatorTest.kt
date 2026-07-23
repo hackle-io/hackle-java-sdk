@@ -142,4 +142,22 @@ internal class InAppMessageEligibilityRemoteEvaluatorTest {
         verify(exactly = 1) { eventRecorder.record(response) }
         verify(exactly = 1) { eventRecorder.record(layoutResponse) }
     }
+
+    @Test
+    fun `record - ineligible 이지만 layout 이 없으면 layout 은 기록하지 않는다`() {
+        // given
+        val response = InAppMessages.eligibilityResponse(
+            evaluation = InAppMessages.eligibilityEvaluation(
+                result = InAppMessages.eligibilityResult(isEligible = false)
+            ),
+            layout = null
+        )
+
+        // when
+        sut.record(InAppMessages.eligibilityRemoteRequest(), response)
+
+        // then: eligibility 만 기록되고, layout 이 없으므로 추가 기록은 없다
+        verify(exactly = 1) { eventRecorder.record(any()) }
+        verify(exactly = 1) { eventRecorder.record(response) }
+    }
 }

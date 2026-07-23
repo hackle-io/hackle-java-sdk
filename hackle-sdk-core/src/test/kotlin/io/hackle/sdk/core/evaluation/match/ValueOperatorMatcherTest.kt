@@ -135,6 +135,15 @@ internal class ValueOperatorMatcherTest {
         verify(NOT_MATCH, listOf("A", "B"), listOf("C", "D"), true)
     }
 
+    @Test
+    fun `userValue 가 null 이면 매칭 값과 비교되지 않는다`() {
+        val match = Match(MATCH, Match.Operator.IN, ValueType.STRING, listOf("A"))
+        assertEquals(false, sut.matches(null, match))
+
+        val notMatch = Match(NOT_MATCH, Match.Operator.IN, ValueType.STRING, listOf("A"))
+        assertEquals(true, sut.matches(null, notMatch))
+    }
+
     private fun verify(type: Match.Type, userValue: Any, matchValues: List<String>, expected: Boolean) {
         val match = Match(type, Match.Operator.IN, ValueType.STRING, matchValues)
         val actual = sut.matches(userValue, match)

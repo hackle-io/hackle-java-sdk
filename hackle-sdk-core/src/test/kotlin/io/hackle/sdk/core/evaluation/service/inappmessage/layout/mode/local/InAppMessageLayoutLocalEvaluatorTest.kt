@@ -104,6 +104,41 @@ internal class InAppMessageLayoutLocalEvaluatorTest {
     }
 
     @Test
+    fun `experimentContext 평가 시 defaultLang 이 아닌 message 는 제외하고 variation 이 일치하는 message 를 선택한다`() {
+        // given
+        val otherLangMessage = InAppMessages.message(variationKey = "B", lang = "en")
+        val targetMessage = InAppMessages.message(variationKey = "B", lang = "ko")
+        val inAppMessage = InAppMessages.config(
+            messageContext = InAppMessages.messageContext(
+                experimentContext = InAppMessages.experimentContext(key = 42),
+                defaultLang = "ko",
+                messages = listOf(otherLangMessage, targetMessage)
+            )
+        )
+
+        val experiment = Experiments.config(id = 5, key = 42)
+        val workspace = Workspaces.config(experiments = listOf(experiment))
+        val request = InAppMessages.layoutLocalRequest(inAppMessage = inAppMessage, workspace = workspace)
+
+        val experimentEvaluation = Experiments.evaluation(
+            entity = experiment,
+            result = Experiments.result(DecisionReason.TRAFFIC_ALLOCATED, Experiments.variation(key = "B"))
+        )
+        every { experimentEvaluator.evaluate(any(), any(), any()) } answers {
+            secondArg<Evaluator.Context>().add(experimentEvaluation)
+            experimentEvaluation
+        }
+
+        // when
+        val actual = sut.evaluate(request, Evaluators.context())
+
+        // then: lang 불일치 message(en) 는 걸러지고, lang·variation 모두 일치하는 message(ko) 가 선택된다
+        expectThat(actual) {
+            get { evaluation.result.message } isSameInstanceAs targetMessage
+        }
+    }
+
+    @Test
     fun `experimentContext 가 없으면 defaultLang 으로 message 를 선택한다`() {
         // given
         val message = InAppMessages.message(lang = "ko")
