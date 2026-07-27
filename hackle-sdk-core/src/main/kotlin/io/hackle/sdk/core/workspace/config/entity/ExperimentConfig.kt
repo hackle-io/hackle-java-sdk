@@ -23,7 +23,7 @@ class ExperimentConfig(
     private val winnerVariationId: Long?,
 ) : AbstractExperiment(), ConfigEntity {
 
-    val controlVariation: Variation get() = requireNotNull(getVariationOrNull("A")) { "ControlVariation[$id]" }
+    val controlVariation: Variation get() = requireNotNull(getVariationOrNull(io.hackle.sdk.common.Variation.CONTROL.name)) { "ControlVariation[$id]" }
     val winnerVariation: Variation? get() = if (winnerVariationId != null) getVariationOrNull(winnerVariationId) else null
 
     fun getVariationOrNull(variationId: Long): Variation? {

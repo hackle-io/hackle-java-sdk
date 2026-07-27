@@ -1,6 +1,7 @@
 package io.hackle.sdk.core.evaluation.match
 
 import io.hackle.sdk.core.evaluation.EvaluateRequest
+import io.hackle.sdk.core.evaluation.EvaluationPhase
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 import io.hackle.sdk.core.model.HackleProperty
 import io.hackle.sdk.core.model.Target
@@ -12,7 +13,10 @@ internal class UserConditionMatcher(
     private val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ConditionMatcher {
     override fun matches(request: EvaluateRequest, context: Evaluator.Context, condition: Target.Condition): Boolean {
-        if (condition.key.type == HACKLE_PROPERTY && !HackleProperty.supports(condition.key.name, request.phase)) {
+        if (request.phase == EvaluationPhase.SYNC &&
+            condition.key.type == HACKLE_PROPERTY &&
+            !HackleProperty.supports(condition.key.name, request.phase)
+        ) {
             return false
         }
 

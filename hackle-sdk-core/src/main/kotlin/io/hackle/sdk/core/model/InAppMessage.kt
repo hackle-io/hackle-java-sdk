@@ -20,7 +20,7 @@ interface InAppMessage : Entity, HackleInAppMessage {
         DRAFT,
         ACTIVE,
         PAUSE,
-        FINISH,
+        FINISHED,
         ARCHIVED;
     }
 
