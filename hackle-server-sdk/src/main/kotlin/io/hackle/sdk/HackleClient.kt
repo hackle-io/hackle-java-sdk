@@ -43,6 +43,24 @@ interface HackleClient : AutoCloseable {
     fun variation(experimentKey: Long, user: User): Variation
 
     /**
+     * Decide the variation to expose to the user for experiment.
+     * Returns the control variation if the variation cannot be decided.
+     *
+     * This method does not block the calling thread.
+     *
+     * @param experimentKey    the unique key for the experiment.
+     * @param user             the user to participate in the experiment. MUST NOT be null.
+     * @param defaultVariation ignored. [Variation.CONTROL] is always used when the experiment cannot be decided.
+     *
+     * @return the decided variation for the user, or [Variation.CONTROL]
+     */
+    @Deprecated(
+        "Use variation(experimentKey, user) without defaultVariation instead.",
+        ReplaceWith("variation(experimentKey, user)")
+    )
+    fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation
+
+    /**
      * Decide the variation to expose to the user for experiment, and returns an object that
      * describes the way the variation was decided.
      *
@@ -63,6 +81,22 @@ interface HackleClient : AutoCloseable {
      * @return a [Decision] object
      */
     fun variationDetail(experimentKey: Long, user: User): Decision
+
+    /**
+     * Decide the variation to expose to the user for experiment, and returns an object that
+     * describes the way the variation was decided.
+     *
+     * @param experimentKey    the unique key for the experiment.
+     * @param user             the user to participate in the experiment. MUST NOT be null.
+     * @param defaultVariation ignored. [Variation.CONTROL] is always used when the experiment cannot be decided.
+     *
+     * @return a [Decision] object
+     */
+    @Deprecated(
+        "Use variationDetail(experimentKey, user) without defaultVariation instead.",
+        ReplaceWith("variationDetail(experimentKey, user)")
+    )
+    fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
     /**
      * Decide whether the feature is turned on to the user.
