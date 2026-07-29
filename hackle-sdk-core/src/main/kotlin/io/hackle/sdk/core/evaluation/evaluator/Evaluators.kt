@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.evaluation.evaluator
 
-import io.hackle.sdk.common.PropertiesBuilder
-import io.hackle.sdk.core.evaluation.evaluator.experiment.ExperimentEvaluation
-import io.hackle.sdk.core.model.Experiment
+import io.hackle.sdk.core.evaluation.EvaluateRequest
+import io.hackle.sdk.core.evaluation.Evaluation
+import io.hackle.sdk.core.model.Entity
 
 object Evaluators {
 
@@ -12,37 +12,31 @@ object Evaluators {
 
     private class DefaultContext : Evaluator.Context {
 
-        private val _requests = mutableListOf<Evaluator.Request>()
-        private val _evaluations = mutableListOf<Evaluator.Evaluation>()
-        private val _properties = PropertiesBuilder()
+        private val _requests = mutableListOf<EvaluateRequest>()
+        private val _evaluations = mutableListOf<Evaluation>()
 
-        override val stack: List<Evaluator.Request> get() = ArrayList(_requests.toList())
-        override val targetEvaluations: List<Evaluator.Evaluation> get() = ArrayList(_evaluations)
-        override val properties: Map<String, Any> get() = _properties.build()
+        override val stack: List<EvaluateRequest> get() = ArrayList(_requests.toList())
+        override val references: List<Evaluation> get() = ArrayList(_evaluations)
         private val map = hashMapOf<Any, Any>()
 
-        override fun contains(request: Evaluator.Request): Boolean {
+        override fun contains(request: EvaluateRequest): Boolean {
             return _requests.contains(request)
         }
 
-        override fun add(request: Evaluator.Request) {
+        override fun add(request: EvaluateRequest) {
             _requests.add(request)
         }
 
-        override fun remove(request: Evaluator.Request) {
+        override fun remove(request: EvaluateRequest) {
             _requests.remove(request)
         }
 
-        override fun get(experiment: Experiment): Evaluator.Evaluation? {
-            return _evaluations.find { it is ExperimentEvaluation && it.experiment == experiment }
+        override fun get(entity: Entity): Evaluation? {
+            return _evaluations.find { it.entity == entity }
         }
 
-        override fun add(evaluation: Evaluator.Evaluation) {
+        override fun add(evaluation: Evaluation) {
             _evaluations.add(evaluation)
-        }
-
-        override fun setProperty(key: String, value: Any?) {
-            _properties.add(key, value)
         }
 
         override fun <T> get(key: Class<T>): T? {
@@ -67,4 +61,3 @@ inline fun <reified T> Evaluator.Context.get(): T? {
 inline fun <reified T> Evaluator.Context.set(value: T) {
     set(T::class.java, value)
 }
-

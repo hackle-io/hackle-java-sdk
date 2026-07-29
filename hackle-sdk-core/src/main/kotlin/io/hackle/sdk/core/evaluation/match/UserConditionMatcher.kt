@@ -1,15 +1,25 @@
 package io.hackle.sdk.core.evaluation.match
 
+import io.hackle.sdk.core.evaluation.EvaluateRequest
+import io.hackle.sdk.core.evaluation.EvaluationPhase
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
+import io.hackle.sdk.core.model.HackleProperty
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Key.Type.*
 import io.hackle.sdk.core.user.HackleUser
 
 internal class UserConditionMatcher(
     private val userValueResolver: UserValueResolver,
-    private val valueOperatorMatcher: ValueOperatorMatcher
+    private val valueOperatorMatcher: ValueOperatorMatcher,
 ) : ConditionMatcher {
-    override fun matches(request: Evaluator.Request, context: Evaluator.Context, condition: Target.Condition): Boolean {
+    override fun matches(request: EvaluateRequest, context: Evaluator.Context, condition: Target.Condition): Boolean {
+        if (request.phase == EvaluationPhase.SYNC &&
+            condition.key.type == HACKLE_PROPERTY &&
+            !HackleProperty.supports(condition.key.name, request.phase)
+        ) {
+            return false
+        }
+
         val userValue = userValueResolver.resolveOrNull(request.user, condition.key)
         return valueOperatorMatcher.matches(userValue, condition.match)
     }

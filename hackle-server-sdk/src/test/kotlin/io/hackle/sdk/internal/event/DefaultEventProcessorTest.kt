@@ -83,6 +83,19 @@ internal class DefaultEventProcessorTest {
         }
     }
 
+    @Test
+    fun `큐 용량을 초과해 넣지 못하면 예외 없이 무시한다`() {
+        // given
+        setDefaultEventProcessor()
+        every { queue.offer(any()) } returns false
+
+        // when (isProcessed=false 경로 - 예외가 전파되면 테스트 실패)
+        sut.process(mockk())
+
+        // then
+        verify(exactly = 1) { queue.offer(any()) }
+    }
+
     @Nested
     inner class Start {
 
@@ -295,6 +308,119 @@ internal class DefaultEventProcessorTest {
 
             //then
             verify(exactly = 1) { eventDispatcher.tryClose() }
+        }
+    }
+
+    @Nested
+    inner class Consuming {
+
+        /**
+         * consumingExecutor 에 제출되는 Consumer(Runnable) 를 캡처해 테스트 스레드에서 동기 실행한다.
+         * queue 는 Shutdown 으로 끝나므로 consumingLoop 가 정상 종료된다.
+         */
+        private fun runConsumer(queue: BlockingQueue<Message>, eventDispatchSize: Int = 10) {
+            val consumer = slot<Runnable>()
+            every { consumingExecutor.submit(capture(consumer)) } returns mockk(relaxed = true)
+            setDefaultEventProcessor(queue = queue, eventDispatchSize = eventDispatchSize)
+            sut.start()
+            consumer.captured.run()
+        }
+
+        @Test
+        fun `consumedEvents 가 dispatchSize 에 도달하면 dispatch 한다`() {
+            // given
+            val e1 = mockk<UserEvent>()
+            val e2 = mockk<UserEvent>()
+            val queue = LinkedBlockingQueue<Message>().apply {
+                add(Message.Event(e1))
+                add(Message.Event(e2))
+                add(Message.Shutdown)
+            }
+
+            // when
+            runConsumer(queue, eventDispatchSize = 2)
+
+            // then
+            verify(exactly = 1) { eventDispatcher.dispatch(listOf(e1, e2)) }
+        }
+
+        @Test
+        fun `Flush 를 받으면 누적된 이벤트를 dispatch 한다`() {
+            // given
+            val e1 = mockk<UserEvent>()
+            val queue = LinkedBlockingQueue<Message>().apply {
+                add(Message.Event(e1))
+                add(Message.Flush)
+                add(Message.Shutdown)
+            }
+
+            // when
+            runConsumer(queue, eventDispatchSize = 10)
+
+            // then
+            verify(exactly = 1) { eventDispatcher.dispatch(listOf(e1)) }
+        }
+
+        @Test
+        fun `Shutdown 을 받으면 남은 이벤트를 dispatch 하고 종료한다`() {
+            // given (dispatchSize 미달이지만 종료 시 finally 에서 dispatch)
+            val e1 = mockk<UserEvent>()
+            val queue = LinkedBlockingQueue<Message>().apply {
+                add(Message.Event(e1))
+                add(Message.Shutdown)
+            }
+
+            // when
+            runConsumer(queue, eventDispatchSize = 10)
+
+            // then
+            verify(exactly = 1) { eventDispatcher.dispatch(listOf(e1)) }
+        }
+
+        @Test
+        fun `누적된 이벤트가 없으면 dispatch 하지 않는다`() {
+            // given
+            val queue = LinkedBlockingQueue<Message>().apply {
+                add(Message.Shutdown)
+            }
+
+            // when
+            runConsumer(queue)
+
+            // then
+            verify(exactly = 0) { eventDispatcher.dispatch(any()) }
+        }
+
+        @Test
+        fun `dispatch 중 예외가 발생해도 전파하지 않고 계속한다`() {
+            // given
+            val e1 = mockk<UserEvent>()
+            val queue = LinkedBlockingQueue<Message>().apply {
+                add(Message.Event(e1))
+                add(Message.Flush)
+                add(Message.Shutdown)
+            }
+            every { eventDispatcher.dispatch(any()) } throws RuntimeException("dispatch error")
+
+            // when (예외가 전파되면 테스트 실패)
+            runConsumer(queue, eventDispatchSize = 10)
+
+            // then
+            verify(exactly = 1) { eventDispatcher.dispatch(listOf(e1)) }
+        }
+
+        @Test
+        fun `consuming loop 에서 예외가 발생하면 남은 이벤트를 dispatch 하고 종료한다`() {
+            // given
+            val e1 = mockk<UserEvent>()
+            val queue = mockk<BlockingQueue<Message>>(relaxed = true)
+            every { queue.take() } returns Message.Event(e1) andThenThrows RuntimeException("take error")
+
+            // when
+            runConsumer(queue, eventDispatchSize = 10)
+
+            // then (두번째 take 예외 → catch → finally 에서 남은 이벤트 dispatch)
+            verify(exactly = 1) { eventDispatcher.dispatch(listOf(e1)) }
         }
     }
 }
