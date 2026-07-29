@@ -32,6 +32,13 @@ internal class HackleClientImpl(
         return variationDetail(experimentKey, user).variation
     }
 
+    @Deprecated(
+        "Use variation(experimentKey, user) without defaultVariation instead.",
+        replaceWith = ReplaceWith("variation(experimentKey, user)")
+    )
+    override fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation {
+        return variation(experimentKey, user)
+    }
 
     override fun variationDetail(experimentKey: Long, userId: String): Decision {
         return variationDetail(experimentKey, User.of(userId))
@@ -52,6 +59,14 @@ internal class HackleClientImpl(
         }.also {
             DecisionMetrics.experiment(sample, experimentKey, it)
         }
+    }
+
+    @Deprecated(
+        "Use variationDetail(experimentKey, user) without defaultVariation instead.",
+        replaceWith = ReplaceWith("variationDetail(experimentKey, user)")
+    )
+    override fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision {
+        return variationDetail(experimentKey, user)
     }
 
     override fun isFeatureOn(featureKey: Long, userId: String): Boolean {
@@ -114,10 +129,7 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updatePushSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User,
-    ) {
+    override fun updatePushSubscriptions(operations: HackleSubscriptionOperations, user: User) {
         try {
             val event = operations.toEvent("\$push_subscriptions")
             track(event, user)
@@ -127,10 +139,7 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateSmsSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User,
-    ) {
+    override fun updateSmsSubscriptions(operations: HackleSubscriptionOperations, user: User) {
         try {
             val event = operations.toEvent("\$sms_subscriptions")
             track(event, user)
@@ -140,10 +149,7 @@ internal class HackleClientImpl(
         }
     }
 
-    override fun updateKakaoSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User,
-    ) {
+    override fun updateKakaoSubscriptions(operations: HackleSubscriptionOperations, user: User) {
         try {
             val event = operations.toEvent("\$kakao_subscriptions")
             track(event, user)
