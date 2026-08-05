@@ -3,7 +3,7 @@ package io.hackle.sdk.common
 import java.util.*
 
 class PropertyOperations private constructor(
-    private val operations: Map<PropertyOperation, Map<String, Any>>
+    private val operations: Map<PropertyOperation, Map<String, Any>>,
 ) {
 
     val size: Int get() = operations.size
@@ -96,6 +96,18 @@ class PropertyOperations private constructor(
         @JvmStatic
         fun clearAll(): PropertyOperations {
             return builder().clearAll().build()
+        }
+
+        @JvmStatic
+        fun set(properties: Map<String, Any>): PropertyOperations {
+            if (properties.isEmpty()) {
+                return empty()
+            }
+            val builder = builder()
+            for ((key, value) in properties) {
+                builder.set(key, value)
+            }
+            return builder.build()
         }
 
         @JvmStatic

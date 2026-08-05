@@ -4,22 +4,28 @@ import io.hackle.sdk.core.internal.log.Logger
 import io.hackle.sdk.core.internal.utils.enumValueOfOrNull
 import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
+import io.hackle.sdk.core.workspace.config.entity.ExperimentConfig
+import io.hackle.sdk.core.workspace.config.entity.RemoteConfigParameterConfig
 
 
-private val log = Logger<DefaultWorkspace>()
+private val log = Logger<DefaultWorkspaceConfig>()
 
 // Experiment
-internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment? {
-    return Experiment(
+internal fun ExperimentDto.toExperimentOrNull(
+    type: Experiment.Type,
+    configurations: Map<Long, ParameterConfiguration>,
+): ExperimentConfig? {
+    return ExperimentConfig(
         id = id,
         key = key,
+        version = version,
+        status = Experiment.Status.from(execution.status) ?: return null,
+        order = order,
         name = name,
         type = type,
         identifierType = identifierType,
-        status = Experiment.Status.fromExecutionStatusOrNull(execution.status) ?: return null,
-        version = version,
         executionVersion = execution.version,
-        variations = variations.map { it.toVariation() },
+        variations = variations.map { it.toVariation(configurations) },
         userOverrides = execution.userOverrides.associate { it.userId to it.variationId },
         segmentOverrides = execution.segmentOverrides.mapNotNull { it.toTargetRuleOrNull(TargetingType.IDENTIFIER) },
         targetAudiences = execution.targetAudiences.mapNotNull { it.toTargetOrNull(TargetingType.PROPERTY) },
@@ -30,12 +36,18 @@ internal fun ExperimentDto.toExperimentOrNull(type: Experiment.Type): Experiment
     )
 }
 
-internal fun VariationDto.toVariation() = Variation(
-    id = id,
-    key = key,
-    isDropped = status == "DROPPED",
-    parameterConfigurationId = parameterConfigurationId,
-)
+internal fun VariationDto.toVariation(configurations: Map<Long, ParameterConfiguration>): Variation {
+    return toVariation(parameterConfigurationId?.let { configurations[it] })
+}
+
+internal fun VariationDto.toVariation(configuration: ParameterConfiguration?): Variation {
+    return Variation(
+        id = id,
+        key = key,
+        isDropped = status == "DROPPED",
+        parameterConfiguration = configuration,
+    )
+}
 
 internal fun TargetDto.toTargetOrNull(targetingType: TargetingType): Target? {
     val conditions = conditions.mapNotNull { it.toConditionOrNull(targetingType) }
@@ -117,9 +129,6 @@ internal fun SlotDto.toSlot() = Slot(
     variationId = variationId
 )
 
-// EventType
-internal fun EventTypeDto.toEventType() = EventType.Custom(id, key)
-
 // Segment
 internal fun SegmentDto.toSegmentOrNull(): Segment? {
     return Segment(
@@ -147,17 +156,14 @@ internal fun ParameterConfigurationDto.toParameterConfiguration() = ParameterCon
 )
 
 
-internal fun RemoteConfigParameterDto.toRemoteConfigParameterOrNull(): RemoteConfigParameter? {
-    return RemoteConfigParameter(
+internal fun RemoteConfigParameterDto.toRemoteConfigParameterOrNull(): RemoteConfigParameterConfig? {
+    return RemoteConfigParameterConfig(
         id = id,
         key = key,
         type = parseEnumOrNull<ValueType>(type) ?: return null,
         identifierType = identifierType,
         targetRules = targetRules.mapNotNull { it.toTargetRuleOrNull() },
-        defaultValue = RemoteConfigParameter.Value(
-            id = defaultValue.id,
-            rawValue = defaultValue.value
-        )
+        defaultValue = defaultValue.toValue()
     )
 }
 
@@ -167,9 +173,13 @@ internal fun RemoteConfigParameterDto.TargetRuleDto.toTargetRuleOrNull(): Remote
         name = name,
         target = target.toTargetOrNull(TargetingType.PROPERTY) ?: return null,
         bucketId = bucketId,
-        value = RemoteConfigParameter.Value(
-            id = value.id,
-            rawValue = value.value
-        )
+        value = value.toValue()
+    )
+}
+
+internal fun RemoteConfigParameterDto.ValueDto.toValue(): RemoteConfigParameter.Value {
+    return RemoteConfigParameter.Value(
+        id = id,
+        rawValue = value
     )
 }
