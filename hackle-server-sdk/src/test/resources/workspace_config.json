@@ -4,13 +4,17 @@
     "environment": {
       "id": 1105,
       "primary": true
-    }
+    },
+    "attributes": {}
   },
   "experiments": [
     {
       "id": 4318,
       "key": 5,
+      "order": 1,
+      "name": "experiment_5",
       "status": "DRAFT",
+      "version": 1,
       "bucketId": 6094,
       "variations": [
         {
@@ -22,7 +26,8 @@
         {
           "id": 13379,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -36,27 +41,34 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6094
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4319,
       "key": 6,
+      "order": 2,
+      "name": "experiment_6",
       "status": "DRAFT",
+      "version": 1,
       "bucketId": 6097,
       "variations": [
         {
           "id": 13380,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13381,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -79,32 +91,40 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6097
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4320,
       "key": 7,
+      "order": 3,
+      "name": "experiment_7",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6100,
       "variations": [
         {
           "id": 13382,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13383,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13384,
           "key": "C",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -188,27 +208,34 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6100
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4321,
       "key": 8,
+      "order": 4,
+      "name": "experiment_8",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6103,
       "variations": [
         {
           "id": 13385,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13386,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -309,32 +336,40 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6103
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4322,
       "key": 9,
+      "order": 5,
+      "name": "experiment_9",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6106,
       "variations": [
         {
           "id": 13387,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13388,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13389,
           "key": "C",
-          "status": "DROPPED"
+          "status": "DROPPED",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -348,27 +383,34 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6106
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4323,
       "key": 10,
+      "order": 6,
+      "name": "experiment_10",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6109,
       "variations": [
         {
           "id": 13390,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13391,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -382,37 +424,46 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6109
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4324,
       "key": 11,
+      "order": 7,
+      "name": "experiment_11",
       "status": "COMPLETED",
+      "version": 1,
       "bucketId": 6112,
       "variations": [
         {
           "id": 13392,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13393,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13394,
           "key": "C",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13395,
           "key": "D",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -426,29 +477,36 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6112
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": 13395,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     }
   ],
   "featureFlags": [
     {
       "id": 4325,
       "key": 1,
+      "order": 1,
+      "name": "feature_flag_1",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6115,
       "variations": [
         {
           "id": 13396,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13397,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -462,27 +520,34 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6115
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4326,
       "key": 2,
+      "order": 2,
+      "name": "feature_flag_2",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6118,
       "variations": [
         {
           "id": 13398,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13399,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -496,27 +561,34 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6118
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4327,
       "key": 3,
+      "order": 3,
+      "name": "feature_flag_3",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6121,
       "variations": [
         {
           "id": 13400,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13401,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -530,27 +602,34 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6121
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4328,
       "key": 4,
+      "order": 4,
+      "name": "feature_flag_4",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 6124,
       "variations": [
         {
           "id": 13402,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         },
         {
           "id": 13403,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -686,11 +765,13 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 6124
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     }
   ],
   "buckets": [
@@ -982,34 +1063,42 @@
       "parameters": [
         {
           "key": "string_key_1",
-          "value": "string_value_1"
+          "value": "string_value_1",
+          "type": "STRING"
         },
         {
           "key": "boolean_key_1",
-          "value": true
+          "value": true,
+          "type": "BOOLEAN"
         },
         {
           "key": "int_key_1",
-          "value": 2147483647
+          "value": 2147483647,
+          "type": "NUMBER"
         },
         {
           "key": "int_key_2",
-          "value": 42
+          "value": 42,
+          "type": "NUMBER"
         },
         {
           "key": "long_key_1",
-          "value": 92147483647
+          "value": 92147483647,
+          "type": "NUMBER"
         },
         {
           "key": "double_key_1",
-          "value": 320.1523
+          "value": 320.1523,
+          "type": "NUMBER"
         },
         {
           "key": "json_key_1",
-          "value": "{\"json_key\": \"json_value\"}"
+          "value": "{\"json_key\": \"json_value\"}",
+          "type": "JSON"
         }
       ]
     }
   ],
-  "remoteConfigParameters": []
+  "remoteConfigParameters": [],
+  "inAppMessages": []
 }

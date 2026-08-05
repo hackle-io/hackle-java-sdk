@@ -4,19 +4,24 @@
     "environment": {
       "id": 1,
       "primary": true
-    }
+    },
+    "attributes": {}
   },
   "experiments": [
     {
       "id": 1,
       "key": 1,
+      "order": 1,
+      "name": "experiment_1",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 1,
       "variations": [
         {
           "id": 1,
           "key": "A",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -55,11 +60,13 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 1
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     }
   ],
   "featureFlags": [],
@@ -107,5 +114,6 @@
   ],
   "containers": [],
   "parameterConfigurations": [],
-  "remoteConfigParameters": []
+  "remoteConfigParameters": [],
+  "inAppMessages": []
 }

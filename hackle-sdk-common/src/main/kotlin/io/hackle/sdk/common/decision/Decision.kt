@@ -76,7 +76,7 @@ data class FeatureFlagDecision internal constructor(
  */
 data class RemoteConfigDecision<T> internal constructor(
     val value: T,
-    val reason: DecisionReason
+    val reason: DecisionReason,
 ) {
 
     companion object {
@@ -107,7 +107,6 @@ enum class DecisionReason {
     IDENTIFIER_NOT_FOUND,
     VARIATION_DROPPED,
     TRAFFIC_ALLOCATED,
-    TRAFFIC_ALLOCATED_BY_TARGETING,
     NOT_IN_EXPERIMENT_TARGET,
 
     FEATURE_FLAG_NOT_FOUND,
@@ -131,5 +130,15 @@ enum class DecisionReason {
     IN_APP_MESSAGE_FREQUENCY_CAPPED,
 
     EXPERIMENT_CONTROL_GROUP,
-    OPT_OUT
+    OPT_OUT,
+
+    UNKNOWN;
+
+    companion object {
+
+        @JvmStatic
+        fun from(reason: String): DecisionReason {
+            return values().find { it.name == reason } ?: UNKNOWN
+        }
+    }
 }

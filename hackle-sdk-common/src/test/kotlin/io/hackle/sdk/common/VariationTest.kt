@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 internal class VariationTest {
 
@@ -37,5 +39,19 @@ internal class VariationTest {
 
         expectThat(Variation.fromOrControl("b")) isEqualTo Variation.B
         expectThat(Variation.fromOrControl("k")) isEqualTo Variation.A
+    }
+
+    @Test
+    fun `isControl - CONTROL 인 경우에만 true`() {
+        expectThat(Variation.A.isControl).isTrue()
+        expectThat(Variation.B.isControl).isFalse()
+        expectThat(Variation.J.isControl).isFalse()
+    }
+
+    @Test
+    fun `isExperimental - CONTROL 이 아닌 경우에만 true`() {
+        expectThat(Variation.A.isExperimental).isFalse()
+        expectThat(Variation.B.isExperimental).isTrue()
+        expectThat(Variation.J.isExperimental).isTrue()
     }
 }

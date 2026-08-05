@@ -1,8 +1,8 @@
 package io.hackle.sdk.core.workspace
 
-/**
- * @author Yong
- */
+import io.hackle.sdk.core.user.HackleUser
+
 interface WorkspaceFetcher {
-    fun fetch(): Workspace?
+    fun metadata(): Workspace.Metadata?
+    fun workspace(user: HackleUser): Workspace?
 }
