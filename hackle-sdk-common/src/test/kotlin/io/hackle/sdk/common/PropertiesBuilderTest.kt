@@ -104,6 +104,15 @@ internal class PropertiesBuilderTest {
     }
 
     @Test
+    fun `setOnce - 존재하지 않는 key 는 추가된다`() {
+        val properties = PropertiesBuilder()
+            .add("a", 1, setOnce = true)
+            .build()
+
+        expectThat(properties) isEqualTo mapOf("a" to 1)
+    }
+
+    @Test
     fun `setOnce 2`() {
         val p1 = mapOf(
             "k1" to 1,

@@ -6,7 +6,7 @@ import io.hackle.sdk.core.model.Slot
 /**
  * @author Yong
  */
-internal class Bucketer {
+class Bucketer {
 
     fun bucketing(bucket: Bucket, identifier: String): Slot? {
         val slotNumber = calculateSlotNumber(seed = bucket.seed, slotSize = bucket.slotSize, value = identifier)

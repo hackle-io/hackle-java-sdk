@@ -2,13 +2,16 @@ package io.hackle.sdk.core.evaluation.match
 
 import com.google.gson.Gson
 import io.hackle.sdk.core.evaluation.evaluator.Evaluators
-import io.hackle.sdk.core.evaluation.evaluator.experiment.experimentRequest
 import io.hackle.sdk.core.internal.time.Clock
 import io.hackle.sdk.core.internal.time.TimeUtil
-import io.hackle.sdk.core.model.*
 import io.hackle.sdk.core.model.Target
 import io.hackle.sdk.core.model.Target.Match.Type.MATCH
-import io.hackle.sdk.core.model.ValueType.*
+import io.hackle.sdk.core.model.TargetEvent
+import io.hackle.sdk.core.model.ValueType
+import io.hackle.sdk.core.model.ValueType.NUMBER
+import io.hackle.sdk.core.model.ValueType.STRING
+import io.hackle.sdk.core.support.Experiments
+import io.hackle.sdk.core.support.Targets
 import io.hackle.sdk.core.user.HackleUser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -34,15 +37,15 @@ class TargetEventConditionMatcherTest {
 
     @Test
     fun `올바르지 않는 type이 들어온 경우 실패`() {
-        val request = experimentRequest(
+        val request = Experiments.localRequest(
             user = HackleUser.builder()
                 .targetEvents(listOf())
                 .build()
         )
-        val condition = condition {
-            key(Target.Key.Type.FEATURE_FLAG, "purchase")
-            match(MATCH, Target.Match.Operator.GTE, NUMBER, 1)
-        }
+        val condition = Targets.condition(
+            key = Targets.key(Target.Key.Type.FEATURE_FLAG, "purchase"),
+            match = Targets.match(MATCH, Target.Match.Operator.GTE, NUMBER, listOf(1))
+        )
 
         val exception = assertThrows<IllegalArgumentException> {
             sut.matches(request, Evaluators.context(), condition)
@@ -381,7 +384,7 @@ class TargetEventConditionMatcherTest {
      * @param expected 예상 결과
      */
     private fun verify(targetEvents: List<TargetEvent>, key: String, matchType: Target.Match.Type, operator: Target.Match.Operator, valueType: ValueType, targetValue: Any, expected: Boolean) {
-        val request = experimentRequest(
+        val request = Experiments.localRequest(
             user = HackleUser.builder()
                 .targetEvents(targetEvents)
                 .build()
@@ -392,10 +395,10 @@ class TargetEventConditionMatcherTest {
             Target.Key.Type.NUMBER_OF_EVENTS_IN_DAYS
         }
 
-        val condition = condition {
-            key(keyType, key)
-            match(matchType, operator, valueType, targetValue)
-        }
+        val condition = Targets.condition(
+            key = Targets.key(keyType, key),
+            match = Targets.match(matchType, operator, valueType, listOf(targetValue))
+        )
 
         val actual = sut.matches(request, Evaluators.context(), condition)
 

@@ -1,58 +1,65 @@
 package io.hackle.sdk.core.evaluation.flow
 
+import io.hackle.sdk.core.evaluation.EvaluateRequest
+import io.hackle.sdk.core.evaluation.EvaluateResult
 import io.hackle.sdk.core.evaluation.evaluator.Evaluator
 
-/**
- * @author Yong
- */
-sealed class EvaluationFlow<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> {
+sealed class EvaluationFlow<REQUEST : EvaluateRequest, RESULT : EvaluateResult> {
 
-    class End<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> :
-        EvaluationFlow<REQUEST, EVALUATION>()
+    class End<REQUEST : EvaluateRequest, RESULT : EvaluateResult> : EvaluationFlow<REQUEST, RESULT>()
 
-    class Decision<REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation>(
-        val flowEvaluator: FlowEvaluator<REQUEST, EVALUATION>,
-        val nextFlow: EvaluationFlow<REQUEST, EVALUATION>,
-    ) : EvaluationFlow<REQUEST, EVALUATION>()
+    class Step<REQUEST : EvaluateRequest, RESULT : EvaluateResult>(
+        val flowEvaluator: FlowEvaluator<REQUEST, RESULT>,
+        val nextFlow: EvaluationFlow<REQUEST, RESULT>,
+    ) : EvaluationFlow<REQUEST, RESULT>()
 
-    fun evaluate(request: REQUEST, context: Evaluator.Context): EVALUATION? {
+    fun evaluate(request: REQUEST, context: Evaluator.Context): RESULT? {
         return when (this) {
-            is End<REQUEST, EVALUATION> -> null
-            is Decision<REQUEST, EVALUATION> -> flowEvaluator.evaluate(request, context, nextFlow)
+            is End<REQUEST, RESULT> -> null
+            is Step<REQUEST, RESULT> -> flowEvaluator.evaluate(request, context, nextFlow)
         }
     }
 
-    operator fun plus(flow: EvaluationFlow<REQUEST, EVALUATION>): EvaluationFlow<REQUEST, EVALUATION> {
+    operator fun plus(flow: EvaluationFlow<REQUEST, RESULT>): EvaluationFlow<REQUEST, RESULT> {
         return when (this) {
             is End -> flow
-            is Decision -> Decision(flowEvaluator, nextFlow + flow)
+            is Step -> Step(flowEvaluator, nextFlow + flow)
         }
     }
 
     companion object {
 
-        private val END: EvaluationFlow<Evaluator.Request, Evaluator.Evaluation> = End()
+        private val END: EvaluationFlow<EvaluateRequest, EvaluateResult> = End()
 
-        fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> end(): EvaluationFlow<REQUEST, EVALUATION> {
+        fun <REQUEST : EvaluateRequest, RESULT : EvaluateResult> end(): EvaluationFlow<REQUEST, RESULT> {
             @Suppress("UNCHECKED_CAST")
-            return END as EvaluationFlow<REQUEST, EVALUATION>
+            return END as EvaluationFlow<REQUEST, RESULT>
         }
 
-        fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> decision(
-            evaluator: FlowEvaluator<REQUEST, EVALUATION>,
-            nextFlow: EvaluationFlow<REQUEST, EVALUATION>,
-        ): EvaluationFlow<REQUEST, EVALUATION> {
-            return Decision(evaluator, nextFlow)
+        fun <REQUEST : EvaluateRequest, RESULT : EvaluateResult> decision(
+            evaluator: FlowEvaluator<REQUEST, RESULT>,
+            nextFlow: EvaluationFlow<REQUEST, RESULT>,
+        ): EvaluationFlow<REQUEST, RESULT> {
+            return Step(evaluator, nextFlow)
         }
 
-        fun <REQUEST : Evaluator.Request, EVALUATION : Evaluator.Evaluation> of(
-            vararg evaluators: FlowEvaluator<REQUEST, EVALUATION>,
-        ): EvaluationFlow<REQUEST, EVALUATION> {
-            var flow: EvaluationFlow<REQUEST, EVALUATION> = end()
+        fun <REQUEST : EvaluateRequest, RESULT : EvaluateResult> of(
+            vararg evaluators: FlowEvaluator<REQUEST, RESULT>,
+        ): EvaluationFlow<REQUEST, RESULT> {
+            var flow: EvaluationFlow<REQUEST, RESULT> = end()
             for (evaluator in evaluators.reversed()) {
                 flow = decision(evaluator, flow)
             }
             return flow
+        }
+
+        fun <REQUEST : EvaluateRequest, RESULT : EvaluateResult> concat(
+            vararg flows: EvaluationFlow<REQUEST, RESULT>,
+        ): EvaluationFlow<REQUEST, RESULT> {
+            if (flows.isEmpty()) {
+                return end()
+            }
+            return flows.reduce { acc, flow -> acc + flow }
         }
     }
 }

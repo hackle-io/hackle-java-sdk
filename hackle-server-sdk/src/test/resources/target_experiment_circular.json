@@ -4,19 +4,24 @@
     "environment": {
       "id": 1,
       "primary": true
-    }
+    },
+    "attributes": {}
   },
   "experiments": [
     {
       "id": 2,
       "key": 2,
+      "order": 1,
+      "name": "experiment_2",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 2,
       "variations": [
         {
           "id": 2,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -49,22 +54,28 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 2
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     },
     {
       "id": 4,
       "key": 4,
+      "order": 2,
+      "name": "experiment_4",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 4,
       "variations": [
         {
           "id": 4,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -97,24 +108,30 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 4
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     }
   ],
   "featureFlags": [
     {
       "id": 3,
       "key": 3,
+      "order": 1,
+      "name": "feature_flag_3",
       "status": "EXECUTED",
+      "version": 1,
       "bucketId": 3,
       "variations": [
         {
           "id": 3,
           "key": "B",
-          "status": "ACTIVE"
+          "status": "ACTIVE",
+          "parameterConfigurationId": null
         }
       ],
       "execution": {
@@ -153,11 +170,13 @@
         "defaultRule": {
           "type": "BUCKET",
           "bucketId": 3
-        }
+        },
+        "targetUrls": null
       },
       "winnerVariationId": null,
       "identifierType": "$id",
-      "containerId": null
+      "containerId": null,
+      "implementationType": "DEFAULT"
     }
   ],
   "buckets": [
@@ -278,5 +297,6 @@
       },
       "identifierType": "$id"
     }
-  ]
+  ],
+  "inAppMessages": []
 }

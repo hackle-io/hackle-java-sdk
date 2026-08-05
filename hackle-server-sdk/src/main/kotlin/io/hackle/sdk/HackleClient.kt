@@ -1,9 +1,9 @@
 package io.hackle.sdk
 
 import io.hackle.sdk.common.*
-import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 import io.hackle.sdk.common.decision.Decision
 import io.hackle.sdk.common.decision.FeatureFlagDecision
+import io.hackle.sdk.common.subscription.HackleSubscriptionOperations
 
 /**
  * The entry point of Hackle SDKs.
@@ -44,16 +44,20 @@ interface HackleClient : AutoCloseable {
 
     /**
      * Decide the variation to expose to the user for experiment.
-     * Returns the default variation if the variation cannot be decided.
+     * Returns the control variation if the variation cannot be decided.
      *
      * This method does not block the calling thread.
      *
      * @param experimentKey    the unique key for the experiment.
      * @param user             the user to participate in the experiment. MUST NOT be null.
-     * @param defaultVariation the default variation of the experiment. MUST NOT be null.
+     * @param defaultVariation ignored. [Variation.CONTROL] is always used when the experiment cannot be decided.
      *
-     * @return the decided variation for the user, or the default variation.
+     * @return the decided variation for the user, or [Variation.CONTROL]
      */
+    @Deprecated(
+        "Use variation(experimentKey, user) without defaultVariation instead.",
+        ReplaceWith("variation(experimentKey, user)")
+    )
     fun variation(experimentKey: Long, user: User, defaultVariation: Variation): Variation
 
     /**
@@ -84,10 +88,14 @@ interface HackleClient : AutoCloseable {
      *
      * @param experimentKey    the unique key for the experiment.
      * @param user             the user to participate in the experiment. MUST NOT be null.
-     * @param defaultVariation the default variation of the experiment. MUST NOT be null.
+     * @param defaultVariation ignored. [Variation.CONTROL] is always used when the experiment cannot be decided.
      *
      * @return a [Decision] object
      */
+    @Deprecated(
+        "Use variationDetail(experimentKey, user) without defaultVariation instead.",
+        ReplaceWith("variationDetail(experimentKey, user)")
+    )
     fun variationDetail(experimentKey: Long, user: User, defaultVariation: Variation): Decision
 
     /**
@@ -191,10 +199,7 @@ interface HackleClient : AutoCloseable {
      * @param operations The subscription operations.
      * @param user The user whose subscription status will be updated.
      */
-    fun updatePushSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User
-    )
+    fun updatePushSubscriptions(operations: HackleSubscriptionOperations, user: User)
 
     /**
      * Updates the user's sms subscription status.
@@ -202,10 +207,7 @@ interface HackleClient : AutoCloseable {
      * @param operations The subscription operations.
      * @param user The user whose subscription status will be updated.
      */
-    fun updateSmsSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User
-    )
+    fun updateSmsSubscriptions(operations: HackleSubscriptionOperations, user: User)
 
     /**
      * Updates the user's kakao talk subscription status.
@@ -213,10 +215,7 @@ interface HackleClient : AutoCloseable {
      * @param operations The subscription operations.
      * @param user The user whose subscription status will be updated.
      */
-    fun updateKakaoSubscriptions(
-        operations: HackleSubscriptionOperations,
-        user: User
-    )
+    fun updateKakaoSubscriptions(operations: HackleSubscriptionOperations, user: User)
 
     /**
      * Shutdown the background task and release the resources used for the background task.

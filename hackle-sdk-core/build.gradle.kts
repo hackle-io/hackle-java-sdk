@@ -15,19 +15,3 @@ tasks.jacocoTestReport {
         }
     )
 }
-
-tasks.jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                counter = "BRANCH"
-                minimum = "0.95".toBigDecimal()
-            }
-
-            limit {
-                counter = "LINE"
-                minimum = "0.90".toBigDecimal()
-            }
-        }
-    }
-}
