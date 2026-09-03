@@ -1,0 +1,196 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# NOTE: a repository .coderabbit.yaml REPLACES organization UI settings outright —
+# sources are not merged unless Configuration Inheritance is turned on.
+# The "organization settings" block below mirrors the Hackle org configuration.
+# Keep the two in sync; anything omitted here falls back to CodeRabbit defaults, not to the org.
+
+language: "ko-KR"
+
+reviews:
+  # ---------------------------------------------------------------- organization settings
+  profile: "quiet"
+  high_level_summary_in_walkthrough: true
+  changed_files_summary: false
+  assess_linked_issues: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  auto_apply_labels: true
+  suggested_reviewers: false
+
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: "off"
+    description:
+      mode: "off"
+    issue_assessment:
+      mode: "off"
+
+  # ---------------------------------------------------------------- repository specific
+  path_filters:
+    - "!**/build/**"
+    - "!gradlew"
+    - "!gradlew.bat"
+    - "!gradle/wrapper/**"
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "master"
+      - "^dev-.*"
+      - "^release-.*"
+      - "^[0-9]+\\.[0-9]+\\.x$"
+
+  tools:
+    # Defaults to true. Disabled because this repository has no detekt configuration, so detekt would
+    # report against its own default rule set. Enable this together with adopting the linter.
+    detekt:
+      enabled: false
+
+  path_instructions:
+    - path: "**"
+      instructions: |
+        # Context
+        Hackle Java SDK — three artifacts published to Maven Central:
+        `hackle-sdk-common` (public API), `hackle-sdk-core` (evaluation and event-processing engine),
+        and `hackle-server-sdk` (the server-side SDK).
+        Hackle's Android SDK depends on the first two, and `hackle-sdk-common` is exposed there as an
+        `api` dependency, so a break here propagates transitively to Android SDK consumers.
+
+        # Priority
+        1. Binary and source compatibility breaks in published API
+        2. Thread-safety defects — this code runs in long-lived, multi-threaded server applications
+        3. Divergence in evaluation semantics that the client SDKs mirror
+        4. Renames or typos in decision reason strings, DTO field names, event property keys, and
+           metric names — these break server-side aggregation
+        5. Other correctness problems
+
+        # Do not raise
+        The following are already settled team policy. Do not leave review comments about them.
+        - Restructuring or renaming for style reasons. The iOS, Android, Flutter, and JavaScript SDKs
+          mirror this code's structure and naming; churn here forces churn in four other repositories.
+        - Adding nullability, null checks, or defensive branches for cases that cannot actually occur
+          (YAGNI). This applies especially to code that already ships in released versions.
+        - Asking for explanatory or rationale comments. Requesting KDoc on public API is fine.
+        - Proposing new integration test harnesses that need a live Hackle server.
+        - Formatting, line breaks, import ordering, and other style preferences.
+        - Anything on lines that are not part of the diff.
+
+        # When you do raise something
+        - Give a concrete failure scenario: the inputs or state, then the wrong result or failure.
+        - If you are not certain, ask a question rather than asserting a defect.
+
+    - path: "**/src/main/kotlin/**/*.kt"
+      instructions: |
+        # Published API compatibility
+        - These artifacts are on Maven Central and cannot be un-published. Treat signature changes,
+          removals, and renames of public API as blocking, especially when they are not routed through
+          a `@Deprecated` cycle first.
+        - Adding an abstract member to a public interface or abstract class breaks existing implementors.
+          Check whether a default implementation is needed.
+        - Adding a property to a public data class changes its `copy` and `componentN` signatures.
+        - Check Java interoperability: removal of `@JvmStatic`, `@JvmOverloads`, or `@JvmField`; JVM
+          overload signatures shifting because a default argument was added; Kotlin-only types leaking
+          into public signatures; and nullability changes, which matter here because main sources
+          compile with `-Xjsr305=strict`.
+
+        # JVM target
+        - Main sources compile with `jvmTarget = "1.6"`; the SDK is expected to run on old JVMs.
+          Flag Java 7+ APIs in main source sets — `java.time`, `Optional`, streams, `Map.computeIfAbsent`,
+          `java.util.Objects`, and similar. They compile but fail at runtime on the oldest supported JVM.
+          Test sources are exempt; they compile with `jvmTarget = "1.8"`.
+
+        # Concurrency
+        - This code runs inside long-lived, multi-threaded applications. Shared mutable state reachable
+          from more than one thread needs explicit synchronization: `@Volatile`, an `Atomic*` type,
+          `ConcurrentHashMap`, or a lock.
+        - Check that lazily initialized fields are safe under races — correct double-checked locking,
+          or `by lazy`.
+        - Every executor, thread, and scheduled task needs a defined shutdown path. A leaked non-daemon
+          thread prevents the customer's JVM from exiting.
+        - Flag blocking calls — network, disk, `Thread.sleep` — on paths that are documented or expected
+          to be non-blocking.
+        - Do not ask for synchronization where access is confined to a single thread or to setup.
+
+        # Robustness
+        - `!!` does not appear anywhere in main sources today. Flag any introduction of it.
+        - Exceptions must not escape public entry points. The SDK should degrade to a default, not take
+          down the customer's request path.
+        - Flag unchecked casts and force parsing of server responses or configuration.
+
+        # Logging and privacy
+        - `hackle-sdk-core` logs through its own `io.hackle.sdk.core.internal.log.Logger` abstraction,
+          not slf4j directly. `hackle-server-sdk` bridges to slf4j. Do not add another logging backend.
+        - `println` is banned and does not appear today.
+        - Never log the SDK key, user identifiers, or event property values verbatim — mask them.
+        - Flag `info`-or-above logging on per-event or per-decision hot paths; it is both a performance
+          and a noise problem for customers.
+
+    - path: "hackle-sdk-common/src/main/kotlin/**/*.kt"
+      instructions: |
+        # Strictest API surface
+        This module is the SDK's public API. Hackle's Android SDK exposes it as an `api` dependency,
+        so a break here reaches every Android SDK consumer transitively, not just direct users.
+        - Hold this module to the strictest backward-compatibility standard of the three.
+        - Check that new public types are usable from Java: no default argument that is the only way to
+          call something, no Kotlin-only types in public signatures, and `@JvmStatic` or `@JvmOverloads`
+          where a Java caller would otherwise be stuck.
+
+    - path: "hackle-sdk-core/src/main/kotlin/**/*.kt"
+      instructions: |
+        # Reference implementation
+        This module is the reference implementation of Hackle's evaluation and event-processing logic.
+        The iOS, Android, Flutter, and JavaScript SDKs port their behavior from this code.
+        - Any change to evaluation semantics — matching, bucketing, decision reasons, default variations,
+          fallback behavior — has to be mirrored in the client SDKs. Ask whether that propagation is planned.
+        - Decision reason strings, DTO field names, event property keys, and metric names are part of the
+          analytics contract. Renames and typos break server-side aggregation and cross-SDK consistency.
+          Treat them as critical.
+        - Bucketing arithmetic and `Murmur3` hashing must stay bit-exact across platforms. Flag any change
+          to integer width, sign handling, or how the hash input is assembled — the client SDKs reimplement
+          this and a silent mismatch reassigns users to different variations.
+
+    - path: "hackle-server-sdk/src/main/kotlin/**/*.kt"
+      instructions: |
+        # Server runtime
+        This module runs inside long-lived, multi-threaded customer server applications.
+        - Every background thread, executor, and scheduled task must be reachable from the client's
+          `close()` path.
+        - Check that HTTP calls have connect and read timeouts and bounded retries. An unbounded wait
+          blocks the customer's request thread.
+        - Check that exceptions from the network, JSON parsing, or the evaluation engine cannot escape
+          a public `HackleClient` method.
+        - Check that failures during initialization leave the client usable in a degraded state rather
+          than throwing at construction.
+
+    - path: "**/src/test/kotlin/**/*.kt"
+      instructions: |
+        # Test conventions
+        - JUnit 5 with MockK. Both AssertJ and Strikt are in use in this repository; match whichever the
+          surrounding file already uses rather than proposing a switch.
+        - Test sources compile with `jvmTarget = "1.8"`, unlike main sources at 1.6.
+        - Production code is never modified for the sake of tests. Do not propose dependency injection,
+          interface extraction, or relaxed visibility for testability.
+        - Do flag defects in the tests themselves: wrong assertions, tests that can never fail, and
+          reliance on non-deterministic timing or on the real clock.
+
+    - path: "**/*.gradle.kts"
+      instructions: |
+        # Build and dependencies
+        - These artifacts publish to Maven Central and are consumed transitively by Hackle's Android SDK.
+          A new dependency here lands inside customer applications; always ask for justification.
+        - Gson and Apache HttpClient are already present. Prefer them over introducing a second JSON or
+          HTTP library.
+        - Changes to `jvmTarget`, the Kotlin version, or the `api` versus `implementation` split are
+          compatibility breaks. Treat them as blocking.
+        - A change to `versionName` belongs to a release, not to a feature PR.
