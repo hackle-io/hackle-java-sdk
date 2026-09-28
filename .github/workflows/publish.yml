@@ -5,6 +5,12 @@ on:
     types:
       - prereleased
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Release version to publish (e.g. 2.30.0)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -12,10 +18,27 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Resolve version
+        id: resolve
+        env:
+          VERSION: ${{ inputs.version || github.event.release.tag_name }}
+        run: |
+          if [ -z "$VERSION" ]; then
+            echo "No release version (workflow_dispatch snapshot publish)"
+            exit 0
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: version must be in X.Y.Z format: $VERSION"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.resolve.outputs.version }}
 
       - name: Set up Snapshot version for Workflow Dispatch
-        if: ${{ github.event_name == 'workflow_dispatch'}}
+        if: ${{ steps.resolve.outputs.version == '' }}
         run: |
           CURRENT_VERSION=$(grep 'val versionName =' build.gradle.kts | sed -E 's/val versionName = "([^"]+)"/\1/')
           SHORT_SHA=$(git rev-parse --short HEAD)
@@ -23,10 +46,11 @@ jobs:
           sed -i "s/val versionName = \".*\"/val versionName = \"$SNAPSHOT_VERSION\"/" build.gradle.kts
 
       - name: Verify Versions
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ steps.resolve.outputs.version != '' }}
+        env:
+          RELEASE_NAME: ${{ steps.resolve.outputs.version }}
         run: |
           SDK_VERSION=$(grep 'val versionName =' build.gradle.kts | sed -E 's/val versionName = "([^"]+)"/\1/')
-          RELEASE_NAME="${{ github.event.release.name }}"
           echo "sdk_version: $SDK_VERSION, release.name: $RELEASE_NAME"
           if [ "$SDK_VERSION" != "$RELEASE_NAME" ]; then
             echo "Error: sdk_version ($SDK_VERSION) does not match release.name ($RELEASE_NAME)"
@@ -55,19 +79,31 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
 
       - name: Convert Prerelease to Release
-        if: ${{ github.event_name == 'release' && github.event.release.prerelease }}
+        if: ${{ steps.resolve.outputs.version != '' }}
         uses: actions/github-script@v7
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
         with:
-          github-token: ${{ secrets.PAT }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const releaseId = ${{ github.event.release.id }};
-            const tagName = '${{ github.event.release.tag_name }}';
-            
+            const tagName = process.env.VERSION;
+
             try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tagName
+              });
+
+              if (!release.prerelease) {
+                console.log(`Release ${tagName} is not a prerelease, skipping conversion`);
+                return;
+              }
+
               const response = await github.rest.repos.updateRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: releaseId,
+                release_id: release.id,
                 prerelease: false,
                 make_latest: true
               });

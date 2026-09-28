@@ -1,7 +1,11 @@
 name: notify release
 on:
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      version:
+        description: 'Java SDK Version'
+        required: true
+        type: string
 
   workflow_dispatch:
     inputs:
@@ -14,12 +18,20 @@ jobs:
     steps:
       - name: Set version
         id: version
+        env:
+          VERSION: ${{ inputs.version || inputs.manual_java_sdk_version }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            echo "java_sdk_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "java_sdk_version=${{ github.event.inputs.manual_java_sdk_version }}" >> $GITHUB_OUTPUT
-          fi
+          echo "java_sdk_version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.DEPLOY_CLIENT_ID }}
+          private-key: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: hackle-android-sdk
+          permission-actions: write
 
       - name: Trigger hackle-android-sdk workflow
         uses: benc-uk/workflow-dispatch@v1
@@ -27,5 +39,5 @@ jobs:
           workflow: update core sdk
           repo: hackle-io/hackle-android-sdk
           ref: main
-          token: ${{ secrets.PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           inputs: '{ "core_version": "${{ steps.version.outputs.java_sdk_version }}" }'
